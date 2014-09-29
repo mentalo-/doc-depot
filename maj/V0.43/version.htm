@@ -1,0 +1,774 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">
+
+    <head>
+	<title>Doc-Dépot et Fissa (Contenu des versions) </title>
+    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\" />
+	</head>
+	<body>
+
+<h4> V0.43   (TTT_mail, maj_bdd)</h4>  
+Evolutions
+<br> + Trace dans journal fonctionnel: les ajout et suppression de rdv (T255)
+<br> + Affiche les rdv même si téléphone non portable 	( sans pouvoir en ajouter ) pour voir l'historique (T250)
+<br> + le texte de supervision change à chaque envoi (T256) et on ne le trace plus dans le journal de log technique
+<br> + les message de dépassements de délais sont remplacés par un début d'alarme et une fin d'alarme (si ddélai >250sec) pour éviter saturation du jdb avec un message toutes les 30 sec
+<br>   Bugs
+<br> - manquait la trace au log technique de l'absence de retour du message de supervision au bout de 10 minutes (Ok par mail)
+
+
+<h4> V0.42 en ligne le 15/09/2014   (TTT_mail, exploit, general , include_mail)</h4>  
+Evolutions
+<br> + Le message de supervision de la gatewaysms est stocké dans la table de parametrage (T241)
+<br> + Mesure du temps de traitement de la supervision et message d'erreur si delais de retour > de 10 min (T133)
+<br> + Vérification du format du numéro de téléphone juste avant envoi (cas ou RDV a été saisi avec un portable puis le tel a changé) (T247)
+<br> + (T127) sur suppression d'un fichier on indique depuis quel espace il a  été supprimé
+<br> + (T118) possibilité de savoir si qqulqun a déjà un compte
+<br>   Bugs
+<br> - Sur changement d'espace le champ Type n'était pas mis à jour 
+<br> - (T251) libellé dans journal technique incorrect sur signature de fichier erroné
+<br> - la fonction 'renvoyer_mail' n'était plus accessible 
+
+<h4> V0.41 en ligne le 12/09/2014  (TTT_mail, general, exploit, include_mail)</h4>  
+Evolutions
+<br> + Sur saisie bug on affiche le numéro
+<br> + envoi à 19h des extract des log fonctionnel et technique (T246)
+<br> + Formulaire de modification de bug : possibilité de saisir sur plusieurs ligne la descrption et le commentaire (T245)
+<br> + Purge des fichiers temporaires après 2 minutes (T242)
+<br> + on n'afficche plus l'adresse du bénéficiaire s'il n'est pas sur l'ecran d'acueil (T243)
+<br> + on ne peut plus modifier tel et mail si on n'est pas sur l'ecran d'acueil (T243)
+<br> + technique : déplacement du code d'afichage de la domiciliation à coté de la gestion des mail et tel
+<br> + remise en forme menu exploitant pour eviter le masquage du menu histrorique (T244)
+<br> + fonction 'membres_organisme' uniquement autorisé à l'administrateur et aux AS
+<br> + Si un filtre est sasie pour le fonctionnel, il est maintenu même après maj ticket. 
+<br> + Possibilité d'effacer le filtre pour le profil fonctionnel
+	
+<h4> V0.40  en ligne le 07/09/2014  (inc_style, general, include_mail, TTT_mail, exploit, include_charge_image)</h4>  
+Evolutions
+<br> + exploitation: sur controle fichiers manquants on affiche clairement s'il n'y en a aucun
+<br> + Suppresion du trace dans le log technique des TTT
+<br> + On ne permet pas de mettre un doc dans la constitution d'un dossier
+<br> + les message ok sont désormais surlignés en vert
+<br> + Finalisation du dépot par MMS
+<br> + message de supervision gateway : uniquement entre 6h et 20h
+<br> + chargement table des bugs et evolutions
+<br> + Ajout etat "Abandonné" et impact '???' pour les bugs
+<br> + Sur création de compte on indiquait que le créateur mais pas le créé
+<br> + Alignement des valeurs de champs de signalement de bug/évolutions avec la table importée
+<br> + On ne parle plus pour les bugs de 'testeur' mais d'd'origine ou de rédacteur
+<br> + Les bugs créés sont initialisés avec la version en cours
+<br> + Lien en tête pour la création de nouveau bug pour le profil Fonctionnel
+<br> + le numero de version en bas de page est issu désormais de la table de paramétrage
+<br> + ajout dans table paramétrage du libellé envoyé dans SMS de supervision gateway
+<br>   Bugs
+<br> - Les rdv sont envoyés en retard et non en avance
+<br> - sur erreur modif code lecture, le message d'erreur entrainait le décalage de l'affichage de la domiciliation
+<br> - la reception du message de supervision n'était pas enregistré dasn le log technique
+<br> - impossibilité de visualiser les fichiers protégés (T233)
+<br> - Traitement mail ne fonctionnait plus à cause du traitement de MMS
+<br> - le controle des doublons ne fonctionnait pas pour certains fichier image (impacté par rotation ou redimmensionnement) (T236)
+<br> - intégrité du fichier pdf protégé perdu sur changement code de lecture(T238)
+<br> - La création de profil fonctionnel et exploitation était refusée à tord
+
+	
+	<h4> V0.39  en ligne le 06/09/2014 (inc_style, conditions, include_mail)</h4>  
+Evolutions
+<br> + Mise en place cadre sur saisie sur tous les formulaires
+<br> + technique/sécurité : on vérifie que l'action demandée (champ en clair) fait bien partie de la liste officielle des actions potentielle
+==> proctection contre intrusion (T 228)
+<br> + technique : il restait dans le code l'utilisation d'une fonction chgt_nom qu'a priori personne n'appelle
+<br> + technique/sécurité : chaque action est associé aux droits du profil (T 227)
+<br> + Mise en forme du numero de téléphone dès 1ere saisie (T 229)
+<br> + Sur erreur saisie mot de passe on retourne pas sur la page de resaisie ( visu_lecture et )exporter_a_confirmer  (T 226)
+<br> + Mise en relief de la zone purement personnelle (T231)
+
+
+<h4> V0.38  (include_charge_image, general, exploit, maj_bdd)</h4>  
+Evolutions
+<br> + technique : création dans la table attachement de champ spécifique idx, user et type
+<br> + technique : Anticipation évolutions futurs (table user pour vérifier la validité tel et organisme s'il est conventionné)
+<br> + Modification du menu des exploitants
+<br> + Exploitation: les calculs de taille de BdD sont données en % par rapport aux données de la tabl paramétrage (T 119) 
+<br>   Bugs
+<br> - les AS ne pouvaient plus supprimer leurs justificatifs
+<br> - le log contenait à tord dasn le champ acteur le nom+ prénom au lieu de l'index 
+	
+<h4> V0.37  (include_charge_image, general, exploit)</h4>  
+Evolutions
+<br> + table de Notes utilise un numéro de séquence, et utilisation de ce numéro comme clé de suppression d'enregistrement
+<br> + L'initialisation SELENIUM pour les tests automtisés efface aussi les tables de log (fonctionnel et technique)
+<br> + Si fichier vide (taille 0) alors on ne le charge pas
+<br> + on mémorise désormais le sens de la photo originale: P= portrait L= landscape
+<br> + on vérifie le format du  numéro de téléphone 
+<br> + dans historique on ne met plus le numéro de doc (acces en lecture, illicite et basculement)
+<br> + dans formulaire contact et bug, si on est déjà identifié les nom et prénom sont alors préremplis
+<br> + les signalements de Bug sont aussi envoyés à l'administrateur
+<br> + on dissocie les mails administrateur des mails du fonctionnel (assistance@doc-depot.com)
+<br> + technique : fonction spécifique pour indiquer les messages OK (T121)
+<br> + les responables peuvent prendre le profil d'acteur social (T221)
+<br> + l' administeur peut prendre les profils d'exploitant ou Fonctionnel
+<br> + technique: sur les choix sur liste, le libellé peut être différent de la valeur
+<br> + Exploitation: on peut controler l'intégrité de la base de données (signalement clés incohérentes) (T 105)
+
+<br>   Bugs
+<br> - le texte dans historique sur autorisation d'accès et Demande d'accès ne faisait pas apparaitre les noms mais les index
+<br> - sur la suppression d'un utilisateur on effacait mal la table 'r_referent'
+<br> - Les lectures de fichiers dans le log sont mal renseignées (champ user à vide)
+<br> - Les créations de compte dans le log sont mal renseignées (champ idx à vide)
+
+<h4> V0.36  (general, fichier.png, include_mail, vcard.php, include_charge_image,)</h4>  
+Evolutions
+<br> +	Posibilité de charger des fichiers avec extension  odt, .doc et .docx (ne sont pas cryptés dans l'espace partagé
+<br> +	Affichage des dates en mode français (mais stockage au format testable chronologiquement)
+<br> +	Toutes les tables sont désormais indexées
+<br> + technique : utilisation DD_param pour adresse mail, gateway_sms, n° tel Adileos
+<br> + technique : transfert du contenu des tables ttt, version, sequence, dans DD_param et utilisation directe de DD_param
+<br> + Possibilité de créer des compte de type Exploiatation (E) ou Fonctionnel  (F)
+<br> + le profil F permet de gérer la liste de anomalies  (dont T195)
+<br> + les images envoyés par MMS sont déposées dans l'espace perso avec envoi de SMS de confirmation (T 104)
+<br> + Possibilité de déposer des contacts au format VCF soit par MAIL, MMS, upload ou drag and drop (T 222)
+<br> + Ajout icone sms en tete du memu "sms et notes"
+<br>   Bugs
+<br> - Autorisation de demande d'acces : l'index pour mettre à jour le mot passe était incorrect
+<br> - Autorisation de demande d'acces : l'acces au fichier n'était plus possible (on crée le fichier au dernier moment)
+<br> - Le fichier ZIP lors de l'export du compte n'était plus lisible ( besoin de rajouter 3 caracteres par rapport à l'original)
+
+<h4> V0.35  (param, include_charge_image, include_mail, general, TTT_mail, calendrier, 
+reveil.png, code.pnd, sms.png, switch.png, illicite.png)</h4>  
+Evolutions
+<br> +	Tracage dans le log technique des traitement Mail avec la tempo depuis le dernier traitement 
+<br> +	Envoi toutes les heures d'un mail sur la gatewaysms déclenchant la reception d'un mail analysé par TTT
+<br> +	Si dans les messages reçus on a les message de supervision de gateway on le trace dans le log technique
+<br> +	Nouvelle fonction d'envoi de mail en "brut"
+<br> + on accepte désormais 60 documents au total et non 20 + 40
+<br> + on accepte désormais des documents jusqu'à 8mo
+<br> + les parametres sont désormais inclus dasn le fichier param.php
+<br> + L'AS peut modifier le type d'un document
+<br> + Si on ne peut pas déposer 2 fois le même fichier (même nom et même taille)==> evite les doublons
+<br> + Amélioration affichage de la page du déconnexion alors qu'on était déjà connecté
+<br> + Possibilité d'afficher les mots de passe en clair
+<br> + le numéro de depost SMS est paramétrable
+<br> + Création de la table de paramétrage et initialisation avec valeur par défaut
+<br> + Purge des saisies automatiques sur mot de passe 
+<br> + Déplacement de l'affichage de la derniére connexion (désormais juste sous menu "deconnexion")
+<br> + sur reinitilisation mot de passe du bénéficiaire, on demande la saisie directement du nouveau mot de passe (économise le passage par en écran et l'utilisation d'un mot de passe provisoir)
+<br> + sur reinitilisation mot de passe du bénéficiaire, on indique les critéres du mot de passe attendu
+<br> + Création de la table des rdv
+<br> + Proposition du menu RDV si n° téléphone valide
+<br> + Possibilité de saisir et supprimer des RDV avec un délais de prévenance
+<br> + envoi de SMS de RDV via gateway (entre 6h et 20h uniquement)
+<br> + Purge des RDV envoyés plus vieux qu'un mois
+<br> + Ajout fonction de lecture des paramètre dans table DD_Param
+<br> + RDV du bénéficiare accessible par AS mais uniquement ceux dont il est à l'origine.
+<br> + Sur demande de reinit de mot de passe , on permet d'utiliser le téléphone
+<br> + Sur demande de reinit de mot de passe , on vérifie que le critére de sélection n'existe ps en double 
+<br> + sur demande identifiant, on affiche immédiatement le formulaire de demande de mot de passe 
+<br> + on propose, dès la page de demande de mot de passe le lien pour déverrouiller le compte
+<br> + Possibilité de recevoir le code de déverouillage par SMS
+<br> + Fonction dédiée pour l'envoi de SMS
+<br> + Simplification des enchainements d'écran pour récuperer son compte 
+<br> + Tous les SMS sont tracés dans le log technique
+<br> + Suppression du lien vers evolutions.htm
+<br> + sur déconnexion on retourne directement à la page d'accueil avec un message en haut indiquant que l'on est déconnecté
+<br> + les tempos de connexion sur echec sont désactivées sur les postes de développement 
+<br> + réactivation de l'envoi de mail sur contact et signalement de bug
+<br> + Ajout d'un numéro aux bugs, et des champs:  date de création, domaine et version
+<br> + on ne peut pas ajouter 2 fois le même référent de confiance
+<br> + on ne peut pas ajouter 2 fois le même SMS (T220)
+<br> + on ne peut pas saisir plus de 10 Référents de confiances
+<br> + Accepter en permanence les dépots de documents par personnes de confiance sur la base de l'adresse mail
+<br> + Possibilité de basculer un document d'un espace à un autre
+<br> + Possibilité de signaler un document comme illicite
+<br> + l'AS qui a déposé un document chez un bénéficiaire peut le supprimer (mais pas les autres)
+<br> + L'exploitant peut visualiser et modifier la table de paramétrage
+<br>   Bugs
+<br> - Sur suppression de compte : la variable nom n'était pas initialisé pour le tracage dasn le log
+<br> - message d'erreur sur Controle mot de passe ancien incorrecte 
+<br> - il manquait l'include de l'envoi des mails  (regression ?)
+<br> - La variable val_init est inutile dans liste responsable
+<br> - lors de l'init_selenium on n'effacait pas les liens de cs utilisateurs
+
+<h4> V0.34  (general)</h4>  Evolutions
+<br> + la constante 'serveur' doit désormais utiliser https au lieu de http
+<br> + Sur echec connexion on trace dans le log le mot de passe tenté en plus du mdp original
+<br>   Bugs
+<br> - Sur modification du mot de passe on ne modifié pas le code de lecture si celui ci était égal au mot de passe
+<br> - sur visualisation des membres d'une structure , certains responsables n'étaient pas listés
+
+<h4> V0.33  ()</h4>  Evolutions
+<br> + Mise à jour des supports d'aide (extrait des memos)
+<br>   Bugs
+<br> - Correction numéro de version affiché 
+<br> - test de l'absence du répertoire "Backup_chi" avant sa création
+<br> - si variable "date-cg" non initalisée en BdD lors du passage V0.31 vers V0.32 alors pas de traitement sur les CG
+  
+<h4> V0.32  (include_mail, include_charge_image, general, exploit ) </h4>
+  Evolutions
+<br> + Activation SSl/https
+<br> + On traite 15 mails à chaque traitements TTT_mail (soit 1 par seconde en moyenne)
+<br> + On enregistre dans le log les créations de bug ou de prise de contact
+<br> + Pendant les tests de sécurité on n'envoie plus de mail (temporaire)
+<br> + les envois de mail technique ne sont plus tracés 
+<br> + Sur fichiers en trop, on supprime aussi ceux sous /upload
+<br> + Sur poste de test ou de développement: on autorise le mot de passe idsentique à celui stocké en base (non crypté)
+<br> + Pour poste autre que dev ou test on ne propose plus le chargement untaire
+<br> + Pour que le dépot par mail fonctionne,  le numéro est stockés sans espaces ni séparateurs
+<br> + Si un bénéficiaire n'a pas de référent de confiance appartenant à une SS, on lui recommander d'en saisir un
+<br> + Si signalement de bug ou de contact, on incréménte les tempos de cx (évite les boucles de dénie de service)
+<br> + Notes par SMS : vérification unicité du numéro de téléphone sinon on ne traite par le message
+<br> + Lorsque l'on visualise ou veut télécharger les documents administratif d'un bénéficaire on rappelle son identité
+<br> + un menu aide permet l'accès aux mémos
+<br> + Indication de la derniere connexion
+<br> + Indication s'il y a eu une tentaive de cx depuis la derniére connexion
+<br> + Impossibilité de supprimer les comptes de test ainsi que de modifier leurs mot de passe et demander la réinit du mdp
+<br> + Création de table log technique et lien organisme <-> utilisateur
+<br> + Purge_log transféré vers général
+<br> + Purge_log technique à 1 mois
+<br> + Ajout au log technique des traitement hors délais
+<br> + lors du stockage dans le log, on stocke directement le nom et non l'index (facilitera les recherche)
+<br> + désormais $_SESSION['user'] contient l'index et non l'identifiant
+<br> + Un resposnable peut être en charge de plusieurs Structures sociales
+<br> + TTT_mail: Affichage date du dernier TTT et delais en sec depuis celui ci 
+<br> + Affichage KPI sur 1 et 7j en fin de TTT ainsi que taille BdD mysql
+<br> + Controle d'authenticité en enregistrant la signature des différents fichiers (à chaque Cx, à la demande par admin tous les soirs)
+<BR> + fonction sens_image trnsféré dasn charge_image mais utilisé par personne
+<BR> + A chaque migration de version de BdD on fait au préalable une sauvegarde
+<BR> + Les sauvegardes ont désormais lieu dans un répertoire spécifique
+<br> + Purge archive bdd.sql agé de plus d'un mois
+<br> + enregistrement dans table la derniére CX
+<br> + enregistrement dans table du dernier controle d'authenticité
+<br> + si site de deveeloppement ou test alors seul le nom apparait en surligné vert
+<br> + Sur supression référent on précise désormais "référent de confiance"
+<br> + suppression dans historique de l'affichage de l'index du fichier (suppression, chargement ,  )
+<br> + Enregistrement de la date des CG dans la table version
+<br> + Affichage d'un message quand date CG est plus récente que la date de derniére connexion
+<br> Bug
+<br> - Si on n'acceptait pas un fichier (taille ou format), on ne l'effacait pas 
+<br> - quand envoi de "nous contacter" il y avait affichage de "Bug enregistreé" à la validation au lieu de "demande enregisrée)
+<br> - Lors de la suppression d'un acteur social, on ne le supprimait pas de la table des référents
+<br> - Histo: sur autorisation acces au compte , on affichait l'index et non le nom
+<br> - HISTO: sur autorisation accès au fichier on voyait l'identifiant au lieu nom
+<br> - Sur reinitilisation du mot de passe, le code est en voyé en crypté mais pas utilisé en crypté après
+
+<h4> V0.31 en ligne le 29/05/2014 (include_charge_image, include_mail, general, TTT_mail, exploit )</h4>
+  Evolutions
+<br> + Si echec de dépot par mail pour cause de taille ou format, on envoie un mail l'indiquant en rappelant les conditions
+<br> + Le mail du gestionnaire est en paramètre global
+<br> + Il y a désormais un formulaire spécifique pour saisir les demandes par 'vous contacter'
+<br> + les mails à destination du gestionnaire n'ont plus besoin d'entête logo + slogan
+<br> + On peut désormais exporter tous les fichiers originaux ainsi que les SMS , notes et historique après saisie mot de passe
+<br> + Mise en relief slogan (taille >)
+<br> + Lien proposé pour faire une sauvegarde avant de procéder à la suppression de compte.
+<br> + dans traitement mail, on positionne la date du dernier traitement
+<br> + A chaque connexion, si le dernier traitetment mail est > à 1 minute alors on exécute le TTT_mail (cas où le scheduleur est HS)
+<br> + possibilité de faire le traitement mail en mode sans affichage
+<br> + Si photos dans mail> 3Mo alors redimmensionnée
+<br> + TTT_mail à minima toutes les heures (planificateur)
+<br> + Interdiction de certains identifiants utilisés par ailleurs 
+<br> + On controle qu'un compte n'existe pas 2 fois sinon on indique qu'il faut passer par la procédure de récupération d'identifiant 
+<br> + la procédure de traitement régulier est desormais un programme indépendant
+<br> + le traitement des echec de connexion  se base sur le temps le séparant du dernier traitement
+<br> + le traitement regulier est le meme que celui appelé par le crontab 
+<br> + Index.php ne contient plus de TTT_mail,  purge de dde_acces et de gestion de echec de cx
+<br> + La tempo de déconnexion bénficiaire est désormais plus petit (env 5min) que celui de l'AS (30 min)
+<br> + Exploitataion : Visualisation d'indicateurs pour exploitation
+<br> + Exploitataion : si qqun se connecte comme Administrateur alors envoi de mail d'information au gestionnaire
+<br> + Exploitataion : Controle si fichiers manquants ou en trop
+<br> + Exploitataion : si fichiers .chi manquants alors il est regénéré
+<br> + Exploitataion : si fichiers en trop alors on les supprime sauf pour les originaux (désactivé pour 1ere mise en production)
+<BR> + Exploitataion : Purge du log des "connexions" si > à 3 mois
+<BR> + Exploitataion : Backup en mode crypté de la base de données tous les jours
+<br> + Exploitataion : Sauvegarde en mode delta des fichiers CHI toutes les heures sur poste de supervision + sur HD externe
+<br> + Exploitataion : idem code source
+<br> - supression du controle du navigateur en français (pour Google et supervision
+<br> + Exploitataion : page d'indisponibilité en cas de besoin
+<BR> + Purge du répertoire zip à chaque action
+<br> Bug
+<BR> -	l'ecriture dans le LOG ne fonctionnait pas si présence d'un apostrophe dans le texte
+<BR> -	L'administrateur ne pouvait plus créer d'organisme depuis la V30
+<br> - sur le chargement par mail, un copie temporaire du fichier restait sur le serveur à tord (include_charge_image)
+<br> - afflog complet : on affichait les index mais pas les libellé
+<br> - Sur suppression de fichier, on ne purgeait pas toutes les extensions
+<br> - On fermait à tord la base de données en fin de traitement SQL
+
+<h4> V0.30 en ligne le 16/05/2014 ((include_mail, general, include_charge_image )</h4>
+  Evolutions
+<br> + texte explicatif pour questions secrétes
+<br> + Sécurité: on ne permet plus des mots de passe "histrorique" stockés en clair
+<br> + envoi mail à l'administrateur sur création de bug 
+<br> + envoi mail à l'administrateur sur création de compte 
+<br> + modification taille logo et slogan
+<br> + sur connexion réussie, on supprime les demandes de récupération de mot de passe encore actif
+<br> + sur affichage bénéfiaire par AS, on rappelle l'ensemble des données perso (cad tel et mail)
+<br> + Le dépot par mail peut se faire via numerotelephone@fixeo.com
+<br> + sur dépot par mail, on indique le mail de l'envoyeur dans l'historique
+<br> + dans l'hitorique si stockage sous forme d'index alors on affiche l'identifiant
+<br> + Maj logo
+<br> Bug
+<BR> - Si AS en mode visu d'un bénéficiaire alors elle ne pouvait pas voir son historique
+<BR> - céation de bug le chmp impact n'était pas enregistré
+<br> - sur mot de passe erroné de suppression de compte, message d'erreur et l'affichage sont centrés
+<br> - On ne traçait plus accès aux documents dans l'historique
+<br> - sur visualisation du detail d'un bénéfiaicaire par AS on affichait à tord en + les justificatifs et structures sociales
+
+
+<h4> V0.29 en ligne le 13/05/2014 (+general) </h4>
+  Evolutions
+<br> + modification de la page de choix du référent de confiance (mise en page, texte)
+<br> + sur erreur de saisie des informations pour récupérer mot de passe ou identifiant, on retourne au même formulaire avec les valeurs de la saisie précédentes
+<br> + technique : fonction dédiée pour entete formulaire (Id=action, et action initialisée)
+<br> + technique : Transfert de fonctions standard dans le fichier "general"
+<br> + Administration : consultation du log global avec filtrage
+<br> + Sur erreur modification mot de passe on retourne à l'écran de saisie
+<br> + On accepte un niveau de complexité des mot de passe jusqu'à 70 au lieu de 100
+<br> + Suppression choix CMU et Vital pour être conforme à la CNIL
+<br> + Isolation des clès de cryptage 
+<br> + les responsables et AS peuvent désormais visualiser et créer des Structures sociales (mais pas modifier ni supprimer)
+<br> + L'administrteur peut lister tous les membres d'un organisme et visualiser les "justificatifs" des AS
+<br> Bug
+<BR> - Le dépot de documents par AS ne fonctionnait plus depuis V0.26
+<BR> - on ne réinitialisait pas le mot de passe en fin de procèdure de réinit pour le bénéficiaire (!!!)
+<BR> - manquait les indications à suivre après réinitialisation du mot de passe
+<BR> - suppression message d'erreur après time out 
+<BR> - on pouvait modifier un mot de passe même en s'étant trompé sur l'ancien mot de passe
+<br> - les caracteres ( ) % * posaient pb sur saisie dans filtre
+<br> - clé passe du mode calculé au mode statique
+
+<h4> V0.28 en ligne le 06/05/2014</h4>
+  Evolutions
+<br> + suppression du bouton Modifier sur données personnelles
+<br> + mise en relief des messages d'erreur pour vérification absence à chaque action par automate de test
+<br> + Changement de libellé "Domiciliation" devient "Domiciliation postale" 
+<br> + pour les AS et les responsable on indique bien "pro" pour les mail et tel 
+<br> + Ajout type document "RIB" et "Pole Emploi"
+<br> + Dépot par Drag and drop : on initialise l'identité avec le nom du fichier par défaut
+<br> Bug
+<BR> - En cas de domiciliation dans Structure sociale, le titre du tableau des référents est tronqué
+<BR> - Sur modification du type d'un doc, on reste désormais en mode modification
+<BR> - La saisie d'un référent de confiance = Tous , était affiché en blanc à tord
+<BR> - Les demande d'accès au responsable n'étaient enregistrées
+
+<h4> V0.27 en ligne le 29/04/2014 </h4>
+  Evolutions
+<br> + SMS2MAIL: l'adresse fixeo1963@gmail est renvoyé sur JM@fixeo.com pour etre renvoyé sur fixeo@doc-depot.com (pour taille <25ko)
+<br> + meilleur centrage du message "vous etes déconnecté !"
+<br> + Suppression du message indiquant que le dépot n'est pas autorisé
+<br> + Activation du dépot par mail via SMS en envoyant activation
+<br> + Sur echec de cx, la tempo est incrémenté de 4 sec pour tenir compte de la tempo de 15 sec de TTT
+<br> + Sur echec de cx, la tempo mx est désomais de 120 secondes ce qui permet un retour à la nomal en 30 minutes
+
+<br> Bug
+<BR> - Le type de document déposé par mail était incorrect (vide au lieu de "Mail")
+<BR> - le type de mail était le mail avec image incorporé mais qu ne fonctionne pas ==> retour arriere
+<br> - Sur echec de cx,	on n'utilisait pas la bonne variable pour générer une tempo
+
+	<h4> V0.26 en ligne le 27/04/2014</h4>
+  Evolutions
+<br> + Les bénéficiaires ayant désigné tout l'organismes de l'AS apparait dans la liste de l'AS de l'organisme
+<br> + SELENIUM: Traitement de la déconnexion mis avant authentification de façon à avoir toujours la même réponse
+<br> + on affiche désormais les teléphones et mails de structures sociales désignées comme référente de confiance
+<BR> + Recupération Mot de passe: si désignation de structure comme référent de confiance alors afficher tous les salariés
+<BR> + sur récupération de mot de passe : on n'affiche plus la colonne de mail (qui était vide) mais contient désormais le lien pour la désigner comme contact
+
+<h4> V0.25 en ligne le 21/04/2014 </h4>
+  Evolutions
+<br> + Sécurité : cryptage des parametres sur lien URL (Finaliser_user, renvoyer_mail et reinit_mdp)
+<br> + Sécurité : Le lien ajout_admin n'a plus besoin de parametre
+<br> + Mise à jour du logo 
+<br> Bug
+<BR> - quand on supprime une note , on supprime toutes les notes de la même minute (on filtre desormais sur les secondes)
+<BR> - La suppression de la référence des attachements n'était pas effective
+	 
+<h4> V0.24 en ligne le 19/04/2014  </h4>
+  Evolutions
+<br> + Ajout fonction de réintialisation de la,BdD pour les test automatisés
+<br> + Sur renvoi de mail, on ne passe plus le paramètre de l'adrese mail
+<br> + SELENIUM: sur le poste de développement, on utilise une adresse locale pour les liens de mail
+<br> + SELENIUM: Ajout "Id" sur lien 
+<br> + on ne peut déposer de notes vides
+<br> + L'AS ne peut pas demander de dossier
+<br> + On parle desormais d'espace perso au lieu de photos
+<br> + L'AS ne doit pas pouvoir supprimer son compte (seul le responsable le peut)
+<br> Bug
+<BR> - sur suppression de compte, il n'y avait pas suppression des fichiers 
+<BR> - les apostrophes n'étaient gérés sur adresses, sigle et nom organisme
+
+	
+<h4> V0.23 en ligne le 12/04/2014 </h4>
+  Evolutions
+<br> +  Sur erreur de langue du navigateur ou du pays d'acès on affiche le Logo et le titre du site (Pour que le moteur de Google affiche la 1ere phrase et non le message d'erreur)
+<br> +  mode_cryptage est désormais  MCRYPT_RIJNDAEL_128 avec clé sur 32 carcatères;
+<br> + on ne voit plus apparaitre les références du bénéficiare et de l'AS lors de la demande de recup
+<br> + Sur fichier à accès restreint on affiche désormais un "sens interdit"
+<br> - on n'affcihe plus à l'acteur social les bénéficiaires domiciliés dans son organisme
+<br> - suppression du menu de chargement de fichier unique puisque le copier glisser réalise implicitement le fonction
+<br> + l'indication que la réception par mail si demandée apparait en clair (et non dans sous menu)
+<br> + Les informations de création de compte sont réduites aux seules informations qui ne sont pas modifiables
+<br> + Possibilité d'annuler l'autorisation de reception par mail
+<br> + Sur erreur de saisie du formulaire d'un nouveau bénéficiaire , on revient sur le formulaire avec les champs pré-remplis
+<br> + le premier caractére des prénoms est forcé en majuscule
+<br> + Mise à jour adresse mail de contact et URL de site ADILEOS
+<br> Bug
+<br> -- Création de responsable impossible (car champs non utilisés étaient non initialisés)
+<br> -- les dépots en draganddrop sur l'espace prvié allé dans l'espace administratif
+<BR> -  Chargement d'une image dans l'espace perso  en mode Paysage subit une rotation à tord
+<BR> -  Chargement d'une image dans l'espace perso on générait aussi les versions PDF et crypté mais c'est inutile
+<br> - Action = "recup_mdp" , il y avait un mauvais affichage du référent sélectionné 
+<br> - indication que vous avez 5 jours pour contacter le référents de confiance alors que ce n'est qu'un seul
+<br> - il restait qq libellé en "organisme" au lieu de "Structure sociale"
+<br> - Sur message d'erreur, on restait centré 
+<br> - Sur finalisation de compte avec succès , il y avait un 2ieme message indiquant une erreur (compte déjà initialisé)
+<br> - Mise en forme prénom ne mettait pas en minuscule
+<br> - l'annulation du filtrage bénéficiare par AS ne fonctionnait pas
+<br> - dans la mise en forme des saisies, il manquait la transformation 'ç' --> 'c'
+<br> - lien incomplet sur mail de réinitialisation mot de passe
+<BR> - sur suppression de compte, il n'y avait pas suppression des fichiers 
+
+<h4> V0.21 en ligne le 31/03/2014  </h4>
+  Evolutions
+<br> + l'organisme a désormais des restrictions d'accès à des types de document 
+<br> - suppression de la fonction accès sans mot de passe selon droit de l'organisme 
+<br> - suppression de la question sur le numéro de sécu
+<br> + le terme "organisme" est remplacé par "structure sociale"
+<br> + le sous menu est plus proche du menu principal ce qui évite les pertes de sous menu sur mouvement lent de souris
+<br> + Sur suppression d'un doc, on revient au menu gestion des doc
+<br> Bug
+<br> - sur chargement PDF sur poste dévelopement on tentait de faire une miniature alors qu'on n'avait pas l'image
+<br> -- mauvaise référence transmises pour la visualisation de fichier PDF cryptés
+
+<h4> V0.20 en ligne le 28/03 </h4>
+  Evolutions
+<br> + Sur création dossier , on affiche l'image du fichier en + du lien "ici"
+<br> + Ajout des liens vers les sites adode et foxit reader
+<br> + Possibilité d'ajouter des notes (en + des SMS)
+<br> Bug
+<br> - Seule la premiere image des papier administratifs n'apparaissaien pas dans un onglet supplémentaire
+<br> - la génération d'un dossier entrainé l'apparaition d'un document protégé  mais pas du dossier lui même
+<br> - l'AS n'avait plus accès aux documents sans mot de passe autorisé pour son organisme (lien non proposé puis accès poposé sur le protégé)
+
+
+<h4> V0.19 en ligne le 24/03 </h4>
+  Evolutions
+<br> + Drag and drop 
+<br> + Sur gestion des doc, on n'affiche que le champ type en mode modification
+<br> + Technique / Sécurité : parametre du lien recept_mail stocké en _session
+<br> + Technique / Sécurité : parametre du lien dde_acces stocké en _session
+<br> + Technique / Sécurité : Le lien associé aux images et aux PDF pour les visualiser n'apparait plus
+<br> + Technique / Sécurité : Le fichier source est sauvegardé en crypté 
+<br> + Suite au chargement d'un fichier individuel, on reste sur le même menu
+<br> + Les miniatures sont mises en relief dans des cadres centrés de couleuret aux bords arrondis
+<br> Bug
+<br> - suppression Affichage symbole "=" sur nom fichiers
+<br> - Les cadenas  ne s'affichaient plus sur les miniatures
+
+<h4> V0.18 en ligne le 18/03/14 / V0.18+ / V0.18++ </h4>
+  Evolutions
+<br> + Lors du dépot de PDF, il y a désormais affichage de la miniature (en production uniquement)
+<br> + pour les PDf, on n'affiche plus le nom du fichier car il y a la miniature
+<br> + Technique : mofification traitement d'identification des extensions de fichiers
+<BR> + envoyer un mail de confirmation de depot par mail 
+<BR> + envoyer un mail d'echec de depot par mail 
+<BR> + les images sont désormais stockées systèmatiquement en mode Paysage 
+<BR> + Administrateur: Lien proposé pour liste ano et compte  
+<br> Bug
+<br> - Traitement d'un fichier à charger avec le libellé .jpg.pdf  était interprété à tord comme une image
+<br> - Dossier: les pages en mode paysage étaient mal gérées 
+<BR> - caractéres accentués dans titre des mails envoyés mal affichés
+
+<h4> V0.16 et V0.17 en ligne le 17/03/14  </h4>
+  Evolutions
+<br> + Technique : ajout table avec version de BDD 
+<br> + Technique : mecanisme permettant la mise à jour de la BDDselon version
+<br> + Technique : on supprime les fichier temporaire selon la date de création (2 minutes)
+<br> + Affichage miniature fichier pdf: on ne fait plus apparaitre le numéro d'index à coté
+<BR> + n'accepte plus que image et PDF 
+
+<br> Bug
+<br> - il manquait le choix de type de document "mail"
+<br> - sur "Suppression de compte réalisée!" on ne proposait pas le lien vers page d'accueil 
+<br> - pb d'affichage sur confirmation de suppression reférent ou d'organisme (visible sous IE
+<br> - Sur hebergeur, on voyait toujours le même fichier 
+<BR> sur modification  de l'espace perso , il était proposé à tord de modifier le type  
+
+<h4> V0.15 en ligne le 10/03/14  </h4>
+  Evolutions
+<br> + Suppression du menu code lecture dans la menu "Deconnexion" (accessible vie "papiers administratifs")
+<br> + Le symbole du cadenas est désormais affiché sur la miniature (au lieu d'à coté)
+<br> + Le symbole du cadenas est désormais entouré de rouge pour être plus visible
+<br> + Ajout de nouveaux type de documents (Carte de séjour, carte vitale, caf, etc) 
+<br> + posibilité de changer la catégorie d'un document
+<br> + Dossier: Ajout des commentaires pour accompagner le lien car le fichier est détruit juste après,
+<BR>+  Dossier: affichage des coordonnées personnelles 
+<BR>+  Dossier: possibilité d'accèder au fichier sans mot de passe 
+<br> Bug
+<br> - le lien envoyé lors de la création de compte ne précisait pas le nom de domaine en tete (lien inactif)
+<br> - Mail : s'affiche désormais en mode HTML
+
+<h4> V0.14 en ligne le 09/03/14  </h4>
+  Evolutions
+<br> +  Pour le bénéficiaire, possibilité de générer un dosssier à partir d'une selection des papiers administratifs
+
+
+<h4> V0.13 en ligne le 8/03/14  </h4>
+  Evolutions
+<br> +  Possibilité d'affecter des droits d'accès sans code selon profil de l'organisme
+<br> +  le référent de confiance peut accèder sans mot de passe aux documents autorisés à son organisme
+<br> +  Admin: Listage table des bug et anomlies
+<br> +  Admin: Listage table des comptes 
+<br> Bug
+<br> - Sur suppression d'organisme, on n'affichait pas la colonne signe, décalant ainsi tout l'affichge
+
+<h4> V0.12  en ligne le 2/03/14  </h4>
+  Evolutions
+<br> + A près chaque traitement de mail on supprime le mail de la BAL
+<br> + Si l'organisme à un logo celui-ci est affiche à chaque responsable ou acteur social
+<br> + le numéro de version et les evolutions en stock sont désormais en pied de page et uniquement visible sur posre développement
+<br> + si l'organisme a une base FISSA, lien vers sa gestion est proposé
+<br> + on trace au log le renvoi de mail sur finalisation de compte
+<br> + Ajout lien vers retour au menu sur lecture code
+<br> + fonction aff_logo() pour remplacement de tous les appels
+<br> + Homogénéisation de l'affichage de la taille du logo
+<br> + Affichage systématique en bas de page du lien retour vers page d'accueil
+<br> + Pour création de compte hors Acteur social, utilisation de captcha
+<br> + Sécurité : protection contre attaque XSS (script, embed, Applet et object)
+<br> + technique : une seule procedure pour incrément index
+<br> + Controle format de date 
+<br> + Controle champ obligatoire sur création de compte
+<BR> + Sécurité: extension les codes provisoires à 6 caractères avec des lettres
+<br> + FISSA : Possibilité de saisir les quantités
+<br> + FISSA : accès pour chaque avec base de données spécifique (stocké en session) Idem pour le logo
+<br> + FISSA : suppression changement Mdp
+<br> + FISSA : Dx renvoyé sur Doc dépot
+<br> + FISSA : libellé des acteurs et bénéficiaire pramétrables
+<br> + FISSA : libellé mail générique basé sur nom activité
+<br> Bug
+<br> - Le refresh du Traitement Mail était devenu inactif
+<br> - Pour un nouveau Acteur Social, on ne pouvait pas créer de 1er bénéficiaire 
+
+<h4> V0.11 en ligne le 16/02   </h4>
+  Evolutions
+<br> + Modification logo
+<br> + Ajout phrase d'accroche sur page d'accueil
+<br> + Mise à jour page "conditions d'utilisation"
+
+<h4> V0.10 en ligne le 15/02  </h4>
+  Evolutions
+<br> + Sécurité: mot de passe d'au moins 8 carcatères pour être compatible CNIL
+<br> + On peut visualiser et modifier son code de lecture après (re)saisie de son mot de passe  
+<BR> + sur changement de code de lecture, ré-encryptage les fichiers protégés avec nouveau code
+<br> + Possibilité de créer un compte sans passer par un acteur social
+<br> + Sécurité le code de lecture est crypté 
+<br> + Sécurité : si code d'accès correct, on supprime les tempo de CX liées aux échecs antérieurs
+<br> + Sécurité : le code de lecture (si non initialisé) égal le mot de passe du bénéficiaire
+<br> + sur création de compte, indication qu'il faut bien prendre connaissance des conditions d'utilisations 
+<br> + On ne peut charger que 20 fichiers administratifs et le double dans l'espace personnel
+<br> + Taille des fichiers chargés portés à 3Mo (au lieu de 1)
+<br> + Mise en forme "stanard" des champs du formulaire ( pour meilleur comparaison ) Nom en majuscule, pas de carcateres accentué, filtre carcateres spéciaux, etc
+<br> + On propose la saisie de la référence d'un document avant le lieu de stockage
+<br> + Technique : Mise en DEFINE du nombre de fichier, du time out, taille fichiers, etc
+<br> + Attachement : utilisation de 'idx' au lieu de 'nom-prenom-date' (qui pouvait créer des pb sur homonymes ou 2ieme compte)==> nécessite mise à jour BdD
+<br> + Technique : Fonction erreur pour afficher en rouge au centre l'erreur
+<br> + le jeu de couleur est spécifique à l'environement de test (évite de confondre les environnements) 
+<br> + Copyrigthg au nom d'Adileos
+<br> + possibilité d'enregistrer un bug ou une demande d'évolution
+<br> Bug
+<br> - modification mot de passe on a un double affichage du logo 
+
+
+<h4> V0.9  en ligne le 08/02/2014 </h4>
+  Evolutions
+<br> + Historique suppression compte: on affiche le NOM, PReNOM et INDEX
+<br> + Technique: fonction CRLF et commentaire_html pour mise en forme code généré
+<br> + Tempo accès sur echec connexion et reduction tempo sur la base de traitement de mail 
+<br> + Sécurité : test de la complexité du mot de passe
+<br> + Sécurité : Interdire accès sous répertoires de travail en acces direct 
+<br> + Sécurité : Les mot de passe sont cryptés 
+<br> + Technique : la purge des demande d'acces est faite toutes le minutes en même temps que les traitements mail
+<br> Bugs
+<br>- Si identifiant et mdp vide on pouvait entrer dans l'appli : Champs devenus obligatoires
+<BR> - Sur modification du mot de passe , si erreur on ne revennait pas sur l'écran de saisie
+
+<br> <h4> V0.8 en ligne le 04/02/2014 </h4>
+  Evolutions
+<br> + Hébérgement chez hébergeur professionnel ( dont configuration mail spécifique + rediection depuis fixeo.com)
+<br> + Technique: mode d'envoi de mail n'utilise plus PHP MAILER
+<br> + Récupération mot de passe bénéficiaire (demande initiale, vérification qu'une demande n'est pas déjà en cours) 
+<br> + pour des raisons de sécurité on ne permet plus de se connecter avec son mail(il faut absolument l'identifiant)
+<br> + Modifier nom, prenom téléphone d'un Acteur Social ou d'un Responsable
+<br> + Sur suppression d'un organisme, on demande désormais confirmation
+<br> + Le mot de passe doit être différent de l'identifiant
+<br> + Si saisie mail sur création compte on vérifie le format de l'adresse mail
+<br> + Si création compte (autre que bénéficiaire) alors l'adresse mail est obligatoirement présente
+<br> + Bénéficiaire: Saisie champs prénoms des parents, n° ss et code lecture
+<br> + Sur founiture de l'identifiant, on controle aussi ville natale et prenoms des parents
+<br> + Amélioration affichage: tous les exit(); ont été transformé en pied_de_page();
+<br> + Administrateur: on trace dans son histotique les créations et suppressions d'organisme
+<br> + Administrateur: on ne peut plus créer 2 fois le même orgnisme
+<br> + sur annulation de la supression d'un utilisateur, on revient sur le mode ajout utilisateur
+<br> + Acteur social: filtrage aussi sur l'adresse du bénéficiaire ainsi que sa nationalité
+<br> + Acteur social: sur création bénéficiaire, l'acteur social est implicitement déclaré comme référent de confiance
+<br> + Administrateur et responsable : on visualise désormais l'identifiant
+<br> + Ajout papier par acteur social: on n'affiche pas l'autorisation du responsable (si présente) pour alleger l'affichage
+<br> + on ne peut plus créer 2 fois le même utilisateur (nom / prenom / date naissance identiques)
+<br> + Responsable: Si compte acteur social non finalisé, possibilité de renvoyer le mail (lien à côté du nom)
+<br> + Bénéficiaire: sur filtrage des SMS on n'affiche plus les papier ni référents
+<br> + Technique: toutes les lectures de variables de font par procedure standard prioriasant lecture en mode POSt
+<br> + Technique: tous les icones suppression et modification sont en mode POST
+<br> + Technique: tous les formulaires sont désormais en mode POST (Securité)
+<br> + Technique Ajout champs n° ss, prénoms des parents, date creation et code lecture
+<br> + Technique : demande d'accès  sont désormais typés ('A' =  Acteur social ; '' = bénéficiaire)
+<br> + Technique : désormais on travaille sur index.php
+<br> + Technique : le nom de la BdD est désormais "doc-depot"
+<br> + Technique : visualisation bénéficiaie se fait par une icone et non par un lien (sécurité)
+<br> + Technique : sur serveur de test on n'envoi pas les mails mais on visualise ce qui est envoyé
+<br> + Dans historique on visualise qui est l'acteur d'une action (pour un compte)
+<br> + Dans historique on visualise les actions où l'on est acteur ou concerné 
+<br> + Technique : l'adresse ip est désormais stocké dans un champ spéficique ==> n'est plus affiché à l'utilisateur (sauf sous forme de bulle au dessus de la date)
+<br> + Bulle description pour chaque icone
+<br> + Bulle indication document protégé lorsque la souris est sur une image ou le cadenas
+<br> + Possibilité de rendre un acteur social inactif
+<br> + Sécurité: protection contre injection SQL par ajout mysql_real_escape_string() sur saisie 
+<br> + Automatisation :possibilité de réinitiliser la base via commande spécifique si administrateur  
+<br> + Organisme : ajout des champs dans les tables : sigle (abréviation) et logo  (nom de l'image)
+<br> + Organisme : possibilité à l'administrateur de donner un sigle (abréviation)=
+<br> + Réinitialisation mot de passe (autre que bénéficiaire) utilise désormais un lien temporaire
+<br> + Sur confirmation de suppression, on propose un lien sans parametres visibles
+<BR> + Sécurité: Mot de passe spécifique pour lecture de doc (<> MdP accès compte)
+<BR> + technique/sécurité: les affichages de miniature sont protégées (la session doit être ouverte)
+<BR> + technique/sécurité: Directives de ne pas mettre les images et fichier en cache
+<BR> + Possibilité de supprimer son compte après saisie du mot de passe p
+
+<br> Bugs
+<br>- Sur suppression acces temporaire on ne supprimait pas bien les fichiers temporaires
+<br>- erreur affichage variable téléphone dans la trace sur modif organisme
+<br>- erreur affichage d'affichage pour l'acteur social de ses bénéficiaires
+<br>- correction Aleatoire Acteur social: il voit "Mes bénéficiaires" et "Je suis le référent de "
+<br>- Modification domicialiation ne fonctionnait plus pour le bénéficiaire
+<br>- Le renvoi du mot de passe pour un acteur social depuis sont identifiant ne fonctionnait plus
+<br>- Erreur sur l’enregistrement dans l’historique lors upload (id non défini)
+<br>- Sur création utilisateur: manquait la balise de fin de formualiaire après le bouton "Ajouter"
+
+<h4> V0.7 en ligne le 14 janvier 2014  </h4>
+  Evolutions
+<br> + Tracage des upload mail dans historique
+<br> + Toute supression (de document, d'utilisateur ou de référent) nécessite confirmation 
+<br> + Pied de page avec liens sur conditions d'utilisation et contact
+<br> + Technique : toutes les fonctions liées aux mails sont dans un Include dédié
+<br> + Technique : La fonction ec() et l'action du même nom devient TTT_mail()
+<br> + Histo: on trace les envois de mot de passe par mail
+<br> + récupération de son identifiant possible sur controle nom, prénom et date de naissance 
+<br>Bug: 
+<br> - les Notes/SMS apparaissanient même si ajout sur papiers, photo ou référents.
+<br> - la Suppression utilisateur comme référents ne fonctionnait pas .
+
+<h4> V0.6 en ligne le 13/01/14</h4>
+  Evolutions
+<br> + Chargement par Mail: identification du document est tronqué à 20 caractère max
+<br> + Séparation page evolutions versus Bugs
+<br> + Sécurité: Identifiant à 7 caracteres minimum
+<br> + Upload : autoriser aussi extension "jpeg", "GIF" et "PNG"" (nouvelle foction de test de type d'image)
+<br> + Mail : traite les SMS depuis le tél du bénéficiaires,les visualiser sur son compte et de les  supprimer;
+<br> + Accès à des fichiers autres que image et PDF ==> MAIS SANS MOT DE PASSE ! (n'existe pas de méthode de cryptage)
+<br> + Note SMS: Possibilité de filtrer les SMS
+<br> + Upload : mutualisation code transactionnel et traitement mails
+<br> + commande phpinfo accessible
+<br>Bug: 
+<br> - Messages d'erreur lors de l'autorisation d'accès (test de présence avant encryptage et permet les 2 formats)
+<br> - Historique (Regression) on ne visualisait plus l'historique  complet 
+<br> - Upload : on tentait de PDiFier les fichiers autres que image et PDF 
+<br> - Corrections sur envoi de mail pour création de mail TS /responsable 
+
+ 
+
+<br><br><h4> V0.5++ en ligne le 8/01/14</h4>
+  Evolutions
+<br> + Si oubli, renvoi par mail du mot de passe pour TS et responsable
+<br> + Envoi de mail sur création  pour finalisation de compte TS ou responsable ayant un mail
+<br> + Possibilité de filtrer les TS par le responsable sur tout ou parti nom, prénom, mail, anniv
+<br> + controle que le pays de celui qui se connecte est la France
+<br> + controle que la langue du navigateur est le français
+<br> + Sur suppression Acgteur Social, on le supprime aussi des référents 
+<br> + Chargement par Mail: identification du document prend la valeur du titre du mail
+<br>Bug: 
+<br> - Dépot par mail: le nom de domaine peut être en majuscule
+<br> - Dépot d'image(Regression) on ne pouvait plus visualier le fichier ! 
+<br> - Historique (Regression) on ne pouvait plus visualier l'historique ! 
+
+<br><br><h4> V0.5 en ligne le 4/01/14 </h4>
+ Evolutions
+<br> + on peut s'identifier aussi grace à son mail (en plus de l'identifiant)
+<br> + Ajout de l'icône dans barre d'adresse
+<br> + Contrôle que le nouveau mot de passe a une longueur d'au moins 7 caracteres
+<br> + Possibilité de filtrer les bénéficiaires sur tout ou parti nom, prénom, mail, anniv
+<br> + Menu consultation Historique (sous-menu de deconnexion)
+<br> + Historique: traçage des connexions avec adresse IP et connexions infructueuses, dépôt fichier, suppression fichier, recept_mail, demande acces , autorisation acces
+<br> + Papier administatif: chaque accès à un fichier est tracé et utilise désormais un lien non permanent  ==> Sécurité ++
+<br> + Suppession des fichiers temporaires restant (cas ou qqun ferme le navigateur en pleine consultation) en même temps que le tratement mail
+<br> - Depot par mail : traité toutes les 1 minute (au lieu de 10)
+
+<br>Bug: 
+<br> - Quand un document était consulté par un TS il restait à tord dans le répertoire temporaire
+<br> - Visualisation historique incomplet (on affiche désormais soit sur l'indetifiant soit sur l'index)
+
+<br><br><h4> V0.4 En ligne le 3/01/14</h4>
+ Bug: 
+<br> - Depot par mail et en ligne était HS pour certains PDF en natif ==> corrigé par MAJ logiciel FPDI depuis http://www.setasign.com/products/fpdi/downloads/
+
+<br><br><h4> V0.3+ En ligne le 3/01/14</h4>
+ Bug: 
+<br> - Depot par mail etait HS pour les images
+<br> - Regression: Orientation des PDF incorrectes sur import Image
+<br> - Technique: mise à jour FPDI (supp &, fonctions dépreciate, etc)
+
+<BR> Evolutions
+<br> - Depot par mail : traité toutes les 10 minutes
+<br> - Technique : traitement des mails en mode LIFO et vérification de valeur minimale
+
+<br><br><h4> V0.3 En ligne le 3/01/14</h4>
+ Bug: 
+<br> - le dépot de document dans le dossier du bénéficiaire par le TS ne fonctionnait pas 
+<br> - Controle pseudo incorrect lors création bénéficiaire
+<BR> Evolutions
+<br> + Initialisation du mdp bénéficiaire obligatoire lors de la 1ere connexion
+<br> + mise en couleur des messages d'erreur lors de la modification du mot de passe 
+<BR> + Manquait la possibilité de modifier le mot le passe (désormais sous menu de Deconnexion)
+<BR> + Ajout d'icones en face de chaque texte (hors  menu)
+<BR> + Bouton "Valider" devient "Ajouter"
+<BR> + Suppression saisie Mot de passe à la création par TS ou responsable
+<br> + création compte bénéficiaire: on ne saisie plus le mot de passe (initialisé) 
+<br> + création compte bénéficiaire: on saisie domiciliation et non adresse 
+<br> + création compte bénéficiaire: on saisie domiciliation et non adresse 
+<br> + Affichage domiciliation du bénéficiaire par l'acteur social
+<br> + saisie et affichage du prénom du référent de confiance
+<br> + Technique: les images ont regroupées dans un repertoire spécifique
+<br> + Technique: FPDF appelé directement dans sous réperoire (utile pour texte)
+<br> + Session : durée du time out = 30 minutes
+<br> + Technique / Upload : sur suppression, suppression aussi fichiers de fichiers physiques (optimisation de l'espace disque)
+<br> temporaire : ajout d'un lien pour cahque document administratif pour avoir un lien non permanent 
+<br> + Ajout copyrigth JM COT
+<br> + Renommage en "Doc Dépot"
+<br> + Mise en gras et centrage du nom du bénéficiaire
+<br> + Admin : mise en couleur tableau organisme
+
+<br><br><h4> V0.2 - 25/12/13</h4>
+ Bug: 
+<br> - Le cadrage des images est incorecte lors du passage en PDF (image ecrasée et coupée sur le coté)
+<br> - le dépot de PDF natif passait  à tord par le traitement d'image 
+<br> - le bouton "deamnde d'acces à traiter" pointait à tord sur la fonction d'ajout de bénéficiaire
+<br> - L'identification du responsable qui autorisait l'accès temporaire n'était pas mémorisée
+<BR> - controle unicité identifiant de compte
+<br> - report corrections du upload par mail dans l'upload depuis PC (fichier de type PDF)
+<BR> Evolutions
+<br> + Deverrouillage: Suppression des fichiers temporaires en fin de journée 
+<br> + TS: affichage accès autorisé accepté à coté de "papier administratif"
+<br> + Création/suppression des fichiers avec code temporaire
+<BR> + Si autorisé, le TS accede aux documents uniquement avec code temporaire 
+<br> + Affichage en table des infos de création de bénéficiaire 
+<br> + Domiciliation sur 2 lignes au lieu d'une 
+<br> + meilleure gestion des variables 
+<br> + Ajout d'un lien vers description de la version
+<br> + Papier administratif: si dépot PDF alors on affiche un icone en plus du nom pour homogénéité
+
+<br><br><h4> V0.1 </h4>(En ligne le 20/12/13 20h)
+		</body>
+	

@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head profile="http://selenium-ide.openqa.org/profiles/test-case">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="selenium.base" href="http://127.0.0.1/" />
+<title>depot</title>
+</head>
+<body>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3">depot</td></tr>
+</thead><tbody>
+<!-- Déconnexion -->
+<tr>
+	<td>open</td>
+	<td>doc-depot/index.php?action=dx</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>id=msg_dx</td>
+	<td>Vous êtes déconnecté!</td>
+</tr>
+<!-- Conexion du bénéficiaire -->
+<tr>
+	<td>type</td>
+	<td>name=id</td>
+	<td>bénéficiaire_SELENIUM</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=pass</td>
+	<td>bénéficiaire_1234</td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>css=input[type=&quot;submit&quot;]</td>
+	<td></td>
+</tr>
+<!--Vérifi logo-->
+<tr>
+	<td>assertElementPresent</td>
+	<td>id=logo</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertTitle</td>
+	<td>Doc-Depot.com</td>
+	<td></td>
+</tr>
+<!--Vérif conditions-->
+<tr>
+	<td>clickAndWait</td>
+	<td>id=lien_conditions</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>css=img</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>id=lien_contact</td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=qui</td>
+	<td>Testeur Selenium</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=coordonnees</td>
+	<td>8 rue maurice berteaux</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=descript</td>
+	<td>Merci ce tester votre portail</td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>id=enreg_contact</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>link=Signaler un bug ou demander une évolution.</td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=qui</td>
+	<td>Testeur selenium</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=titre</td>
+	<td>Test Selenium</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=descript</td>
+	<td>texte du Test Selenium</td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>id=enreg_bug</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>css=img</td>
+	<td></td>
+</tr>
+</tbody></table>
+</body>
+</html>

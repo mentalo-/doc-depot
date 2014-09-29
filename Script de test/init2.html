@@ -1,0 +1,336 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head profile="http://selenium-ide.openqa.org/profiles/test-case">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="selenium.base" href="http://127.0.0.1/" />
+<title>Création SS</title>
+</head>
+<body>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3">Création SS</td></tr>
+</thead><tbody>
+<!-- Déconnexion -->
+<tr>
+	<td>open</td>
+	<td>doc-depot/index.php?action=dx</td>
+	<td></td>
+</tr>
+<!-- Connexion Administrateur -->
+<tr>
+	<td>type</td>
+	<td>name=id</td>
+	<td>JMC</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=pass</td>
+	<td>Admin_1234</td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>css=input[type=&quot;submit&quot;]</td>
+	<td></td>
+</tr>
+<!-- Création Initialisation base de données  -->
+<tr>
+	<td>open</td>
+	<td>doc-depot/index.php?action=init_selenium</td>
+	<td></td>
+</tr>
+<tr>
+	<td>open</td>
+	<td>doc-depot/index.php</td>
+	<td></td>
+</tr>
+<!-- Création Structure L'étape SELENIUM  -->
+<tr>
+	<td>clickAndWait</td>
+	<td>link=+ Structure sociale</td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=organisme</td>
+	<td>L'étape SELENIUM </td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=adresse</td>
+	<td>115 rue Selenium ; Radiation-ville</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=tel</td>
+	<td>0102030405</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=mail</td>
+	<td>selenium@fixeo.com</td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>css=input[type=&quot;submit&quot;]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>open</td>
+	<td>doc-depot/index.php</td>
+	<td></td>
+</tr>
+<!-- Création du responsable de la Structure L'étape SELENIUM  -->
+<tr>
+	<td>clickAndWait</td>
+	<td>link=+ Responsable</td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=nom</td>
+	<td>resp SELENIUM</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=prenom</td>
+	<td>gérard</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>xpath=(//input[@name='telephone'])[2]</td>
+	<td>06 05 04 03 02</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=mail</td>
+	<td>resp_SELENIUM@fixeo.com</td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>css=input[type=&quot;submit&quot;]</td>
+	<td></td>
+</tr>
+<!-- Création du lien responsable vers structure  -->
+<tr>
+	<td>clickAndWait</td>
+	<td>link=+ Affectation</td>
+	<td></td>
+</tr>
+<tr>
+	<td>select</td>
+	<td>id=organisme</td>
+	<td>label=L'étape SELENIUM</td>
+</tr>
+<tr>
+	<td>select</td>
+	<td>id=responsable</td>
+	<td>label=RESP SELENIUM Gerard</td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>id=nouvelle_affectation</td>
+	<td></td>
+</tr>
+<!-- Mail de finalisation compte responsable de la Structure L'étape SELENIUM  -->
+<tr>
+	<td>clickAndWait</td>
+	<td>id=lien</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>id=lien</td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=id</td>
+	<td>RESP SELENIUM</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=pw</td>
+	<td>RESP_1234</td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>css=input[type=&quot;submit&quot;]</td>
+	<td></td>
+</tr>
+<!-- Création d'un acteur social   -->
+<tr>
+	<td>clickAndWait</td>
+	<td>link=+ Acteur Social</td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=nom</td>
+	<td>AS SELENIUM</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=prenom</td>
+	<td>geraldine</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>xpath=(//input[@name='telephone'])[3]</td>
+	<td>070605040302</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>xpath=(//input[@name='mail'])[2]</td>
+	<td>geraldine@fixeo.com</td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>css=input[type=&quot;submit&quot;]</td>
+	<td></td>
+</tr>
+<!-- mail de finalisation de Création d'acteur Social  -->
+<tr>
+	<td>clickAndWait</td>
+	<td>id=lien</td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=id</td>
+	<td>AS_SELENIUM</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=pw</td>
+	<td>AS_123456</td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>css=input[type=&quot;submit&quot;]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>selectWindow</td>
+	<td>null</td>
+	<td></td>
+</tr>
+<!-- Création bénéficiaire 1 -->
+<tr>
+	<td>clickAndWait</td>
+	<td>link=+ Je suis le référent de</td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=id</td>
+	<td>bénéficiaire_SELENIUM</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=nom</td>
+	<td>SELENIUM</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=prenom</td>
+	<td>Bénédicte</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=anniv</td>
+	<td>26/07/1963</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=ville_nat</td>
+	<td>Paris</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=nationalite</td>
+	<td>française</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=prenom_p</td>
+	<td>Joseph</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=prenom_m</td>
+	<td>Marie</td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>css=input[type=&quot;submit&quot;]</td>
+	<td></td>
+</tr>
+<!-- Deconnexion AS -->
+<tr>
+	<td>clickAndWait</td>
+	<td>link=Deconnexion</td>
+	<td></td>
+</tr>
+<!-- Conexion du bénéficiaire -->
+<tr>
+	<td>type</td>
+	<td>name=id</td>
+	<td>bénéficiaire_SELENIUM</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=pass</td>
+	<td>123456</td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>css=input[type=&quot;submit&quot;]</td>
+	<td></td>
+</tr>
+<!-- initialisation mot de passe car 1ere Connexion -->
+<tr>
+	<td>type</td>
+	<td>name=ancien</td>
+	<td>123456</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=n1</td>
+	<td>bénéficiaire_1234</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=n2</td>
+	<td>bénéficiaire_1234</td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>css=input[type=&quot;submit&quot;]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>id=accueil</td>
+	<td></td>
+</tr>
+<!-- initialisation téléphone et mail -->
+<tr>
+	<td>typeAndWait</td>
+	<td>name=telephone</td>
+	<td>0979817234</td>
+</tr>
+<tr>
+	<td>typeAndWait</td>
+	<td>name=telephone2</td>
+	<td>benedicte@fixeo.com</td>
+</tr>
+<!-- initialisation domicialisation -->
+<tr>
+	<td>selectAndWait</td>
+	<td>id=organisme</td>
+	<td>label=L'étape SELENIUM</td>
+</tr>
+</tbody></table>
+</body>
+</html>
