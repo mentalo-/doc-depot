@@ -1,7 +1,7 @@
 <?php 
 
 // ------------------------------------------------------
-// DOC-DEPOT : COPYRIGTH ADILEOS - Décembre 2013/Aout 2014
+// DOC-DEPOT : COPYRIGTH ADILEOS - Décembre 2013/Octobre 2014
 
 session_start(); 
 
@@ -9,8 +9,7 @@ error_reporting(E_ALL | E_STRICT);
 
 include 'general.php';
 
-// session de 5 ou 30 minutes selon profil 
-
+	// session de 5 ou 30 minutes selon profil 
 	if 	(!isset($_SESSION['droit']) || ($_SESSION['droit']=="S")|| ($_SESSION['droit']=="A")) 
 		$to=TIME_OUT;	
 	else
@@ -553,6 +552,7 @@ function maj_mdp_fichier($idx, $pw )
 		affiche_un_choix($val_init,"R","Responsable");
 		affiche_un_choix($val_init,"E","Exploitant");
 		affiche_un_choix($val_init,"F","Fonctionnel");
+		affiche_un_choix($val_init,"T","Formateur");
 		echo "</SELECT></td>";
 		}
 
@@ -2600,6 +2600,8 @@ function affiche_membre($idx)
 				case "alerte_admin":
 				case "raz_mdp":
 				case "raz_mdp1":
+				case "init_formation": 
+				case "raz_mdp_formation":
 				
 				return($action);
 				break;
@@ -2609,7 +2611,7 @@ function affiche_membre($idx)
 					$nom=libelle_user($_SESSION['user']);
 				else 
 					$nom="user non connecté (".$_SERVER["REMOTE_ADDR"].")";
-				ajout_log_tech ( "Action '$action' inconnue par $nom " );
+				ajout_log_tech ( "Action '$action' inconnue par $nom ", "P1" );
 				return ("");
 				}
 		}
@@ -2682,7 +2684,7 @@ require_once 'include_crypt.php';
 			aff_logo();
 			echo "<p><br>";
 			$motif = variable_get("motif");
-			ajout_log_tech( "Signalement : $motif" );
+			ajout_log_tech( "Signalement : $motif" , "P1");
 			msg_ok( "Votre signalmement a été tansmis à l'administrateur du site.");
 			echo "<p><br>";
 
@@ -3856,6 +3858,17 @@ if (isset($_POST['pass']))
 			echo "<td></table>";
 			}		
 
+		if ($user_droit=="T") 
+			{
+			echo "<table><tr><td width=\"400\">";
+			echo " <ul id=\"menu-bar\">";
+			echo "<li><a href=\"index.php?action=init_formation\"> Init comptes </a></li>";			
+			echo "<li><a href=\"index.php?action=raz_mdp_formation\"> Init Mots de passe</a></li>";
+			echo "</ul>";
+			echo "<td></table>";
+			}		
+
+			
 	if (($action=="supp_filtre") && ($user_droit=="F"))
 		{
 		$_SESSION["filtre"]="";
@@ -3984,21 +3997,22 @@ if (isset($_POST['pass']))
 			{
 			echo "</table> ";
 			$filtre1=variable("filtre");
-			formulaire ("afflog");
+			formulaire ("afflog_t");
 			echo "<table><tr> <td>Filtre : <input type=\"text\" name=\"filtre\" size=\"20\" value=\"$filtre1\" onChange=\"this.form.submit();\"> ";
 			echo "</form> </td></table> ";
 			
-			echo "<div class=\"CSSTableGenerator\" ><table><tr><td >   </td><td> </td><td> </td>";
+			echo "<div class=\"CSSTableGenerator\" ><table><tr><td > Date  </td><td> Prio </td><td> Evénement </td><td> Ip </td>";
 			if ($filtre1=="")
 				$reponse =command("","select * from  z_log_t  order by date desc limit 0,1000");		
 			else
-				$reponse =command("","select * from  z_log_t where (date REGEXP '$filtre1' or ligne REGEXP '$filtre1' or ip REGEXP '$filtre1') order by date desc");		
+				$reponse =command("","select * from  z_log_t where (date REGEXP '$filtre1' or ligne REGEXP '$filtre1' or ip REGEXP '$filtre1'or prio REGEXP '$filtre1') order by date desc");		
 			while ($donnees = mysql_fetch_array($reponse) ) 
 				{
 				$date=$donnees["date"];	
 				$ligne=$donnees["ligne"];
 				$ip=$donnees["ip"];
-				echo "<tr><td>  $date   </a></td><td> $ip </td><td> $ligne </td>";
+				$prio=$donnees["prio"];
+				echo "<tr><td>  $date   </a></td><td> $prio </td><td> $ligne </td><td> $ip </td>";
 				}
 			echo "</table></div>";
 			pied_de_page("x");
@@ -4328,9 +4342,99 @@ if (isset($_POST['pass']))
 		modif_valeur_param(variable('nom'),variable('valeur'));
 		param_sys();
 		}
+	
+	if ( ($action=="") && ($user_droit=="T") )
+		echo "Mot de passe par défaut : '".parametre("Formation_mdp")."'<br>";
+
+	
+	// intialisation des comptes de formation
+	if ( ($action=="init_formation") && ($user_droit=="T") )
+		{	
+		$i=0;
+		echo "Initialisation comptes de formation : ";
+		$mdp=encrypt (parametre("Formation_mdp", "Form_1234")) ;
+		
+		// Purge des toutes les tables 
+
+		$reponse = command("","Select * from r_user where (id REGEXP 'FORM_R') or (id REGEXP 'FORM_B') or (id REGEXP 'FORM_A')");
+		while ($donnees = mysql_fetch_array($reponse) )
+			{
+			$id=$donnees["id"];
+			echo "<br>- $id";
+			$idx=$donnees["idx"];
+			command("","UPDATE r_user set pw='$mdp', lecture='$mdp', mail='$id@fixeo.com', telephone='060504030$i' where idx='$idx' ");
+			command("","delete from r_sms where idx='$idx' ");
+			command("","delete from dd_rdv where user='$idx' or auteur='$idx' ");
+			command("","delete from r_dde_acces where user='$idx' or ddeur='$idx' or autorise='$idx' ");
+			command("","delete from log where user='$idx' or acteur='$idx'  ");
+			command("","delete from r_referent where user='$idx'  or organisme='$idx'  ");
+			$i++;
+			
+			if ($donnees["droit"]=="")
+				{
+				ajoute_note($idx,"Numéro d''envoi de SMS pour Doc-depot 06.98.47.43.12 ");
+				$idx_rdv=inc_index("rdv");
+				$date=date('Y-m-d');
+				command("","INSERT INTO dd_rdv VALUES ('$idx_rdv', '$idx','$idx','$date 18H00', 'Penser à supprimer les documents inutiles', '15min', 'A envoyer' ) ");
+
+				}
+			}
+		
+		echo "<p>Chaque bénéficiaire de la formation a pour référent tous les acteurs socicaux de la formation";
+		// initialisation pour chaque bénéficiaire que de tous les Acteur sociaux
+		$reponse = command("","Select * from r_user where (id REGEXP 'FORM_A')");
+		while ($donnees = mysql_fetch_array($reponse) )
+			{
+			$idx=$donnees["idx"];
+			// recherche des benéficiaire à ratacher
+			$r1 = command("","Select * from r_user where (id REGEXP 'FORM_B')");
+			while ($d1 = mysql_fetch_array($r1) )
+				{
+				$idx1=$d1["idx"];
+				$i=inc_index("referent");
+				command("","INSERT INTO `r_referent`  VALUES ( '$i', '$idx1', '$idx', '','', '','','')");
+				}
+			}	
+		
+		echo "<p>Un seul document par espace et utilisateur de la formation";
+		// on ne garde qu'un document par compte 
+		$reponse = command("","Select * from r_user where (id REGEXP 'FORM_B') or (id REGEXP 'FORM_A')");
+		while ($donnees = mysql_fetch_array($reponse) )
+			{
+			$i=0;
+			// espace perso
+			$r1 =command("","select * from r_attachement where ref='P-$idx' ");		
+			while ($d1 = mysql_fetch_array($r1) ) 
+				{
+				if ($i++ !=0)
+					supp_attachement ($d1["num"]);
+				}	
+
+			$i=0;				
+			// espace partagé
+			$r1 =command("","select * from r_attachement where ref='A-$idx' ");		
+			while ($d1 = mysql_fetch_array($r1) ) 
+				{
+				if ($i++ !=0)
+					supp_attachement ($d1["num"]);
+				}
+			}
+	
+		msg_ok ("<br>Mot de passe par défaut : '".parametre("Formation_mdp")."'<br>");
+		}					
+
+
+		if ( ($action=="raz_mdp_formation") && ($user_droit=="T") )
+		{	
+		$mdp=encrypt (parametre("Formation_mdp", "Form_1234")) ;
+		$reponse = command("","UPDATE r_user set pw='$mdp' where (id REGEXP 'FORM_R') or (id REGEXP 'FORM_B') or (id REGEXP 'FORM_A')");
+		msg_ok("Mot de passe des comptes de formation initialisé ($mdp)");
+		}	
+
+		
 	// -------------------------------------------------------------------------------------------------------
 	// au dela les fonctions ne sont pas accesssibles pour les profils E et F
-	if ( ($user_droit=="E") || ($user_droit=="F"))
+	if ( ($user_droit=="E") || ($user_droit=="F")|| ($user_droit=="T"))
 		pied_de_page("x");
 
 		
@@ -4375,7 +4479,7 @@ if (isset($_POST['pass']))
 			$num=variable('num');
 			$num = substr($num,strpos($num,".")+1 );
 			ajout_log( $idx, "Signalement document illicite : $num", $user_idx );
-			ajout_log_tech( "Signalement par $user_idx  document illicite : $num" );
+			ajout_log_tech( "Signalement par $user_idx  document illicite : $num" ,"P1");
 			msg_ok("<Strong>Signalement transmis à l'administrateur. </strong>");
 			$action=variable('retour');
 			}	

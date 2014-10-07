@@ -75,11 +75,28 @@ function TTT_mail($aff=true)
 	$login=parametre('DEF_ADRESSE_MAIL_TTT'); //imap login
 	$password=parametre('DEF_PW_MAIL_TTT'); //imap password
 
-	$mBox = imap_open($host, $login, $password); 
-
-	$time_ttt= time();
-	mysql_query("UPDATE z_ttt SET date='$time_ttt'  ") ;
+	$mBox = imap_open(	$host, $login, $password); 
 	
+	$alarme=parametre("TECH_alarme_acces_bal");
+	if (!$mBox)
+		{
+		if ($alarme=="")
+			{
+			ecrit_parametre("TECH_alarme_acces_bal",time());
+			ajout_log_tech( "Début alarme accès boite mail $login ","P0");
+			envoi_mail(parametre('DD_mail_gestinonnaire'),"Début alarme accès boite mail $login ","");
+			}
+		echo " ==> echec Connexion boite mail";
+		return;
+		}
+	else
+		if ($alarme!="")
+			{
+			ajout_log_tech( "Fin alarme accès boite mail $login ","P0");
+			envoi_mail(parametre('DD_mail_gestinonnaire'),"Fin alarme accès boite mail $login ","");
+			ecrit_parametre("TECH_alarme_acces_bal","");
+			}
+		
 	$savedirpath="./tmp/" ; // attachement will save in same directory where scripts run othrwise give abs path
 	$jk= new  MailAttachmentManager($host, $login, $password, $savedirpath); 
 	$jk -> openMailBox();
@@ -135,7 +152,7 @@ function TTT_mail($aff=true)
 						if ($donnees = mysql_fetch_array($reponse))
 							{
 							// cas où il y a 2 fois le même téléphone==> anormal
-							ajout_log_tech ("2 fois le même numéro $n pour un bénéficiaire ! ");
+							ajout_log_tech ("2 fois le même numéro $n pour un bénéficiaire ! ","P1");
 							}
 						else
 							{

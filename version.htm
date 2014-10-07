@@ -7,9 +7,9 @@
 	</head>
 	<body>
 
-<h4> V0.45    ( maj_bdd,upload_dd )</h4>  
+<h4> V0.45    ( maj_bdd,upload_dd , include_mail, general, TTT_mail)</h4>  
 Evolutions
-<br> + T270: champ de siasir adresse structure  plus long
+<br> + T270: champ de saisir adresse structure  plus long
 <br> + T275: La liste des structures d'un responsable est désromais affiché en tableau (optimisation cadrage)
 <br> + mise en forme page réinitialisation mot de passe
 <br> + T264: Reinitialisation de mot de passe: rappel des régles de saisies
@@ -17,11 +17,18 @@ Evolutions
 <br> + On trace dans le log technique les incohérences de chargement d'un fichier
 <br> + Possibilité de forcer la réinitialisation du mot de passe par l'exploitant 
 <br> + création d'une page de redirection depuis soutien.doc-depot.com
+<br> + suppression de la mise à jour de la table z_ttt qui restait à tord dans TTT_mail() 
+<br> + Alarme sur echec connexion boite mail
+<br> + Profil de Compte "Formateur"
+<br> + Possibilité de forcer la valeur du mot de passe des compte formateur avec valeur prédéfinie dasn table des paramètres
+<br> + Initialisation des comptes de formation (init mdp, init tel et mail, purge sms+rdv+dde_access+log)
+<br> + Ajout de l'indication de la priorité des informations dans le log technique
 <br>   Bugs
 <br> - T269 : sur chgt adresse structure, le champ adresse disparaissait 
 <br> - T266 : La reinitilisation de mot de passe ne fonctionnait plus à partir du mail
 <br> - T273 : les fichiers avec apostrophes dans le nom ne sont pas téléchargés
 <br> - T276 - les dépot pas drag and drop ne fonctionnait pas en production ==>include_charge_image.php non à jour
+<br> - sur filtrage log technique, on basculait à tord vers log fonctionnel 
 
 <h4> V0.44    ( maj_bdd, upload_dd)</h4>  
 Evolutions

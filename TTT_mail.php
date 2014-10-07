@@ -57,7 +57,8 @@ function random_chaine($car)
 		
 	$time_ttt= time();
 	$heure=date('H',  time());
-		
+	
+
 		$ancien_ttt=parametre("TECH_date_dernier_ttt");
 		$delta= (time()-$ancien_ttt);
 		Echo "Dernier traitement TTT :".date('Y-m-d H\hi.s',$ancien_ttt)." Il y a ". $delta . "sec<p>";	
@@ -70,6 +71,7 @@ function random_chaine($car)
 				purge_log();
 				purge_dde_acces(); 					
 				purge_backup_tables();
+				supp_fichier('tmp/log.txt');
 				ecrit_parametre("TECH_nb_mail_envoyes",0) ;
 				ecrit_parametre("TECH_nb_sms_envoyes",0) ;
 				}
@@ -87,14 +89,13 @@ function random_chaine($car)
 				ajout_log_tech( "Controle de signature");
 				ctrl_signature();
 				}			
-						
+					
 		Echo "<p>Purge temporaire";
 		purge_fichiers_temporaires("dir_zip/");		
 		purge_fichiers_temporaires("tmp/");		
 		purge_fichiers_temporaires("upload_tmp/");		
 		
 		$td_envoi=parametre('TECH_dernier_envoi_supervision');
-
 
 			// envoi aleatoir  d'un  mail vers la gatewaysms avec envoi de mail sur elle même qui va générer un mmail en retour
 	//		if (date('Y-m-d-h',  time()) != date('Y-m-d-h',  $ancien_ttt ))
@@ -119,10 +120,11 @@ function random_chaine($car)
 				if ((time()-$td_envoi ) >10*60 ) // s'il y a eu plus de 10 minutes depuis l'envoi
 					{
 					envoi_mail(parametre('DD_mail_gestinonnaire'),"Dépassement délais supervision gateway sms ","");
-					ajout_log_tech( "Dépassement délais supervision gateway SMS ");
+					ajout_log_tech( "Dépassement délais supervision gateway SMS ","P0");
 					ecrit_parametre('TECH_dernier_envoi_supervision', '' );
 					}
-					
+		ajout_log_jour("Journéee");
+				
 		if (($heure>6) && ($heure<20))
 			{		
 			if (date('Y-m-d-h',  time()) != date('Y-m-d-h',  $ancien_ttt ))
@@ -180,18 +182,19 @@ function random_chaine($car)
 			echo "<p>";
 			}
 		
-
 		// -------------------------------------------------------------------traitement des mails et tempo de connexion
-	
+
+
 		if ($time_ttt-$ancien_ttt>14) 
 			{
 			ecrit_parametre("TECH_date_dernier_ttt","$time_ttt") ;
-			
-			if ($_SERVER['REMOTE_ADDR']!="127.0.0.1")
+		
+			if ($_SERVER['REMOTE_ADDR']!="127.0.0.1")	
 				TTT_mail(true);
 			else
 				echo "TTT";
-			
+
+		
 			$delta=($time_ttt-$ancien_ttt);
 			// attention cette action doit être en dernier sinon mise à jour z_ttt ne fonctionne pas !!!
 			decremente_echec_cx ($delta/15);
@@ -202,7 +205,7 @@ function random_chaine($car)
 					ajout_log_tech( "Traitement mail hors delais : $delta sec ");
 					if ($delta> 250 )
 						{
-						ajout_log_tech( "Début alarme Traitement mail hors delais");
+						ajout_log_tech( "Début alarme Traitement mail hors delais","P0");
 						envoi_mail(parametre('DD_mail_gestinonnaire'),"Début alarme Traitement mail hors delais ","");
 						ecrit_parametre("TECH_alarme_delais_TTT",time()) ;
 						}
@@ -212,7 +215,7 @@ function random_chaine($car)
 				{
 				if (parametre("TECH_alarme_delais_TTT")!="")	
 					{
-					ajout_log_tech( "Fin alarme Traitement mail hors delais");
+					ajout_log_tech( "Fin alarme Traitement mail hors delais","P0");
 					envoi_mail(parametre('DD_mail_gestinonnaire'),"Fin alarme Traitement mail hors delais ","");
 					}
 				ecrit_parametre("TECH_alarme_delais_TTT",'') ;

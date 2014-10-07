@@ -202,6 +202,7 @@
 				{
 				$version="V0.45";
 
+				command("1","ALTER TABLE z_log_t ADD prio TEXT not null ");
 				
 				ecrit_parametre("DD_version_bdd", $version);
 				ecrit_parametre("DD_version_portail", $version);

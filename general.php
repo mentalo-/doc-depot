@@ -413,15 +413,28 @@ include 'param.php';
 		$reponse = command("","INSERT INTO `log`  VALUES ('$date_log $heure_jour' , '$id', '$ligne', '$acteur','$ip' ) ");
 		}
 
-	function ajout_log_tech( $ligne)
+	function ajout_log_tech( $ligne, $prio="P2")
 		{
 		$date_log=date('Y-m-d');	
 		$heure_jour=date("H\hi.s");	
 		$ip= $_SERVER["REMOTE_ADDR"];
 		$ligne=addslashes($ligne);
-		$reponse = command("","INSERT INTO `z_log_t`  VALUES ('$date_log $heure_jour' , '$ligne', '$ip' ) ");
+		$reponse = command("","INSERT INTO `z_log_t`  VALUES ('$date_log $heure_jour' , '$ligne', '$ip', '$prio' ) ");
 		}		
 
+	function ajout_log_jour( $ligne)
+		{
+		$date_log=date('Y-m-d');	
+		$heure_jour=date("H\hi.s");	
+		$ligne=addslashes($ligne);
+		
+		$nom='tmp/log.txt';
+		$f_log = fopen($nom, 'a+');		
+		fputs($f_log, $date_log." ".$heure_jour." : ".$ligne."\r\n"); 
+		fclose($f_log);
+
+		}	
+		
 	function purge_log ()
 		{
 		$date=date('Y-m-d',  mktime(0,0,0 , date("m")-3, date("d"), date ("Y")));
@@ -495,7 +508,7 @@ include 'param.php';
 
 	function compte_non_protege($id)
 		{
-		return ( ( $id!="jeanmichelcot" ) && ( $id!="LEGRAIS_TST" ) );
+		return ( ( $id!="Form_B" ) && ( $id!="Form_R" ) && ( $id!="Form_A1" ) && ( $id!="Form_A2" ) );
 		}
 	
 	function liste_profil( $user_droit_org, $val_init)
@@ -513,6 +526,7 @@ include 'param.php';
 			affiche_un_choix($val_init,"A","Administrateur");
 			affiche_un_choix($val_init,"E","Exploitant");
 			affiche_un_choix($val_init,"F","Fonctionnel");
+			affiche_un_choix($val_init,"T","Formateur");
 			affiche_un_choix($val_init,"s","AS inactif");
 			affiche_un_choix($val_init,"R","Responsable");
 			affiche_un_choix($val_init,"S","Acteur social");
