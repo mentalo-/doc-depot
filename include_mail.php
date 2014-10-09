@@ -44,7 +44,7 @@
 
 	function envoi_mail_brut($to,$subject,$body)		
 		{
-				ecrit_parametre("TECH_nb_sms_envoyes",parametre("TECH_nb_sms_envoyes")+1) ;
+		ecrit_parametre("TECH_nb_sms_envoyes",parametre("TECH_nb_sms_envoyes")+1) ;
 
 		if (($_SERVER['REMOTE_ADDR']=="127.0.0.1"))
 			{
@@ -80,21 +80,28 @@ function TTT_mail($aff=true)
 	$alarme=parametre("TECH_alarme_acces_bal");
 	if (!$mBox)
 		{
-		if ($alarme=="")
+		if ($alarme==0)
+			ecrit_parametre("TECH_alarme_acces_bal",1);
+		else
 			{
-			ecrit_parametre("TECH_alarme_acces_bal",time());
-			ajout_log_tech( "Début alarme accès boite mail $login ","P0");
-			envoi_mail(parametre('DD_mail_gestinonnaire'),"Début alarme accès boite mail $login ","");
+			if ($alarme=="") $alarme=0;
+			$alarme++;
+			ecrit_parametre("TECH_alarme_acces_bal",$alarme);
+			if($alarme==4)
+				{
+				ajout_log_tech( "Début alarme accès boite mail $login ","P0");
+				envoi_mail(parametre('DD_mail_gestinonnaire'),"Début alarme accès boite mail $login ","");
+				}
 			}
 		echo " ==> echec Connexion boite mail";
 		return;
 		}
 	else
-		if ($alarme!="")
+		if ($alarme!=0)
 			{
 			ajout_log_tech( "Fin alarme accès boite mail $login ","P0");
 			envoi_mail(parametre('DD_mail_gestinonnaire'),"Fin alarme accès boite mail $login ","");
-			ecrit_parametre("TECH_alarme_acces_bal","");
+			ecrit_parametre("TECH_alarme_acces_bal",0);
 			}
 		
 	$savedirpath="./tmp/" ; // attachement will save in same directory where scripts run othrwise give abs path
@@ -137,12 +144,13 @@ function TTT_mail($aff=true)
 					$delta= time()-parametre("TECH_dernier_envoi_supervision");
 					ajout_log_tech( "Reception supervision gatewaysms (delais $delta sec)");
 					ecrit_parametre('TECH_dernier_envoi_supervision', '' );
+					ecrit_parametre("TECH_alarme_supervision_sms",'') ;
 					}			
 				}
 			else
 				{
 				$cmd= "SELECT * from  r_user WHERE ((telephone='0$n') or (telephone='+33$n')  ) and droit='' ";
-				$reponse = mysql_query($cmd); 
+				$reponse = command( "",$cmd); 
 				if ($donnees = mysql_fetch_array($reponse)) 
 						{
 						$date_jour=date('Y-m-d')." ".$heure_jour=date("H\hi:s");
@@ -159,7 +167,7 @@ function TTT_mail($aff=true)
 							if (!strstr(strtolower($ligne), "activation"))
 								{
 								$cmd= "INSERT INTO r_sms VALUES ('$date_jour', '$idx', '$ligne' ) ";
-								$reponse = mysql_query($cmd); 
+								$reponse = command( "",$cmd); 
 								}
 							else
 								recept_mail($idx,date('Y-m-d'));
@@ -441,12 +449,12 @@ class MailAttachmentManager
 							// vérifiction si cela ne vient pas d'un référent de confiance
 							$vient_de_RC=false;
 							
-							$r1 = mysql_query("SELECT * FROM r_user WHERE mail='$from')"); 
+							$r1 = command( "","SELECT * FROM r_user WHERE mail='$from')"); 
 							if ($d1 = mysql_fetch_array($r1))  // on a trouver un utilisateur
 								if ($d1["droit"]=='S') // c'est bien un Acteur Social
 									{
 									$rc_idx=$d1["idx"];
-									$r2 = mysql_query("SELECT * FROM r_referent WHERE user='$user' and nom='$rc_idx' and organisme='' "); 
+									$r2 = command( "","SELECT * FROM r_referent WHERE user='$user' and nom='$rc_idx' and organisme='' "); 
 									if ($d2 = mysql_fetch_array($r2))  
 										$vient_de_RC=true;
 									}

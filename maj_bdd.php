@@ -208,6 +208,17 @@
 				ecrit_parametre("DD_version_portail", $version);
 				}	
 
+		if ($version<"V0.46")
+				{
+				$version="V0.46";
+
+				ecrit_parametre("Formation_num_structure",19) ;
+				ecrit_parametre("TECH_alarme_supervision_sms","") ;
+				
+				ecrit_parametre("DD_version_bdd", $version);
+				ecrit_parametre("DD_version_portail", $version);
+				}	
+
 
 				
 		 }

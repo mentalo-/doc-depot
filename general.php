@@ -100,6 +100,8 @@ include 'param.php';
 	Function erreur($texte)
 		{
 		echo "<div id=\"msg_erreur\"><center><FONT color=\"#ff0000\" >Erreur : $texte</FONT><br></center></div >";
+		ajout_log_jour("Msg erreur : $texte");
+
 		}	
 	
 	Function msg_ok($texte)
@@ -209,13 +211,13 @@ include 'param.php';
 				$m=0;
 				}			
 			
-			if (  ($m<0) || ($m>60))
+			if (  ($m<0) || ($m>=60))
 				$m=0;
 				
 			if (  ($h<0) || ($h>23))
 				$m=8;		
 				
-			return(sprintf("%02dh%2d",$h,$m));
+			return(sprintf("%02dh%02d",$h,$m));
 			}			
 	function filtre_xss($var)
 		{
@@ -411,6 +413,7 @@ include 'param.php';
 	//		$acteur=libelle_user($acteur);
 			
 		$reponse = command("","INSERT INTO `log`  VALUES ('$date_log $heure_jour' , '$id', '$ligne', '$acteur','$ip' ) ");
+		
 		}
 
 	function ajout_log_tech( $ligne, $prio="P2")
@@ -446,6 +449,7 @@ include 'param.php';
 		{
 		if ($flag!="")
 			echo "<p>$ligne";
+		ajout_log_jour($ligne);
 		return( mysql_query($ligne) );	
 		}
 	// ----------------------------------------------------------------- Tempo connexion

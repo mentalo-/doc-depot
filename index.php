@@ -32,7 +32,7 @@ if ( isset($_SESSION['pass']) && ($_SESSION['pass']==true) )
 			include 'include_crypt.php';
 			
 			$user_idx=$_SESSION['user_idx'];
-			$reponse = mysql_query("SELECT * from  r_user WHERE idx='$user_idx'"); 
+			$reponse = command( "","SELECT * from  r_user WHERE idx='$user_idx'"); 
 			$donnees = mysql_fetch_array($reponse);
 			$id=$donnees["id"];
 			if (encrypt(variable("pw"))!=$donnees["pw"]) 
@@ -1112,7 +1112,7 @@ function maj_mdp_fichier($idx, $pw )
 				$lib = libelle_organisme($donnees["organisme"]);
 		
 		$cmd = "DELETE FROM `r_referent`  where idx='$idx' ";
-		$reponse = mysql_query($cmd);
+		$reponse = command( "",$cmd);
 		ajout_log( $user_idx, "Suppression Référent de confiance $lib " );
 		}		
 
@@ -1875,7 +1875,7 @@ function maj_mdp_fichier($idx, $pw )
 			if ($doc=="")
 				$doc = ";Tous;";
 			$cmd = "INSERT INTO `r_organisme`  VALUES ( '$idx','$organisme', '$tel','$mail','$adresse','$sigle','','$doc','1')";
-			$reponse = mysql_query($cmd);
+			$reponse = command( "",$cmd);
 			ajout_log( $user_idx, "Création organisme ($idx) : $organisme / $mail / $tel / $adresse / $sigle" );
 			}
 		else
@@ -1898,7 +1898,7 @@ function maj_mdp_fichier($idx, $pw )
 		$l=libelle_organisme($idx);
 		
 		$cmd = "DELETE FROM `r_organisme`  where idx='$idx' ";
-		$reponse = mysql_query($cmd);
+		$reponse = command( "",$cmd);
 		ajout_log( $user_idx, "Suppresion organisme $l " );
 		}		
 		
@@ -2071,7 +2071,7 @@ function maj_mdp_fichier($idx, $pw )
 		if (!($d1 = mysql_fetch_array($r1)))
 			{
 			$cmd = "INSERT INTO `r_lien`  VALUES ('$date_jour','$organisme', '$responsable')";
-			$reponse = mysql_query($cmd);
+			$reponse = command( "",$cmd);
 			ajout_log( $user_idx, "Affectation : ".libelle_organisme($organisme)."($organisme)  <-> ".libelle_user($responsable)." ($responsable)" );
 			}
 		else
@@ -2603,16 +2603,18 @@ function affiche_membre($idx)
 				case "init_formation": 
 				case "raz_mdp_formation":
 				
-				return($action);
+					ajout_log_jour("----------------------------------------------------------------------------------- [ Action= $action ] ");
+					return($action);
 				break;
+				
 				default : 
-				erreur ("Action '$action' inconnue");
-				if (isset($_SESSION['user']))
-					$nom=libelle_user($_SESSION['user']);
-				else 
-					$nom="user non connecté (".$_SERVER["REMOTE_ADDR"].")";
-				ajout_log_tech ( "Action '$action' inconnue par $nom ", "P1" );
-				return ("");
+					erreur ("Action '$action' inconnue");
+					if (isset($_SESSION['user']))
+						$nom=libelle_user($_SESSION['user']);
+					else 
+						$nom="user non connecté (".$_SERVER["REMOTE_ADDR"].")";
+					ajout_log_tech ( "Action '$action' inconnue par $nom ", "P1" );
+					return ("");
 				}
 		}
 		
@@ -2832,11 +2834,11 @@ require_once 'include_crypt.php';
 										$code_lecture=$donnees["lecture"];
 										
 										if  ($code_lecture=="$mdp_ancien") 
-											mysql_query("UPDATE r_user set lecture='".encrypt($mdp)."' where id='$id'");
+											command( "","UPDATE r_user set lecture='".encrypt($mdp)."' where id='$id'");
 
 										$mdp=encrypt($mdp);
 										aff_logo();
-										mysql_query("UPDATE r_user set pw='$mdp' where id='$id'");
+										command( "","UPDATE r_user set pw='$mdp' where id='$id'");
 										echo "<p><br><p>Modification du mot de passe réalisée.";
 										$ok=TRUE;
 										ajout_log( $id, 'Changement de Mot de passe' );
@@ -2882,7 +2884,7 @@ require_once 'include_crypt.php';
 				$idx=variable_get("idx");
 			else
 				$idx=variable("idx");			
-			$reponse = mysql_query("SELECT * from  r_user WHERE idx='$idx'"); 
+			$reponse = command( "","SELECT * from  r_user WHERE idx='$idx'"); 
 			if ($donnees = mysql_fetch_array($reponse))
 				{
 				$user_nom=$donnees["nom"];
@@ -2929,7 +2931,7 @@ require_once 'include_crypt.php';
 			$prenom_p=mef_prenom(variable("prenom_p")); 
 			$prenom_m=mef_prenom(variable("prenom_m")); 
 
-			$reponse = mysql_query("SELECT * from  r_user WHERE droit='' and nom='$nom' and prenom='$prenom' and prenom_p='$prenom_p' and prenom_m='$prenom_m' and anniv='$anniv'and ville_nat='$ville_natale'"); 
+			$reponse = command( "","SELECT * from  r_user WHERE droit='' and nom='$nom' and prenom='$prenom' and prenom_p='$prenom_p' and prenom_m='$prenom_m' and anniv='$anniv'and ville_nat='$ville_natale'"); 
 			if ($donnees = mysql_fetch_array($reponse))
 				{
 				aff_logo();
@@ -3125,7 +3127,7 @@ require_once 'include_crypt.php';
 				aff_logo();
 				}
 			echo "<center>";	
-			$reponse = mysql_query("SELECT * from  r_user WHERE (id='$id' or mail='$id' or telephone='$id')"); 
+			$reponse = command( "","SELECT * from  r_user WHERE (id='$id' or mail='$id' or telephone='$id')"); 
 			if ($donnees = mysql_fetch_array($reponse))
 				{
 				if (!mysql_fetch_array($reponse)) // vérifiction qu'il est unique
@@ -3299,7 +3301,7 @@ require_once 'include_crypt.php';
 if (isset($_POST['pass']))
 	{
 	$id=$_POST['id'];
-	$reponse = mysql_query("SELECT * from  r_user WHERE id='$id' "); 
+	$reponse = command( "","SELECT * from  r_user WHERE id='$id' "); 
 	$donnees = mysql_fetch_array($reponse);
 	$mot_de_passe=$donnees["pw"];	
 	$id=$donnees["id"];
@@ -3387,7 +3389,7 @@ if (isset($_POST['pass']))
 	if (isset($_SESSION['user']))
 		{
 		$idx=$_SESSION['user'];
-		$reponse = mysql_query("SELECT * from  r_user WHERE idx='$idx'"); 
+		$reponse = command( "","SELECT * from  r_user WHERE idx='$idx'"); 
 		$donnees = mysql_fetch_array($reponse);
 		$user_idx=$donnees["idx"];
 		$_SESSION['acteur']=$user_idx; // utilisé par le upload en mode drag and drop 
@@ -3651,7 +3653,7 @@ if (isset($_POST['pass']))
 		include ("maj_bdd.php");
 
 		// ===================================================================== Bloc IMAGE
-		$reponse = mysql_query("SELECT * from  r_user WHERE idx='$idx'"); 
+		$reponse = command( "","SELECT * from  r_user WHERE idx='$idx'"); 
 		$donnees = mysql_fetch_array($reponse);
 		$user_idx=$donnees["idx"];
 		$id=$donnees["id"];
@@ -3795,6 +3797,9 @@ if (isset($_POST['pass']))
 	
 		echo "</table>";
 
+		
+
+		
 		if ($user_droit=="")	 
 			// on n'affiche au bénéficiaire sa domiciliation que sur l'écran d'accueil 
 			if (($action=="") || ($action=="modif_tel")|| ($action=="modif_domicile"))
@@ -3809,7 +3814,9 @@ if (isset($_POST['pass']))
 				echo "<input type=\"hidden\" name=\"idx\" value=\"$idx\"> " ;
 				echo "</form> </table>";
 				}	
-				
+		if (($user_droit=="E") || ($user_droit=="A") || ($user_droit=="F") || ($user_droit=="T"))
+			affiche_alarme();
+		
 		echo "<hr>";
 	
 		
@@ -3844,6 +3851,8 @@ if (isset($_POST['pass']))
 			echo "<li><a href=\"index.php\"> Journaux </a><ul>";
 			echo "<li><a href=\"index.php?action=afflog_t\"> Log technique </a></li>";
 			echo "<li><a href=\"index.php?action=afflog\"> Log Fonctionnel</a></li>";		
+			echo "<li><a href=\"tmp/log.txt\"> Aujourd'hui</a></li>";		
+			echo "<li><a href=\"tmp/hier.txt\"> Hier</a></li>";		
 			echo "</li></ul>";			
 			echo "<li><a href=\"index.php?action=liste_compte\"> Liste User</a></li>";
 			echo "</li><li> <a href=\"index.php\">CTRL</a><ul>";			
@@ -3856,6 +3865,7 @@ if (isset($_POST['pass']))
 			echo "<li><a href=\"index.php?action=phpinfo\"> Phpinfo </a></li>";
 			echo "</ul></ul >";
 			echo "<td></table>";
+
 			}		
 
 		if ($user_droit=="T") 
@@ -4060,7 +4070,7 @@ if (isset($_POST['pass']))
 			{
 			$action="visualisation_lecture2";
 			$ok=FALSE;
-			$reponse = mysql_query("SELECT * from  r_user WHERE id='$id'"); 
+			$reponse = command( "","SELECT * from  r_user WHERE id='$id'"); 
 			if ($donnees = mysql_fetch_array($reponse))
 				{
 				$ancienne_lecture=$donnees['lecture'];
@@ -4069,7 +4079,7 @@ if (isset($_POST['pass']))
 					{
 					if (strlen($mdp)==0)
 						{
-						mysql_query("UPDATE r_user set lecture='$mdp' where id='$id'");
+						command( "","UPDATE r_user set lecture='$mdp' where id='$id'");
 						echo "Modification effectuée: votre code de lecture est désactivé.";
 						$ok=TRUE;
 						ajout_log( $id, 'Effacement code lecture' );
@@ -4085,7 +4095,7 @@ if (isset($_POST['pass']))
 								$pw=$mdp; // passage du parametre en global 
 								maj_mdp_fichier($user_idx, $mdp );
 								$mdp=encrypt($mdp);
-								mysql_query("UPDATE r_user set lecture='$mdp' where id='$id'");
+								command( "","UPDATE r_user set lecture='$mdp' where id='$id'");
 								msg_ok( "Modification code lecture réalisée.");
 								$ok=TRUE;
 								ajout_log( $id, 'Changement code lecture' );
@@ -4108,7 +4118,7 @@ if (isset($_POST['pass']))
 				
 		if ((($action=="visualisation_lecture") || ($action=="visualisation_lecture2")) && ($user_droit==""))
 			{
-			$reponse = mysql_query("SELECT * from  r_user WHERE id='$id' "); 
+			$reponse = command( "","SELECT * from  r_user WHERE id='$id' "); 
 			$donnees = mysql_fetch_array($reponse);
 			$mot_de_passe=$donnees["pw"];	
 			if ( ($action=="visualisation_lecture2")
@@ -4362,9 +4372,9 @@ if (isset($_POST['pass']))
 			$id=$donnees["id"];
 			echo "<br>- $id";
 			$idx=$donnees["idx"];
-			command("","UPDATE r_user set pw='$mdp', lecture='$mdp', mail='$id@fixeo.com', telephone='060504030$i' where idx='$idx' ");
+			command("","UPDATE r_user set pw='$mdp', lecture='$mdp', mail='$id@fixeo.com', telephone='0651256164' where idx='$idx' ");
 			command("","delete from r_sms where idx='$idx' ");
-			command("","delete from dd_rdv where user='$idx' or auteur='$idx' ");
+			command("","delete from DD_rdv where user='$idx' or auteur='$idx' ");
 			command("","delete from r_dde_acces where user='$idx' or ddeur='$idx' or autorise='$idx' ");
 			command("","delete from log where user='$idx' or acteur='$idx'  ");
 			command("","delete from r_referent where user='$idx'  or organisme='$idx'  ");
@@ -4375,8 +4385,7 @@ if (isset($_POST['pass']))
 				ajoute_note($idx,"Numéro d''envoi de SMS pour Doc-depot 06.98.47.43.12 ");
 				$idx_rdv=inc_index("rdv");
 				$date=date('Y-m-d');
-				command("","INSERT INTO dd_rdv VALUES ('$idx_rdv', '$idx','$idx','$date 18H00', 'Penser à supprimer les documents inutiles', '15min', 'A envoyer' ) ");
-
+				command("","INSERT INTO DD_rdv VALUES ('$idx_rdv', '$idx','$idx','$date 18H00', 'Penser à supprimer les documents inutiles', '15min', 'A envoyer' ) ");
 				}
 			}
 		
@@ -4391,8 +4400,9 @@ if (isset($_POST['pass']))
 			while ($d1 = mysql_fetch_array($r1) )
 				{
 				$idx1=$d1["idx"];
-				$i=inc_index("referent");
-				command("","INSERT INTO `r_referent`  VALUES ( '$i', '$idx1', '$idx', '','', '','','')");
+				$i=inc_index("referent");					
+				$ns= parametre("Formation_num_structure");
+				command("","INSERT INTO `r_referent`  VALUES ( '$i', '$idx1', '$ns', '$idx','', '','','')");
 				}
 			}	
 		

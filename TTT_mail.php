@@ -57,11 +57,12 @@ function random_chaine($car)
 		
 	$time_ttt= time();
 	$heure=date('H',  time());
-	
+	ajout_log_jour("TTT");
+	affiche_alarme();
 
 		$ancien_ttt=parametre("TECH_date_dernier_ttt");
 		$delta= (time()-$ancien_ttt);
-		Echo "Dernier traitement TTT :".date('Y-m-d H\hi.s',$ancien_ttt)." Il y a ". $delta . "sec<p>";	
+		Echo "<p>Dernier traitement TTT :".date('Y-m-d H\hi.s',$ancien_ttt)." Il y a ". $delta . "sec<p>";	
 		
 		if (date('Y-m-d-h',  time()) != date('Y-m-d-h',  $ancien_ttt ))
 			if ($heure==0)
@@ -71,7 +72,10 @@ function random_chaine($car)
 				purge_log();
 				purge_dde_acces(); 					
 				purge_backup_tables();
-				supp_fichier('tmp/log.txt');
+
+				supp_fichier('tmp/hier.txt');
+				copy('tmp/log.txt','tmp/hier.txt');
+
 				ecrit_parametre("TECH_nb_mail_envoyes",0) ;
 				ecrit_parametre("TECH_nb_sms_envoyes",0) ;
 				}
@@ -122,10 +126,11 @@ function random_chaine($car)
 					envoi_mail(parametre('DD_mail_gestinonnaire'),"Dépassement délais supervision gateway sms ","");
 					ajout_log_tech( "Dépassement délais supervision gateway SMS ","P0");
 					ecrit_parametre('TECH_dernier_envoi_supervision', '' );
+					ecrit_parametre("TECH_alarme_supervision_sms",time()) ;
 					}
-		ajout_log_jour("Journéee");
+		
 				
-		if (($heure>6) && ($heure<20))
+		if (($heure>6) && ($heure<21))
 			{		
 			if (date('Y-m-d-h',  time()) != date('Y-m-d-h',  $ancien_ttt ))
 				if ($heure==19)
@@ -194,7 +199,6 @@ function random_chaine($car)
 			else
 				echo "TTT";
 
-		
 			$delta=($time_ttt-$ancien_ttt);
 			// attention cette action doit être en dernier sinon mise à jour z_ttt ne fonctionne pas !!!
 			decremente_echec_cx ($delta/15);
