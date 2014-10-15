@@ -259,6 +259,7 @@ include 'param.php';
 		}		
 	function supp_fichier($nom)
 		{
+		ajout_log_jour("supp_fichier($nom)");
 		if (file_exists($nom))
 				unlink ($nom);
 		}
@@ -266,6 +267,7 @@ include 'param.php';
 	Function commentaire_html($texte)
 		{
 		echo "\r\n<!-- $texte -->\r\n";
+		ajout_log_jour($texte);
 		}
 	
 	Function signet($texte)
@@ -413,11 +415,11 @@ include 'param.php';
 	//		$acteur=libelle_user($acteur);
 			
 		$reponse = command("","INSERT INTO `log`  VALUES ('$date_log $heure_jour' , '$id', '$ligne', '$acteur','$ip' ) ");
-		
 		}
 
 	function ajout_log_tech( $ligne, $prio="P2")
 		{
+		ajout_log_jour("Fct: ajout_log_tech($ligne,$prio)");
 		$date_log=date('Y-m-d');	
 		$heure_jour=date("H\hi.s");	
 		$ip= $_SERVER["REMOTE_ADDR"];
@@ -435,7 +437,6 @@ include 'param.php';
 		$f_log = fopen($nom, 'a+');		
 		fputs($f_log, $date_log." ".$heure_jour." : ".$ligne."\r\n"); 
 		fclose($f_log);
-
 		}	
 		
 	function purge_log ()
@@ -443,7 +444,8 @@ include 'param.php';
 		$date=date('Y-m-d',  mktime(0,0,0 , date("m")-3, date("d"), date ("Y")));
 		$r1 = command("","DELETE FROM log WHERE ligne regexp 'connexion' and date<$date  ");
 		$date=date('Y-m-d',  mktime(0,0,0 , date("m")-1, date("d"), date ("Y")));
-		$r1 = command("","DELETE FROM z_log_t WHERE date<$date  ");		}
+		$r1 = command("","DELETE FROM z_log_t WHERE date<$date  ");		
+		}
 				
 	function command($flag,$ligne)
 		{

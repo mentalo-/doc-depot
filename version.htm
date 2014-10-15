@@ -7,7 +7,20 @@
 	</head>
 	<body>
 
-<h4> V0.46 en ligne le 07/10/2014    ( maj_bdd,exploit ,  TTT_mail, exploit, general,include_mail )</h4>  
+<h4> V0.47   ( maj_bdd,  TTT_mail, general, exploit, include_mail )</h4>  
+Evolutions
+<br> + Enrichissement log_quotidien : mieux marquer le début du traitement TTT, commentaire html
+<br> + Initialiation des téléphones pour envoi de SMS d'alerte
+<br> + Possibilité de faie une sauvegarde des sources et backup des tables 
+<br> + le mail d'absence de supervision sms n'est envoyé qu'une fois (et une fois à la fin)
+<br> + Si echec connexion à la base de données alors message d'indisponibilité
+<br> + permet d'avoir un  numéro de tél pour l'emission différent de la réception
+<br> + page d'aide au debug accessible sans mot de passe 
+<br>   Bugs
+<br> - Le message de fin d'alertes d'accès à la boite au lettres est émis même si le début d'alarme n'a pas été déclenché
+
+
+<h4> V0.46 en ligne le 09/10/2014    ( maj_bdd,exploit ,  TTT_mail, exploit, general,include_mail )</h4>  
 Evolutions
 <br> + le mail quotidien technique isole en 1ere partie uniquement les items de type P0
 <br> + il faut 4 erreurs consecutives sur la boite mail pour déclencher l'alarme

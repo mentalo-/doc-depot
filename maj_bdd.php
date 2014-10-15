@@ -226,7 +226,7 @@
 
 				ecrit_parametre("DD_tel_alarme1", "+33625841153");
 				ecrit_parametre("DD_tel_alarme2", "");
-				ecrit_parametre('DD_numero_tel_sms_E',"+33651256164")
+				ecrit_parametre('DD_numero_tel_sms_E',"+33651256164");
 				ecrit_parametre("DD_version_bdd", $version);
 				ecrit_parametre("DD_version_portail", $version);
 				}

@@ -2553,6 +2553,9 @@ function affiche_membre($idx)
 				case "en_trop":
 				case "integrite":
 				case "authenticite":
+				case "force_supervision_sms":
+				case "desactive_sms2mail":
+				case "active_sms2mail":
 				case "liste_compte":
 				case "afflog":
 				case "afflog_t":
@@ -3855,7 +3858,7 @@ if (isset($_POST['pass']))
 
 	if ($user_droit=="E") 
 			{
-			echo "<table><tr><td width=\"400\">";
+			echo "<table><tr><td width=\"500\">";
 			echo " <ul id=\"menu-bar\">";
 			echo "<li><a href=\"index.php\"> Journaux </a><ul>";
 			echo "<li><a href=\"index.php?action=afflog_t\"> Log technique </a></li>";
@@ -3864,7 +3867,14 @@ if (isset($_POST['pass']))
 			echo "<li><a href=\"tmp/hier.txt\"> Hier</a></li>";		
 			echo "</li></ul>";			
 			echo "<li><a href=\"index.php?action=liste_compte\"> Liste User</a></li>";
-			echo "</li><li> <a href=\"index.php\">CTRL</a><ul>";			
+			echo "<li><a href=\"index.php?action=force_supervision_sms\"> Télécom</a><ul>";
+			
+			echo "<li><a href=\"index.php?action=force_supervision_sms\"> Supervision SMS à la demande </a></li>";
+			echo "<li><a href=\"index.php?action=active_sms2mail\">  active_sms2mail </a></li>";
+			echo "<li><a href=\"index.php?action=desactive_sms2mail\"> desactive_sms2mail </a></li>";		
+			echo "</li></ul>";			
+			
+			echo "<li> <a href=\"index.php\">CTRL</a><ul>";			
 
 			echo "<li><a href=\"index.php?action=en_trop\"> Fichiers en trop </a></li>";
 			echo "<li><a href=\"index.php?action=authenticite \"> Aunthenticité </a></li>";
@@ -3917,6 +3927,28 @@ if (isset($_POST['pass']))
 		{
 		echo "Controle Aunthenticité des fichiers";
 		ctrl_signature(true);
+		pied_de_page("x");
+		}	
+
+	if (($action=="force_supervision_sms") &&  ($user_droit=="E"))
+		{
+		ecrit_parametre('TECH_msg_supervision_gatewaysms', "Test SMS ");
+		envoi_SMS( parametre('DD_numero_tel_sms') ,parametre('TECH_msg_supervision_gatewaysms').". ".date('H\hi',time()));
+		ecrit_parametre('TECH_dernier_envoi_supervision', time() );
+		echo "Supervision SMS à la demande envoyée avec '". parametre('TECH_msg_supervision_gatewaysms')."'";
+		pied_de_page("x");
+		}	
+
+	if (($action=="active_sms2mail") &&  ($user_droit=="E"))
+		{
+		envoi_SMS( parametre('DD_numero_tel_sms') ,'sms2mail on');
+		echo "Activation SMS2MAIL envoyée au ". parametre('DD_numero_tel_sms');
+		pied_de_page("x");
+		}	
+	if (($action=="desactive_sms2mail") &&  ($user_droit=="E"))
+		{
+		envoi_SMS( parametre('DD_numero_tel_sms') ,'sms2mail off');
+		echo "Activation SMS2MAIL envoyée au ". parametre('DD_numero_tel_sms');
 		pied_de_page("x");
 		}	
 
