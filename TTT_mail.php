@@ -13,6 +13,8 @@
 	// supprime les rdv envoyé ayant plus d'un mois d'ancieneté
 	function purge_rdv()
 		{
+		commentaire_html("purge_rdv");
+
 		echo "<br>Purge Rdv";
 		$reponse =command("","select * from  DD_rdv where etat='Envoyé' ");		
 		while ($donnees = mysql_fetch_array($reponse) ) 
@@ -31,6 +33,8 @@
 	
 	function purge_fichiers_temporaires($dir)
 		{
+		commentaire_html("purge_fichiers_temporaires");
+		
 		// suppression des fichiers temporaire
 		$l= date('Y-m-d H:i',  mktime(date ("H"),date ("i")-2, date ("s") , date("m"), date("d"), date ("Y") ));
 		foreach(glob($dir.'*.*') as $v)
@@ -57,7 +61,9 @@ function random_chaine($car)
 		
 	$time_ttt= time();
 	$heure=date('H',  time());
-	ajout_log_jour("TTT");
+	ajout_log_jour(" ==================================================================================================== TTT");
+	
+	commentaire_html("Affiche Alarme");
 	affiche_alarme();
 
 		$ancien_ttt=parametre("TECH_date_dernier_ttt");
@@ -102,19 +108,17 @@ function random_chaine($car)
 		$td_envoi=parametre('TECH_dernier_envoi_supervision');
 
 			// envoi aleatoir  d'un  mail vers la gatewaysms avec envoi de mail sur elle même qui va générer un mmail en retour
-	//		if (date('Y-m-d-h',  time()) != date('Y-m-d-h',  $ancien_ttt ))
 			if ( 
 				($td_envoi=='') 
 				&& 
 				(
 				( ( rand(0,300)==1 ) && ($heure>6) && ($heure<20))
 				||
-				( rand(0,900)==1 )
+				( rand(0,1300)==1 )
 				)
 				)
 				{
 				ecrit_parametre('TECH_msg_supervision_gatewaysms', random_chaine(6).' '.random_chaine(3).' '.random_chaine(6).'.');
-			
 				envoi_SMS( parametre('DD_numero_tel_sms') ,parametre('TECH_msg_supervision_gatewaysms').". ".date('H\hi',time()));
 				ecrit_parametre('TECH_dernier_envoi_supervision', time() );
 				}
@@ -123,10 +127,13 @@ function random_chaine($car)
 			if ($td_envoi!='') // s'il y a un marquage de l'heure d'envoi
 				if ((time()-$td_envoi ) >10*60 ) // s'il y a eu plus de 10 minutes depuis l'envoi
 					{
-					envoi_mail(parametre('DD_mail_gestinonnaire'),"Dépassement délais supervision gateway sms ","");
-					ajout_log_tech( "Dépassement délais supervision gateway SMS ","P0");
+					if (parametre("TECH_alarme_supervision_sms") =="")
+						{
+						envoi_mail(parametre('DD_mail_gestinonnaire'),"Début alarme délais supervision gateway sms ","");
+						ajout_log_tech( "Dépassement délais supervision gateway SMS ","P0");
+						ecrit_parametre("TECH_alarme_supervision_sms",time()) ;
+						}
 					ecrit_parametre('TECH_dernier_envoi_supervision', '' );
-					ecrit_parametre("TECH_alarme_supervision_sms",time()) ;
 					}
 		
 				
@@ -227,7 +234,8 @@ function random_chaine($car)
 			
 			}
 
-	
+	commentaire_html("TTT: Affiche Indicateurs");
+
 	// Affichage des principaux indicaturs
 	titre_kpi();
 	

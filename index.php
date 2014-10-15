@@ -383,7 +383,7 @@ if (isset($_SESSION['DD_time_out']))
 	function saisie_champ_bug_area($idx, $champ, $valeur, $size="")
 		{
 		$valeur= stripcslashes ($valeur);
-		return ("<form method=\"post\" > <input  type=\"hidden\" name=\"action\" value=\"modif_champ_bug\"/> ".param("idx","$idx").param("champ","$champ")."<TEXTAREA rows=\"5\" cols=\"$size\" name=\"valeur\"  onChange=\"this.form.submit();\" > $valeur </TEXTAREA></form> ");
+		return ("<form method=\"post\" ><input  type=\"hidden\" name=\"action\" value=\"modif_champ_bug\"/>".param("idx","$idx").param("champ","$champ")."<TEXTAREA rows=\"5\" cols=\"$size\" name=\"valeur\"  onChange=\"this.form.submit();\" >$valeur</TEXTAREA></form> ");
 		}
 		
 	function liste_type_bug( $idx, $champ, $val_init)
@@ -2520,6 +2520,7 @@ function affiche_membre($idx)
 				case "user_inactif":
 				case "user_actif":
 				case "phpinfo":
+				case "archivage_php":
 				case "dde_chgt_cle":
 				case "chgt_cle":
 				case "supp_upload":
@@ -2620,6 +2621,7 @@ function affiche_membre($idx)
 		
 		// -====================================================================== DEBUT de PAGE ===============================
 // Connexion BdD
+
 require_once "connex_inc.php";
 require_once 'include_crypt.php';
 
@@ -3462,12 +3464,6 @@ if (isset($_POST['pass']))
 	if ( ($action=="user_actif") && ($user_droit=="R"))
 		maj_droit(variable("idx"),"S");
 			
-	if (($action=="phpinfo") && ( ($user_droit=="A") || ($user_droit=="E")) )
-		{
-		phpinfo();
-		pied_de_page();
-		}
-
 	if (($action=="dde_chgt_cle") && ($user_droit=="A"))
 		dde_chgt_cle();
 		
@@ -3818,7 +3814,20 @@ if (isset($_POST['pass']))
 			affiche_alarme();
 		
 		echo "<hr>";
-	
+
+	if (($action=="phpinfo") && ( ($user_droit=="A") || ($user_droit=="E")) )
+		{
+		phpinfo();
+		pied_de_page();
+		}
+		
+	if (($action=="archivage_php") &&  ($user_droit=="E")) 
+		{
+		archivage_php();
+		echo "<p> Sauvegarde Tables ";
+		backup_tables(false);
+		pied_de_page();
+		}		
 		
 		if ($action=="supp_upload_a_confirmer")
 			{
@@ -3863,6 +3872,7 @@ if (isset($_POST['pass']))
 			echo "</ul><li> <a href=\"index.php?action=param_sys\">Paramètrage</a><ul>";			
 
 			echo "<li><a href=\"index.php?action=phpinfo\"> Phpinfo </a></li>";
+			echo "<li><a href=\"index.php?action=archivage_php\"> Archivage Php+Sql </a></li>";
 			echo "</ul></ul >";
 			echo "<td></table>";
 

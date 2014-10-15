@@ -97,7 +97,7 @@ function TTT_mail($aff=true)
 		return;
 		}
 	else
-		if ($alarme!=0)
+		if ($alarme>=4)
 			{
 			ajout_log_tech( "Fin alarme accès boite mail $login ","P0");
 			envoi_mail(parametre('DD_mail_gestinonnaire'),"Fin alarme accès boite mail $login ","");
@@ -134,7 +134,11 @@ function TTT_mail($aff=true)
 			$n= substr($sujet, $pos, 9 ); // recupération du numéro de téléphone dasn le titre du mail 
 			
 			if ($aff) echo " --> SMS : $n";
-			if (parametre('DD_numero_tel_sms ')=="+33$n")  // test si cela vient de la gateway
+			if (
+				(parametre('DD_numero_tel_sms')=="+33$n")  // test si cela vient de la gateway de reception
+				||
+				(parametre('DD_numero_tel_sms_E')=="+33$n")  // test si cela vient de la gateway d'emission
+				)
 				{
 				$ligne = imap_fetchbody($mBox, $i, 1);
 				Echo "Gatewaysms: "; 
@@ -144,6 +148,8 @@ function TTT_mail($aff=true)
 					$delta= time()-parametre("TECH_dernier_envoi_supervision");
 					ajout_log_tech( "Reception supervision gatewaysms (delais $delta sec)");
 					ecrit_parametre('TECH_dernier_envoi_supervision', '' );
+					if (parametre("TECH_alarme_supervision_sms")!="") 
+						envoi_mail(parametre('DD_mail_gestinonnaire'),"Fin alarme supervision gateway sms ","");
 					ecrit_parametre("TECH_alarme_supervision_sms",'') ;
 					}			
 				}
