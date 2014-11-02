@@ -381,6 +381,7 @@ include 'param.php';
 		echo "<div id=\"logo\"> <center><a href=\"index.php\"><img src=\"images/logo.png\" width=\"200\" height=\"150\" ></a> </div>  <center>";	
 		if ($titre!="")
 			{
+			echo "<h3>Consigne Numérique Solidaire</h3>";
 			echo "<p><i><b><font size=\"5\">'' Mon essentiel à l'abri en toute confiance '' .</b></i></font>";
 			echo "<p>Sauvegardez gratuitement de façon sécurisée vos documents, photos et informations essentielles .";
 			}
@@ -550,4 +551,33 @@ include 'param.php';
 		{
 		echo "</td><td></td></TABLE>";
 		}
+		
+	function formate_telephone($tel)
+		{
+
+		if (VerifierPortable($tel))	
+			{
+			$m = "<form method=\"POST\" action=\"index.php\">$tel ";
+			$m .= "<input type=\"image\" src=\"images/sms.png\" width=\"20\" height=\"20\" title=\"Envoyer un SMS\">";
+			$m .= "<input type=\"hidden\" name=\"tel\" value=\"$tel\">";
+			$m .= "<input type=\"hidden\" name=\"action\" value=\"sms_test\"></form>";
+			$tel =$m;
+			}
+		return  ($tel) ;			
+		}
+
+	function formate_mail($mail)
+		{
+		if (VerifierAdresseMail($mail))	
+			{
+			$m = "<form method=\"POST\" action=\"index.php\">$mail ";
+			$m .= "<input type=\"image\" src=\"images/mail2.png\" width=\"20\" height=\"20\" title=\"Envoyer un Mail\">";
+			$m .= "<input type=\"hidden\" name=\"mail\" value=\"$mail\">";
+			$m .= "<input type=\"hidden\" name=\"action\" value=\"mail_test\"></form>";
+			$mail =$m;
+			}
+			
+		return  ($mail) ;
+		}		
+		
 ?>

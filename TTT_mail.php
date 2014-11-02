@@ -81,6 +81,7 @@ function random_chaine($car)
 
 				supp_fichier('tmp/hier.txt');
 				copy('tmp/log.txt','tmp/hier.txt');
+				supp_fichier('tmp/log.txt');
 
 				ecrit_parametre("TECH_nb_mail_envoyes",0) ;
 				ecrit_parametre("TECH_nb_sms_envoyes",0) ;
@@ -99,8 +100,8 @@ function random_chaine($car)
 				ajout_log_tech( "Controle de signature");
 				ctrl_signature();
 				}			
-					
-		Echo "<p>Purge temporaire";
+
+		commentaire_html( "Purge temporaire");
 		purge_fichiers_temporaires("dir_zip/");		
 		purge_fichiers_temporaires("tmp/");		
 		purge_fichiers_temporaires("upload_tmp/");		
@@ -108,10 +109,12 @@ function random_chaine($car)
 		$td_envoi=parametre('TECH_dernier_envoi_supervision');
 
 			// envoi aleatoir  d'un  mail vers la gatewaysms avec envoi de mail sur elle même qui va générer un mmail en retour
-			if ( 
+			if ( // il ne faut pas que l'on soit déjà en traitement d'une supervision 
 				($td_envoi=='') 
+				&& // il faut à minima une heure entre chaque sms
+ 				( (time()-parametre('TECH_dernier_envoi_supervision_effectif') ) > 3600 ) 
 				&& 
-				(
+				( // frequence plus élevée en journée
 				( ( rand(0,300)==1 ) && ($heure>6) && ($heure<20))
 				||
 				( rand(0,1300)==1 )
@@ -121,6 +124,7 @@ function random_chaine($car)
 				ecrit_parametre('TECH_msg_supervision_gatewaysms', random_chaine(6).' '.random_chaine(3).' '.random_chaine(6).'.');
 				envoi_SMS( parametre('DD_numero_tel_sms') ,parametre('TECH_msg_supervision_gatewaysms').". ".date('H\hi',time()));
 				ecrit_parametre('TECH_dernier_envoi_supervision', time() );
+				ecrit_parametre('TECH_dernier_envoi_supervision_effectif',  time()  );
 				}
 			
 			$td_envoi=parametre('TECH_dernier_envoi_supervision');
@@ -141,7 +145,11 @@ function random_chaine($car)
 			{		
 			if (date('Y-m-d-h',  time()) != date('Y-m-d-h',  $ancien_ttt ))
 				if ($heure==19)
-					exploit_envoi_mail_synthese();
+				    if ( parametre("Tech_date_envoi_synthses")!=date('Y-m-d',  time()) )
+						{
+						exploit_envoi_mail_synthese();
+						ecrit_parametre("Tech_date_envoi_synthses", date('Y-m-d',  time()));
+						}
 					
 		// ----------------------------------------------------------------------- traitement des RDV				
 			Echo "<p>TTT rdv ";

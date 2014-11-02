@@ -230,6 +230,15 @@
 				ecrit_parametre("DD_version_bdd", $version);
 				ecrit_parametre("DD_version_portail", $version);
 				}
+		if ($version<"V0.48")
+				{
+				$version="V0.48";
+				// backup_tables(); // A utiliser si chnagement de structure ou de contenu de la base
+				ecrit_parametre('FORM_msg_rdv','Penser à supprimer les documents inutiles');
+				ecrit_parametre('FORM_tel_rdv','0651256164');
+
+				ecrit_parametre("Tech_date_envoi_synthses", "");
+				}
 				
 		 }
 ?>

@@ -1130,6 +1130,8 @@ function maj_mdp_fichier($idx, $pw )
 			$tel=$donnees["tel"];	
 			$mail=$donnees["mail"];	
 			$adresse=stripcslashes($donnees["adresse"]);	
+			$mail= formate_mail($mail);
+
 			echo "<tr><td> $organisme </td><td> $nom   </td><td> $prenom   </td><td> $tel </td><td> $mail</td><td> $adresse</td>";
 			}
 		else
@@ -1170,7 +1172,9 @@ function maj_mdp_fichier($idx, $pw )
 			}
 		if ($masque!="") 
 			$mail="";
-		if ($droit=="s")
+			
+		$mail= formate_mail($mail);
+			if ($droit=="s")
 			echo "<tr><td> $organisme </td><td> <img src=\"images/inactif.png\" title=\"Inactif\" width=\"15\" height=\"15\"> $nom   </td><td> $prenom   </td><td> $tel </td><td> $mail</td><td> $adresse</td>";
 		else
 			echo "<tr><td> $organisme </td><td> $nom   </td><td> $prenom   </td><td> $tel </td><td> $mail</td><td> $adresse</td>";
@@ -1529,6 +1533,8 @@ function maj_mdp_fichier($idx, $pw )
 				else
 					$nom= "$nom (Identifiant='$id')";
 				}
+			$mail = formate_mail($mail);
+			$telephone = formate_telephone($telephone);
 			echo "<tr><td> $nom   </td><td> $prenom </td><td> $telephone</td><td> $mail</td>";
 			if ($droit=="A")			
 				{ 
@@ -1839,6 +1845,9 @@ function maj_mdp_fichier($idx, $pw )
 				$ville_nat=$d1["ville_nat"];				
 				$adresse=stripcslashes($d1["adresse"]);	
 				echo "<tr>";
+				$mail= formate_mail($mail);
+				$telephone= formate_telephone($telephone);
+				
 				lien_c ("images/voir.png", "detail_user", param("user","$nom1" ), "Voir le détail" );
 				echo "<td>$nom   </a></td><td> $prenom </td><td> $telephone</td><td> $mail</td>";
 				echo "<td> $anniv </td><td> $nationalite   </td><td> $ville_nat </td><td> $adresse </td>";
@@ -2606,6 +2615,13 @@ function affiche_membre($idx)
 				case "raz_mdp1":
 				case "init_formation": 
 				case "raz_mdp_formation":
+				case "dde_acces" :
+				case "sms_test" :
+				case "sms_envoi" :
+				case "mail_test" :
+				case "mail_envoi" :
+				case "collegues" :
+				
 				
 					ajout_log_jour("----------------------------------------------------------------------------------- [ Action= $action ] ");
 					return($action);
@@ -3872,6 +3888,7 @@ if (isset($_POST['pass']))
 			echo "<li><a href=\"index.php?action=force_supervision_sms\"> Supervision SMS à la demande </a></li>";
 			echo "<li><a href=\"index.php?action=active_sms2mail\">  active_sms2mail </a></li>";
 			echo "<li><a href=\"index.php?action=desactive_sms2mail\"> desactive_sms2mail </a></li>";		
+			echo "<li><a href=\"index.php?action=sms_test\"> Envoi SMS </a></li>";		
 			echo "</li></ul>";			
 			
 			echo "<li> <a href=\"index.php\">CTRL</a><ul>";			
@@ -3945,12 +3962,114 @@ if (isset($_POST['pass']))
 		echo "Activation SMS2MAIL envoyée au ". parametre('DD_numero_tel_sms');
 		pied_de_page("x");
 		}	
+		
 	if (($action=="desactive_sms2mail") &&  ($user_droit=="E"))
 		{
 		envoi_SMS( parametre('DD_numero_tel_sms') ,'sms2mail off');
 		echo "Activation SMS2MAIL envoyée au ". parametre('DD_numero_tel_sms');
 		pied_de_page("x");
 		}	
+	
+	if (($action=="sms_envoi") &&  ($user_droit!=""))
+		{
+		$msg= variable("msg");		
+		$tel= variable("tel");		
+		if (strlen($msg)>10)
+			{
+			$msg.= " Message de ".variable("origine");
+			envoi_SMS( $tel , $msg);
+			ajout_log( $idx, "Envoi SMS personnel à : $tel", $user_idx );
+
+			echo "Envoi du SMS réalisé";
+			pied_de_page("x");
+			}
+		else
+			{
+			erreur ("Message trop court");
+			$action="sms_test";			
+			}
+		}	
+		
+	if (($action=="sms_test") &&  ($user_droit!=""))
+		{
+		$tel= variable("tel");
+		$msg= variable("msg");
+		
+			echo "<center><p>Envoi d'un SMS : ";
+		
+			debut_cadre("500");
+			echo "<br><img src=\"images/sms.png\" width=\"50\" height=\"40\" > ";
+			formulaire ("sms_envoi");
+			echo "<TABLE><TR><td> Destinataire :  </td> ";
+			if ($tel=="")
+				echo "<td> <input type=\"text\" name=\"tel\" size=\"13\" value=\"06\"/></td>";
+			else
+				echo "<td> $tel</td>".param("tel",$tel);
+			echo param("origine",$user_nom." ".$user_prenom);
+			echo "<TR> <td>Texte </td><td><TEXTAREA rows=\"3\" cols=\"40\" name=\"msg\" >$msg</TEXTAREA></td>";
+		
+			echo "<TR> <td> </td><td><input type=\"submit\"  id=\"envoi\"  value=\"Envoyer sms signé de $user_nom $user_prenom \"/></td> ";
+			echo "</form> </table> ";
+			fin_cadre();
+		
+		pied_de_page("x");
+		}			
+	
+
+
+	if (($action=="mail_envoi") )
+		{
+		$mail = variable("mail");
+		$titre = variable("titre");
+		$msg = variable("msg");
+		if ( VerifierAdresseMail($mail))
+			{
+			if ( (strlen($msg)<10) ||  (strlen($titre)<10) )
+				{
+				erreur ("Message ou titre du mail trop court");
+				$action="mail_test";			
+				}
+			else
+				{
+				envoi_mail( $mail  ,variable("titre"),variable("msg")." Message de ".variable("origine"));
+				ajout_log( $idx, "Envoi mail personnel à : $mail", $user_idx );
+				echo "Mail envoyé à $mail ";
+				pied_de_page("x");
+				}
+			}
+		else
+			{
+			erreur ("Adresse mail incorrecte");
+			$action="mail_test";
+			}
+		}			
+		
+	if (($action=="mail_test") )
+		{
+		$mail= variable("mail");
+		$msg= variable("msg");
+		$titre= variable("titre");
+			echo "<p><center>Envoi d'un Mail : ";		
+			debut_cadre("700");
+			echo "<br><img src=\"images/mail2.png\" width=\"50\" height=\"40\" > ";
+			formulaire ("mail_envoi");
+			echo "<TABLE><TR><td> Adresse mail : </td> ";
+			if ($mail=="")
+				echo "<td> <input type=\"text\" name=\"mail\" size=\"70\" value=\"$mail\"/></td>";
+			else
+				echo "<td> $mail</td>".param("mail",$mail);
+				
+			echo param("origine",$user_nom." ".$user_prenom);
+			echo "<TR> <td>Titre </td><td><input type=\"text\" name=\"titre\" size=\"70\" value=\"$titre\"/></td>";
+			echo "<TR> <td>Texte </td><td><TEXTAREA rows=\"5\" cols=\"70\" name=\"msg\" >$msg</TEXTAREA></td>";
+			echo "<TR> <td> </td><td><input type=\"submit\"  id=\"envoi\"  value=\"Envoyer mail signé de $user_nom $user_prenom\"/></td> ";
+			echo "</form> </table> ";
+			fin_cadre();
+
+		
+		pied_de_page("x");
+		}			
+	
 
 		
 	if (($action=="raz_mdp1") &&  ($user_droit=="E"))
@@ -4355,7 +4474,9 @@ if (isset($_POST['pass']))
 				}
 			else
 				if ($action=="")
+					{
 					echo "<tr><td>  <img src=\"images/organisme.png\" width=\"25\" height=\"25\" ></td><td> Structure sociale: $orga </td><td> / $adresse </td><td> / $telephone </td><td> / $mail </td><td> (Resp.:".responsables_organisme($user_organisme).")</td>";
+					}
 			
 			/* ----------------------------------FISSA
 			$jfissa=0;
@@ -4411,10 +4532,11 @@ if (isset($_POST['pass']))
 		$reponse = command("","Select * from r_user where (id REGEXP 'FORM_R') or (id REGEXP 'FORM_B') or (id REGEXP 'FORM_A')");
 		while ($donnees = mysql_fetch_array($reponse) )
 			{
+			$tel = parametre('FORM_tel_rdv') ;
 			$id=$donnees["id"];
 			echo "<br>- $id";
 			$idx=$donnees["idx"];
-			command("","UPDATE r_user set pw='$mdp', lecture='$mdp', mail='$id@fixeo.com', telephone='0651256164' where idx='$idx' ");
+			command("","UPDATE r_user set pw='$mdp', lecture='$mdp', mail='$id@fixeo.com', telephone='$tel' where idx='$idx' ");
 			command("","delete from r_sms where idx='$idx' ");
 			command("","delete from DD_rdv where user='$idx' or auteur='$idx' ");
 			command("","delete from r_dde_acces where user='$idx' or ddeur='$idx' or autorise='$idx' ");
@@ -4427,7 +4549,8 @@ if (isset($_POST['pass']))
 				ajoute_note($idx,"Numéro d''envoi de SMS pour Doc-depot 06.98.47.43.12 ");
 				$idx_rdv=inc_index("rdv");
 				$date=date('Y-m-d');
-				command("","INSERT INTO DD_rdv VALUES ('$idx_rdv', '$idx','$idx','$date 18H00', 'Penser à supprimer les documents inutiles', '15min', 'A envoyer' ) ");
+				$msg = parametre('FORM_msg_rdv');
+				command("","INSERT INTO DD_rdv VALUES ('$idx_rdv', '$idx','$idx','$date 18H00', '$msg', '15min', 'A envoyer' ) ");
 				}
 			}
 		
@@ -4489,7 +4612,25 @@ if (isset($_POST['pass']))
 	if ( ($user_droit=="E") || ($user_droit=="F")|| ($user_droit=="T"))
 		pied_de_page("x");
 
+	if ( ($user_droit=="S") && ($action=="collegues") )
+		{
+		echo "<table><tr><td width> <ul id=\"menu-bar\">";
+		echo "<li><a href=\"index.php?action=collegues\"  > Collègues </a></li>";
+		echo "</ul></td></table>";
 		
+		echo "<div class=\"CSSTableGenerator\"><table> ";
+		titre_user("R");
+		$reponse =command("","select * from  r_user where droit='S' and organisme='$user_organisme' ");
+				
+		while ($donnees = mysql_fetch_array($reponse) ) 
+			{
+			$idx=$donnees["idx"];
+			visu_user($idx,"R");
+			}
+		echo "</td></table></div></center>";
+		pied_de_page("x");
+		}
+			
 			
 	if ( ($user_droit=="S") && ($action=="verif_user") )
 			{
@@ -4667,6 +4808,7 @@ if (isset($_POST['pass']))
 			if($action=="ajout_admin")
 				affiche_titre_user($user);
 			bouton_upload("A-$user",$user);	
+
 			}
 
 		if (($user_droit=="R") && ($action!="ajout_user"))
@@ -4677,19 +4819,25 @@ if (isset($_POST['pass']))
 				{
 				signet("ajout_admin");
 				bouton_upload("A-$user_idx",$user_idx);	
+
 				}
-				
 		if ( ($user_droit=="") && ($action==""))
 			echo "<div class=\"CSS_perso\"  ><br><center> Les documents et informations dans cette zone ne sont jamais visibles des référents de confiance. </center> ";
-			
+		
+		// justificatif pour les acteurs sociaux et listage des collègues
 		if (($user_droit!="A") && ($filtre==""))
-
 			if (($action!="note_sms") &&($action!="ajout_note")&&($action!="rdv") && ($action!="ajout_admin") && ($action!="ajout_referent") && ($action!="ajout_organisme")  && ($action!="ajout_user"))
 				{
 				signet("ajout_photo");
 				if (($user_droit=="") || ( ( ($user_droit=="S") ) && ($action!="detail_user") ))
+					{
 					bouton_upload("P-$user_idx",$user_idx);	
+					echo "<table><tr><td><ul id=\"menu-bar\">";
+					echo "<li><a href=\"index.php?action=collegues\" > Mes Collègues </a></li>";
+					echo "</ul></td></table><hr>";
+					}
 				}
+										
 		//----------------------------------------------------------------------------- Bloc SMS et NOTES --------------
 		if (($action=="ajout_note") && ($user_droit=="") )
 			{

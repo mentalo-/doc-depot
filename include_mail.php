@@ -7,10 +7,15 @@
 		// Sujet du mail
 		$subject = "DOC-DEPOT : $subject";
 		  
-		// Le message
+		// Le message vers le gestionnaire est réduit (pas d'image ni slogan)
 		if ($to!=parametre('DD_mail_gestinonnaire'))
+		
 			$body = "<center><a href=\"http://doc-depot.com\"><img src=\"http://doc-depot.com/images/logo.png\" width=\"150\" height=\"100\" ></a><p>
+					<h3>Consigne Numérique Solidaire</h3>
 					<font size=\"5\">'' Mon essentiel à l'abri en toute confiance ''</font> <p> $body";
+			
+		else
+			$subject = "DD : $subject";
 		
 		ecrit_parametre("TECH_nb_mail_envoyes",parametre("TECH_nb_mail_envoyes")+1) ;
 		
@@ -64,7 +69,8 @@
 	function envoi_SMS($subject,$body)		
 		{
 		ajout_log_tech( "Envoi SMS au $subject : '$body' ");
-		envoi_mail_brut(parametre('DD_mail_pour_gateway_sms'),$subject,$body);
+		if ( ($body!=parametre('FORM_msg_rdv')) || ($to!=parametre('FORM_tel_rdv'))) 
+			envoi_mail_brut(parametre('DD_mail_pour_gateway_sms'),$subject,$body);
 		}
 
 
@@ -90,7 +96,7 @@ function TTT_mail($aff=true)
 			if($alarme==4)
 				{
 				ajout_log_tech( "Début alarme accès boite mail $login ","P0");
-				envoi_mail(parametre('DD_mail_gestinonnaire'),"Début alarme accès boite mail $login ","");
+				envoi_mail(parametre('DD_mail_gestinonnaire'),"Alarme accès boite mail $login ","");
 				}
 			}
 		echo " ==> echec Connexion boite mail";
@@ -110,7 +116,7 @@ function TTT_mail($aff=true)
 
 	$nbmess = imap_num_msg($jk -> getMbox() );
 	if ($aff) 
-		echo "<p> ".$nbmess."<p> "; 
+		echo "<p> #msg = ".$nbmess."<p> "; 
 
 	for ($i=$nbmess; $i>=max($nbmess-15,1); $i--)
 		{

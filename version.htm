@@ -7,6 +7,21 @@
 	</head>
 	<body>
 
+<h4> V0.48   ( maj_bdd,  TTT_mail, include_mail  )</h4>  
+Evolutions
+<br> + On vérifie avant d'envoyer les mails de synthèses que cela n'a pas déjà été fait
+<br> + on affiche un titre au nombre de messages présents dans la boite de réception
+<br> + L'exploitant peut envoyer un sms de test à n'importe quel numéro
+<br> + ajout de "consigne numérique solidaire" en 1ere page et dans mail
+<br> + on peut envoyer des mail et sms au adresse mail et numero de téléphone (s'ils sont valides) Sauf pour bénéficiaires
+<br> + on n'envoie pas physiquement le SMS pour les rdv initialisé  pour les formations
+<br> + les numeros de téléphone et messages pour la formation sont désormais paramètrables 
+<br> + possibilité de lister ses collegues acteurs sociaux
+
+<h4> V0.47.2   ( )</h4>  
+<br>   Bugs	
+<br> - fonction 'dde_access' n'etait autorisée à tort
+
 <h4> V0.47   ( maj_bdd,  TTT_mail, general, exploit, include_mail )</h4>  
 Evolutions
 <br> + Enrichissement log_quotidien : mieux marquer le début du traitement TTT, commentaire html
@@ -15,7 +30,9 @@ Evolutions
 <br> + le mail d'absence de supervision sms n'est envoyé qu'une fois (et une fois à la fin)
 <br> + Si echec connexion à la base de données alors message d'indisponibilité
 <br> + permet d'avoir un  numéro de tél pour l'emission différent de la réception
-<br> + page d'aide au debug accessible sans mot de passe 
+<br> + page d'aide au debug accessible sans mot de passe
+<br> + Possibilité de faire un envoi de massage supervision à la demande 
+<br> + Possibilité d'activer ou désactiver la fonction sms2mail sur le téléphone 
 <br>   Bugs
 <br> - Le message de fin d'alertes d'accès à la boite au lettres est émis même si le début d'alarme n'a pas été déclenché
 
