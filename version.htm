@@ -7,7 +7,40 @@
 	</head>
 	<body>
 
-<h4> V0.48   ( maj_bdd,  TTT_mail, include_mail  )</h4>  
+<h4> V0.49   ( maj_bdd, TTT_mail,  include_mail , general, )</h4>  
+Evolutions
+<br> + On a un refresh de l'écran (> au time out) ce qui permet d'afficher la page d'accueil après le time out et non les données du compte
+<br> + possibilité de lister les responsables vis à vis de doc-depot
+<br> + ajout icones sur page acteur social
+<br> + limitation à un seul TTT_mail par tranche de 15sec
+<br> + technique: les comptes créés héritent du type du compte créateur (sera utilisé pour les comptes de formation)
+<br> + On renregistre en fin de journée dans le log le nombre de SmS et mail envoyés
+<br> + mesure du nombre de mail envoyé par jour par rapport au niveau max (parametre systeme) et indication dasn log
+<br> + on trace dans les journaux de log les initialisations de compte de formation et de leurs mots de passes
+<br> + Ajout de "LA " avant "Consigne numérique solidaire"
+<br> + introduction de la fonction traduire() pour les texts devant être traduit
+<br> + à chaque manipulation on enregistre dans la table z_traduire les textes à afficher
+<br> + Selecteur de langue en pied de page (valable pour la session)
+<br> + Affichage des textes selon la langue choisie
+<br> + Création d'un profil traducteur parmettant d'accéder à la table de traduction (avec filtrage)
+<br> + A coté de chaque texte à traduire on propose un lien vers google traduction dasn la langue correspondante
+<br> + Simplification: à la finalisation de compte de responsable on ne demande plus les N° de tel et mail ==> sera fait à la connexion
+<br> + T288 : limitation de longuer de saisie des SMS à 220 caractères
+<br> + sur sauvegarde SQL, on vérifie si la table existe avant de faire un drop table
+<br>   Bugs	
+<br> - le menu mes collegues était affiché à tort aux bénficiaires
+<br> - Historique : sur génération  d'un dossier on indiquait l'identifiant et non pas le nom
+<br> - l'affichage du mot de passe par défaut de formation était affiché à tort en crypté 
+<br> - Les fichiers d'aides n'étaient pas chargées en production
+<br> - le fichier hier.txt était absent en production à cause du multi TTT_mail dans la tanche 15sec
+<br> - message d'erreur sur création de dossier ==> absence trace dans le log(utilisation du mauvais index pour ajouter le message dasn le log)
+<br> - correction de fautes d'orthographe et formulations moyennes
+
+<h4> V0.48.2   (en ligne le 23/11/2014 )</h4>  
+<br>   Bugs	
+<br> - T285 : l'acteur social ne pouvait plus consulter les documents du bénéficiaire
+
+<h4> V0.48  en ligne le 04/11/2014   ( maj_bdd,  TTT_mail, include_mail , general )</h4>  
 Evolutions
 <br> + On vérifie avant d'envoyer les mails de synthèses que cela n'a pas déjà été fait
 <br> + on affiche un titre au nombre de messages présents dans la boite de réception
@@ -26,7 +59,7 @@ Evolutions
 Evolutions
 <br> + Enrichissement log_quotidien : mieux marquer le début du traitement TTT, commentaire html
 <br> + Initialiation des téléphones pour envoi de SMS d'alerte
-<br> + Possibilité de faie une sauvegarde des sources et backup des tables 
+<br> + T279: Possibilité de faie une sauvegarde des sources et backup des tables 
 <br> + le mail d'absence de supervision sms n'est envoyé qu'une fois (et une fois à la fin)
 <br> + Si echec connexion à la base de données alors message d'indisponibilité
 <br> + permet d'avoir un  numéro de tél pour l'emission différent de la réception
@@ -57,7 +90,7 @@ Evolutions
 <br> + On trace dans le log technique les incohérences de chargement d'un fichier
 <br> + Possibilité de forcer la réinitialisation du mot de passe par l'exploitant 
 <br> + création d'une page de redirection depuis soutien.doc-depot.com
-<br> + suppression de la mise à jour de la table z_ttt qui restait à tord dans TTT_mail() 
+<br> + suppression de la mise à jour de la table z_ttt qui restait à tort dans TTT_mail() 
 <br> + Alarme sur echec connexion boite mail
 <br> + Profil de Compte "Formateur"
 <br> + Possibilité de forcer la valeur du mot de passe des compte formateur avec valeur prédéfinie dasn table des paramètres
@@ -68,7 +101,7 @@ Evolutions
 <br> - T266 : La reinitilisation de mot de passe ne fonctionnait plus à partir du mail
 <br> - T273 : les fichiers avec apostrophes dans le nom ne sont pas téléchargés
 <br> - T276 - les dépot pas drag and drop ne fonctionnait pas en production ==>include_charge_image.php non à jour
-<br> - sur filtrage log technique, on basculait à tord vers log fonctionnel 
+<br> - sur filtrage log technique, on basculait à tort vers log fonctionnel 
 
 <h4> V0.44    ( maj_bdd, upload_dd)</h4>  
 Evolutions
@@ -172,7 +205,7 @@ Evolutions
 <br> + Exploitation: les calculs de taille de BdD sont données en % par rapport aux données de la tabl paramétrage (T 119) 
 <br>   Bugs
 <br> - les AS ne pouvaient plus supprimer leurs justificatifs
-<br> - le log contenait à tord dasn le champ acteur le nom+ prénom au lieu de l'index 
+<br> - le log contenait à tort dasn le champ acteur le nom+ prénom au lieu de l'index 
 	
 <h4> V0.37  (include_charge_image, general, exploit)</h4>  
 Evolutions
@@ -367,10 +400,10 @@ Evolutions
 <br> Bug
 <BR> -	l'ecriture dans le LOG ne fonctionnait pas si présence d'un apostrophe dans le texte
 <BR> -	L'administrateur ne pouvait plus créer d'organisme depuis la V30
-<br> - sur le chargement par mail, un copie temporaire du fichier restait sur le serveur à tord (include_charge_image)
+<br> - sur le chargement par mail, un copie temporaire du fichier restait sur le serveur à tort (include_charge_image)
 <br> - afflog complet : on affichait les index mais pas les libellé
 <br> - Sur suppression de fichier, on ne purgeait pas toutes les extensions
-<br> - On fermait à tord la base de données en fin de traitement SQL
+<br> - On fermait à tort la base de données en fin de traitement SQL
 
 <h4> V0.30 en ligne le 16/05/2014 ((include_mail, general, include_charge_image )</h4>
   Evolutions
@@ -390,7 +423,7 @@ Evolutions
 <BR> - céation de bug le chmp impact n'était pas enregistré
 <br> - sur mot de passe erroné de suppression de compte, message d'erreur et l'affichage sont centrés
 <br> - On ne traçait plus accès aux documents dans l'historique
-<br> - sur visualisation du detail d'un bénéfiaicaire par AS on affichait à tord en + les justificatifs et structures sociales
+<br> - sur visualisation du detail d'un bénéfiaicaire par AS on affichait à tort en + les justificatifs et structures sociales
 
 
 <h4> V0.29 en ligne le 13/05/2014 (+general) </h4>
@@ -552,7 +585,7 @@ Evolutions
 <BR> + les images sont désormais stockées systèmatiquement en mode Paysage 
 <BR> + Administrateur: Lien proposé pour liste ano et compte  
 <br> Bug
-<br> - Traitement d'un fichier à charger avec le libellé .jpg.pdf  était interprété à tord comme une image
+<br> - Traitement d'un fichier à charger avec le libellé .jpg.pdf  était interprété à tort comme une image
 <br> - Dossier: les pages en mode paysage étaient mal gérées 
 <BR> - caractéres accentués dans titre des mails envoyés mal affichés
 
@@ -569,7 +602,7 @@ Evolutions
 <br> - sur "Suppression de compte réalisée!" on ne proposait pas le lien vers page d'accueil 
 <br> - pb d'affichage sur confirmation de suppression reférent ou d'organisme (visible sous IE
 <br> - Sur hebergeur, on voyait toujours le même fichier 
-<BR> sur modification  de l'espace perso , il était proposé à tord de modifier le type  
+<BR> sur modification  de l'espace perso , il était proposé à tort de modifier le type  
 
 <h4> V0.15 en ligne le 10/03/14  </h4>
   Evolutions
@@ -788,7 +821,7 @@ Evolutions
 <br> - Depot par mail : traité toutes les 1 minute (au lieu de 10)
 
 <br>Bug: 
-<br> - Quand un document était consulté par un TS il restait à tord dans le répertoire temporaire
+<br> - Quand un document était consulté par un TS il restait à tort dans le répertoire temporaire
 <br> - Visualisation historique incomplet (on affiche désormais soit sur l'indetifiant soit sur l'index)
 
 <br><br><h4> V0.4 En ligne le 3/01/14</h4>
@@ -834,8 +867,8 @@ Evolutions
 <br><br><h4> V0.2 - 25/12/13</h4>
  Bug: 
 <br> - Le cadrage des images est incorecte lors du passage en PDF (image ecrasée et coupée sur le coté)
-<br> - le dépot de PDF natif passait  à tord par le traitement d'image 
-<br> - le bouton "deamnde d'acces à traiter" pointait à tord sur la fonction d'ajout de bénéficiaire
+<br> - le dépot de PDF natif passait  à tort par le traitement d'image 
+<br> - le bouton "deamnde d'acces à traiter" pointait à tort sur la fonction d'ajout de bénéficiaire
 <br> - L'identification du responsable qui autorisait l'accès temporaire n'était pas mémorisée
 <BR> - controle unicité identifiant de compte
 <br> - report corrections du upload par mail dans l'upload depuis PC (fichier de type PDF)

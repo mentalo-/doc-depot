@@ -1,4 +1,5 @@
   <?php  
+ // traduire() : Ok (inutile)
  
  	function sens_image ( $num )
 		{
@@ -116,7 +117,6 @@
 		{
 		global $user_idx;
 		
-
 		$sens_doc_original="P";
 		
 		if (!isset($user_idx))

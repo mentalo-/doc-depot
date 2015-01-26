@@ -1,4 +1,5 @@
   <?php  
+// traduire() : Ok (inutile)
 
 	echo "<head>";
 	echo "<META HTTP-EQUIV=\"refresh\" CONTENT=\"15\">";
@@ -66,10 +67,14 @@ function random_chaine($car)
 	commentaire_html("Affiche Alarme");
 	affiche_alarme();
 
-		$ancien_ttt=parametre("TECH_date_dernier_ttt");
-		$delta= (time()-$ancien_ttt);
-		Echo "<p>Dernier traitement TTT :".date('Y-m-d H\hi.s',$ancien_ttt)." Il y a ". $delta . "sec<p>";	
-		
+	$ancien_ttt=parametre("TECH_date_dernier_ttt");
+	$delta= (time()-$ancien_ttt);
+	Echo "<p>Dernier traitement TTT :".date('Y-m-d H\hi.s',$ancien_ttt)." Il y a ". $delta . "sec<p>";	
+
+	if ($time_ttt-$ancien_ttt>14) 
+		{
+		ecrit_parametre("TECH_date_dernier_ttt","$time_ttt") ;
+			
 		if (date('Y-m-d-h',  time()) != date('Y-m-d-h',  $ancien_ttt ))
 			if ($heure==0)
 				{
@@ -83,6 +88,8 @@ function random_chaine($car)
 				copy('tmp/log.txt','tmp/hier.txt');
 				supp_fichier('tmp/log.txt');
 
+				ajout_log_tech( "Mails envoyés:".parametre("TECH_nb_mail_envoyes")." / ".parametre("DD_nbre_mail_jour_max"));
+				ajout_log_tech( "SMS envoyés:".parametre("TECH_nb_sms_envoyes"));
 				ecrit_parametre("TECH_nb_mail_envoyes",0) ;
 				ecrit_parametre("TECH_nb_sms_envoyes",0) ;
 				}
@@ -203,12 +210,6 @@ function random_chaine($car)
 			}
 		
 		// -------------------------------------------------------------------traitement des mails et tempo de connexion
-
-
-		if ($time_ttt-$ancien_ttt>14) 
-			{
-			ecrit_parametre("TECH_date_dernier_ttt","$time_ttt") ;
-		
 			if ($_SERVER['REMOTE_ADDR']!="127.0.0.1")	
 				TTT_mail(true);
 			else

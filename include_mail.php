@@ -1,24 +1,27 @@
 	
     <?php 
+// traduire() : Ok
 
-		
-	function envoi_mail($to,$subject,$body,$masque=false)
+	function maj_compteur_envoi_mail()
 		{
-		// Sujet du mail
-		$subject = "DOC-DEPOT : $subject";
-		  
-		// Le message vers le gestionnaire est réduit (pas d'image ni slogan)
-		if ($to!=parametre('DD_mail_gestinonnaire'))
+		$nb=parametre("TECH_nb_mail_envoyes")+1;
+		// on met à jour le nombre de mail envoyé 
+		ecrit_parametre("TECH_nb_mail_envoyes",$nb) ;
+
+		if ($nb>0.7*parametre("DD_nbre_mail_jour_max"))
+			ajout_log_tech( "Attention seuil d'envoi mails dépassé :".parametre("TECH_nb_mail_envoyes")." / ".parametre("DD_nbre_mail_jour_max"));
+
+		}
 		
-			$body = "<center><a href=\"http://doc-depot.com\"><img src=\"http://doc-depot.com/images/logo.png\" width=\"150\" height=\"100\" ></a><p>
-					<h3>Consigne Numérique Solidaire</h3>
-					<font size=\"5\">'' Mon essentiel à l'abri en toute confiance ''</font> <p> $body";
-			
-		else
-			$subject = "DD : $subject";
+	// envoi de mail sans mise en forme Doc-dépot
+	function envoi_mail_perso($to,$subject,$body, $origine, $from="")
+		{
+		// on signe le mail avec le nom de l'emetteur
+		$body = "$body <p> Mail envoyé depuis doc-depot.com par $origine";
+
+		maj_compteur_envoi_mail();
 		
-		ecrit_parametre("TECH_nb_mail_envoyes",parametre("TECH_nb_mail_envoyes")+1) ;
-		
+		// si envoie depuis le pc de test , on ne fait que l'afficher
 		if (($_SERVER['REMOTE_ADDR']=="127.0.0.1"))
 			{
 			echo "<table border=\"2\"> <tr> <td>$to <hr>" ;
@@ -27,28 +30,75 @@
 			return;
 			}
 		
+		// Entete
+		$headers  = "MIME-Version: 1.0 \n"; 
+		$headers .='Content-Type: text/html; charset="iso-8859-1"'."\n";
+		$headers .="From: $from\n";
+		$headers .="Reply-To: $from\n";
+        $headers .='Content-Transfer-Encoding: 8bit'."\n";			
+		
+		// mise en forme HTML
+		$body = "<html><body>$body</body></html>";	
+		$subject = '=?iso-8859-1?B?'.base64_encode($subject).'?=';
+		// Envoi de l'email
+		
+		$CR_Mail = @mail ($to, $subject, $body, $headers);
+
+		if ($CR_Mail === FALSE)
+			erreur( " Erreur envoi mail: $CR_Mail <br> \n");
+		}	
+		
+	// envoi de mail avec mise en forme doc-depot
+	function envoi_mail($to,$subject,$body,$masque=false)
+		{
+		maj_compteur_envoi_mail();
+		
+		// Le message vers le gestionnaire est réduit (pas d'image ni slogan)
+		if ($to!=parametre('DD_mail_gestinonnaire'))
+			{
+			// Sujet du mail
+			$subject = "DOC-DEPOT : $subject";		
+			// contenu du message
+			$body = "<center><a href=\"http://doc-depot.com\"><img src=\"http://doc-depot.com/images/logo.png\" width=\"150\" height=\"100\" ></a><p>
+					<h3>La Consigne Numérique Solidaire</h3>
+					<font size=\"5\">'' Mon essentiel à l'abri en toute confiance ''</font> <p> $body";
+			}
+		else
+			$subject = "DD : $subject";
+		
+		if (($_SERVER['REMOTE_ADDR']=="127.0.0.1"))
+			{
+			echo "<table border=\"2\"> <tr> <td>$to <hr>" ;
+			echo "$subject <hr>" ;
+			echo "$body </td> </table>" ;
+			return;
+			}
+			
+		// Entete
 		$headers  = "MIME-Version: 1.0 \n"; 
 		$headers .='Content-Type: text/html; charset="iso-8859-1"'."\n";
 		$headers .='From: Doc-Depot <fixeo@doc-depot.com>'."\n";
         $headers .='Reply-To: Doc-Depot <fixeo@doc-depot.com>'."\n";
         $headers .='Content-Transfer-Encoding: 8bit'."\n";			
-    
+		
+		// mise en forme HTML
 		$body = "<html><body>$body</body></html>";	
 		$subject = '=?iso-8859-1?B?'.base64_encode($subject).'?=';
+		
 		// Envoi de l'email
 		$CR_Mail = @mail ($to, $subject, $body, $headers);
 		if (!$masque)
 			{
 			if ($CR_Mail === FALSE)
-					erreur( " Erreur envoi mail: $CR_Mail <br> \n");
+					erreur( "Erreur envoi mail: $CR_Mail <br> \n");
 				else
-					echo " Mail envoyé<br> \n";
+					echo traduire('Mail envoyé')."<br> \n";
 			}
-
 		}
 
 	function envoi_mail_brut($to,$subject,$body)		
 		{
+		maj_compteur_envoi_mail();
 		ecrit_parametre("TECH_nb_sms_envoyes",parametre("TECH_nb_sms_envoyes")+1) ;
 
 		if (($_SERVER['REMOTE_ADDR']=="127.0.0.1"))
@@ -61,7 +111,7 @@
 			
 		$CR_Mail = @mail ($to, $subject, $body);
 		if ($CR_Mail === FALSE)
-			erreur( " Erreur envoi mail: $CR_Mail <br> \n");
+			erreur( "Erreur envoi SMS: $CR_Mail <br> \n");
 
 		}
 

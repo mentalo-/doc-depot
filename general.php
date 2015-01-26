@@ -381,7 +381,7 @@ include 'param.php';
 		echo "<div id=\"logo\"> <center><a href=\"index.php\"><img src=\"images/logo.png\" width=\"200\" height=\"150\" ></a> </div>  <center>";	
 		if ($titre!="")
 			{
-			echo "<h3>Consigne Numérique Solidaire</h3>";
+			echo "<h3>La Consigne Numérique Solidaire</h3>";
 			echo "<p><i><b><font size=\"5\">'' Mon essentiel à l'abri en toute confiance '' .</b></i></font>";
 			echo "<p>Sauvegardez gratuitement de façon sécurisée vos documents, photos et informations essentielles .";
 			}

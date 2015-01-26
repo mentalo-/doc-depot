@@ -1,7 +1,12 @@
-  <?php  
-	{
+  <?php 
+  
+  		require_once  'general.php';
+		require_once "connex_inc.php"; 
+		require_once 'exploit.php';		
+	
 		$version=parametre("DD_version_bdd");
-			
+		echo "<p> Version actuelle -> $version <br>";
+		
 		if ($version<"V0.32")
 				{
 				if (!file_exists ("backup_chi"))
@@ -230,15 +235,42 @@
 				ecrit_parametre("DD_version_bdd", $version);
 				ecrit_parametre("DD_version_portail", $version);
 				}
+				
 		if ($version<"V0.48")
 				{
 				$version="V0.48";
+				
 				// backup_tables(); // A utiliser si chnagement de structure ou de contenu de la base
 				ecrit_parametre('FORM_msg_rdv','Penser à supprimer les documents inutiles');
 				ecrit_parametre('FORM_tel_rdv','0651256164');
-
 				ecrit_parametre("Tech_date_envoi_synthses", "");
+				
+				
+				ecrit_parametre("DD_version_bdd", $version);
+				ecrit_parametre("DD_version_portail", $version);
+				}	
+
+		if ($version<"V0.49")
+				{
+				$version="V0.49";
+
+				backup_tables(false); // A utiliser si chnagement de structure ou de contenu de la base
+
+				command("1","ALTER TABLE r_user ADD cg_valide TEXT not null ");
+				command("1","ALTER TABLE r_user ADD type_user TEXT not null ");
+				command("1","ALTER TABLE r_organisme ADD offre TEXT not null ");
+				ecrit_parametre("DD_nbre_mail_jour_max", 500);
+				ecrit_parametre("DD_nom_environnement", "");
+				command("1","CREATE TABLE IF NOT EXISTS `z_traduire` ( `idx` text,`fr` text, `gb` text, `es` text, `it` text, `de` text, `ru` text) ENGINE=InnoDB DEFAULT CHARSET=latin1;");
+				ecrit_parametre("TECH_sequence_traduire", '500');	
+				ecrit_parametre("TECH_identite_environnement", 'DOC-DEPOT');	
+				
+				// -------------------------------------------
+				echo "<p>MAJ -> $version";
+				ecrit_parametre("DD_version_bdd", $version);
+				ecrit_parametre("DD_version_portail", $version);
 				}
 				
-		 }
+
+
 ?>
