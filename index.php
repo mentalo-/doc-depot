@@ -2328,11 +2328,16 @@ function pied_de_page($r="")
 	echo "<hr><center> ";
 	echo "<table> <tr> <td align=\"right\" valign=\"bottom\" ></td>";
 	
-	echo "<td><a href=\"index.php?action=fr\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"français\" alt=\"français\" src=\"images/flag_fr.png\"/></a></td><td> | </td>";
-	echo "<td><a href=\"index.php?action=gb\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"anglais\" alt=\"anglais\" src=\"images/flag_gb.png\"/></a></td><td> | </td>";
-	echo "<td><a href=\"index.php?action=de\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"allemand\" alt=\"allemand\" src=\"images/flag_de.png\"/></a></td><td> | </td>";
-	echo "<td><a href=\"index.php?action=es\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"espagnol\" alt=\"espagnol\" src=\"images/flag_es.png\"/></a></td><td> | </td>";
-	echo "<td><a href=\"index.php?action=ru\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"russe\" alt=\"russe\" src=\"images/flag_ru.png\"/></a></td><td> | </td>";
+	if ($user_lang!="fr")
+		echo "<td><a href=\"index.php?action=fr\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"français\" alt=\"français\" src=\"images/flag_fr.png\"/></a></td><td> | </td>";
+	if ($user_lang!="gb")
+		echo "<td><a href=\"index.php?action=gb\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"english\" alt=\"anglais\" src=\"images/flag_gb.png\"/></a></td><td> | </td>";
+	if ($user_lang!="de")
+			echo "<td><a href=\"index.php?action=de\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"allemand\" alt=\"allemand\" src=\"images/flag_de.png\"/></a></td><td> | </td>";
+	if ($user_lang!="es")
+			echo "<td><a href=\"index.php?action=es\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"espagnol\" alt=\"espagnol\" src=\"images/flag_es.png\"/></a></td><td> | </td>";
+	if ($user_lang!="ru")
+			echo "<td><a href=\"index.php?action=ru\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"russe\" alt=\"russe\" src=\"images/flag_ru.png\"/></a></td><td> | </td>";
 					
 	echo "<td><a id=\"lien_conditions\" href=\"conditions.html\">".traduire('Conditions d\'utilisation')."</a>";
 	echo "- <a id=\"lien_contact\" href=\"index.php?action=contact\">".traduire('Nous contacter')."</a>";
@@ -2705,7 +2710,8 @@ function affiche_membre($idx)
 
 require_once 'include_crypt.php';
 
-
+	$user_lang='fr';
+		
 	// on teste le pays d'origine
 	$pays= visitor_country(); 
 	if (($pays!="France") && ($pays!="Unknown"))  // on n'autorise que la france 
@@ -3738,9 +3744,6 @@ if (isset($_POST['pass']))
 		exit();
 		}
 	
-	// pour l'adminitrateur  on fait une vérification de la mise à jour des BdD
-	if(($user_droit=="A"))
-		include ("maj_bdd.php");
 
 		// ===================================================================== Bloc IMAGE
 		$reponse = command( "","SELECT * from  r_user WHERE idx='$idx'"); 
