@@ -271,6 +271,14 @@
 				ecrit_parametre("DD_version_portail", $version);
 				}
 				
+		if ($version<"V0.49")
+				{
+				$version="V1.01";
 
+				// -------------------------------------------
+				echo "<p>MAJ -> $version";
+				ecrit_parametre("DD_version_bdd", $version);
+				ecrit_parametre("DD_version_portail", $version);
+				}
 
 ?>

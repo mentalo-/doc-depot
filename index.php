@@ -10,7 +10,7 @@ error_reporting(E_ALL | E_STRICT);
 include 'general.php';
 
 	// session de 5 ou 30 minutes selon profil 
-	if 	(!isset($_SESSION['droit']) || ($_SESSION['droit']=="S")|| ($_SESSION['droit']=="A")) 
+	if 	(!isset($_SESSION['droit']) || ($_SESSION['droit']=="S")|| ($_SESSION['droit']=="A")|| ($_SESSION['droit']=="R")) 
 		$to=TIME_OUT;	
 	else
 		$to=TIME_OUT_BENE;
@@ -1347,7 +1347,7 @@ function maj_mdp_fichier($idx, $pw )
 									
 								$body= traduire("Bonjour").", $prenom $nom ";
 								$body.= "<p> $user_prenom $user_nom ".traduire("vous a créé un compte sur 'Doc-depot.com': ");
-								$body.= "<p> ".traduire("Pour accepter et finaliser la création de votre compte sur 'Doc-depot.com', merci de cliquer sur ce");" <a id=\"lien\" href=\"".serveur."index.php?action=finaliser_user&idx=".addslashes(encrypt($idx))."\">".traduire('lien')."</a>". traduire("et compléter les informations manquantes.");
+								$body.= "<p> ".traduire("Pour accepter et finaliser la création de votre compte sur 'Doc-depot.com', merci de cliquer sur ce")." <a id=\"lien\" href=\"".serveur."index.php?action=finaliser_user&idx=".addslashes(encrypt($idx))."\">".traduire('lien')."</a>". traduire("et compléter les informations manquantes.");
 								$body .= "<p> <hr> <center> Copyright ADILEOS 2014 </center>";
 								// Envoyer mail pour demander saisie pseudo et PW
 								envoi_mail($mail,traduire("Finaliser la création de votre compte"),$body);
@@ -1704,6 +1704,8 @@ function maj_mdp_fichier($idx, $pw )
 			
 	function modif_user($idx)
 		{
+		global $user_idx, $user_droit;
+
 		$reponse =command("","select * from  r_user where idx='$idx'  ");				
 		if ($donnees = mysql_fetch_array($reponse) ) 
 			{
@@ -1730,7 +1732,10 @@ function maj_mdp_fichier($idx, $pw )
 			echo "<td> <input type=\"texte\" name=\"prenom\"   size=\"15\" value=\"$prenom\"> </td>" ;
 			echo "<td> <input type=\"texte\" name=\"telephone\"   size=\"12\" value=\"$telephone\"> </td>" ;
 			echo "<td>  <input type=\"texte\" name=\"mail\"   size=\"35\" value=\"$mail\"> </td>" ;
-			liste_type_user($droit);
+			if ($user_droit=='R')
+				liste_organisme_du_responsable ($user_idx);
+			else
+				liste_type_user($droit);
 			echo "<td><input type=\"submit\"  id=\"modif_user\" value=\"".traduire('Modifier')."\" > </td> ";
 
 		echo "</form></table></div>";
