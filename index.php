@@ -16,24 +16,22 @@ include 'general.php';
 		$to=TIME_OUT_BENE;
 
 	if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > $to )) 
-		{
-		// last request was more than 30 minutes ago
-		session_unset();     // unset $_SESSION variable for the run-time 
-		session_destroy();   // destroy session data in storage
-		}	
+		$_SESSION['pass']=false;
+		
 	$_SESSION['LAST_ACTIVITY'] = time(); // update last activity time stamp
 
-
+	
 if ( isset($_SESSION['pass']) && ($_SESSION['pass']==true) )
 	switch (variable_s('action'))
 		{
+		
 		case "exporter":	
 			include "connex_inc.php";
 			include 'include_crypt.php';
 			
 			$user_idx=$_SESSION['user_idx'];
-			$reponse = command( "","SELECT * from  r_user WHERE idx='$user_idx'"); 
-			$donnees = mysql_fetch_array($reponse);
+			$reponse = command("SELECT * from  r_user WHERE idx='$user_idx'"); 
+			$donnees = fetch_command($reponse);
 			$id=$donnees["id"];
 			if (encrypt(variable("pw"))!=$donnees["pw"]) 
 				{
@@ -46,8 +44,8 @@ if ( isset($_SESSION['pass']) && ($_SESSION['pass']==true) )
 			$j=1;
 			if ($zip->open("dir_zip/$id.zip", ZipArchive::CREATE) === true)
 				{
-				$reponse =command("","select * from r_attachement where  ref='A-$user_idx' or ref='P-$user_idx' ");
-				while (($donnees = mysql_fetch_array($reponse) ) && ($j<100))
+				$reponse =command("select * from r_attachement where  ref='A-$user_idx' or ref='P-$user_idx' ");
+				while (($donnees = fetch_command($reponse) ) && ($j<100))
 					{
 					$f=$donnees["num"];
 					 if(!$zip->addFile('upload/'.$f, $f))
@@ -61,8 +59,8 @@ if ( isset($_SESSION['pass']) && ($_SESSION['pass']==true) )
 				$zip->addFile('SMS-et-notes.htm');
 				$txt="<table>";
 				// Ajout direct.
-				$reponse =command("","select * from  r_sms where (idx='$user_idx') order by date desc");		
-				while ($donnees = mysql_fetch_array($reponse) ) 
+				$reponse =command("select * from  r_sms where (idx='$user_idx') order by date desc");		
+				while ($donnees = fetch_command($reponse) ) 
 					{
 					$date=$donnees["date"];	
 					$ligne=stripcslashes($donnees["ligne"]);
@@ -76,8 +74,8 @@ if ( isset($_SESSION['pass']) && ($_SESSION['pass']==true) )
 				$zip->addFile('historique.htm');
 				$txt="<table><tr><td> ".traduire('Date').":   </td><td> ".traduire('Evénement').":</td><td> ".traduire('Acteur').":</td>";
 
-				$reponse =command("","select * from  log where (user='$user_idx' ) or (acteur='$user_idx' or acteur='$id') order by date DESC ");		
-				while ($donnees = mysql_fetch_array($reponse) ) 
+				$reponse =command("select * from  log where (user='$user_idx' ) or (acteur='$user_idx' or acteur='$id') order by date DESC ");		
+				while ($donnees = fetch_command($reponse) ) 
 					{
 					$date=$donnees["date"];	
 					$ligne=stripcslashes($donnees["ligne"]);
@@ -105,8 +103,6 @@ if ( isset($_SESSION['pass']) && ($_SESSION['pass']==true) )
 				header("Location: dir_zip/$id.zip");			
 
 				ajout_log($_SESSION['user'], traduire("Export des fichiers et données du compte"),$_SESSION['user']);
-
-				exit();
 				}
 			break;
 			
@@ -136,30 +132,7 @@ if ( isset($_SESSION['pass']) && ($_SESSION['pass']==true) )
 			$fichier = substr($fichier,strpos($fichier,".")+1 );
 
 			ajout_log($bene, traduire("Acces au fichier")." $fichier ".traduire('en lecture'),$_SESSION['user']);
-			pied_de_page();
-			break;
 
-		case "visu_fichier_tmp":
-			// Connexion BdD
-			include "connex_inc.php";
-			include "include_charge_image.php";
-
-			$id=rand(1000000,999999999999);
-			$fichier=variable_s('num');
-			$code_lecture=variable_s('code');
-			if ( est_image($fichier))
-				pdfEncrypt ("upload_pdf/$fichier.pdf", $code_lecture, "upload_tmp/$id.pdf",'P');
-			else
-				pdfEncrypt ("upload/$fichier", $code_lecture , "upload_tmp/$id.pdf",'P');
-
-
-			header("Location: upload_tmp/$id.pdf");			
-			$bene= $_SESSION['bene'];
-			if ($bene=="") 
-				$bene=$_SESSION['user'];
-			
-			ajout_log($bene, traduire("Acces au fichier")." $fichier ".traduire('en lecture'),$_SESSION['user']);
-			pied_de_page();
 			break;
 
 		case "visu_doc":
@@ -180,7 +153,6 @@ if ( isset($_SESSION['pass']) && ($_SESSION['pass']==true) )
 			break;
 			
 		case "visu_image_mini":
-
 			// Définit le contenu de l'en-tête - dans ce cas, image/jpeg
 			header('Content-Type: image/jpeg');
 			$im = imagecreatefromjpeg( "upload_mini/".variable_s("nom"));
@@ -203,13 +175,6 @@ if ( isset($_SESSION['pass']) && ($_SESSION['pass']==true) )
 			imagedestroy($im);
 			exit();
 			break;
-
-		case "visu_pdf":			
-			header('Content-type: application/pdf');
-			header("Content-Disposition: inline; filename=\"".variable_s("nom")."\"");
-			readfile("upload_prot/".variable("nom"));
-			break;
-
 
 		default : break;
 		}
@@ -321,7 +286,7 @@ require_once "connex_inc.php";
 		
 		$date_jour=date('Y-m-d');	
 		$idx=inc_index("bug");
-		$reponse = command("","INSERT INTO `z_bug` VALUES ( '$idx', '$titre', '$descript', '$type', '???','$qui','new','$date_jour','$impact','$version','','') ");
+		$reponse = command("INSERT INTO `z_bug` VALUES ( '$idx', '$titre', '$descript', '$type', '???','$qui','new','$date_jour','$impact','$version','','') ");
 		$message = "Titre : $titre";
 		$message .= "<p>Description : $descript";
 		$message .= "<p>Type : $type";
@@ -351,8 +316,8 @@ require_once "connex_inc.php";
 								<td>".traduire('Version')." </td>
 								<td>".traduire('Commentaire')." </td>
 								<td>".traduire('fonction')." </td>";
-			$reponse =command("",$cmd);		
-			while ($donnees = mysql_fetch_array($reponse) ) 
+			$reponse =command($cmd);		
+			while ($donnees = fetch_command($reponse) ) 
 				{
 				$idx1=$donnees["idx"];	
 				$titre=stripcslashes($donnees["titre"]);
@@ -392,7 +357,9 @@ require_once "connex_inc.php";
 			else
 				$filtre=" where ";
 
-			affiche_liste_bug("select * from  z_bug $filtre (etat<>'En production' and etat<>'Abandonné') order by domaine desc");
+			affiche_liste_bug("select * from  z_bug $filtre (etat='OK pour MEP') order by domaine desc");
+			echo"<p>";
+			affiche_liste_bug("select * from  z_bug $filtre (etat<>'En production' and etat<>'Abandonné' and etat<>'OK pour MEP') order by domaine desc");
 			echo"<p>";
 			affiche_liste_bug("select * from  z_bug $filtre (etat='En production' ) order by version desc");
 			echo"<p>";
@@ -404,7 +371,7 @@ require_once "connex_inc.php";
 		
 		function modif_champ_bug($idx, $champ, $valeur)
 			{
-			$reponse =command("","update z_bug SET $champ = '$valeur' where idx='$idx' ");
+			$reponse =command("update z_bug SET $champ = '$valeur' where idx='$idx' ");
 
 			}
 
@@ -481,22 +448,22 @@ require_once "connex_inc.php";
 		{
 		echo "</table> ";
 		echo "<table border=\"2\">";
-		$reponse =command("","select * from  z_bug where idx='$idx' ");		
-		if ($donnees = mysql_fetch_array($reponse) )
+		$reponse =command("select * from  z_bug where idx='$idx' ");		
+		if ($donnees = fetch_command($reponse) )
 			{
 			echo "<tr><td> Numéro </td><td>".$donnees["idx"]."</td>";
 			echo "<tr><td> Création</td><td>". $donnees["date"]."</td>";
 			// champ modifiables
-			echo "<tr><td> Titre</td><td>". saisie_champ_bug($idx,"titre",$donnees["titre"],100)."</td>";
-			echo "<tr><td> Description</td><td>". saisie_champ_bug_area($idx,"descript",$donnees["descript"],100)."</td>";
-			echo "<tr><td> Type</td><td>";  liste_type_bug($idx,"type",$donnees["type"]);  echo "</td>";
-			echo "<tr><td> Impact</td><td>";  liste_impact_bug( $idx,"impact",$donnees["impact"]); echo"</td>";
-			echo "<tr><td> Origine</td><td>".  saisie_champ_bug($idx,"testeur",$donnees["testeur"])."</td>";
-			echo "<tr><td> Etat</td><td>";  liste_etat_bug($idx,"etat",$donnees["etat"]); echo "</td>";
-			echo "<tr><td> Priorité</td><td>"; liste_prioite_bug($idx,"domaine",$donnees["domaine"]); echo "</td>";
-			echo "<tr><td> Version</td><td>". saisie_champ_bug($idx,"version",$donnees["version"]) ."</td>";
-			echo "<tr><td> Commentaire</td><td>".  saisie_champ_bug_area($idx,"commentaire",$donnees["commentaire"],100)."</td>";
-			echo "<tr><td> Fonction</td><td>".  saisie_champ_bug($idx,"fonction",$donnees["fonction"])."</td>";
+			echo "<tr><td> ".traduire('Titre')."</td><td>". saisie_champ_bug($idx,"titre",$donnees["titre"],100)."</td>";
+			echo "<tr><td> ".traduire('Description')."</td><td>". saisie_champ_bug_area($idx,"descript",$donnees["descript"],100)."</td>";
+			echo "<tr><td> ".traduire('Type')."</td><td>";  liste_type_bug($idx,"type",$donnees["type"]);  echo "</td>";
+			echo "<tr><td> ".traduire('Impact')."</td><td>";  liste_impact_bug( $idx,"impact",$donnees["impact"]); echo"</td>";
+			echo "<tr><td> ".traduire('Origine')."</td><td>".  saisie_champ_bug($idx,"testeur",$donnees["testeur"])."</td>";
+			echo "<tr><td> ".traduire('Etat')."</td><td>";  liste_etat_bug($idx,"etat",$donnees["etat"]); echo "</td>";
+			echo "<tr><td> ".traduire('Priorité')."</td><td>"; liste_prioite_bug($idx,"domaine",$donnees["domaine"]); echo "</td>";
+			echo "<tr><td> ".traduire('Version')."</td><td>". saisie_champ_bug($idx,"version",$donnees["version"]) ."</td>";
+			echo "<tr><td> ".traduire('Commentaire')."</td><td>".  saisie_champ_bug_area($idx,"commentaire",$donnees["commentaire"],100)."</td>";
+			echo "<tr><td> ".traduire('Fonction')."</td><td>".  saisie_champ_bug($idx,"fonction",$donnees["fonction"])."</td>";
 			}
 		else
 			erreur(traduire("Anomalie inconnue"));
@@ -511,7 +478,7 @@ require_once "connex_inc.php";
 		$message .= "<p>Coordonnées : $coordo";
 		$message .= "<p>Description : $descript";
 		envoi_mail(parametre('DD_mail_fonctionnel'),"Demande 'Nous contacter' ",$message, true);
-		ajout_log( "", traduire("Contact")." : $qui / $coordo ", "");
+		ajout_log( "", traduire("Demandeur")." : $qui / $coordo ", "");
 		
 		}
 // ---------------------------------------------------------------------------------------
@@ -520,8 +487,8 @@ function maj_mdp_fichier($idx, $pw )
 	{
 	$j=0;
 	
-	$reponse =command("","select * from r_attachement where ref='A-$idx'  ");
-	while (($donnees = mysql_fetch_array($reponse) ) && ($j<100))
+	$reponse =command("select * from r_attachement where ref='A-$idx'  ");
+	while (($donnees = fetch_command($reponse) ) && ($j<100))
 			{
 			$num=$donnees["num"];		
 			if (est_image($num))
@@ -543,23 +510,7 @@ function maj_mdp_fichier($idx, $pw )
 	}
 	
 	// =========================================================== procedures générales
-	function  addslashes2($memo)
-		{
-		 return(addslashes($memo));
-		}
-	
-	function affiche_un_choix($val_init, $val, $libelle="")
-		{
-		if ($libelle=="")
-			$libelle=$val;
-			
-		$libelle=traduire($libelle);
-			
-		if (( $val_init!=$val) || ($val_init=="") || ($val==""))
-				echo "<OPTION  VALUE=\"$val\"> $libelle </OPTION>";
-			else
-				echo "<OPTION  VALUE=\"$val\" selected> $libelle </OPTION>";
-		}
+
 
 	function affiche_un_choix_2($val_init, $val, $val_aff)
 		{
@@ -604,8 +555,8 @@ function maj_mdp_fichier($idx, $pw )
 			echo "<td> <SELECT name=\"organisme\" id=\"organisme\" onChange=\"this.form.submit();\"  >";
 		
 		affiche_un_choix($val_init,"");
-		$reponse =command("","select * from  r_organisme  ");
-		while ($donnees = mysql_fetch_array($reponse) ) 
+		$reponse =command("select * from  r_organisme  ");
+		while ($donnees = fetch_command($reponse) ) 
 			{
 			$organisme=stripcslashes($donnees["organisme"]);
 			$idx=$donnees["idx"];
@@ -617,11 +568,11 @@ function maj_mdp_fichier($idx, $pw )
 
 	function liste_AS( $organisme )
 		{
-		$reponse =command("","select * from  r_user where organisme=\"$organisme\" and droit='S'  ");
+		$reponse =command("select * from  r_user where organisme=\"$organisme\" and droit='S'  ");
 
 		echo "<td> <SELECT name=\"nom\"   >";
 		affiche_un_choix("","Tous");
-		while ($donnees = mysql_fetch_array($reponse) ) 
+		while ($donnees = fetch_command($reponse) ) 
 			{
 			$nom=$donnees["nom"];
 			$prenom=$donnees["prenom"];
@@ -631,14 +582,14 @@ function maj_mdp_fichier($idx, $pw )
 	
 	
 		// recherche des responsables d'organisme
-		$reponse =command("","select * from  r_lien where organisme=\"$organisme\"  ");
-		while ($donnees = mysql_fetch_array($reponse) ) 
+		$reponse =command("select * from  r_lien where organisme=\"$organisme\"  ");
+		while ($donnees = fetch_command($reponse) ) 
 			{
 			$idx=$donnees["user"];
 			$nom_prenom =  libelle_user($idx);
 			// on vérifie aussi qu'il est déjà le référent d'au moins une personne
-			$r1 =command("","select * from  r_referent  where nom=\"$idx\"  ");
-			if (mysql_fetch_array($r1) ) 			
+			$r1 =command("select * from  r_referent  where nom=\"$idx\"  ");
+			if (fetch_command($r1) ) 			
 				affiche_un_choix_2("",$idx,"- $nom_prenom");
 			}
 		echo "</SELECT></td>";
@@ -667,8 +618,8 @@ function maj_mdp_fichier($idx, $pw )
 		
 		echo "</form>"; 
 		$ordre += ($ordre-1)/4;
-		$reponse =command("","select * from r_attachement where num='$num' ");
-		if ($donnees = mysql_fetch_array($reponse) ) 
+		$reponse =command("select * from r_attachement where num='$num' ");
+		if ($donnees = fetch_command($reponse) ) 
 			{
 			$ref=$donnees["ref"];
 			$date=$donnees["date"];
@@ -690,7 +641,8 @@ function maj_mdp_fichier($idx, $pw )
 				echo " <br> ".traduire('Accès restreint')." <br> <p> $type ";
 				return;
 				}
-
+			
+					
 			if (est_image($num)) 
 				{
 				if ((substr($ref,0,1)=="A") &&( $user_lecture!=""))
@@ -703,7 +655,7 @@ function maj_mdp_fichier($idx, $pw )
 					if (($doc_autorise=="") || (stristr($doc_autorise, ";$type_org;") === FALSE) )
 						{
 						if ($flag_acces=="") 
-							lien("index.php?action=visu_image_mini&nom=-$num", "visu_fichier", param ("num","$num.pdf"), traduire("Document protégé"), "","B",$sans_lien);
+							lien("index.php?action=visu_image_mini&nom=$num", "visu_image", param ("nom","$num"), "", "","B",$sans_lien);
 						else
 							lien("index.php?action=visu_image_mini&nom=-$num", "visu_fichier", param ("num","$num").param ("code","$flag_acces"), traduire("Document protégé"), "","B",$sans_lien);
 						echo " $type <br> $ident ";
@@ -716,6 +668,7 @@ function maj_mdp_fichier($idx, $pw )
 					}
 				else
 					lien("index.php?action=visu_image_mini&nom=$num", "visu_image", param ("nom","$num"), "", "","B",$sans_lien);
+
 				}
 			else
 				if (extension_fichier($num)=="pdf")
@@ -788,8 +741,8 @@ function maj_mdp_fichier($idx, $pw )
 
 		echo traduire('Ajouter au dossier vos coordonnées ?')." <input type=\"checkbox\" name=\"add\" > ".traduire('Adresse')." ,<input type=\"checkbox\" name=\"tel\" > ".traduire('Téléphone')." , <input type=\"checkbox\" name=\"mail\" >".traduire('Mail');
 		echo "<p>".traduire('Sélectionnez les fichiers à prendre en compte')." :<table>";
-		$reponse =command("","select * from r_attachement where ref='$ref' order by date DESC ");
-		while (($donnees = mysql_fetch_array($reponse) ) && ($j<100))
+		$reponse =command("select * from r_attachement where ref='$ref' order by date DESC ");
+		while (($donnees = fetch_command($reponse) ) && ($j<100))
 			{
 			$num=$donnees["num"];
 			if ((($j-1) % 4)==0)
@@ -870,8 +823,8 @@ function maj_mdp_fichier($idx, $pw )
 		$pdf->addPDF("tmp/garde_$ref.pdf", 'all');
 		$j=1;
 		echo "<p>".traduire('Génération du dossier');
-		$reponse =command("","select * from r_attachement where ref='$ref' order by date DESC ");
-		while (($donnees = mysql_fetch_array($reponse) ) && ($j<100))
+		$reponse =command("select * from r_attachement where ref='$ref' order by date DESC ");
+		while (($donnees = fetch_command($reponse) ) && ($j<100))
 			{
 			$num=$donnees["num"];
 			$val=variable("d$j");
@@ -889,9 +842,14 @@ function maj_mdp_fichier($idx, $pw )
 		supp_fichier("tmp/_$ref.pdf");
 		$pdf->merge('file', "tmp/_$ref.pdf");
 		supp_fichier("tmp/$ref.pdf");
-		pdfEncrypt ("tmp/_$ref.pdf", decrypt( $code_lecture ), "tmp/$ref.pdf",'P');
+		
+		if ($code_lecture!="")
+			pdfEncrypt ("tmp/_$ref.pdf", decrypt( $code_lecture ), "tmp/$ref.pdf",'P');
 	
-		echo " : ".traduire('Ok').". <p> ".traduire('Cliquez ')." <a href=\"tmp/$ref.pdf\"target=_blank > ".traduire('ici')." <img src=\"images/-fichier.jpg\"  title=\"".traduire('Document protégé')."\" width=\"100\"  > </a>".traduire("pour ouvrir le fichier avec code de lecture (recommandé) ");
+		echo " : ".traduire('Ok').". <p> ";
+				
+		if ($code_lecture!="")
+			echo traduire('Cliquez ')." <a href=\"tmp/$ref.pdf\"target=_blank > ".traduire('ici')." <img src=\"images/-fichier.jpg\"  title=\"".traduire('Document protégé')."\" width=\"100\"  > </a>".traduire("pour ouvrir le fichier avec code de lecture (recommandé) ");
 		echo " ".traduire('ou cliquez ')."<a href=\"tmp/_$ref.pdf\"target=_blank > ".traduire('ici')." <img src=\"images/-fichier.jpg\"  title=\"".traduire('Document NON protégé')."\" width=\"40\" height=\"40\" ></a>".traduire("pour accèder au fichier SANS code de lecture (non- recommandé). ");
 		echo " <p><BR><p>".traduire("Attention, le fichier ne sera plus accessible dès que vous aurez quitté cette page: ");
 		echo " <BR> - ".traduire("Soit vous consultez maintenant le document : cliquez sur le lien et saisissez le code de lecture;");
@@ -911,8 +869,8 @@ function maj_mdp_fichier($idx, $pw )
 		$date_jour=date('Y-m-d');
 		$nb_doc=0;
 		
-		$reponse =command("","select * from r_attachement where ref='$ref'  ");
-		while (($donnees = mysql_fetch_array($reponse) ) && ($nb_doc<100))
+		$reponse =command("select * from r_attachement where ref='$ref'  ");
+		while (($donnees = fetch_command($reponse) ) && ($nb_doc<100))
 			$nb_doc++; 	
 		$j=1;
 
@@ -923,13 +881,15 @@ function maj_mdp_fichier($idx, $pw )
 		echo "<tr> ";
 		if (substr($ref,0,1)=="A")
 			{
-			$reponse =command("","select * from  r_user where idx='$idx' ");
-			$donnees = mysql_fetch_array($reponse) ;
+			$reponse =command("select * from  r_user where idx='$idx' ");
+			$donnees = fetch_command($reponse) ;
 			$recept_mail=$donnees["recept_mail"];	
 			$flag_acces=$donnees["lecture"];
+			$tel=$donnees["telephone"];
+			$id=$donnees["id"];
 			
-			$reponse =command("","select * from r_dde_acces where type='A' and user='$idx' and date_dde='$date_jour'");
-			if ($donnees = mysql_fetch_array($reponse) )
+			$reponse =command("select * from r_dde_acces where type='A' and user='$idx' and date_dde='$date_jour'");
+			if ($donnees = fetch_command($reponse) )
 				{
 				$code=$donnees["code"];	
 				if ($code=="")
@@ -945,7 +905,9 @@ function maj_mdp_fichier($idx, $pw )
 			$_SESSION['user_idx']=$idx;
 			
 			echo "<ul >";
-		
+
+			echo "<li> <a href=\"index.php?action=ajout_admin\"> ".traduire('Gérer les documents')." </a></li>";
+			echo "<li> <a href=\"index.php?action=draganddrop\"> ".traduire('Déposer des documents')." </a></li>";			
 			if ($recept_mail<$date_jour)
 				echo "<li><a id=\"depot\" href=\"index.php?action=recept_mail\">".traduire('Autoriser dépot par Mail (Aujourd\'hui)')."</a></li>";
 			
@@ -954,8 +916,7 @@ function maj_mdp_fichier($idx, $pw )
 
 			if ($user_droit=="") 
 				echo "<li><a href=\"index.php?action=dossier\"> ".traduire('Constituer un dossier')." </a></li>";
-
-			
+		
 			if ($user_droit!="")
 				{
 				if ($code=="")
@@ -967,7 +928,8 @@ function maj_mdp_fichier($idx, $pw )
 						{
 						echo "</td>";
 						echo "<td>".traduire('Accès autorisé par')." ".libelle_user($donnees["autorise"])."</td>";
-						$flag_acces=$code;
+//						$flag_acces=$code;
+						$flag_acces=""; // contournement de T248 sur génération du fichier SANS code provisoire
 						}
 				}
 			else
@@ -979,17 +941,21 @@ function maj_mdp_fichier($idx, $pw )
 			echo "<td> <img src=\"images/photo.png\" width=\"35\" height=\"35\" > </td>";
 			echo "<td><ul id=\"menu-bar\">";
 			if ($user_droit=="")
-				echo "<li><a href=\"index.php?action=ajout_photo\" > + ".traduire('Espace personnel')." </a></li>";
+				echo "<li><a href=\"index.php?action=ajout_photo\" > + ".traduire('Espace personnel')." </a>";
 			else
-				echo "<li><a href=\"index.php?action=ajout_photo\" > + ".traduire('Justificatifs')." </a></li>";
-
-			echo "</ul></td>";
+				echo "<li><a href=\"index.php?action=ajout_photo\" > + ".traduire('Justificatifs')." </a>";
+				
+			echo "<ul>";
+			echo "<li> <a href=\"index.php?action=ajout_photo\"> ".traduire('Gérer les documents')." </a></li>";
+			echo "<li> <a href=\"index.php?action=draganddrop_p\"> ".traduire('Déposer des documents')." </a></li>";	
+			
+			echo "</ul></ul></td>";
 			}
 		
 		if (substr($ref,0,1)=="A")
 			if ($recept_mail>=$date_jour)
 				{
-				echo "<td> - ".traduire('Réception de document par mail autorisé pour la journée.');
+				echo "<td> - ".traduire("Réception de document par mail autorisé pour la journée")." ('$id@fixeo.com' ".traduire("ou")." '$tel@fixeo.com')";
 				lien ("images/croixrouge.png", "supp_recept_mail", param("idx","$idx" ),"Annuler l'autorisation." );
 				echo "</td>";
 				}
@@ -1004,16 +970,16 @@ function maj_mdp_fichier($idx, $pw )
 
 				echo traduire("Dépot par Glisser/Déposer (Drag&drop)")."<img src=\"images/fichier.png\" width=\"35\" height=\"35\" ><img src=\"images/fleche.png\" width=\"35\" height=\"35\" ><img src=\"images/dossier.png\" width=\"35\" height=\"35\" ></a></td>";
 				
-				echo "</table> <table><tr><td></td><td>".traduire('Dépot de fichier unique')." </td>";
-				if ($action=="ajout_admin")
-					{
-					echo "<td> ";
-					liste_type("");
-					echo "</td>";
-					}
 				if ($_SERVER['REMOTE_ADDR']=="127.0.0.1")	
-					{
-			
+					{				
+					echo "</table> <table><tr><td><form method=\"POST\" action=\"index.php\" ></td><td>".traduire('Dépot de fichier unique')." </td>";
+					if ($action=="ajout_admin")
+						{
+						echo "<td> ";
+						liste_type("");
+						echo "</td>";
+						}
+
 					if (substr($ref,0,1)=="A")
 							echo "<td> Référence : <input type=\"text\" name=\"ident\" size=\"15\"  value=\"\"></td>  " ;
 					echo "<td><input type=\"file\" size=\"50\"  name=\"nom\" >";
@@ -1028,8 +994,8 @@ function maj_mdp_fichier($idx, $pw )
 			}
 
 		echo " </table>  <table>";
-		$reponse =command("","select * from r_attachement where ref='$ref' order by date DESC ");
-		while (($donnees = mysql_fetch_array($reponse) ) && ($j<100))
+		$reponse =command("select * from r_attachement where ref='$ref' order by date DESC ");
+		while (($donnees = fetch_command($reponse) ) && ($j<100))
 			{
 			if ((($j-1) % 4)==0)
 				echo "<tr>";
@@ -1074,13 +1040,13 @@ function maj_mdp_fichier($idx, $pw )
 		supp_fichier("upload_pdf/$num");
 		supp_fichier("upload_prot/$num.pdf");
 		supp_fichier("upload_prot/$num");
-		command("","delete from r_attachement where num='$num' ");
+		command("delete from r_attachement where num='$num' ");
 		}
 		
 	function supp_tous_fichiers($idx)
 		{
-		$reponse =command("","select * from  r_attachement where ref='A-$idx' or ref='P-$idx'");		
-		while ( $donnees = mysql_fetch_array($reponse) ) 
+		$reponse =command("select * from  r_attachement where ref='A-$idx' or ref='P-$idx'");		
+		while ( $donnees = fetch_command($reponse) ) 
 			supp_attachement ($donnes["num"]);
 		}
 		
@@ -1088,7 +1054,7 @@ function maj_mdp_fichier($idx, $pw )
 		{
 		global $action;
 		
-		$reponse =command("","update r_attachement SET status = '$type' where num='$num' ");
+		$reponse =command("update r_attachement SET status = '$type' where num='$num' ");
 		$action = "ajout_admin";
 		}
 	
@@ -1102,23 +1068,23 @@ function maj_mdp_fichier($idx, $pw )
 			|| (($organisme!="") and ($nom!="")) 
 			) 
 			{
-			$reponse = command("","select * FROM `r_referent`  where user='$user' and organisme='$organisme' and nom='$nom' and prenom='$prenom' and tel='$tel' and mail='$mail' and adresse='$adresse' ");
-			if ($donnees = mysql_fetch_array($reponse))
+			$reponse = command("select * FROM `r_referent`  where user='$user' and organisme='$organisme' and nom='$nom' and prenom='$prenom' and tel='$tel' and mail='$mail' and adresse='$adresse' ");
+			if ($donnees = fetch_command($reponse))
 				{
 				erreur(traduire("Ce référent de confiance existe déjà."));
 				}
 			else
 				{
 				$nb=0;
-				$reponse = command("","select * FROM `r_referent`  where user='$user'  ");
-				while ($donnees = mysql_fetch_array($reponse)) $nb++;
+				$reponse = command("select * FROM `r_referent`  where user='$user'  ");
+				while ($donnees = fetch_command($reponse)) $nb++;
 				
 				if ($nb>9) 
 					erreur(traduire("Nombre maximum (10) de référents atteint."));
 				else
 					{
 					$idx=inc_index("referent");
-					$reponse = command("","INSERT INTO `r_referent`  VALUES ( '$idx', '$user', '$organisme', '$nom','$prenom', '$tel','$mail','$adresse')");
+					$reponse = command("INSERT INTO `r_referent`  VALUES ( '$idx', '$user', '$organisme', '$nom','$prenom', '$tel','$mail','$adresse')");
 
 					if (is_numeric($nom))
 						$nom=libelle_user($nom);
@@ -1135,8 +1101,8 @@ function maj_mdp_fichier($idx, $pw )
 		{
 		global $user_idx;
 		
-		$reponse = command("","select * FROM `r_referent`  where idx='$idx' ");
-		$donnees = mysql_fetch_array($reponse)	;	
+		$reponse = command("select * FROM `r_referent`  where idx='$idx' ");
+		$donnees = fetch_command($reponse);	
 		$idx_ref= $donnees["nom"];
 		
 		if (is_numeric($idx_ref))
@@ -1148,14 +1114,14 @@ function maj_mdp_fichier($idx, $pw )
 				$lib = libelle_organisme($donnees["organisme"]);
 		
 		$cmd = "DELETE FROM `r_referent`  where idx='$idx' ";
-		$reponse = command( "",$cmd);
+		$reponse = command($cmd);
 		ajout_log( $user_idx, traduire("Suppression Référent de confiance")." $lib " );
 		}		
 
 	function visu_referent($idx, $user="", $masque="")
 		{
-		$reponse =command("","select * from  r_referent where idx='$idx' ");
-		$donnees = mysql_fetch_array($reponse);
+		$reponse =command("select * from  r_referent where idx='$idx' ");
+		$donnees = fetch_command($reponse);
 
 		$organisme=$donnees["organisme"];
 
@@ -1185,8 +1151,8 @@ function maj_mdp_fichier($idx, $pw )
 
 	function visu_referent_user($idx, $user="", $masque="")
 		{
-		$r1 =command("","select * from  r_user where idx='$idx' ");
-		$d1 = mysql_fetch_array($r1);
+		$r1 =command("select * from  r_user where idx='$idx' ");
+		$d1 = fetch_command($r1);
 		$nom=$d1["nom"];
 		$idx2=$d1["idx"];
 		$prenom=$d1["prenom"];
@@ -1279,8 +1245,8 @@ function maj_mdp_fichier($idx, $pw )
 			}
 		
 		$nb_rc=0;
-		$reponse =command("","select * from  r_referent where user='$idx' ");
-		while ($donnees = mysql_fetch_array($reponse) ) 
+		$reponse =command("select * from  r_referent where user='$idx' order by organisme ");
+		while ($donnees = fetch_command($reponse) ) 
 			{
 			$organisme=stripcslashes($donnees["organisme"]);
 			if ($organisme!="")
@@ -1302,8 +1268,8 @@ function maj_mdp_fichier($idx, $pw )
 		$action="ajout_user";
 		$date_jour=date('Y-m-d');
 		$idx="";
-		$reponse = command("","select * from r_user where nom='$nom' and prenom='$prenom' and anniv='$anniv'and ville_nat='$ville_nat'");
-		if (!mysql_fetch_array($reponse) )
+		$reponse = command("select * from r_user where nom='$nom' and prenom='$prenom' and anniv='$anniv'and ville_nat='$ville_nat'");
+		if (!fetch_command($reponse) )
 			{
 			if ($code_lecture=="")
 				$code_lecture=$pw;		
@@ -1325,57 +1291,60 @@ function maj_mdp_fichier($idx, $pw )
 				if ( ($nom=="") ||($prenom=="") ||($prenom_p=="") ||($prenom_m=="") ||($nationalite=="") ||($ville_nat=="")  )
 					erreur( traduire("Attention, tous les champs ne sont pas renseignés")) ;
 				else
-					{
-					$pw=encrypt($pw);
-					$code_lecture=encrypt($code_lecture);					
-
-					if ($droit!="")
-						{
-						if (($mail!="") || ( VerifierAdresseMail($mail)) )
-							{
-							if ( ($organisme!="") || ($droit=="R") || ($droit=="E") || ($droit=="F"))
-								{
-								$idx=inc_index("user");
-								
-								$plus="";
-								if ($telephone[0]=='+')
-									$plus='+';
-								$telephone = $plus.preg_replace('`[^0-9]`', '', $telephone);
-								
-								command("","INSERT INTO `r_user`  VALUES (  '$idx', '$id', '$pw','$droit','$mail','$organisme','$nom','$prenom','$anniv','$telephone','$nationalite','$ville_nat','$adresse','$recept_mail' ,'$prenom_p','$prenom_m','$date_jour','$code_lecture','','' ,'' ,'','$type_user')");
-								ajout_log( $idx, traduire("Création utilisateur")."  $idx / $droit / $nom/ $prenom",	 $user_idx );
-									
-								$body= traduire("Bonjour").", $prenom $nom ";
-								$body.= "<p> $user_prenom $user_nom ".traduire("vous a créé un compte sur 'Doc-depot.com': ");
-								$body.= "<p> ".traduire("Pour accepter et finaliser la création de votre compte sur 'Doc-depot.com', merci de cliquer sur ce")." <a id=\"lien\" href=\"".serveur."index.php?action=finaliser_user&idx=".addslashes(encrypt($idx))."\">".traduire('lien')."</a>". traduire("et compléter les informations manquantes.");
-								$body .= "<p> <hr> <center> Copyright ADILEOS 2014 </center>";
-								// Envoyer mail pour demander saisie pseudo et PW
-								envoi_mail($mail,traduire("Finaliser la création de votre compte"),$body);
-									
-								envoi_mail(parametre('DD_mail_gestinonnaire'),traduire("Création du compte")." $prenom $nom ".traduire('par')." $user_prenom $user_nom ","",true);
-								}
-							else
-								erreur (traduire("La structure sociale doit être renseignée."));
-							}
-						else
-							erreur (traduire("Format de mail incorrect ou absent")." $mail.");
-						}	
+					if ( ($id!="???") && (strlen($id)<8 ) )
+						erreur(traduire("L'identifiant est trop court (au moins 8 caractères)."));
 					else
 						{
-						$idx=inc_index("user");
-						$reponse = command("","select * from r_user where id='$id' ");
-						if ( (!mysql_fetch_array($reponse) ) || ($id!="jm") || ($id!="jean-michel.cot")|| ($id!="jm.cot") || ($id!="contact")|| ($id!="fixeo"))
+						$pw=encrypt($pw);
+						$code_lecture=encrypt($code_lecture);					
+
+						if ($droit!="")
 							{
-							command("","INSERT INTO `r_user`  VALUES (  '$idx', '$id', '$pw','$droit','$mail','$organisme','$nom','$prenom','$anniv','$telephone','$nationalite','$ville_nat','$adresse','$recept_mail' ,'$prenom_p','$prenom_m','$date_jour','$code_lecture','$nss','','','','$type_user')");
-							ajout_log( $idx, traduire("Création compte Bénéficiaire")."  $idx / $nom/ $prenom", $user_idx );
-							}
+							if (($mail!="") || ( VerifierAdresseMail($mail)) )
+								{
+								if ( ($organisme!="") || ($droit=="R") || ($droit=="E") || ($droit=="F"))
+									{
+									$idx=inc_index("user");
+									
+									$plus="";
+									if ($telephone[0]=='+')
+										$plus='+';
+									$telephone = $plus.preg_replace('`[^0-9]`', '', $telephone);
+									
+									command("INSERT INTO `r_user`  VALUES (  '$idx', '$id', '$pw','$droit','$mail','$organisme','$nom','$prenom','$anniv','$telephone','$nationalite','$ville_nat','$adresse','$recept_mail' ,'$prenom_p','$prenom_m','$date_jour','$code_lecture','','' ,'' ,'','$type_user','fr')");
+									ajout_log( $idx, traduire("Création utilisateur")."  $idx / $droit / $nom/ $prenom",	 $user_idx );
+										
+									$body= traduire("Bonjour").", $prenom $nom ";
+									$body.= "<p> $user_prenom $user_nom ".traduire("vous a créé un compte sur 'Doc-depot.com': ");
+									$body.= "<p> ".traduire("Pour accepter et finaliser la création de votre compte sur 'Doc-depot.com', merci de cliquer sur ce")." <a id=\"lien\" href=\"".serveur."index.php?action=finaliser_user&idx=".addslashes(encrypt($idx))."\">".traduire('lien')."</a> ". traduire("et compléter les informations manquantes.");
+									$body .= "<p> <hr> <center> Copyright ADILEOS 2014 </center>";
+									// Envoyer mail pour demander saisie pseudo et PW
+									envoi_mail($mail,traduire("Finaliser la création de votre compte"),$body);
+										
+									envoi_mail(parametre('DD_mail_gestinonnaire'),traduire("Création du compte")." $prenom $nom ".traduire('par')." $user_prenom $user_nom ","",true);
+									}
+								else
+									erreur (traduire("La structure sociale doit être renseignée."));
+								}
+							else
+								erreur (traduire("Format de mail incorrect ou absent")." $mail.");
+							}	
 						else
 							{
-							$idx="";
-							erreur (traduire("Identifiant déjà existant"));
+							$idx=inc_index("user");
+							$reponse = command("select * from r_user where id='$id' ");
+							if ( (!fetch_command($reponse) ) || ($id!="jm") || ($id!="jean-michel.cot")|| ($id!="jm.cot") || ($id!="contact")|| ($id!="fixeo"))
+								{
+								command("INSERT INTO `r_user`  VALUES (  '$idx', '$id', '$pw','$droit','$mail','$organisme','$nom','$prenom','$anniv','$telephone','$nationalite','$ville_nat','$adresse','$recept_mail' ,'$prenom_p','$prenom_m','$date_jour','$code_lecture','$nss','','','','$type_user','fr')");
+								ajout_log( $idx, traduire("Création compte Bénéficiaire")."  $idx / $nom/ $prenom", $user_idx );
+								}
+							else
+								{
+								$idx="";
+								erreur (traduire("Identifiant déjà existant"));
+								}
 							}
 						}
-					}
 				}
 			}
 			else
@@ -1385,14 +1354,14 @@ function maj_mdp_fichier($idx, $pw )
 
 	FUNCTION mail_user($idx)
 		{
-		$reponse = command("","select * from r_user where idx='$idx' ");
-		$d1 = mysql_fetch_array($reponse);
+		$reponse = command("select * from r_user where idx='$idx' ");
+		$d1 = fetch_command($reponse);
 		return ($d1["mail"]);
 		}
 	FUNCTION telephone_user($idx)
 		{
-		$reponse = command("","select * from r_user where idx='$idx' ");
-		$d1 = mysql_fetch_array($reponse);
+		$reponse = command("select * from r_user where idx='$idx' ");
+		$d1 = fetch_command($reponse);
 		return ($d1["telephone"]);
 		}
 		
@@ -1400,8 +1369,8 @@ function maj_mdp_fichier($idx, $pw )
 		{
 		global $action;
 		
-		$reponse = command("","select * from r_user where id='$id' ");
-		if (!mysql_fetch_array($reponse) )
+		$reponse = command("select * from r_user where id='$id' ");
+		if (!fetch_command($reponse) )
 			{
 			if (strlen($id)>7 )
 				{
@@ -1413,7 +1382,7 @@ function maj_mdp_fichier($idx, $pw )
 							{
 							// si changement d'"id" vérifier qu'il n'existe pas déja
 							$pw=encrypt($pw);
-							$reponse = command("","UPDATE `r_user` SET id='$id', pw='$pw', nom='$nom', prenom='$prenom'  where idx='$idx'  ");
+							$reponse = command("UPDATE `r_user` SET id='$id', pw='$pw', nom='$nom', prenom='$prenom'  where idx='$idx'  ");
 							ajout_log( $id, traduire("Finalisation compte")." $id / $nom / $prenom" );
 							$_SESSION['pass']=true;	 
 							$_SESSION['user']=$idx;				
@@ -1456,7 +1425,7 @@ function maj_mdp_fichier($idx, $pw )
 				erreur (traduire("Format de téléphone incorrect"));
 				return(false);
 				}
-		$reponse = command("","UPDATE `r_user` SET mail='$mail', telephone='$telephone'  where idx='$idx'  ");
+		$reponse = command("UPDATE `r_user` SET mail='$mail', telephone='$telephone'  where idx='$idx'  ");
 		ajout_log( $idx, traduire("Modification tel")." : $telephone /mail :$mail" );
 		return(true);
 		}
@@ -1465,19 +1434,27 @@ function maj_mdp_fichier($idx, $pw )
 		{
 		global $user_id;
 		
-		$reponse = command("","UPDATE `r_user` SET mail='$mail', telephone='$telephone', nom='$nom', prenom='$prenom', droit='$droit'  where idx='$idx'  ");
+		$reponse = command("UPDATE `r_user` SET mail='$mail', telephone='$telephone', nom='$nom', prenom='$prenom', droit='$droit'  where idx='$idx'  ");
 		ajout_log( $idx, traduire("Modification nom/prenom/tel/mail par")." $user_id" );
+		}		
+		
+	FUNCTION modification_langue($idx,$langue)
+		{
+		global $user_id;
+		
+		$reponse = command("UPDATE `r_user` SET langue='$langue' where idx='$idx'  ");
+		ajout_log( $idx, traduire("Modification langue en ")." $user_id" );
 		}		
 		
 	FUNCTION modif_domicile($idx,$organisme, $adresse)
 		{
 		if ($organisme!="")
 			{
-			$r1 =command("","select * from  r_organisme where idx='$organisme' ");
-			$d1 = mysql_fetch_array($r1);
+			$r1 =command("select * from  r_organisme where idx='$organisme' ");
+			$d1 = fetch_command($r1);
 			$adresse=$d1["adresse"];
 			}
-		$reponse = command("","UPDATE `r_user` SET organisme='$organisme', adresse='$adresse'  where idx='$idx'  ");
+		$reponse = command("UPDATE `r_user` SET organisme='$organisme', adresse='$adresse'  where idx='$idx'  ");
 		ajout_log( $idx, traduire("Modification Domiciliation") );
 		}
 		
@@ -1485,7 +1462,7 @@ function maj_mdp_fichier($idx, $pw )
 		{
 		global $user_idx;
 		
-		$reponse = command("","UPDATE `r_user` SET  recept_mail='$date' where idx='$id'  ");
+		$reponse = command("UPDATE `r_user` SET  recept_mail='$date' where idx='$id'  ");
 		ajout_log( $id, traduire("Autorisation reception par mail"), 	 $user_idx );
 		}
 
@@ -1493,7 +1470,7 @@ function maj_mdp_fichier($idx, $pw )
 		{
 		global $user_idx;
 		
-		$reponse = command("","UPDATE `r_user` SET  recept_mail='' where idx='$id'  ");
+		$reponse = command("UPDATE `r_user` SET  recept_mail='' where idx='$id'  ");
 		ajout_log( $id, traduire("Annulation autorisation reception par mail"), 	 $user_idx );
 		}
 		
@@ -1501,7 +1478,7 @@ function maj_mdp_fichier($idx, $pw )
 		{
 		global $user_idx;
 		
-		$reponse = command("","UPDATE `r_user` SET  droit='$droit' where idx='$id'  ");
+		$reponse = command("UPDATE `r_user` SET  droit='$droit' where idx='$id'  ");
 		ajout_log( $id, traduire("Mise à jour droit")." ==> $droit",	$user_idx );
 		}
 		
@@ -1509,14 +1486,14 @@ function maj_mdp_fichier($idx, $pw )
 		{
 		global $user_idx;
 
-		$reponse =command("","select * from  r_user where idx='$idx'  ");		
-		if ($donnees = mysql_fetch_array($reponse))
+		$reponse =command("select * from  r_user where idx='$idx'  ");		
+		if ($donnees = fetch_command($reponse))
 			{
 			$nom=$donnees["nom"];
 			$prenom=$donnees["prenom"];	
-			$reponse =command("", "DELETE FROM `r_referent` where user='$idx' ");
-			$reponse =command("","DELETE FROM `r_lien`  where user='$idx' ");
-			$reponse =command("","DELETE FROM `r_user`  where idx='$idx' ");
+			$reponse =command( "DELETE FROM `r_referent` where user='$idx' ");
+			$reponse =command("DELETE FROM `r_lien`  where user='$idx' ");
+			$reponse =command("DELETE FROM `r_user`  where idx='$idx' ");
 			ajout_log( $idx, traduire("Suppression compte")." $nom $prenom ($idx)" ,  $user_idx);
 			}
 		}		
@@ -1540,15 +1517,15 @@ function maj_mdp_fichier($idx, $pw )
 		{
 		global $user_droit;
 		
-		$reponse =command("","select * from  r_user where idx='$idx'  ");		
+		$reponse =command("select * from  r_user where idx='$idx'  ");		
 				
-		if ($donnees = mysql_fetch_array($reponse) ) 
+		if ($donnees = fetch_command($reponse) ) 
 			{
 			//$pw=$donnees["pw"];				
 			$organisme=stripcslashes($donnees["organisme"]);	
 
-			$r1 =command("","select * from  r_organisme where idx='$organisme' ");
-			$d1 = mysql_fetch_array($r1);
+			$r1 =command("select * from  r_organisme where idx='$organisme' ");
+			$d1 = fetch_command($r1);
 			$organisme=stripcslashes($d1["organisme"]);
 			
 			$mail=$donnees["mail"];	
@@ -1676,14 +1653,14 @@ function maj_mdp_fichier($idx, $pw )
 			}
 	
 		if ($droit=="R")			
-			$reponse =command("","SELECT * FROM `r_lien`, `r_user` WHERE r_user.droit='S' and r_user.organisme=r_lien.organisme and r_lien.user='$user_idx' $filtre  ");
+			$reponse =command("SELECT * FROM `r_lien`, `r_user` WHERE r_user.droit='S' and r_user.organisme=r_lien.organisme and r_lien.user='$user_idx' $filtre  ");
 		else
 			if ($droit=="A")			
-				$reponse =command("","select * from  r_user where droit='R' or droit='E' or droit='F' $filtre  ");
+				$reponse =command("select * from  r_user where droit='R' or droit='E' or droit='F' $filtre  ");
 			else
-				$reponse =command("","select * from  r_user where droit='' $filtre ");		
+				$reponse =command("select * from  r_user where droit='' $filtre ");		
 				
-		while ($donnees = mysql_fetch_array($reponse) ) 
+		while ($donnees = fetch_command($reponse) ) 
 			{
 			$idx=$donnees["idx"];
 			
@@ -1706,14 +1683,14 @@ function maj_mdp_fichier($idx, $pw )
 		{
 		global $user_idx, $user_droit;
 
-		$reponse =command("","select * from  r_user where idx='$idx'  ");				
-		if ($donnees = mysql_fetch_array($reponse) ) 
+		$reponse =command("select * from  r_user where idx='$idx'  ");				
+		if ($donnees = fetch_command($reponse) ) 
 			{
 			//$pw=$donnees["pw"];				
 			$organisme=stripcslashes($donnees["organisme"]);	
 
-			$r1 =command("","select * from  r_organisme where idx='$organisme' ");
-			$d1 = mysql_fetch_array($r1);
+			$r1 =command("select * from  r_organisme where idx='$organisme' ");
+			$d1 = fetch_command($r1);
 			$organisme=stripcslashes($d1["organisme"]);
 			
 			$droit=$donnees["droit"];	
@@ -1733,7 +1710,10 @@ function maj_mdp_fichier($idx, $pw )
 			echo "<td> <input type=\"texte\" name=\"telephone\"   size=\"12\" value=\"$telephone\"> </td>" ;
 			echo "<td>  <input type=\"texte\" name=\"mail\"   size=\"35\" value=\"$mail\"> </td>" ;
 			if ($user_droit=='R')
+				{
+				echo "<input type=\"hidden\" name=\"droit\"  value=\"S\"> " ; // T328
 				liste_organisme_du_responsable ($user_idx);
+				}
 			else
 				liste_type_user($droit);
 			echo "<td><input type=\"submit\"  id=\"modif_user\" value=\"".traduire('Modifier')."\" > </td> ";
@@ -1756,7 +1736,7 @@ function maj_mdp_fichier($idx, $pw )
 		echo "</table>";
 		
 		echo "<center><TABLE><TR> <td  width=\"700\">";
-		echo traduire("Important: Tous les  champs sont obligatoires et prennez soin de bien les orthographier et vérifier chaque champ car il n'est plus possible de les modifier. ");
+		echo traduire("Important: Tous les  champs sont obligatoires et prenez soin de bien les orthographier et vérifier chaque champ car il n'est plus possible de les modifier. ");
 		echo traduire("Les réponses à ces questions vous seront demandées pour récupérer le mot de passe de votre compte, si vous l'avez perdu.")."<p></td> ";
 		
 		debut_cadre("700");
@@ -1820,7 +1800,7 @@ function maj_mdp_fichier($idx, $pw )
 	
 		$num_seq = variable("num_seq");	
 		if (($action=="note_sms") and ($num_seq!=""))
-			$reponse =command("","DELETE FROM `r_sms`  where idx='$user_idx' and num_seq='$num_seq' ");
+			$reponse =command("DELETE FROM `r_sms`  where idx='$user_idx' and num_seq='$num_seq' ");
 		echo "<table> <tr><td> <img src=\"images/sms.png\" width=\"35\" height=\"35\" ></td> ";
 		echo "<td> <ul id=\"menu-bar\">";
 		echo "<li> <a href=\"index.php?action=note_sms\"  >+ ".traduire('Notes et SMS')." </a> </li></ul></td>";
@@ -1843,8 +1823,8 @@ function maj_mdp_fichier($idx, $pw )
 			echo "<input type=\"hidden\" name=\"user\"  value=\"$user_idx\"> " ;
 			echo "<td><input type=\"submit\" id=\"ajout_note\" value=\"".traduire('Ajouter')."\" ></form> </td> ";
 			}
-		$reponse =command("","select * from  r_sms where (idx='$user_idx' $filtre ) order by date desc");		
-		while ($donnees = mysql_fetch_array($reponse) ) 
+		$reponse =command("select * from  r_sms where (idx='$user_idx' $filtre ) order by date desc");		
+		while ($donnees = fetch_command($reponse) ) 
 			{
 			$num_seq=$donnees["num_seq"];	
 			$date=$donnees["date"];	
@@ -1873,16 +1853,16 @@ function maj_mdp_fichier($idx, $pw )
 		echo "</table><div class=\"CSSTableGenerator\" ><table> ";
 		echo "<tr><td>   </td><td> ".traduire('Nom')."  </td><td> ".traduire('Prénom')." </td><td>  ".traduire('Téléphone')." </td><td> ".traduire('Mail')." </td><td> ".traduire('Anniv')." </td><td> ".traduire('Nationalité')."  </td><td> ".traduire('Ville natale')." </td><td> ".traduire('Adresse')." </td>";
 		
-		$reponse =command("",$ligne_cmd);		
-		while ($donnees = mysql_fetch_array($reponse) ) 
+		$reponse =command($ligne_cmd);		
+		while ($donnees = fetch_command($reponse) ) 
 			{
 			if (isset($donnees["user"]))
 				$nom1=$donnees["user"];
 				else
 				$nom1=$donnees["idx"];
 
-			$r1 =command("","select * from  r_user where idx='$nom1' $filtre2 ");
-			if ($d1 = mysql_fetch_array($r1))
+			$r1 =command("select * from  r_user where idx='$nom1' $filtre2 ");
+			if ($d1 = fetch_command($r1))
 				{
 				
 				$mail=$d1["mail"];	
@@ -1926,15 +1906,15 @@ function maj_mdp_fichier($idx, $pw )
 		
 		$action="ajout_organisme";
 		
-		$r1 =command("","select * from  r_organisme where organisme='$organisme' ");
-		if (!($d1 = mysql_fetch_array($r1)))
+		$r1 =command("select * from  r_organisme where organisme='$organisme' ");
+		if (!($d1 = fetch_command($r1)))
 			{
 			$idx=inc_index("organisme");
 			if ($doc=="")
 				$doc = ";Tous;";
 			$cmd = "INSERT INTO `r_organisme`  VALUES ( '$idx','$organisme', '$tel','$mail','$adresse','$sigle','','$doc','1','')";
-			$reponse = command( "",$cmd);
-			ajout_log( $user_idx, traduire("Création organisme")." ($idx) : $organisme / $mail / $tel / $adresse / $sigle" );
+			$reponse = command($cmd);
+			ajout_log( $user_idx, traduire("Création structure")." ($idx) : $organisme / $mail / $tel / $adresse / $sigle" );
 			}
 		else
 			erreur (traduire("Structure sociale déjà existante!"));
@@ -1945,7 +1925,7 @@ function maj_mdp_fichier($idx, $pw )
 		global $user_idx;
 		
 		$l=libelle_organisme($id);
-		$reponse = command("","UPDATE `r_organisme` SET mail='$mail', tel='$telephone' , adresse='$adresse' , sigle='$sigle', doc_autorise='$doc'  where idx='$id'  ");
+		$reponse = command("UPDATE `r_organisme` SET mail='$mail', tel='$telephone' , adresse='$adresse' , sigle='$sigle', doc_autorise='$doc'  where idx='$id'  ");
 		ajout_log( $user_idx, traduire("Modification organisme")." $l : $mail / $telephone / $adresse / $sigle/ $doc" );
 		}	
 		
@@ -1956,36 +1936,36 @@ function maj_mdp_fichier($idx, $pw )
 		$l=libelle_organisme($idx);
 		
 		$cmd = "DELETE FROM `r_organisme`  where idx='$idx' ";
-		$reponse = command( "",$cmd);
+		$reponse = command($cmd);
 		ajout_log( $user_idx, traduire("Suppresion organisme")." $l " );
 		}		
 		
 	function libelle_organisme($organisme	)
 		{
-		$r1 =command("","select * from  r_organisme where idx='$organisme' ");
-		$d1 = mysql_fetch_array($r1);
+		$r1 =command("select * from  r_organisme where idx='$organisme' ");
+		$d1 = fetch_command($r1);
 		return(stripcslashes($d1["organisme"]));
 		}
 	
 	function doc_autorise($organisme	)
 		{
-		$r1 =command("","select * from  r_organisme where idx='$organisme' ");
-		$d1 = mysql_fetch_array($r1);
+		$r1 =command("select * from  r_organisme where idx='$organisme' ");
+		$d1 = fetch_command($r1);
 		return($d1["doc_autorise"]);
 		}
 	
 	function adresse_organisme($organisme	)
 		{
-		$r1 =command("","select * from  r_organisme where idx='$organisme' ");
-		$d1 = mysql_fetch_array($r1);
+		$r1 =command("select * from  r_organisme where idx='$organisme' ");
+		$d1 = fetch_command($r1);
 		return(stripcslashes($d1["adresse"]));
 		}
 		
 	function responsables_organisme($organisme)
 		{
 		$ligne="";
-		$r1 =command("","select * from r_lien where organisme='$organisme' ");
-		while ($d1 = mysql_fetch_array($r1) ) 
+		$r1 =command("select * from r_lien where organisme='$organisme' ");
+		while ($d1 = fetch_command($r1) ) 
 			{
 			$ligne= $ligne . libelle_user($d1["user"])."; ";
 			}
@@ -2038,11 +2018,11 @@ function maj_mdp_fichier($idx, $pw )
 				}
 
 			if ($filtre1=="")
-				$reponse =command("","select * from  r_organisme order by organisme asc");
+				$reponse =command("select * from  r_organisme order by organisme asc");
 			else
-				$reponse =command("","select * from  r_organisme where (adresse REGEXP '$filtre1' or organisme REGEXP '$filtre1' or sigle REGEXP '$filtre1' or mail REGEXP '$filtre1' or tel REGEXP '$filtre1') order by organisme asc");			
+				$reponse =command("select * from  r_organisme where (adresse REGEXP '$filtre1' or organisme REGEXP '$filtre1' or sigle REGEXP '$filtre1' or mail REGEXP '$filtre1' or tel REGEXP '$filtre1') order by organisme asc");			
 
-			while ($donnees = mysql_fetch_array($reponse) ) 
+			while ($donnees = fetch_command($reponse) ) 
 				{
 				$idx=$donnees["idx"];	
 				$adresse=stripcslashes($donnees["adresse"]);
@@ -2077,8 +2057,8 @@ function maj_mdp_fichier($idx, $pw )
 		echo "<td> <SELECT name=\"responsable\" id=\"responsable\"  >";
 		
 		affiche_un_choix("","");
-		$reponse =command("","select * from  r_user where droit='R' ");
-		while ($donnees = mysql_fetch_array($reponse) ) 
+		$reponse =command("select * from  r_user where droit='R' ");
+		while ($donnees = fetch_command($reponse) ) 
 			{
 			$idx=$donnees["idx"];
 			$nom= $donnees["nom"]." ".$donnees["prenom"];
@@ -2092,8 +2072,8 @@ function maj_mdp_fichier($idx, $pw )
 		{
 		echo "<td> <SELECT name=\"organisme\" id=\"organisme\"  >";
 		
-		$reponse =command("","select * from r_lien where user='$responsable'  ");
-		while ($donnees = mysql_fetch_array($reponse) ) 
+		$reponse =command("select * from r_lien where user='$responsable'  ");
+		while ($donnees = fetch_command($reponse) ) 
 			{
 			$idx = $donnees["organisme"];
 			affiche_un_choix_2("",$idx,libelle_organisme($idx));			
@@ -2104,8 +2084,8 @@ function maj_mdp_fichier($idx, $pw )
 	function organisme_d_un_responsable($responsable)
 		{
 		$ligne="";
-		$r1 =command("","select * from r_lien where user='$responsable' ");
-		while ($d1 = mysql_fetch_array($r1) ) 
+		$r1 =command("select * from r_lien where user='$responsable' ");
+		while ($d1 = fetch_command($r1) ) 
 			{
 			$ligne= $ligne . libelle_organisme($d1["organisme"])."; ";
 			}
@@ -2116,7 +2096,7 @@ function maj_mdp_fichier($idx, $pw )
 		{
 		global $action,$user_idx;
 		
-		$reponse =command("","DELETE FROM `r_lien`  where organisme='$organisme' and user='$responsable' ");
+		$reponse =command("DELETE FROM `r_lien`  where organisme='$organisme' and user='$responsable' ");
 		ajout_log( $user_idx, traduire("Suppresion affectation")." $organisme  <-> $responsable " );
 		}	
 		
@@ -2125,11 +2105,11 @@ function maj_mdp_fichier($idx, $pw )
 		global $action,$user_idx;
 		
 		$date_jour=date('Y-m-d');
-		$r1 =command("","select * from  r_lien where organisme='$organisme' and user='$responsable' ");
-		if (!($d1 = mysql_fetch_array($r1)))
+		$r1 =command("select * from  r_lien where organisme='$organisme' and user='$responsable' ");
+		if (!($d1 = fetch_command($r1)))
 			{
 			$cmd = "INSERT INTO `r_lien`  VALUES ('$date_jour','$organisme', '$responsable')";
-			$reponse = command( "",$cmd);
+			$reponse = command($cmd);
 			ajout_log( $user_idx, traduire("Affectation")." : ".libelle_organisme($organisme)."($organisme)  <-> ".libelle_user($responsable)." ($responsable)" );
 			}
 		else
@@ -2154,9 +2134,9 @@ function maj_mdp_fichier($idx, $pw )
 				echo "<td><input type=\"submit\"   id=\"nouvelle_affectation\"  value=\"".traduire('Valider')."\" > </form></td> ";
 				}
 
-		$reponse =command("","select * from  r_lien order by organisme asc");
+		$reponse =command("select * from  r_lien order by organisme asc");
 
-		while ($donnees = mysql_fetch_array($reponse) ) 
+		while ($donnees = fetch_command($reponse) ) 
 				{
 				$user=$donnees["user"];
 				$orga=$donnees["organisme"];
@@ -2174,14 +2154,14 @@ function dde_acces($idx,$user, $type='A', $duree=0)
 
 	$date_jour=date('Y-m-d',  mktime(0,0,0 , date("m"), date("d")+$duree, date ("Y")));
 		
-	$reponse =command("","select * from r_dde_acces where user='$user' and type='$type' and ddeur='$idx' and date_dde>'$date_jour'  ");
-	if (! ($donnees = mysql_fetch_array($reponse) )  )
+	$reponse =command("select * from r_dde_acces where user='$user' and type='$type' and ddeur='$idx' and date_dde>'$date_jour'  ");
+	if (! ($donnees = fetch_command($reponse) )  )
 		{
-		$reponse =command("","INSERT INTO `r_dde_acces`  VALUES ('$idx' , '', '$date_jour', '$user', '', '', '$type' ) ");
+		$reponse =command("INSERT INTO `r_dde_acces`  VALUES ('$idx' , '', '$date_jour', '$user', '', '', '$type' ) ");
 		if ($type=="A")
-			ajout_log( $idx, traduire("Demande d'accès au compte par")." ".libelle_user($user) );
+			ajout_log( $idx, traduire("Demande d'accès au compte par")." ".libelle_user($user), $user );
 		else
-			ajout_log( $idx, traduire("Demande de recupération MdP")." ".libelle_user($user) );
+			ajout_log( $idx, traduire("Demande de recupération MdP")." ".libelle_user($user), $user );
 		}
 	}
 
@@ -2198,10 +2178,9 @@ function autorise_acces($ddeur,$bene,$autorise)
 		} 
 	$code=$str;
 	
-	$reponse =command("","UPDATE r_dde_acces set code='$code' , date_auto='$date_jour', autorise='$autorise' where user='$bene' and ddeur='$ddeur' and date_dde>='$date_jour' ");
-	ajout_log( $bene, traduire("Autorisation d'accès au compte par ").libelle_user($autorise)." à ".libelle_user($ddeur), $autorise );
-	ajout_log( $ddeur, traduire("Autorisation d'accès au compte par ").libelle_user($autorise)." à ".libelle_user($ddeur), $autorise );
-	
+	$reponse =command("UPDATE r_dde_acces set code='$code' , date_auto='$date_jour', autorise='$autorise' where user='$bene' and ddeur='$ddeur' and date_dde>='$date_jour' ");
+	ajout_log( $bene, traduire("Autorisation d'accès au compte partagé par ").libelle_user($autorise)." à ".libelle_user($ddeur), $autorise );
+	ajout_log( $ddeur, traduire("Autorisation d'accès au compte partagé par ").libelle_user($autorise)." à ".libelle_user($ddeur), $autorise );
 	}	
 
 
@@ -2210,7 +2189,7 @@ function autorise_acces($ddeur,$bene,$autorise)
 		{
 		$date_jour=date('Y-m-d');
 
-		$reponse =command("","UPDATE r_dde_acces set code='' , date_auto='' where user='$bene' and ddeur='$as' and type=''  ");
+		$reponse =command("UPDATE r_dde_acces set code='' , date_auto='' where user='$bene' and ddeur='$as' and type=''  ");
 		ajout_log( $bene, traduire("Fin d'autorisation de recupération par")." $as" );
 		}
 
@@ -2218,12 +2197,12 @@ function autorise_acces($ddeur,$bene,$autorise)
 		{
 		$date_jour=date('Y-m-d');
 		$j=0;
-		$reponse =command("","select * from r_user where droit='S' and organisme='$organisme' ");
-		while ($donnees = mysql_fetch_array($reponse) ) 
+		$reponse =command("select * from r_user where droit='S' and organisme='$organisme' ");
+		while ($donnees = fetch_command($reponse) ) 
 			{
 			$idx2=$donnees["idx"];
-			$r1 =command("","select * from r_dde_acces where type='A' and ddeur=$idx2 and date_dde>='$date_jour' ");
-			while ($d1 = mysql_fetch_array($r1) ) 
+			$r1 =command("select * from r_dde_acces where type='A' and ddeur=$idx2 and date_dde>='$date_jour' ");
+			while ($d1 = fetch_command($r1) ) 
 				{
 				if ($j++==0)
 					{
@@ -2263,8 +2242,8 @@ function autorise_acces($ddeur,$bene,$autorise)
 		echo "<hr><img src=\"images/histo.png\" width=\"25\" height=\"25\" >  ".traduire('Historique')." : ";	
 
 		$j=0;
-		$reponse =command("","select * from  log where (user='$user_idx' ) or (acteur='$user_idx' ) order by date DESC ");		
-		while ($donnees = mysql_fetch_array($reponse) ) 
+		$reponse =command("select * from  log where (user='$user_idx' ) or (acteur='$user_idx' ) order by date DESC ");		
+		while ($donnees = fetch_command($reponse) ) 
 			{
 			if ($j++==0)
 				{
@@ -2322,41 +2301,7 @@ function visitor_country()
     return $result;
 }
 
-function pied_de_page($r="")
-	{
-	global $user_lang ;
-	
-	if ($r!="")
-		echo "<center><p><br><a id=\"accueil\" href=\"index.php\">".traduire('Retour à la page d\'accueil.')."</a>"; 
 
-	echo "<br><br>";
-	echo "<hr><center> ";
-	echo "<table> <tr> <td align=\"right\" valign=\"bottom\" ></td>";
-	
-	if ($user_lang!="fr")
-		echo "<td><a href=\"index.php?action=fr\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"français\" alt=\"français\" src=\"images/flag_fr.png\"/></a></td><td> | </td>";
-	if ($user_lang!="gb")
-		echo "<td><a href=\"index.php?action=gb\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"english\" alt=\"anglais\" src=\"images/flag_gb.png\"/></a></td><td> | </td>";
-	if ($user_lang!="de")
-			echo "<td><a href=\"index.php?action=de\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"allemand\" alt=\"allemand\" src=\"images/flag_de.png\"/></a></td><td> | </td>";
-	if ($user_lang!="es")
-			echo "<td><a href=\"index.php?action=es\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"espagnol\" alt=\"espagnol\" src=\"images/flag_es.png\"/></a></td><td> | </td>";
-	if ($user_lang!="ru")
-			echo "<td><a href=\"index.php?action=ru\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"russe\" alt=\"russe\" src=\"images/flag_ru.png\"/></a></td><td> | </td>";
-					
-	echo "<td><a id=\"lien_conditions\" href=\"conditions.html\">".traduire('Conditions d\'utilisation')."</a>";
-	echo "- <a id=\"lien_contact\" href=\"index.php?action=contact\">".traduire('Nous contacter')."</a>";
-	echo "- Copyright <a href=\"http://adileos.doc-depot.com\">ADILEOS 2014</a> ";
-	$version= parametre("DD_version_portail") ;
-	if ($_SERVER['REMOTE_ADDR']=="127.0.0.1")
-		echo "- <a href=\"version.htm\"target=_blank > $version </a>";	
-	else
-		echo "- $version ";	
-
-	echo "- <a href=\"index.php?action=bug\">".traduire('Signaler un bug ou demander une évolution').".</a> </td> ";
-	mysql_close( );	
-	exit();
-	}
  
 function testpassword($mdp)	{ // $mdp le mot de passe passé en paramètre
  
@@ -2423,8 +2368,8 @@ return $final;
 
 function affiche_titre_user($user)
 	{
-	$reponse =command("","select * from  r_user where idx='$user' ");		
-	$donnees = mysql_fetch_array($reponse) ;
+	$reponse =command("select * from  r_user where idx='$user' ");		
+	$donnees = fetch_command($reponse) ;
 
 	$nom=$donnees["nom"];
 	$prenom=$donnees["prenom"];				
@@ -2443,8 +2388,8 @@ function affiche_titre_user($user)
 
 function affiche_membre($idx)
 	{
-	$reponse =command("","select * from r_user where idx='$idx' ");		
-	$donnees = mysql_fetch_array($reponse) ;
+	$reponse =command("select * from r_user where idx='$idx' ");		
+	$donnees = fetch_command($reponse) ;
 
 	$droit=$donnees["droit"];	
 	$nom=$donnees["nom"];	
@@ -2454,8 +2399,8 @@ function affiche_membre($idx)
 	$id=$donnees["id"];
 	$idx=$donnees["idx"];
 	echo "<tr><td>  $droit </td><td>  $id  </td><td> $nom </td><td> $prenom </td><td> $tel </td><td> $mail </td>";
-	$r1 =command("","select * from r_attachement where ref='P-$idx' ");		
-	while ($d1 = mysql_fetch_array($r1) ) 
+	$r1 =command("select * from r_attachement where ref='P-$idx' ");		
+	while ($d1 = fetch_command($r1) ) 
 		{
 		$num=$d1["num"];
 		visu_doc($num,0);
@@ -2476,7 +2421,7 @@ function affiche_membre($idx)
 	function titre_rdv($user_telephone)
 		{
 		echo "<div class=\"CSSTableGenerator\" > ";
-		echo "<table><tr><td width=\"15%\"> ".traduire('Date - Heure')." </td><td> ".traduire('Message envoyé par SMS au')." $user_telephone </td><td> ".traduire('Alerte')." </td><td> ".traduire('Etat')." </td>";		
+		echo "<table><tr><td width=\"10%\"> ".traduire('Date')." </td><td width=\"10%\"> ".traduire('Heure')." </td><td> ".traduire('Message envoyé par SMS au')." $user_telephone </td><td> ".traduire('Préavis')." </td><td> ".traduire('Etat')." </td>";		
 		}
 		
 	function rdv($U_idx)
@@ -2490,15 +2435,14 @@ function affiche_membre($idx)
 		$idx = variable("idx");
 		if (($action=="rdv") and ($idx!="") )
 			{
-			$reponse =command("","select * FROM `DD_rdv` where idx='$idx' ");
-			if ($donnees = mysql_fetch_array($reponse))
+			$reponse =command("select * FROM `DD_rdv` where idx='$idx' ");
+			if ($donnees = fetch_command($reponse))
 				{
 				$date=$donnees["date"];	
 				$ligne=$donnees["ligne"];	
-				$reponse =command("","DELETE FROM `DD_rdv` where idx='$idx' ");
+				$reponse =command("DELETE FROM `DD_rdv` where idx='$idx' ");
 				ajout_log( $idx, traduire("Suppression RDV le")." $date : '$ligne' ", $user_idx );		
 				}
-				
 			}
 
 		echo "<table> <tr>";
@@ -2506,15 +2450,15 @@ function affiche_membre($idx)
 		echo "<td> <ul id=\"menu-bar\">";
 		if ( !VerifierPortable($user_telephone) )
 			{
-					echo "<li> <a href=\"index.php\"  >+ ".traduire('Rendez-vous')." </a> </li></ul></td>";
+			echo "<li> <a href=\"index.php\"  >+ ".traduire('Rendez-vous')." </a> </li></ul></td>";
 
-					if ($user_idx==$U_idx)
-						echo "<td> - ".traduire('Pour accèder à cette fonction il faut disposer d\'un n° de téléphone portable')." </td> ";
-					else
-						echo "<td> - ".traduire('Fonction non accessible car le bénéficiaire ne dispose pas d\'un n° de téléphone portable')." </td> ";
-				}
+			if ($user_idx==$U_idx)
+				echo "<td> - ".traduire('Pour accèder à cette fonction il faut disposer d\'un n° de téléphone portable')." </td> ";
 			else
-				echo "<li> <a href=\"index.php?action=rdv\"  >+ ".traduire('Rendez-vous')." </a> </li></ul></td>";
+				echo "<td> - ".traduire('Fonction non accessible car le bénéficiaire ne dispose pas d\'un n° de téléphone portable')." </td> ";
+			}
+		else
+			echo "<li> <a href=\"index.php?action=rdv\"  >+ ".traduire('Rendez-vous')." </a> </li></ul></td>";
 
 		echo "<td> </table> ";
 			
@@ -2524,30 +2468,31 @@ function affiche_membre($idx)
 			$j++;
 			formulaire ("ajout_rdv");
 			echo "<tr>";
-			echo "<td> <input type=\"texte\" name=\"date\"  class=\"calendrier\" size=\"10\" value=\"\">  ";
-			echo " <input type=\"texte\" name=\"heure\"   size=\"5\" value=\"\"> </td>";
+			echo "<td> <input type=\"texte\" name=\"date\"  class=\"calendrier\" size=\"10\" value=\"\"> </td> ";
+			echo " <td><input type=\"texte\" name=\"heure\"   size=\"5\" value=\"\"> </td>";
 			echo "<td> <input type=\"texte\" name=\"ligne\"   size=\"100\" value=\"\"> </td>";
 			liste_avant( "1H" );
 			echo "<input type=\"hidden\" name=\"user\"  value=\"$U_idx\"> " ;
 			echo "<td><input type=\"submit\" id=\"ajout_rdv\" value=\"".traduire('Ajouter')."\" ></form> </td> ";
 			}
 		if ($user_idx==$U_idx)
-			$reponse =command("","select * from  DD_rdv where user='$U_idx'  order by date desc");		
+			$reponse =command("select * from  DD_rdv where user='$U_idx'  order by date desc");		
 		else
-			$reponse =command("","select * from  DD_rdv where user='$U_idx' and auteur='$user_idx'  order by date desc");	
+			$reponse =command("select * from  DD_rdv where user='$U_idx' and auteur='$user_idx'  order by date desc");	
 			
-		while ($donnees = mysql_fetch_array($reponse) ) 
+		while ($donnees = fetch_command($reponse) ) 
 			{
 			if ($j==0)
 				titre_rdv($user_telephone);
 			$date=$donnees["date"];	
 			$d3= explode(" ",$date);
-			$date=mef_date_fr($d3[0])." ".$d3[1];
+			$date=mef_date_fr($d3[0]);
+			$heure=$d3[1];
 			$avant=$donnees["avant"];	
 			$etat=$donnees["etat"];	
 			$idx=$donnees["idx"];	
 			$ligne=stripcslashes($donnees["ligne"]);
-			echo "<tr><td>  $date </td><td> $ligne </td><td> $avant </td><td> $etat </td>";
+			echo "<tr><td> $date </td><td> $heure </td><td> $ligne </td><td> $avant </td><td> $etat </td>";
 			if ( ($action=="rdv") && ($etat=="A envoyer")) 
 				lien_c ("images/croixrouge.png", "rdv", param("idx","$idx" ) , traduire("Supprimer"));
 			$j++;
@@ -2655,7 +2600,6 @@ function affiche_membre($idx)
 				case "draganddrop_p":
 				case "modif_champ_bug":
 				case "modif_bug":
-				case "trad":
 				case "modif_trad":
 				case "param_sys":
 				case "modif_valeur_param":
@@ -2671,9 +2615,9 @@ function affiche_membre($idx)
 				case "ajout_referent":
 				case "ajout_user":
 				case "visu_fichier":
-				case "visu_fichier_tmp":
+//				case "visu_fichier_tmp":
 				case "visu_doc":
-				case "visu_pdf":
+//				case "visu_pdf":
 				case "visu_image_mini":
 				case "ajout_beneficiaire":
 				case "verif_existe_user":
@@ -2693,6 +2637,12 @@ function affiche_membre($idx)
 				case "mail_test" :
 				case "mail_envoi" :
 				case "collegues" :
+				
+				case "cc_activite" :
+				case "cc_maj_rdv" :
+				case "cc_ajout" :
+				case "cc_jour" :
+				case "cc_user" :
 				
 				
 					ajout_log_jour("----------------------------------------------------------------------------------- [ Action= $action ] ");
@@ -2738,6 +2688,7 @@ require_once 'include_crypt.php';
 	// ------------------------------------------------------------------------------ traitement des actions sans mot de passe
 	$action=variable("action");	
 
+
 	// on vérifie que l'action demandée (champ en clair) fait bien partie de la liste officielle ==> évite le piratage
 	$action = verif_action_autorise($action);	
 	
@@ -2752,6 +2703,8 @@ require_once 'include_crypt.php';
 			{
 			$_SESSION['lang'] = $action;
 			$user_lang=$_SESSION['lang'];
+			if (isset ($_SESSION['user_idx']))
+				modification_langue($_SESSION['user_idx'], $user_lang );
 			}	
 			
 		if ($action=="recup_mdp")
@@ -2763,8 +2716,8 @@ require_once 'include_crypt.php';
 			echo "<p><br><p> ".traduire('Rappel: vous avez 5 jours pour la contacter en personne. Elle s\'assurera de votre identité.');
 			
 			titre_referent("");
-			$reponse =command("","select * from  r_user where idx='$idx1' ");
-			$d1 = mysql_fetch_array($reponse);
+			$reponse =command("select * from  r_user where idx='$idx1' ");
+			$d1 = fetch_command($reponse);
 			$nom=$d1["nom"];
 			$idx2=$d1["idx"];
 			$prenom=$d1["prenom"];
@@ -2861,7 +2814,7 @@ require_once 'include_crypt.php';
 			echo "<td> <input type=\"text\" name=\"qui\" size=\"60\" value=\"$nom\"/></td>";
 			echo "<TR> <td> ".traduire('Vos coordonnées').":</td><td> <input type=\"text\" name=\"coordonnees\" size=\"60\" value=\"\"/></td>";
 			echo "<TR> <td> ".traduire('Description de')." <br>".traduire('votre demande')." :</td><td><TEXTAREA rows=\"5\" cols=\"60\" name=\"descript\" ></TEXTAREA></td>";
-			echo "<TR> <td> </td> <td><input type=\"submit\"  id=\"enreg_contact\" value=\"".traduire('Enregistrer')."\"/><br></td>";
+			echo "<TR> <td> </td> <td><input type=\"submit\"  id=\"enreg_contact\" value=\"".traduire('Envoyer la demande')."\"/><br></td>";
 			echo "</form> </table>  <p> ".traduire('Nous vous contacterons dans les meilleurs délais.')." <br><br>";
 			fin_cadre();
 			pied_de_page("x");
@@ -2872,7 +2825,11 @@ require_once 'include_crypt.php';
 			if (!maj_user(variable("idx"),variable("id"),variable("pw"),variable("nom"),variable("prenom")))
 				$action="finaliser_user2";
 			else
+				{
 				$action="";
+				$_SESSION['user']=variable("idx");
+				$_SESSION['user_idx']=variable("idx"); // T338
+				}
 			}
 			
 		if ($action=="reinit_mdp")
@@ -2880,14 +2837,14 @@ require_once 'include_crypt.php';
 			$date_jour=date('Y-m-d');
 
 			$code=variable_get("code");
-			$reponse =command("","select * from r_dde_acces where code='$code' and type='' and  date_dde='$date_jour'  ");
-			if ( ($donnees = mysql_fetch_array($reponse) )  )
+			$reponse =command("select * from r_dde_acces where code='$code' and type='' and  date_dde='$date_jour'  ");
+			if ( ($donnees = fetch_command($reponse) )  )
 				{
 				aff_logo();
 				$user=$donnees["user"];
 				
-				$r1 =command("","select * from r_user where  idx='$user'  ");
-				$d1 = mysql_fetch_array($r1) ;
+				$r1 =command("select * from r_user where  idx='$user'  ");
+				$d1 = fetch_command($r1) ;
 					
 				$identifiant=$d1["id"];
 				$pw=decrypt($d1["pw"]);
@@ -2918,8 +2875,8 @@ require_once 'include_crypt.php';
 			$action="modif_mdp";
 			$ok=FALSE;
 			$idx=variable('idx');
-			$reponse =command("","SELECT * from  r_user WHERE idx='$idx'"); 
-			if ($donnees = mysql_fetch_array($reponse))
+			$reponse =command("SELECT * from  r_user WHERE idx='$idx'"); 
+			if ($donnees = fetch_command($reponse))
 				{
 				$id=$donnees["id"];	
 				$mdp_ancien=$donnees["pw"];
@@ -2939,11 +2896,11 @@ require_once 'include_crypt.php';
 										$code_lecture=$donnees["lecture"];
 										
 										if  ($code_lecture=="$mdp_ancien") 
-											command( "","UPDATE r_user set lecture='".encrypt($mdp)."' where id='$id'");
+											command("UPDATE r_user set lecture='".encrypt($mdp)."' where id='$id'");
 
 										$mdp=encrypt($mdp);
 										aff_logo();
-										command( "","UPDATE r_user set pw='$mdp' where id='$id'");
+										command("UPDATE r_user set pw='$mdp' where id='$id'");
 										echo "<p><br><p>".traduire('Modification du mot de passe réalisée.');
 										$ok=TRUE;
 										ajout_log( $id, traduire('Changement de Mot de passe') );
@@ -2989,8 +2946,8 @@ require_once 'include_crypt.php';
 				$idx=variable_get("idx");
 			else
 				$idx=variable("idx");			
-			$reponse = command( "","SELECT * from  r_user WHERE idx='$idx'"); 
-			if ($donnees = mysql_fetch_array($reponse))
+			$reponse = command("SELECT * from  r_user WHERE idx='$idx'"); 
+			if ($donnees = fetch_command($reponse))
 				{
 				$user_nom=$donnees["nom"];
 				$user_prenom=$donnees["prenom"];
@@ -3036,8 +2993,8 @@ require_once 'include_crypt.php';
 			$prenom_p=mef_prenom(variable("prenom_p")); 
 			$prenom_m=mef_prenom(variable("prenom_m")); 
 
-			$reponse = command( "","SELECT * from  r_user WHERE droit='' and nom='$nom' and prenom='$prenom' and prenom_p='$prenom_p' and prenom_m='$prenom_m' and anniv='$anniv'and ville_nat='$ville_natale'"); 
-			if ($donnees = mysql_fetch_array($reponse))
+			$reponse = command("SELECT * from  r_user WHERE droit='' and nom='$nom' and prenom='$prenom' and prenom_p='$prenom_p' and prenom_m='$prenom_m' and anniv='$anniv'and ville_nat='$ville_natale'"); 
+			if ($donnees = fetch_command($reponse))
 				{
 				aff_logo();
 				$id=$donnees["id"];
@@ -3063,7 +3020,7 @@ require_once 'include_crypt.php';
 			formulaire ("traite_dde_identifiant");
 			echo "<tr><td> ".traduire('Nom').":</td><td><input ctype=\"text\" size=\"20\" name=\"nom\" value=\"".variable("nom")."\"/></td>";
 			echo "<tr><td> ".traduire('Prénom').": </td><td><input  type=\"text\" size=\"20\" name=\"prenom\" value=\"".variable("prenom")."\"/></td>";
-			echo "<tr><td> ".traduire('Date de naissance')." :  </td><td><input  type=\"text\" size=\"20\" name=\"anniv\" value=\"".variable("anniv")."\"/></td>";
+			echo "<tr><td> ".traduire('Date de naissance')." :  </td><td><input  type=\"text\" size=\"20\" name=\"anniv\" value=\"".variable("anniv")."\"/></td><td>jj/mm/aaaa</td>";
 			echo "<tr><td> ".traduire('Ville natale').":   </td><td><input  type=\"text\" size=\"20\" name=\"ville_natale\" value=\"".variable("ville_natale")."\"/></td>";
 			echo "<tr><td> ".traduire('Prénom de votre mére').": </td><td><input  type=\"text\" size=\"20\" name=\"prenom_m\" value=\"".variable("prenom_m")."\"/></td>";
 			echo "<tr><td> ".traduire('Prénom de votre pére').": </td><td><input  type=\"text\" size=\"20\" name=\"prenom_p\" value=\"".variable("prenom_p")."\"/></td>";
@@ -3083,9 +3040,9 @@ require_once 'include_crypt.php';
 			$prenom_p=mef_prenom(variable("prenom_p")); 
 			$prenom_m=mef_prenom(variable("prenom_m")); 
 			$code=variable("code"); 
-			echo $nom.$prenom.$prenom_p.$prenom_m.$anniv.$ville_natale;
-			$reponse = command ("","SELECT * from  r_user WHERE droit='' and nom='$nom' and prenom='$prenom' and prenom_p='$prenom_p' and prenom_m='$prenom_m' and anniv='$anniv'and ville_nat='$ville_natale'"); 
-			if ($donnees = mysql_fetch_array($reponse))
+
+			$reponse = command("SELECT * from  r_user WHERE droit='' and nom='$nom' and prenom='$prenom' and prenom_p='$prenom_p' and prenom_m='$prenom_m' and anniv='$anniv'and ville_nat='$ville_natale'"); 
+			if ($donnees = fetch_command($reponse))
 				{
 				aff_logo();
 				$idx=$donnees["idx"];
@@ -3103,10 +3060,10 @@ require_once 'include_crypt.php';
 										$code_lecture=$donnees["lecture"];
 										
 										if  ($code_lecture=="$mdp_ancien") 
-											command ("","UPDATE r_user set lecture='".encrypt($mdp)."' where id='$id'");
+											command("UPDATE r_user set lecture='".encrypt($mdp)."' where id='$id'");
 
 										$mdp=encrypt($mdp);
-										command ("","UPDATE r_user set pw='$mdp' where id='$id'");
+										command("UPDATE r_user set pw='$mdp' where id='$id'");
 										echo "<p><br><p>".traduire('Modification du mot de passe réalisée.')."<p><br><p>";
 										$ok=TRUE;
 										ajout_log( $idx, traduire("Réinitialisation Mot de passe avec code de déverrouillage")." $code" );
@@ -3138,22 +3095,22 @@ require_once 'include_crypt.php';
 		if ($action=="dde_code_par_sms")
 			{
 			aff_logo();
-			$code=rand(1000000,999999999);
+			$code=rand(100000,999999);
 			$date_jour=date('Y-m-d');
 			$telephone=variable_get("telephone");
-			$reponse =command("","SELECT * from  r_user WHERE telephone='$telephone' "); 
-			if (($donnees = mysql_fetch_array($reponse)) && (strlen($telephone)==10 ))
+			$reponse =command("SELECT * from  r_user WHERE telephone='$telephone' "); 
+			if (($donnees = fetch_command($reponse)) && (strlen($telephone)==10 ))
 				{
 				$idx=$donnees["idx"];
 
-				$reponse =command("","SELECT * from  r_dde_acces WHERE user='$idx'  and date_dde='$date_jour' "); 
-				if ($donnees = mysql_fetch_array($reponse))
+				$reponse =command("SELECT * from  r_dde_acces WHERE user='$idx'  and date_dde='$date_jour' "); 
+				if ($donnees = fetch_command($reponse))
 					{
 					echo "<br><p><strong>".traduire('Un SMS ou mail a déjà été envoyé aujourd\'hui.')." </strong> <p><br>";
 					}
 				else
 					{
-					$reponse =command("","INSERT INTO `r_dde_acces`  VALUES ('$idx' , '$code', '$date_jour', '$idx', '$idx', '', '' ) ");
+					$reponse =command("INSERT INTO `r_dde_acces`  VALUES ('$idx' , '$code', '$date_jour', '$idx', '$idx', '', '' ) ");
 					envoi_SMS($telephone , "Code de déverrouillage : $code ");
 					echo "<br><p><strong>".traduire('Vous receverez dans quelques minutes un SMS avec le code de déverrouillage.')."</strong> ";
 					}
@@ -3169,24 +3126,24 @@ require_once 'include_crypt.php';
 		if ($action=="dde_code_par_mail")
 			{
 			aff_logo();
-			$code=rand(1000000,999999999);
+			$code=rand(100000,999999);
 			$date_jour=date('Y-m-d');
 			$mail=variable_get("mail");
-			$reponse =command("","SELECT * from  r_user WHERE mail='$mail' "); 
-			if (($donnees = mysql_fetch_array($reponse)) && (VerifierAdresseMail($mail) ) )
+			$reponse =command("SELECT * from  r_user WHERE mail='$mail' "); 
+			if (($donnees = fetch_command($reponse)) && (VerifierAdresseMail($mail) ) )
 				{
 				$idx=$donnees["idx"];
 
-				$reponse =command("","SELECT * from  r_dde_acces WHERE user='$idx'  and date_dde='$date_jour' "); 
-				if ($donnees = mysql_fetch_array($reponse))
+				$reponse =command("SELECT * from  r_dde_acces WHERE user='$idx'  and date_dde='$date_jour' "); 
+				if ($donnees = fetch_command($reponse))
 					{
 					echo "<br><p><strong>".traduire('Un SMS ou mail a déjà été envoyé aujourd\'hui.')." </strong> <p><br>";
 					}
 				else
 					{
-					$reponse =command("","INSERT INTO `r_dde_acces`  VALUES ('$idx' , '$code', '$date_jour', '$idx', '$idx', '', '' ) ");
+					$reponse =command("INSERT INTO `r_dde_acces`  VALUES ('$idx' , '$code', '$date_jour', '$idx', '$idx', '', '' ) ");
 					
-					envoi_mail($mail,"Code de déverrouillage","Suite à votre demande votre code de déverrouillage est '$code' ");
+					envoi_mail($mail,traduire("Code de déverrouillage"),traduire("Suite à votre demande, votre code de déverrouillage est")." : '$code' ");
 					echo "<br><p><strong>".traduire('Vous receverez dans quelques minutes un mail avec le code de déverrouillage.')."</strong> <p><br>";
 					}
 				$action="dde_mdp_avec_code2";
@@ -3209,7 +3166,7 @@ require_once 'include_crypt.php';
 			formulaire ("valider_dde_mdp_avec_code");
 			echo "<tr><td> ".traduire('Nom').":</td><td><input ctype=\"text\" size=\"20\" name=\"nom\" value=\"".variable("nom")."\"/></td>";
 			echo "<tr><td> ".traduire('Prénom').":  </td><td><input  type=\"text\" size=\"20\" name=\"prenom\" value=\"".variable("prenom")."\"/></td>";
-			echo "<tr><td> ".traduire('Date de naissance')." : </td><td><input  type=\"text\" size=\"20\" name=\"anniv\" value=\"".variable("anniv")."\"/></td>";
+			echo "<tr><td> ".traduire('Date de naissance')." : </td><td><input  type=\"text\" size=\"20\" name=\"anniv\" value=\"".variable("anniv")."\"/></td><td>jj/mm/aaaa</td>";
 			echo "<tr><td> ".traduire('Ville natale').":  </td><td><input  type=\"text\" size=\"20\" name=\"ville_natale\" value=\"".variable("ville_natale")."\"/></td>";
 			echo "<tr><td> ".traduire('Prénom de votre mére').": </td><td><input  type=\"text\" size=\"20\" name=\"prenom_m\" value=\"".variable("prenom_m")."\"/></td>";
 			echo "<tr><td> ".traduire('Prénom de votre pére').": </td><td><input  type=\"text\" size=\"20\" name=\"prenom_p\" value=\"".variable("prenom_p")."\"/></td>";
@@ -3232,10 +3189,10 @@ require_once 'include_crypt.php';
 				aff_logo();
 				}
 			echo "<center>";	
-			$reponse = command( "","SELECT * from  r_user WHERE (id='$id' or mail='$id' or telephone='$id')"); 
-			if ($donnees = mysql_fetch_array($reponse))
+			$reponse = command("SELECT * from  r_user WHERE (id='$id' or mail='$id' or telephone='$id')"); 
+			if ($donnees = fetch_command($reponse))
 				{
-				if (!mysql_fetch_array($reponse)) // vérifiction qu'il est unique
+				if (!fetch_command($reponse)) // vérifiction qu'il est unique
 					{
 					$mail=$donnees["mail"];
 					$telephone=$donnees["telephone"];
@@ -3244,14 +3201,14 @@ require_once 'include_crypt.php';
 					$id1=$donnees["id"];
 					$date_jour=date('Y-m-d');				
 					
-					if ( ( (strlen(strstr($telephone,"06"))==10) || (strlen(strstr($telephone,"07"))==10) || (VerifierAdresseMail($mail) ) ) && ($droit=="") )
+					if ( ( ( VerifierPortable($telephone)) || (VerifierAdresseMail($mail) ) ) && ($droit=="") )
 						{
 						echo traduire('Pour recevoir votre code de déverrouillage : ');
 						echo "<p> <table border=\"2\" ><tr> <td> <center>";
 						echo "<img src=\"images/sms.png\" width=\"35\" height=\"35\" >".traduire('Soit directement en cliquant sur un choix ci-dessous')." : ";
 
-						// si téléphone portable valide alors on propose de l'encoyer par SMS 
-						if ( (strlen(strstr($telephone,"06"))==10) || (strlen(strstr($telephone,"07"))==10) )
+						// si téléphone portable valide alors on propose de l'envoyer par SMS 
+						if ( VerifierPortable($telephone))
 							{
 							$tel_tronque= $telephone;
 							$tel_tronque[3]='.';
@@ -3276,20 +3233,23 @@ require_once 'include_crypt.php';
 						{
 						$id=$donnees["id"];
 						$idx=$donnees["idx"];
-						$code=rand(1000000,999999999);
+						$code=rand(100000,999999);
 			
-						$reponse =command("","select * from r_dde_acces where user='$idx1' and ddeur='$idx1' and type='' and  date_dde='$date_jour'  ");
-						if (! ($donnees = mysql_fetch_array($reponse) )  )
+						$reponse =command("select * from r_dde_acces where user='$idx1' and ddeur='$idx1' and type='' and  date_dde='$date_jour'  ");
+						if (! ($donnees = fetch_command($reponse) )  )
 							{
 							if (compte_non_protege($id))
 								{
-								$reponse =command("","INSERT INTO `r_dde_acces`  VALUES ('$idx' , '$code', '$date_jour', '$idx', '', '', '' ) ");
-								$synth ="Pour réinitialiser votre mot de passe, cliquez <a  id=\"lien\"  href=\"".serveur."index.php?action=reinit_mdp&code=".encrypt($code)."\"> ici</a>' .";
-								$synth .="<p><br> Si vous n'êtes pas à l'origine de cette demande, cliquez <a  id=\"alerte\"  href=\"".serveur."index.php?action=alerte_admin&motif=".encrypt("reinit_mdp avec $code")."\"> ici</a>' .";
+								$sauve_lang=$user_lang;
+								$reponse =command("INSERT INTO `r_dde_acces`  VALUES ('$idx' , '$code', '$date_jour', '$idx', '', '', '' ) ");
+								$user_lang='fr'; // Attention : A initialiser quand le user aura mémorisé 
+								
+								$synth =traduire("Pour réinitialiser votre mot de passe, cliquez")." <a  id=\"lien\"  href=\"".serveur."index.php?action=reinit_mdp&code=".encrypt($code)."\">".traduire("ici")."</a> .";
+								$synth .="<p><br> ".traduire("Si vous n'êtes pas à l'origine de cette demande, cliquez")." <a  id=\"alerte\"  href=\"".serveur."index.php?action=alerte_admin&motif=".encrypt("reinit_mdp avec $code")."\">".traduire("ici")."</a>' .";
 								$dest = "$mail";
-
-								echo "<p><br><p>Un mail contenant un lien, valable uniquement aujourd'hui,<p> permettant de réinitialiser votre mot de passe a été envoyé à $mail. ";
-								envoi_mail( $dest , "Information pour $id", "$synth" );		
+								$user_lang=$sauve_lang;
+								echo "<p><br><p>".traduire("Un mail contenant un lien, valable uniquement aujourd'hui,<p> permettant de réinitialiser votre mot de passe a été envoyé à")." $mail. ";
+								envoi_mail( $dest , traduire ("Information pour")." $id", "$synth" );		
 								ajout_log( $id, traduire("Lien pour reinitialisation mail envoyé à l'adresse")." $mail" );
 								}
 							else
@@ -3300,16 +3260,16 @@ require_once 'include_crypt.php';
 						}
 					else
 						{
-						$reponse =command("","select * from r_dde_acces where user='$idx1' and user<>autorise and type='' and  date_dde>='$date_jour'  ");
-						if (! ($donnees = mysql_fetch_array($reponse) )  )
+						$reponse =command("select * from r_dde_acces where user='$idx1' and user<>autorise and type='' and  date_dde>='$date_jour'  ");
+						if (! ($donnees = fetch_command($reponse) )  )
 							{
 							echo "<p><br>".traduire('Cliquez sur')." <img src=\"images/contact.png\" width=\"25\" height=\"25\" > ".traduire('correspondant à la personne que vous allez contacter pour vous aider à récupérer votre mot de passe. ');
 
 							echo traduire('Après avoir cliqué sur le lien, vous aurez 5 jours pour la contacter en personne. Elle s\'assurera de votre identité. ');
 							echo traduire('Elle vous communiquera alors le code de déverouillage (mais elle ne connaitra pas votre mot de passe). ');
 							titre_referent("","x");
-							$reponse =command("","select * from  r_referent where user='$idx1' ");
-							while ($donnees = mysql_fetch_array($reponse) ) 
+							$reponse =command("select * from  r_referent where user='$idx1' ");
+							while ($donnees = fetch_command($reponse) ) 
 								{
 								$organisme=stripcslashes($donnees["organisme"]);
 								$idx=$donnees["idx"];
@@ -3321,8 +3281,8 @@ require_once 'include_crypt.php';
 									}
 								else
 									{
-									$r1 =command("","select * from  r_user where organisme='$organisme' and droit='S' ");
-									while ($d1 = mysql_fetch_array($r1) ) 
+									$r1 =command("select * from  r_user where organisme='$organisme' and droit='S' ");
+									while ($d1 = fetch_command($r1) ) 
 										{
 										$idx=$d1["idx"];
 										$nom=$donnees["nom"];
@@ -3338,8 +3298,8 @@ require_once 'include_crypt.php';
 							echo "<p><br>Il y a dejà une demande en cours auprès de ";
 							$ddeur=$donnees["ddeur"];
 							titre_referent("","x");
-							$reponse =command("","select * from  r_referent where user='$idx1' and nom='$ddeur' ");
-							while ($donnees = mysql_fetch_array($reponse) ) 
+							$reponse =command("select * from  r_referent where user='$idx1' and nom='$ddeur' ");
+							while ($donnees = fetch_command($reponse) ) 
 								{
 								$organisme=stripcslashes($donnees["organisme"]);
 								$idx=$donnees["idx"];
@@ -3350,7 +3310,7 @@ require_once 'include_crypt.php';
 							echo "<p><br><p> ".traduire('Contacter cette personne, elle s\'assurera de votre identité.');
 							echo "<br> ".traduire('Puis, elle vous communiquera votre code de déverouillage (mais elle ne connaitra pas votre mot de passe). ');
 							echo "<p>".traduire('Si vous n\'arrivez pas à la joindre et que vous voulez contacter un autre référent de confiance,');
-							echo "<br>".traduire('attendez que le delais initial soit écoulé pour faire une nouvelle demande. ');
+							echo "<br>".traduire('attendez que le délai initial soit écoulé pour faire une nouvelle demande. ');
 							echo "<br><p><br><p><a href=\"index.php?action=dde_mdp_avec_code\"> <img src=\"images/code.png\" width=\"35\" height=\"35\" >".traduire('Si vous avez déjà reccueilli le code de déverrouillage, cliquez ici')."</a><p><br><p><br></center>";
 						
 							}
@@ -3406,8 +3366,8 @@ require_once 'include_crypt.php';
 if (isset($_POST['pass']))
 	{
 	$id=$_POST['id'];
-	$reponse = command( "","SELECT * from  r_user WHERE id='$id' "); 
-	$donnees = mysql_fetch_array($reponse);
+	$reponse = command("SELECT * from  r_user WHERE id='$id' "); 
+	$donnees = fetch_command($reponse);
 	$mot_de_passe=$donnees["pw"];	
 	$id=$donnees["id"];
 	$date_log=date('Y-m-d');	
@@ -3443,15 +3403,18 @@ if (isset($_POST['pass']))
 			$_SESSION['profil']= $donnees["droit"];
 			
 			if (($donnees["droit"]=="A") && ($ancien_droit!="A"))
-				envoi_mail( parametre('DD_mail_gestinonnaire') , "Connexion administrateur", "IP : $ip" );		
+				envoi_mail( parametre('DD_mail_gestinonnaire') , "Connexion administrateur : ".$donnees["nom"]." ".$donnees["prenom"], "IP : $ip" );
+				
+			if (($donnees["droit"]=="E") && ($ancien_droit!="E"))
+				envoi_mail( parametre('DD_mail_gestinonnaire') , "Connexion exploitant : ".$donnees["nom"]." ".$donnees["prenom"], "IP : $ip" );		
 			
 			// supprime les demandes de recupération de mot de passe encore actif 
-			$reponse =command("","UPDATE r_dde_acces set type='-' where user='$idx' and type='' and date_dde>='$date_log' ");
+			$reponse =command("UPDATE r_dde_acces set type='-' where user='$idx' and type='' and date_dde>='$date_log' ");
 			$label = libelle_user($idx);
 			$last_cx = "";
-			$reponse =command("","select * from  log where ( user='$idx' or user='$id'or user='$label'  ) and  (ligne regexp 'Connexion') and  (not (ligne regexp 'Déconnexion')) and ( not (ligne regexp 'Echec Connexion'))  order by date DESC ");		
-			if ($donnees = mysql_fetch_array($reponse))// c'est la connexion actuelle
-				if ($donnees = mysql_fetch_array($reponse) )// c'est la connexion précédente
+			$reponse =command("select * from  log where ( user='$idx' or user='$id'or user='$label'  ) and  (ligne regexp 'Connexion') and  (not (ligne regexp 'Déconnexion')) and ( not (ligne regexp 'Echec Connexion'))  order by date DESC ");		
+			if ($donnees = fetch_command($reponse))// c'est la connexion actuelle
+				if ($donnees = fetch_command($reponse) )// c'est la connexion précédente
 					{
 					$last_cx=$donnees["date"];
 					if ($last_cx!="")
@@ -3459,8 +3422,8 @@ if (isset($_POST['pass']))
 						maj_last_cx($idx);
 						$ligne_last_cx = traduire('Dernière connexion')." :<br> $last_cx. ";
 						
-						$reponse =command("","select * from  log where ( user='$idx' or user='$id'  or user='$label' ) and  (ligne regexp 'Echec Connexion') order by date DESC ");		
-						$donnees = mysql_fetch_array($reponse); 
+						$reponse =command("select * from  log where ( user='$idx' or user='$id'  or user='$label' ) and  (ligne regexp 'Echec Connexion') order by date DESC ");		
+						$donnees = fetch_command($reponse); 
 						$last_echec_cx=$donnees["date"];	
 						if ($last_echec_cx>$last_cx)
 							echo traduire("Depuis votre derniére connexion, il y a eu tentative de connexion à votre compte, merci de consulter votre")." <a href=\"index.php?action=histo\"  >".traduire('historique')."</a> ";
@@ -3494,8 +3457,8 @@ if (isset($_POST['pass']))
 	if (isset($_SESSION['user']))
 		{
 		$idx=$_SESSION['user'];
-		$reponse = command( "","SELECT * from  r_user WHERE idx='$idx'"); 
-		$donnees = mysql_fetch_array($reponse);
+		$reponse = command("SELECT * from  r_user WHERE idx='$idx'"); 
+		$donnees = fetch_command($reponse);
 		$user_idx=$donnees["idx"];
 		$_SESSION['acteur']=$user_idx; // utilisé par le upload en mode drag and drop 
 		$id=$donnees["id"];
@@ -3512,6 +3475,7 @@ if (isset($_POST['pass']))
 		$user_ville_nat=$donnees["ville_nat"];
 		$user_adresse=stripcslashes($donnees["adresse"]);
 		$user_organisme=stripcslashes($donnees["organisme"]);
+		$user_lang=$donnees["langue"];
 		if ($user_droit=="S")
 			$doc_autorise=doc_autorise($user_organisme);
 		else
@@ -3578,8 +3542,8 @@ if (isset($_POST['pass']))
 		{
 		$num=variable("num");
 	
-		$reponse =command("","select * from r_attachement where  num='$num' ");
-		if ($donnees = mysql_fetch_array($reponse) )
+		$reponse =command("select * from r_attachement where  num='$num' ");
+		if ($donnees = fetch_command($reponse) )
 				{
 				$type=$donnees["type"];		
 				
@@ -3622,7 +3586,7 @@ if (isset($_POST['pass']))
 				aff_logo();
 				maj_droit("$user_idx","$user_droit-");
 				supp_tous_fichiers($user_idx);			
-				command("","delete from r_sms where idx='$user_idx' ");
+				command("delete from r_sms where idx='$user_idx' ");
 				$_SESSION['pass']=false;	
 				echo "<hr><p><br><p>";
 				msg_ok(traduire("Suppression de compte réalisée!"));
@@ -3633,7 +3597,7 @@ if (isset($_POST['pass']))
 			}
 		else
 			{
-			erreur (traduire("Code Incorrect"));
+			erreur (traduire("Mot de passe incorrect"));
 			$action="supp_compte_a_confirmer";
 			}
 		}
@@ -3727,21 +3691,21 @@ if (isset($_POST['pass']))
 		{
 		echo "Init Selenium:";
 		
-		command("","delete from r_organisme where organisme REGEXP 'SELENIUM' ");
+		command("delete from r_organisme where organisme REGEXP 'SELENIUM' ");
 		
-		$reponse =command("","select * from  r_user where nom REGEXP 'SELENIUM' or id REGEXP 'SELENIUM'  ");		
-		while ($donnees = mysql_fetch_array($reponse) ) 
+		$reponse =command("select * from  r_user where nom REGEXP 'SELENIUM' or id REGEXP 'SELENIUM'  ");		
+		while ($donnees = fetch_command($reponse) ) 
 			{	
 			$idx= $donnees["idx"];
-			command("","delete from r_lien where user='$idx' ");
-			command("","delete from r_dde_acces where user='$idx' or  ddeur='$idx' ");
-			command("","delete from r_referent where user='$idx' or  idx='$idx' ");
-			command("","delete from r_sms where idx='$idx' ");
-			command("","delete from log where user='$idx' or  acteur='$idx'  ");
+			command("delete from r_lien where user='$idx' ");
+			command("delete from r_dde_acces where user='$idx' or  ddeur='$idx' ");
+			command("delete from r_referent where user='$idx' or  idx='$idx' ");
+			command("delete from r_sms where idx='$idx' ");
+			command("delete from log where user='$idx' or  acteur='$idx'  ");
 			supp_tous_fichiers($idx);
-			command("","delete from r_user where idx='$idx'  ");
-			command("","trunc table log ");
-			command("","trunc table z_log_t  ");
+			command("delete from r_user where idx='$idx'  ");
+			command("trunc table log ");
+			command("trunc table z_log_t  ");
 			
 			echo "<br>User $idx  Ok.";
 			}
@@ -3751,8 +3715,8 @@ if (isset($_POST['pass']))
 	
 
 		// ===================================================================== Bloc IMAGE
-		$reponse = command( "","SELECT * from  r_user WHERE idx='$idx'"); 
-		$donnees = mysql_fetch_array($reponse);
+		$reponse = command("SELECT * from  r_user WHERE idx='$idx'"); 
+		$donnees = fetch_command($reponse);
 		$user_idx=$donnees["idx"];
 		$id=$donnees["id"];
 		$user_nom=$donnees["nom"];
@@ -3773,7 +3737,7 @@ if (isset($_POST['pass']))
 		$user_organisme=stripcslashes($donnees["organisme"]);	
 		$code_lecture=$donnees["lecture"];	
 		$user_lecture=$donnees["lecture"];
-		
+		$user_lang=$donnees["langue"];		
 		supp_fichier("tmp/A-$user_idx.pdf");	
 		supp_fichier("tmp/_A-$user_idx.pdf");	
 	
@@ -3860,7 +3824,7 @@ if (isset($_POST['pass']))
 		if ($user_droit=="")
 			{
 			echo "<li><a href=\"index.php?action=supp_compte_a_confirmer\"> ".traduire('Suppression compte')." </a></li>";
-			echo "<li><a href=\"index.php?action=exporter_a_confirmer\"> ".traduire('Tout exporter')." </a></li>";
+			echo "<li><a href=\"index.php?action=exporter_a_confirmer\"> ".traduire('Tout archiver')." </a></li>";
 			}		
 
 		if  ($user_droit=="A") 
@@ -3887,8 +3851,8 @@ if (isset($_POST['pass']))
 		
 		if ($user_droit!="")
 			{
-			$r1 =command("","select * from  r_organisme where idx='$user_organisme' ");
-			$d1 = mysql_fetch_array($r1);
+			$r1 =command("select * from  r_organisme where idx='$user_organisme' ");
+			$d1 = fetch_command($r1);
 			$logo=$d1["logo"];
 			if ($logo!="")
 				echo "<td> <img src=\"images/$logo\" width=\"200\" height=\"100\"  > </td>";
@@ -3943,121 +3907,6 @@ if (isset($_POST['pass']))
 			pied_de_page("x");
 			}	
 			
-
-		
-		// !!!!!!!!!!!!! ZONE COMPLEXE  !!!!!!!!!!!
-		if (($_SESSION['bene']!="") && ($action!="") && ($action!="dde_acces") && ($user_droit=="S"))
-			{
-			if (($action!="ajout_admin") &&  ($action!="draganddrop") &&  ($action!="rdv") &&  ($action!="ajout_rdv"))
-				$action="detail_user";
-			$user=$_SESSION['bene'];
-			}
-		else
-			$_SESSION['bene']="";
-		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-	if ($user_droit=="E") 
-			{
-			echo "<table><tr><td width=\"500\">";
-			echo " <ul id=\"menu-bar\">";
-			echo "<li><a href=\"index.php\"> Journaux </a><ul>";
-			echo "<li><a href=\"index.php?action=afflog_t\"> Log technique </a></li>";
-			echo "<li><a href=\"index.php?action=afflog\"> Log Fonctionnel</a></li>";		
-			echo "<li><a href=\"tmp/log.txt\"> Aujourd'hui</a></li>";		
-			echo "<li><a href=\"tmp/hier.txt\"> Hier</a></li>";		
-			echo "</li></ul>";			
-			echo "<li><a href=\"index.php?action=liste_compte\"> Liste User</a></li>";
-			echo "<li><a href=\"index.php?action=force_supervision_sms\"> Télécom</a><ul>";
-			
-			echo "<li><a href=\"index.php?action=force_supervision_sms\"> Supervision SMS à la demande </a></li>";
-			echo "<li><a href=\"index.php?action=active_sms2mail\">  active_sms2mail </a></li>";
-			echo "<li><a href=\"index.php?action=desactive_sms2mail\"> desactive_sms2mail </a></li>";		
-			echo "<li><a href=\"index.php?action=sms_test\"> Envoi SMS </a></li>";		
-			echo "</li></ul>";			
-			
-			echo "<li> <a href=\"index.php\">CTRL</a><ul>";			
-
-			echo "<li><a href=\"index.php?action=en_trop\"> Fichiers en trop </a></li>";
-			echo "<li><a href=\"index.php?action=authenticite \"> Aunthenticité </a></li>";
-			echo "<li><a href=\"index.php?action=integrite \"> Intégrité BdD </a></li>";
-			echo "</ul><li> <a href=\"index.php?action=param_sys\">Paramètrage</a><ul>";			
-
-			echo "<li><a href=\"index.php?action=phpinfo\"> Phpinfo </a></li>";
-			echo "<li><a href=\"index.php?action=archivage_php\"> Archivage Php+Sql </a></li>";
-			echo "</ul></ul >";
-			echo "<td></table>";
-
-			}		
-	if ($user_droit=="F") 
-			{
-			echo "<a href=\"index.php?action=trad\">Traduction</a>";			
-			}	
-			
-		if ($user_droit=="T") 
-			{
-			echo "<table><tr><td width=\"400\">";
-			echo " <ul id=\"menu-bar\">";
-			echo "<li><a href=\"index.php?action=init_formation\"> Init comptes </a></li>";			
-			echo "<li><a href=\"index.php?action=raz_mdp_formation\"> Init Mots de passe</a></li>";
-			echo "</ul>";
-			echo "<td></table>";
-			}	
-
-		
-	if (($action=="supp_filtre") && ($user_droit=="F"))
-		{
-		$_SESSION["filtre"]="";
-		$action="";
-		}		
-		
-	if (($action=="") && ($user_droit=="E"))
-		{
-		indicateurs();
-		pied_de_page("x");
-		}		
-		
-	if (($action=="en_trop") && ($user_droit=="E"))
-		{
-		fichiers_en_trop();
-		pied_de_page("x");
-		}		
-
-	if (($action=="integrite") &&($user_droit=="E"))
-		{
-		verif_integrite_bdd();
-		pied_de_page("x");
-		}	
-		
-	if (($action=="authenticite") &&  ($user_droit=="E"))
-		{
-		echo "Controle Aunthenticité des fichiers";
-		ctrl_signature(true);
-		pied_de_page("x");
-		}	
-
-	if (($action=="force_supervision_sms") &&  ($user_droit=="E"))
-		{
-		ecrit_parametre('TECH_msg_supervision_gatewaysms', "Test SMS ");
-		envoi_SMS( parametre('DD_numero_tel_sms') ,parametre('TECH_msg_supervision_gatewaysms').". ".date('H\hi',time()));
-		ecrit_parametre('TECH_dernier_envoi_supervision', time() );
-		echo "Supervision SMS à la demande envoyée avec '". parametre('TECH_msg_supervision_gatewaysms')."'";
-		pied_de_page("x");
-		}	
-
-	if (($action=="active_sms2mail") &&  ($user_droit=="E"))
-		{
-		envoi_SMS( parametre('DD_numero_tel_sms') ,'sms2mail on');
-		echo "Activation SMS2MAIL envoyée au ". parametre('DD_numero_tel_sms');
-		pied_de_page("x");
-		}	
-		
-	if (($action=="desactive_sms2mail") &&  ($user_droit=="E"))
-		{
-		envoi_SMS( parametre('DD_numero_tel_sms') ,'sms2mail off');
-		echo "Activation SMS2MAIL envoyée au ". parametre('DD_numero_tel_sms');
-		pied_de_page("x");
-		}	
-	
 	if (($action=="sms_envoi") &&  ($user_droit!=""))
 		{
 		$msg= stripcslashes(stripcslashes(variable("msg")));		
@@ -4134,7 +3983,8 @@ if (isset($_POST['pass']))
 			$action="mail_test";
 			}
 		}			
-		
+
+	
 	if (($action=="mail_test") )
 		{
 		$mail= variable("mail");
@@ -4161,14 +4011,126 @@ if (isset($_POST['pass']))
 		
 		pied_de_page("x");
 		}			
+		
+		// !!!!!!!!!!!!! ZONE COMPLEXE  !!!!!!!!!!!
+		if (($_SESSION['bene']!="") && ($action!="") && ($action!="dde_acces") && ($user_droit=="S"))
+			{
+			if (($action!="ajout_admin") &&  ($action!="draganddrop") &&  ($action!="rdv") &&  ($action!="ajout_rdv"))
+				$action="detail_user";
+			$user=$_SESSION['bene'];
+			}
+		else
+			$_SESSION['bene']="";
+		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+	if ($user_droit=="E") 
+			{
+			echo "<table><tr><td width=\"500\">";
+			echo " <ul id=\"menu-bar\">";
+			echo "<li><a href=\"index.php\"> Journaux </a><ul>";
+			echo "<li><a href=\"index.php?action=afflog_t\"> Log technique </a></li>";
+			echo "<li><a href=\"index.php?action=afflog\"> Log Fonctionnel</a></li>";		
+			echo "<li><a href=\"tmp/log.txt\"> Aujourd'hui</a></li>";		
+			echo "<li><a href=\"tmp/hier.txt\"> Hier</a></li>";		
+			echo "</li></ul>";			
+			echo "<li><a href=\"index.php?action=liste_compte\"> Liste User</a></li>";
+			echo "<li><a href=\"index.php?action=force_supervision_sms\"> Télécom</a><ul>";
+			
+			echo "<li><a href=\"index.php?action=force_supervision_sms\"> Supervision SMS à la demande </a></li>";
+			echo "<li><a href=\"index.php?action=active_sms2mail\">  active_sms2mail </a></li>";
+			echo "<li><a href=\"index.php?action=desactive_sms2mail\"> desactive_sms2mail </a></li>";		
+			echo "<li><a href=\"index.php?action=sms_test\"> Envoi SMS </a></li>";		
+			echo "</li></ul>";			
+			
+			echo "<li> <a href=\"index.php\">CTRL</a><ul>";			
+
+			echo "<li><a href=\"index.php?action=en_trop\"> Fichiers en trop </a></li>";
+			echo "<li><a href=\"index.php?action=authenticite \"> Aunthenticité </a></li>";
+			echo "<li><a href=\"index.php?action=integrite \"> Intégrité BdD </a></li>";
+			echo "</ul><li> <a href=\"index.php?action=param_sys\">Paramètrage</a><ul>";			
+
+			echo "<li><a href=\"index.php?action=phpinfo\"> Phpinfo </a></li>";
+			echo "<li><a href=\"index.php?action=archivage_php\"> Archivage Php+Sql </a></li>";
+			echo "</ul></ul >";
+			echo "<td></table>";
+
+			}	
+			
+
+		if ($user_droit=="T") 
+			{
+			echo "<table><tr><td width=\"400\">";
+			echo " <ul id=\"menu-bar\">";
+			echo "<li><a href=\"index.php?action=init_formation\"> Init comptes </a></li>";			
+			echo "<li><a href=\"index.php?action=raz_mdp_formation\"> Init Mots de passe</a></li>";
+			echo "</ul>";
+			echo "<td></table>";
+			}	
+
+		
+	if (($action=="supp_filtre") && ($user_droit=="F"))
+		{
+		$_SESSION["filtre"]="";
+		$action="";
+		}		
+		
+	if (($action=="") && ($user_droit=="E"))
+		{
+		indicateurs();
+		pied_de_page("x");
+		}		
+		
+	if (($action=="en_trop") && ($user_droit=="E"))
+		{
+		fichiers_en_trop();
+		pied_de_page("x");
+		}		
+
+	if (($action=="integrite") &&($user_droit=="E"))
+		{
+		verif_integrite_bdd();
+		pied_de_page("x");
+		}	
+		
+	if (($action=="authenticite") &&  ($user_droit=="E"))
+		{
+		echo "Controle Aunthenticité des fichiers";
+		ctrl_signature(true);
+		pied_de_page("x");
+		}	
+
+	if (($action=="force_supervision_sms") &&  ($user_droit=="E"))
+		{
+		ecrit_parametre('TECH_msg_supervision_gatewaysms', "Test SMS ");
+		envoi_SMS( parametre('DD_numero_tel_sms') ,parametre('TECH_msg_supervision_gatewaysms').". ".date('H\hi',time()));
+		ecrit_parametre('TECH_dernier_envoi_supervision', time() );
+		echo "Supervision SMS à la demande envoyée avec '". parametre('TECH_msg_supervision_gatewaysms')."'";
+		pied_de_page("x");
+		}	
+
+	if (($action=="active_sms2mail") &&  ($user_droit=="E"))
+		{
+		envoi_SMS( parametre('DD_numero_tel_sms') ,'sms2mail on');
+		echo "Activation SMS2MAIL envoyée au ". parametre('DD_numero_tel_sms');
+		pied_de_page("x");
+		}	
+		
+	if (($action=="desactive_sms2mail") &&  ($user_droit=="E"))
+		{
+		envoi_SMS( parametre('DD_numero_tel_sms') ,'sms2mail off');
+		echo "Activation SMS2MAIL envoyée au ". parametre('DD_numero_tel_sms');
+		pied_de_page("x");
+		}	
+	
+
 	
 
 		
 	if (($action=="raz_mdp1") &&  ($user_droit=="E"))
 		{
 		$idx=variable('idx');
-		$reponse =command("","SELECT * from  r_user WHERE idx='$idx'"); 
-		if ($donnees = mysql_fetch_array($reponse))
+		$reponse =command("SELECT * from  r_user WHERE idx='$idx'"); 
+		if ($donnees = fetch_command($reponse))
 			{
 			$id=$donnees["id"];	
 			debut_cadre();
@@ -4189,15 +4151,15 @@ if (isset($_POST['pass']))
 	if (($action=="raz_mdp") &&  ($user_droit=="E"))
 		{
 		$idx=variable('idx');
-		$reponse =command("","SELECT * from  r_user WHERE idx='$idx'"); 
-		if ($donnees = mysql_fetch_array($reponse))
+		$reponse =command("SELECT * from  r_user WHERE idx='$idx'"); 
+		if ($donnees = fetch_command($reponse))
 			{
 			$id=$donnees["id"];	
 			$mdp=variable('mdp');
 			echo traduire("Réinitilaition du mot de passe de")." '$id' ".traduire("faite (Mdp = ")."'$mdp')";
 			ajout_log_tech("Réinitilaition du mot de passe de '$id' faite par exploitant. (Mdp = '$mdp')");
 			$mdp=encrypt($mdp);
-			$reponse =command("","UPDATE r_user set pw='$mdp' where idx='$idx'");
+			$reponse =command("UPDATE r_user set pw='$mdp' where idx='$idx'");
 			$action="liste_compte";
 			}
 		}				
@@ -4206,8 +4168,8 @@ if (isset($_POST['pass']))
 			{
 			echo "</table><div class=\"CSSTableGenerator\" > ";
 			echo "<table><tr><td > ".traduire('N°')."  </td><td> ".traduire('Création')."</td><td> ".traduire('Nom')."</td><td> ".traduire('Prénom')."</td><td> ".traduire('Mail')."</td><td> ".traduire('Tel')."</td><td> ".traduire('Droit')."</td>";
-			$reponse =command("","select * from  r_user order by idx desc");		
-			while ($donnees = mysql_fetch_array($reponse) ) 
+			$reponse =command("select * from  r_user order by idx desc");		
+			while ($donnees = fetch_command($reponse) ) 
 				{
 				$idx1=$donnees["idx"];	
 				$creation=$donnees["creation"];
@@ -4235,10 +4197,10 @@ if (isset($_POST['pass']))
 			
 			echo "<div class=\"CSSTableGenerator\" ><table><tr><td > ".traduire('Date')." </td><td> ".traduire('IP')."</td><td> ".traduire('Action')." </td><td> ".traduire('Compte')." </td><td> ".traduire('Acteur')." </td>";
 			if ($filtre1=="")
-				$reponse =command("","select * from  log  order by date desc limit 0,1000");		
+				$reponse =command("select * from  log  order by date desc limit 0,1000");		
 			else
-				$reponse =command("","select * from  log where (date REGEXP '$filtre1' or ligne REGEXP '$filtre1' or user REGEXP '$filtre1' or acteur REGEXP '$filtre1' or ip REGEXP '$filtre1') order by date desc");		
-			while ($donnees = mysql_fetch_array($reponse) ) 
+				$reponse =command("select * from  log where (date REGEXP '$filtre1' or ligne REGEXP '$filtre1' or user REGEXP '$filtre1' or acteur REGEXP '$filtre1' or ip REGEXP '$filtre1') order by date desc");		
+			while ($donnees = fetch_command($reponse) ) 
 				{
 				$date=$donnees["date"];	
 				$ligne=$donnees["ligne"];
@@ -4266,10 +4228,10 @@ if (isset($_POST['pass']))
 			
 			echo "<div class=\"CSSTableGenerator\" ><table><tr><td > ".traduire('Date')."  </td><td> ".traduire('Prio')." </td><td> ".traduire('Evénement')." </td><td> ".traduire('Ip')." </td>";
 			if ($filtre1=="")
-				$reponse =command("","select * from  z_log_t  order by date desc limit 0,1000");		
+				$reponse =command("select * from  z_log_t  order by date desc limit 0,1000");		
 			else
-				$reponse =command("","select * from  z_log_t where (date REGEXP '$filtre1' or ligne REGEXP '$filtre1' or ip REGEXP '$filtre1'or prio REGEXP '$filtre1') order by date desc");		
-			while ($donnees = mysql_fetch_array($reponse) ) 
+				$reponse =command("select * from  z_log_t where (date REGEXP '$filtre1' or ligne REGEXP '$filtre1' or ip REGEXP '$filtre1'or prio REGEXP '$filtre1') order by date desc");		
+			while ($donnees = fetch_command($reponse) ) 
 				{
 				$date=$donnees["date"];	
 				$ligne=$donnees["ligne"];
@@ -4291,20 +4253,36 @@ if (isset($_POST['pass']))
 			$organisme=variable_get("organisme");
 			echo libelle_organisme ($organisme); 
 			echo "<div class=\"CSSTableGenerator\" ><table><tr><td > ".traduire('Droit')."  </td><td > ".traduire('Identifiant')."  </td><td> ".traduire('Nom')." </td><td> ".traduire('Prénom')." </td><td> ".traduire('Téléphone')." </td><td> ".traduire('Mail')." </td>";
-			$reponse =command("","select * from r_lien where organisme='$organisme' ");		
-			while ($donnees = mysql_fetch_array($reponse) ) 
+			$reponse =command("select * from r_lien where organisme='$organisme' ");		
+			while ($donnees = fetch_command($reponse) ) 
 				{
 				$idx=$donnees["user"];	
 				affiche_membre($idx);
 				}			
 				
-			$reponse =command("","select * from r_user where (organisme='$organisme' and (droit='S' or droit='s') )");		
-			while ($donnees = mysql_fetch_array($reponse) ) 
+			$reponse =command("select * from r_user where (organisme='$organisme' and (droit='S' or droit='s') )");		
+			while ($donnees = fetch_command($reponse) ) 
 				{
 				$idx=$donnees["idx"];	
 				affiche_membre($idx);
 				}
 			echo "</table></div>";
+			
+			echo "<p><div class=\"CSSTableGenerator\" ><table><tr><td > ".traduire('Support')."  </td><td > ".traduire('Libellé')."  </td><td> ".traduire('Libellé Acteur')." </td><td> ".traduire('Libellé Bénéficiaire')." </td><td> ".traduire('Mails complémentaires')." </td>";
+			$reponse =command("select * from fct_fissa where organisme='$organisme' ");		
+			while ($donnees = fetch_command($reponse) ) 
+				{
+				$support=$donnees["support"];	
+				$libelle=$donnees["libelle"];	
+				$acteur=$donnees["acteur"];
+				$beneficiaire=$donnees["beneficiaire"];
+				$mails_rapports=$donnees["mails_rapports"];
+				echo "<tr><td>  $support </td><td>  '$libelle'  </td><td> '$acteur' </td><td> '$beneficiaire'</td><td> $mails_rapports </td>";
+
+				}			
+				
+			echo "</table></div>";			
+			
 			pied_de_page("x");
 			}	
 			
@@ -4316,7 +4294,7 @@ if (isset($_POST['pass']))
 			$body .= "<p>".traduire("Pour accepter et finaliser la création de votre compte sur 'Doc-depot.com', merci de cliquer sur ce")." <a  id=\"lien\"  href=\"".serveur."index.php?action=finaliser_user&idx=".addslashes(encrypt($idx))."\">".traduire('lien')." </a> ".traduire('et compléter les informations manquantes.');
 			$body .= "<p>".traduire('Message de la part de')." $user_prenom $user_nom";
 			$body .= "<p> <hr> <center> Copyright ADILEOS 2014 </center>";			// Envoyer mail pour demander saisie pseudo et PW
-			envoi_mail($mail,"Création compte",$body);
+			envoi_mail($mail,traduire("Création compte"),$body);
 			ajout_log( $idx, traduire("Renvoi mail de finalisation de compte")." : $mail", $user_idx );
 			}
 
@@ -4324,8 +4302,8 @@ if (isset($_POST['pass']))
 			{
 			$action="visualisation_lecture2";
 			$ok=FALSE;
-			$reponse = command( "","SELECT * from  r_user WHERE id='$id'"); 
-			if ($donnees = mysql_fetch_array($reponse))
+			$reponse = command("SELECT * from  r_user WHERE id='$id'"); 
+			if ($donnees = fetch_command($reponse))
 				{
 				$ancienne_lecture=$donnees['lecture'];
 				$mdp=variable('n1');
@@ -4333,7 +4311,7 @@ if (isset($_POST['pass']))
 					{
 					if (strlen($mdp)==0)
 						{
-						command( "","UPDATE r_user set lecture='$mdp' where id='$id'");
+						command("UPDATE r_user set lecture='$mdp' where id='$id'");
 						msg_ok (traduire("Modification effectuée: votre code de lecture est désactivé."));
 						$ok=TRUE;
 						ajout_log( $id, traduire('Effacement code lecture') );
@@ -4349,7 +4327,7 @@ if (isset($_POST['pass']))
 								$pw=$mdp; // passage du parametre en global 
 								maj_mdp_fichier($user_idx, $mdp );
 								$mdp=encrypt($mdp);
-								command( "","UPDATE r_user set lecture='$mdp' where id='$id'");
+								command("UPDATE r_user set lecture='$mdp' where id='$id'");
 								msg_ok( traduire("Modification code lecture réalisée."));
 								$ok=TRUE;
 								ajout_log( $id, traduire('Changement code lecture') );
@@ -4372,8 +4350,8 @@ if (isset($_POST['pass']))
 				
 		if ((($action=="visualisation_lecture") || ($action=="visualisation_lecture2")) && ($user_droit==""))
 			{
-			$reponse = command( "","SELECT * from  r_user WHERE id='$id' "); 
-			$donnees = mysql_fetch_array($reponse);
+			$reponse = command("SELECT * from  r_user WHERE id='$id' "); 
+			$donnees = fetch_command($reponse);
 			$mot_de_passe=$donnees["pw"];	
 			if ( ($action=="visualisation_lecture2")
 				||
@@ -4422,10 +4400,9 @@ if (isset($_POST['pass']))
 			pied_de_page("x");
 			}	
 
-
-			
+		
 		// si on arrive ici avec action=exporter c'est que l'export a echoué 
-		if (( ($action=="exporter_a_confirmer") || ($action=="exporter")) && ($user_droit==""))
+		if ( ($action=="exporter_a_confirmer")  && ($user_droit==""))
 			{
 			echo "<hr><center><p>";
 			debut_cadre("700");
@@ -4480,8 +4457,8 @@ if (isset($_POST['pass']))
 			echo "<hr><p>".traduire('Attention, vous avez demandé la suppression de la structure sociale suivante')." :<p>";
 			$idx=variable('idx');
 			titre_organisme();
-			$reponse =command("","select * from  r_organisme where idx='$idx' ");
-			$donnees = mysql_fetch_array($reponse) ;
+			$reponse =command("select * from  r_organisme where idx='$idx' ");
+			$donnees = fetch_command($reponse) ;
 			$adresse=stripcslashes($donnees["adresse"]);
 			$organisme=stripcslashes($donnees["organisme"]);				
 			$tel=$donnees["tel"];	
@@ -4534,8 +4511,9 @@ if (isset($_POST['pass']))
 			
 		if ( (($user_droit=="R") || ($user_droit=="S") ) && (($action=="") ||($action=="modif_organisme")  ) )
 			{
-			$r1 =command("","select * from  r_organisme where idx='$user_organisme' ");
-			$d1 = mysql_fetch_array($r1);
+			echo "<table>";
+			$r1 =command("select * from  r_organisme where idx='$user_organisme' ");
+			$d1 = fetch_command($r1);
 			$orga=stripcslashes($d1["organisme"]);
 			$adresse=stripcslashes($d1["adresse"]);
 			$mail=$d1["mail"];
@@ -4543,13 +4521,13 @@ if (isset($_POST['pass']))
 			$id_org=$d1["idx"];
 			if ($user_droit=="R") 
 				{
-				$reponse =command("","select * from r_lien where user='$user_idx'  ");
-				echo "<table>";
-				while ($donnees = mysql_fetch_array($reponse) ) 
+				$reponse =command("select * from r_lien where user='$user_idx'  ");
+				
+				while ($donnees = fetch_command($reponse) ) 
 					{
 					$id_org = $donnees["organisme"];
-					$r1 =command("","select * from r_organisme where idx='$id_org'  ");
-					$d1 = mysql_fetch_array($r1);
+					$r1 =command("select * from r_organisme where idx='$id_org'  ");
+					$d1 = fetch_command($r1);
 					$orga=stripcslashes($d1["organisme"]);
 					$adresse = $d1["adresse"];
 					$telephone = $d1["tel"];
@@ -4562,7 +4540,7 @@ if (isset($_POST['pass']))
 					echo "<input type=\"hidden\" name=\"id\" value=\"$id_org\"> " ;
 					echo "</form> ";	
 					}		
-				echo "</table>";
+				
 				}
 			else
 				if ($action=="")
@@ -4570,10 +4548,10 @@ if (isset($_POST['pass']))
 					echo "<tr><td>  <img src=\"images/organisme.png\" width=\"25\" height=\"25\" ></td><td> ".traduire('Structure sociale').": $orga </td><td> / $adresse </td><td> / $telephone </td><td> / $mail </td><td> (".traduire('Resp.:').responsables_organisme($user_organisme).")</td>";
 					}
 			
-			/* ----------------------------------FISSA
+			//* ----------------------------------FISSA
 			$jfissa=0;
-			$reponse = mysql_query("SELECT * from  fissa WHERE organisme='$user_organisme'"); 
-			while($donnees = mysql_fetch_array($reponse))
+			$reponse = command("SELECT * from  fct_fissa WHERE organisme='$user_organisme'"); 
+			while($donnees = fetch_command($reponse))
 				{
 				if ($jfissa++==0)
 					echo "<td>--> </td><td>";
@@ -4583,7 +4561,23 @@ if (isset($_POST['pass']))
 				}
 			if ($jfissa!=0)
 				echo "</td>";
-			-----------------------------------*/ 
+			//-----------------------------------*/ 
+
+			//* ---------------------------------- Calendrier
+			$jfissa=0;
+			$reponse = command("SELECT * from  fct_calendrier WHERE organisme='$user_organisme'"); 
+			while($donnees = fetch_command($reponse))
+				{
+				if ($jfissa++==0)
+					echo "<td>--> </td><td>";
+				$l=$donnees["libelle"];
+				$idx_activite=encrypt($donnees["idx_activite"]);
+				echo "<a href=\"index.php?action=cc_activite\"> $l </a>";
+				}
+			if ($jfissa!=0)
+				echo "</td>";
+			//-----------------------------------*/ 
+			echo "</table>";
 			}
 	
 
@@ -4629,19 +4623,19 @@ if (isset($_POST['pass']))
 		ajout_log_tech(	"Initialisation comptes de formation avec ".parametre("Formation_mdp"). " par ".$user_nom."  ".$user_prenom);	
 		// Purge des toutes les tables 
 
-		$reponse = command("","Select * from r_user where (id REGEXP 'FORM_R') or (id REGEXP 'FORM_B') or (id REGEXP 'FORM_A')");
-		while ($donnees = mysql_fetch_array($reponse) )
+		$reponse = command("Select * from r_user where (id REGEXP 'FORM_R') or (id REGEXP 'FORM_B') or (id REGEXP 'FORM_A')");
+		while ($donnees = fetch_command($reponse) )
 			{
 			$tel = parametre('FORM_tel_rdv') ;
 			$id=$donnees["id"];
 			echo "<br>- $id";
 			$idx=$donnees["idx"];
-			command("","UPDATE r_user set pw='$mdp', lecture='$mdp', mail='$id@fixeo.com', telephone='$tel' where idx='$idx' ");
-			command("","delete from r_sms where idx='$idx' ");
-			command("","delete from DD_rdv where user='$idx' or auteur='$idx' ");
-			command("","delete from r_dde_acces where user='$idx' or ddeur='$idx' or autorise='$idx' ");
-			command("","delete from log where user='$idx' or acteur='$idx'  ");
-			command("","delete from r_referent where user='$idx'  or organisme='$idx'  ");
+			command("UPDATE r_user set pw='$mdp', lecture='$mdp', mail='$id@fixeo.com', telephone='$tel' where idx='$idx' ");
+			command("delete from r_sms where idx='$idx' ");
+			command("delete from DD_rdv where user='$idx' or auteur='$idx' ");
+			command("delete from r_dde_acces where user='$idx' or ddeur='$idx' or autorise='$idx' ");
+			command("delete from log where user='$idx' or acteur='$idx'  ");
+			command("delete from r_referent where user='$idx'  or organisme='$idx'  ");
 			$i++;
 			
 			if ($donnees["droit"]=="")
@@ -4650,36 +4644,36 @@ if (isset($_POST['pass']))
 				$idx_rdv=inc_index("rdv");
 				$date=date('Y-m-d');
 				$msg = parametre('FORM_msg_rdv');
-				command("","INSERT INTO DD_rdv VALUES ('$idx_rdv', '$idx','$idx','$date 18H00', '$msg', '15min', 'A envoyer' ) ");
+				command("INSERT INTO DD_rdv VALUES ('$idx_rdv', '$idx','$idx','$date 18H00', '$msg', '15min', 'A envoyer' ) ");
 				}
 			}
 		
 		echo "<p>".traduire('Chaque bénéficiaire de la formation a pour référent tous les acteurs socicaux de la formation');
 		// initialisation pour chaque bénéficiaire que de tous les Acteur sociaux
-		$reponse = command("","Select * from r_user where (id REGEXP 'FORM_A')");
-		while ($donnees = mysql_fetch_array($reponse) )
+		$reponse = command("Select * from r_user where (id REGEXP 'FORM_A')");
+		while ($donnees = fetch_command($reponse) )
 			{
 			$idx=$donnees["idx"];
 			// recherche des benéficiaire à ratacher
-			$r1 = command("","Select * from r_user where (id REGEXP 'FORM_B')");
-			while ($d1 = mysql_fetch_array($r1) )
+			$r1 = command("Select * from r_user where (id REGEXP 'FORM_B')");
+			while ($d1 = fetch_command($r1) )
 				{
 				$idx1=$d1["idx"];
 				$i=inc_index("referent");					
 				$ns= parametre("Formation_num_structure");
-				command("","INSERT INTO `r_referent`  VALUES ( '$i', '$idx1', '$ns', '$idx','', '','','')");
+				command("INSERT INTO `r_referent`  VALUES ( '$i', '$idx1', '$ns', '$idx','', '','','')");
 				}
 			}	
 		
 		echo "<p>".traduire('Un seul document par espace et utilisateur de la formation');
 		// on ne garde qu'un document par compte 
-		$reponse = command("","Select * from r_user where (id REGEXP 'FORM_B') or (id REGEXP 'FORM_A')");
-		while ($donnees = mysql_fetch_array($reponse) )
+		$reponse = command("Select * from r_user where (id REGEXP 'FORM_B') or (id REGEXP 'FORM_A')");
+		while ($donnees = fetch_command($reponse) )
 			{
 			$i=0;
 			// espace perso
-			$r1 =command("","select * from r_attachement where ref='P-$idx' ");		
-			while ($d1 = mysql_fetch_array($r1) ) 
+			$r1 =command("select * from r_attachement where ref='P-$idx' ");		
+			while ($d1 = fetch_command($r1) ) 
 				{
 				if ($i++ !=0)
 					supp_attachement ($d1["num"]);
@@ -4687,8 +4681,8 @@ if (isset($_POST['pass']))
 
 			$i=0;				
 			// espace partagé
-			$r1 =command("","select * from r_attachement where ref='A-$idx' ");		
-			while ($d1 = mysql_fetch_array($r1) ) 
+			$r1 =command("select * from r_attachement where ref='A-$idx' ");		
+			while ($d1 = fetch_command($r1) ) 
 				{
 				if ($i++ !=0)
 					supp_attachement ($d1["num"]);
@@ -4705,7 +4699,7 @@ if (isset($_POST['pass']))
 		ajout_log_tech(	"Initialisation MdP comptes de formation avec ".parametre("Formation_mdp"). " par ".$user_nom."  ".$user_prenom);	
 
 		$mdp=encrypt (parametre("Formation_mdp")) ;
-		$reponse = command("","UPDATE r_user set pw='$mdp' where (id REGEXP 'FORM_R') or (id REGEXP 'FORM_B') or (id REGEXP 'FORM_A')");
+		$reponse = command("UPDATE r_user set pw='$mdp' where (id REGEXP 'FORM_R') or (id REGEXP 'FORM_B') or (id REGEXP 'FORM_A')");
 		msg_ok(traduire("Mot de passe des comptes de formation initialisé")." ('".parametre("Formation_mdp")."')");
 		}	
 
@@ -4715,15 +4709,178 @@ if (isset($_POST['pass']))
 	if ( ($user_droit=="E") || ($user_droit=="F")|| ($user_droit=="T")|| ($user_droit=="t"))
 		pied_de_page("x");
 
+	if ( (($user_droit=="S") || ($user_droit=="R")) && ($action=="cc_activite") )
+		{
+		echo "<table><tr><td><ul id=\"menu-bar\">";
+		echo "<li><a href=\"index.php?action=cc_usagers\"  > ".traduire('Usagers')."</a>";
+		echo "</ul ></td>";
+	
+		$reponse =command("select * from  fct_calendrier where organisme='$user_organisme' ");
+		while ($donnees = fetch_command($reponse) ) 
+			{
+			for ($j=0;$j<7;$j++)
+				$jour_ouvert[$j]=$donnees["$j"];
+				
+			$libelle=$donnees["libelle"];
+			$idx_activite=$donnees["idx_activite"];
+			echo "<tr><td><H4> ".$libelle. " - << ";
+			
+			$t0=mktime(0,0,0 ,date('m'), 1, date('Y'));
+			echo date('m-Y',$t0)." >> </H4></td></table>";
+			echo "<table><tr><td></td><td>";
+			for ($h=8; $h<20; $h++)
+				echo "<td> $h</td><td> </td><td> </td><td> </td><td></td>";
+
+			for ($i=$t0; $i<$t0+30*60*60*24; $i+= 60*60*24)
+				{
+				echo "<tr><td>";
+				//echo "$i</td><td>";
+				$j=date('w',$i);
+				if ($jour_ouvert[$j]!="") 
+					{
+					
+					// on regarde les heures d'ouvertures
+					$r1 =command("select * from  cc_creneau where date='$i' and user='' ");
+					if ($d1 = fetch_command($r1) )
+							$d3= explode("/",$d1['horaire']);  // Spécifique
+						else
+							$d3= explode("/",$jour_ouvert[$j]); // standard
+					$d1=$d3[0];
+					$f1=$d3[1];	
+					
+					for ($m=0;$m<24*4;$m++)
+						$occupation[$m]="";
+						
+					$r1 =command("select * from  cc_creneau where date='$i' and user<>'' ");
+					while($d2 = fetch_command($r1) )
+						{
+						$d3= explode("/",$d2['horaire']);
+						$d2=$d3[0];
+						$f2=$d3[1];		
+						for ($m=$d2*4;$m<$f2*4;$m++) 
+							$occupation[$m]=" <a title=\"Occupé\">#</a>";
+						}	
+					$ej=encrypt($i);
+					$ea=encrypt($idx_activite);
+					echo "<a href=\"index.php?action=cc_jour&jour=$ej&activite=$ea\">";
+					echo libelle_jour (date('w',$i)).'</td><td> '. date('d',$i);	
+					echo "</a><td >|</td>";					
+					for ($h=8; $h<20; $h++)
+						{
+
+						if (($h>=$d1) && ($h<$f1)) 
+							{
+							for ($m=0; $m<4; $m++)
+								{
+
+								if ($occupation[$h*4+$m]!="")
+									echo "<td width=\"10\" BGCOLOR=\"orange\" >".$occupation[$h*4+$m]." </td>";
+								else
+									{
+									// on mémorise les rdv de la journée
+									$ej=encrypt($i);
+									$ea=encrypt($idx_activite);
+										{
+										$eh=encrypt($m);
+										$occupation[$h*4+$m]=" <a href=\"index.php?action=cc_ajout&jour=$ej&activite=$ea&heure=$eh\" title=\"ajout\">+</a>";
+										echo "<td width=\"10\" BGCOLOR=\"green\" >".$occupation[$h*4+$m]." </td>";
+										}
+									}
+								}
+							}
+						else
+							{
+							for ($m=0; $m<60; $m+=15)
+								echo "<td width=\"10\" BGCOLOR=\"lightgrey\" > </td>";
+							}		
+						
+						echo "<td >|</td>";
+						}			
+					}
+					
+				}
+			echo "</table>";
+			echo "<hr>";
+			}
+		pied_de_page("x");
+		}
+					
+
+	if ( (($user_droit=="S") || ($user_droit=="R")) && ($action=="cc_maj_activite") )
+		{
+		$idx_activite=variable_get("idx_activite");	
+		
+		// MAJ activité
+		// - libellé
+		// - horaires
+		// - texte standard
+
+		pied_de_page("x");
+		}	
+		
+	if ( (($user_droit=="S") || ($user_droit=="R")) && ($action=="cc_maj_rdv") )
+		{
+		$idx_activite=variable_get("idx_activite");	
+		
+		// MAJ rdv
+		// Changement texte et délai d'alerte
+		// possibilité suppression
+		// Ajout commentaire
+
+		pied_de_page("x");
+		}
+					
+					
+	if ( (($user_droit=="S") || ($user_droit=="R")) && ($action=="cc_ajout") )
+		{
+		$idx_activite=variable_get("activite");	
+		$t0=variable_get("jour");	
+		
+		// Ajout rdv
+		// choix usager
+		// Saisie commentaire, texte et délai d'alerte
+		
+		pied_de_page("x");
+		}
+						
+
+	if ( (($user_droit=="S") || ($user_droit=="R")) && ($action=="cc_jour") )
+		{
+		$idx_activite=variable_get("activite");	
+		$t0=variable_get("jour");	
+		
+		// mise à jour horaire d'ouverture de la journée
+		// possibilité de déclarer fermer 
+		// + commentaire 
+
+		echo "<table border=\"2\">";
+		$reponse =command("select * from  cc_creneau where date='$t0' and idx_activite='$idx_activite' ");		
+		if ($donnees = fetch_command($reponse) )
+			{
+			$horaire=$donnees["horaire"];
+			$commentaire=$donnees["commentaire"];
+			}
+		else
+			echo traduire("Journée standard");
+		
+		echo "<tr><td> horaires </td><td>".$donnees["idx"]."</td>";
+		echo "<tr><td> Commentaire</td><td>".  saisie_champ_bug_area($idx,"commentaire",$donnees["commentaire"],100)."</td>";			
+		echo "</table>";
+		pied_de_page("x");
+		}		
+
+
+
+		
 	if ( ($user_droit=="S") && ($action=="collegues") )
 		{
 		echo "<H4> ".traduire('Responsables vis à vis de Doc-depot.com')."</H4>";
 		
 		echo "<div class=\"CSSTableGenerator\"><table> ";
 		titre_user("R");
-		$reponse =command("","select * from  r_lien where organisme='$user_organisme' ");
+		$reponse =command("select * from  r_lien where organisme='$user_organisme' ");
 				
-		while ($donnees = mysql_fetch_array($reponse) ) 
+		while ($donnees = fetch_command($reponse) ) 
 			{
 			$idx=$donnees["user"];
 			visu_user($idx,"R");
@@ -4734,9 +4891,9 @@ if (isset($_POST['pass']))
 		
 		echo "<div class=\"CSSTableGenerator\"><table> ";
 		titre_user("R");
-		$reponse =command("","select * from  r_user where droit='S' and organisme='$user_organisme' ");
+		$reponse =command("select * from  r_user where droit='S' and organisme='$user_organisme' ");
 				
-		while ($donnees = mysql_fetch_array($reponse) ) 
+		while ($donnees = fetch_command($reponse) ) 
 			{
 			$idx=$donnees["idx"];
 			visu_user($idx,"R");
@@ -4753,16 +4910,18 @@ if (isset($_POST['pass']))
 			echo "</ul></td></table>";
 			
 			echo "<p><center><table><tr>";
-			$nom=variable('nom');
-			$prenom=variable('prenom');
+			
+			$nom=mef_nom(variable('nom'));
+			$prenom=mef_prenom(variable('prenom'));
 			$anniv=variable('anniv');
+			
 			if (($nom!="") && ($prenom!="") && ($anniv!=""))
 				{
-				$reponse = command("","select * from r_user where nom='$nom' and prenom='$prenom' and anniv='$anniv' and droit='' ");
-				if ($donnees = mysql_fetch_array($reponse) )
+				$reponse = command("select * from r_user where nom='$nom' and prenom='$prenom' and anniv='$anniv' and droit='' ");
+				if ($donnees = fetch_command($reponse) )
 					echo"<td ALIGN=\"CENTER\" BGCOLOR=\"lightgreen\" ><br>Il existe un compte avec ces informations. Cliquez <a href=\"index.php?action=dde_identifiant\">ici</a> pour récupérer son compte<p>";
 				else
-					echo "<td ALIGN=\"CENTER\" BGCOLOR=\"yellow\" ><br>Il n'existe pas de compte avec ces informations. Cliquez <a href=\"index.php?action=ajout_beneficiaire\">ici</a> pour cérer un compte<p>";
+					echo "<td ALIGN=\"CENTER\" BGCOLOR=\"yellow\" ><br>Il n'existe pas de compte avec ces informations. Cliquez <a href=\"index.php?action=ajout_beneficiaire\">ici</a> pour créer un compte<p>";
 				}
 			else
 				if (($nom!="") || ($prenom!="") || ($anniv!=""))
@@ -4795,14 +4954,14 @@ if (isset($_POST['pass']))
 	if ( ($action=="switch")&& ($user_droit=="") )
 			{
 			$num=variable('num');
-			$reponse =command("","select * from r_attachement where  num='$num' ");
-			if ($donnees = mysql_fetch_array($reponse) )
+			$reponse =command("select * from r_attachement where  num='$num' ");
+			if ($donnees = fetch_command($reponse) )
 				{
 				$ref=$donnees["ref"];
 				if ($ref[0]=='A') $ref[0]='P'; else $ref[0]='A';
 				$type=$ref[0];
-				$reponse =command("","update r_attachement SET ref='$ref' where num='$num' ");
-				$reponse =command("","update r_attachement SET type='$type' where num='$num' ");
+				$reponse =command("update r_attachement SET ref='$ref' where num='$num' ");
+				$reponse =command("update r_attachement SET type='$type' where num='$num' ");
 				$num = substr($num,strpos($num,".")+1 );
 				ajout_log( $idx, traduire("Basculement d'espace de")." $num", $user_idx );				
 				}
@@ -4823,8 +4982,8 @@ if (isset($_POST['pass']))
 
 			$date_jour=date('Y-m-d');
 			$j=0;
-			$r1 =command("","select * from r_dde_acces where type='' and user=$user and ddeur=$user_idx and date_dde>='$date_jour' ");
-			If ($d1 = mysql_fetch_array($r1) ) 
+			$r1 =command("select * from r_dde_acces where type='' and user=$user and ddeur=$user_idx and date_dde>='$date_jour' ");
+			If ($d1 = fetch_command($r1) ) 
 				{
 				$date_dde=$d1["date_dde"];
 				$qui=$d1["user"];
@@ -4891,7 +5050,7 @@ if (isset($_POST['pass']))
 				$idx=inc_index("rdv");
 				if ($date_jour<=$date)
 					{
-					command("","INSERT INTO DD_rdv VALUES ('$idx', '$user1','$user_idx','$date $heure', '$ligne', '$avant', 'A envoyer' ) ");
+					command("INSERT INTO DD_rdv VALUES ('$idx', '$user1','$user_idx','$date $heure', '$ligne', '$avant', 'A envoyer' ) ");
 					ajout_log( $idx, traduire("Ajout RDV le")." $date $heure : $ligne ", $user1 );				
 					}
 				else
@@ -4945,7 +5104,7 @@ if (isset($_POST['pass']))
 				if (($user_droit=="") || ( ( ($user_droit=="S") ) && ($action!="detail_user") ))
 					{
 					bouton_upload("P-$user_idx",$user_idx);	
-					if ($user_droit=="S")
+					if (($user_droit=="S")  && ($action!="ajout_photo"))
 						{
 						echo "<table><tr><td> <img src=\"images/referent.png\" width=\"35\" height=\"35\" ></td><td><ul id=\"menu-bar\">";
 						echo "<li><a href=\"index.php?action=collegues\" > ".traduire('Mes Collègues')." </a></li>";
@@ -4957,7 +5116,10 @@ if (isset($_POST['pass']))
 		//----------------------------------------------------------------------------- Bloc SMS et NOTES --------------
 		if (($action=="ajout_note") && ($user_droit=="") )
 			{
-			ajoute_note( $user_idx, variable ('note'));
+			$note= variable ('note');
+			ajoute_note( $user_idx,$note );
+			ajout_log( $idx, traduire("Ajout note")." : $note", $user_idx );				
+			
 			$action="note_sms";
 			}
 			

@@ -3,21 +3,22 @@
 
 function parametre($nom, $par_defaut="")
 	{
-	$reponse =command("","select * from  DD_param where nom='$nom' ");
-	if ($donnees = mysql_fetch_array($reponse) ) 
+	$reponse =command("select * from  DD_param where nom='$nom' ");
+	if ($donnees = fetch_command($reponse) ) 
 		return ($donnees["valeur"]);
 	else
-		command("","INSERT INTO DD_param VALUES ('$nom', '$par_defaut' ) ");
+		command("INSERT INTO DD_param VALUES ('$nom', '$par_defaut' ) ");
 	return ("");
 	}
 
 function ecrit_parametre($nom, $valeur)
 	{
-	$reponse =command("","select * from  DD_param where nom='$nom' ");
-	if ($donnees = mysql_fetch_array($reponse) ) 
-		$reponse =command("","update DD_param set valeur='$valeur' where nom='$nom' ");
+	$reponse =command("select * from  DD_param where nom='$nom' ");
+	if ($donnees = fetch_command($reponse) ) 
+		command("update DD_param set valeur='$valeur' where nom='$nom' ");
 	else
-		command("","INSERT INTO DD_param VALUES ('$nom', '$valeur' ) ");	}
+		command("INSERT INTO DD_param VALUES ('$nom', '$valeur' ) ");
+	}
 	
 // zone définitions --------------------------------------
 if ($_SERVER['REMOTE_ADDR']!="127.0.0.1")
@@ -47,8 +48,8 @@ define('TAILLE_FICHIER_dropzone','8');
 
 			echo "</table><div class=\"CSSTableGenerator\" > ";
 			echo "<table><tr><td > ".traduire('Nom')."  </td><td > ".traduire('Valeur')."  </td>";
-			$reponse =command("","select * from  DD_param $filtre order by nom ASC");		
-			while ($donnees = mysql_fetch_array($reponse) ) 
+			$reponse =command("select * from  DD_param $filtre order by nom ASC");		
+			while ($donnees = fetch_command($reponse) ) 
 				{
 				$nom=$donnees["nom"];	
 				$valeur=$donnees["valeur"];
@@ -67,7 +68,7 @@ define('TAILLE_FICHIER_dropzone','8');
 		function modif_valeur_param($nom, $valeur)
 			{
 			$valeur= addslashes($valeur);
-			$reponse =command("","update DD_param SET valeur = '$valeur' where nom='$nom' ");
+			$reponse =command("update DD_param SET valeur = '$valeur' where nom='$nom' ");
 			}
 
 			
@@ -98,13 +99,13 @@ define('TAILLE_FICHIER_dropzone','8');
 
 			echo "</table><div class=\"CSSTableGenerator\" > ";
 			echo "<table><tr><td > ".traduire('Nom')."  </td><td > ".traduire('Valeur')."  </td>";
-			$reponse =command("","select * from  z_traduire $filtre order by fr ASC");		
-			while ($donnees = mysql_fetch_array($reponse) ) 
+			$reponse =command("select * from  z_traduire $filtre order by fr ASC");		
+			while ($donnees = fetch_command($reponse) ) 
 				{
 				$nom=$donnees["fr"];	
 				$valeur=$donnees["$user_lang"];
 				$idx=$donnees["idx"];	
-				echo "<tr><td width=\"30%\"> $idx - $nom ";
+				echo "<tr><td id=\"$idx\" width=\"30%\"> $idx - $nom ";
 				
 				$cible_g=$user_lang;
 				if ($user_lang=="gb")
@@ -112,7 +113,7 @@ define('TAILLE_FICHIER_dropzone','8');
 					
 				echo "<a id=\"E$idx\" href=\"https://translate.google.com/?hl=fr#fr/$cible_g/$nom\"  target=_blank>$user_lang</a>";
 					
-				echo "</td><td width=\"70%\"><form method=\"post\" > <input  type=\"hidden\"  name=\"action\" value=\"modif_trad\"/> ".param('idx',"$idx").param('filtre',"$filtre1")."<input type=\"text\" name=\"valeur\" id=\"S$idx\" value=\"$valeur\" size=\"100\" onChange=\"this.form.submit();\" >  </form> </td>";
+				echo "</td><td width=\"70%\"><form method=\"post\" action=\"index.php#$idx\"> <input  type=\"hidden\"  name=\"action\" value=\"modif_trad\"/> ".param('idx',"$idx").param('filtre',"$filtre1")."<input type=\"text\" name=\"valeur\" id=\"$idx\" value=\"$valeur\" size=\"100\" onChange=\"this.form.submit();\" >  </form> </td>";
 				}
 			echo "</table></div>";
 			pied_de_page("x");
@@ -125,7 +126,7 @@ define('TAILLE_FICHIER_dropzone','8');
 			
 			$valeur= addslashes($valeur);
 			if ($user_lang!="fr")
-				$reponse =command("","update z_traduire SET $user_lang = '$valeur' where idx='$idx' ");
+				$reponse =command("update z_traduire SET $user_lang = '$valeur' where idx='$idx' ");
 
 			}
 ?>

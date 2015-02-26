@@ -7,7 +7,43 @@
 	</head>
 	<body>
 
-<h4> V0.49   ( maj_bdd, TTT_mail,  include_mail , general, )</h4>  
+<h4> V1.02  (en ligne le ??/2015 ) ( General, TTT_mail, include_mail )</h4>  
+Evolutions
+<br> + Suppression lien vers traduction() car inutile
+<br> + rajout FISSA
+<br> + fonctions génériques (pied de page, etc)  basculent de index.php vers general.php
+<br> + on indique le format attendu sur date (de_identifiant et déverrouillage)
+<br> + les codes de déverrouillage sont désormis sur 6 chiffres
+<br> + inutile d'afficher à chaque fois les indicatuer lors du TTT_mail la fonction X couvre le besoin si nécesaire
+<br> + dans la fonction traduire on force à 'fr' si ce n'est pas une langue connue
+<br> + Traduction des textes modif bug
+<br> + mise à jour de libéllés (retours traductions)
+<br> + rendez-vous: date et heure sont affichés dans 2 colonnes distinctes au lieu d'une seule
+<br> + On trace désormais les ajouts de notes
+<br> + On trace désormais les dépots de MMS
+<br> + On envoie un mail à l'administrateur à la connexion d'un exploitant  avec indication nom et prénom
+<br> Bugs	
+<br> - Correction faute orthographe : "cérer" au lieu de "créer", "prenez" <-- "prennez", 
+<br> - la création de dossier alors qu'il n'y a pas de code de lecture crée un message d'erreur et proposait à tord un lien vers le fichier crypté 
+<br> - Si pas de code de lecture, alors le RC ne peut pas lire les images (par contre pdf ok)
+<br> - message de trace laissé à tord dans fonction valider_dde_mdp_avec_code
+<br> - l'AS ne pouvait pas envoyer de mail aux RC d'un bénéficiaire
+<br> - T299: les SMS initialisés pour la formation sont envoyés même s'ils ne sont pas mofifiés
+<br> - le dépot d'une image ou un pdf alors qu'il n'y a pas de code de lecture crée un message d'erreur 
+<br> - une partie du formulaire upload apparait en production
+
+<h4> V1.01  (en ligne le /2015 ) (  )</h4>  
+Evolutions
+<br> + 
+<br> + l'identitité de l'environement est paramétrée et est affiché dasn lentete des mails
+<br> + T304 : time out de deconnexion du responsable identique à celui de l'acteur social
+<br> + T303 : le numéro de version passe de V0.50 à V1.01
+<br> Bugs	
+<br> - le référencement Google n'affiche plus de libellé
+<br> - T302 : le lien pour finaliser un compte AS n'apparaisait pas 
+<br> - T305 : lors de la modification d'un acteur social le champ structure est incorrect
+
+<br> -<h4> V0.49  (en ligne le 4/1/2015 ) ( maj_bdd, TTT_mail,  include_mail , general, instal, retour_a )</h4>  
 Evolutions
 <br> + On a un refresh de l'écran (> au time out) ce qui permet d'afficher la page d'accueil après le time out et non les données du compte
 <br> + possibilité de lister les responsables vis à vis de doc-depot
@@ -27,6 +63,9 @@ Evolutions
 <br> + Simplification: à la finalisation de compte de responsable on ne demande plus les N° de tel et mail ==> sera fait à la connexion
 <br> + T288 : limitation de longuer de saisie des SMS à 220 caractères
 <br> + sur sauvegarde SQL, on vérifie si la table existe avant de faire un drop table
+<br> + technique : la mise à jour de bdd est externalisée du code principal
+<br> + on n'affiche pas le drapeu de la langue courante 
+<br> + l'identitité de l'environement est paramétrée et est affiché dasn lentete des mails
 <br>   Bugs	
 <br> - le menu mes collegues était affiché à tort aux bénficiaires
 <br> - Historique : sur génération  d'un dossier on indiquait l'identifiant et non pas le nom

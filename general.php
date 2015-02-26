@@ -1,11 +1,60 @@
 <?PHP
+// traduire() : Ok
 
 include 'param.php';
 
+
+	function jour($t)
+		{
+		return (($t+4) % 7);
+		}
+		
+	function libelle_jour($i)
+		{
+		switch ($i)
+			{
+			case 1 : return("Lundi"); break;
+			case 2 : return("Mardi"); break;
+			case 3 : return("Mercredi"); break;
+			case 4 : return("Jeudi"); break;
+			case 5 : return("Vendredi"); break;
+			case 6 : return("Samedi"); break;
+			case 0 : return("Dimanche"); break;
+			}
+		}
+		
+		
+	function traduire($ligne)
+		{
+		global $user_lang;
+		
+		if (($user_lang!="fr") && ($user_lang!="gb") && ($user_lang!="de") &&  ($user_lang!="es") && ($user_lang!="ru"))
+			$user_lang="fr";
+			
+		$l=addslashes($ligne);
+		$r1 =command("select * from  z_traduire where fr='$l' ");
+		if (!($d1=fetch_command($r1))) 
+			{
+			if ($l!="")
+				{
+				$idx=inc_index('traduire');
+				command("insert into z_traduire VALUES ($idx,'$l','','','','','','$l','') ");
+				}
+			}			
+		else
+			{
+			//echo 
+			$l=$d1[$user_lang];
+			if ($l!="")	
+				$ligne=$l;
+			}
+		return($ligne);
+		}	
+
 	function libelle_user($idx	)
 		{
-		$r1 =command("","select * from  r_user where idx='$idx' ");
-		$d1 = mysql_fetch_array($r1);
+		$r1 =command("select * from  r_user where idx='$idx' ");
+		$d1 = fetch_command($r1);
 		return($d1["nom"]." ".$d1["prenom"]);
 		}	
 
@@ -14,7 +63,7 @@ include 'param.php';
 		{
 		$date_jour=date('Y-m-d');
 
-		$reponse =command("","UPDATE r_dde_acces set code='' , date_auto='' where user='$bene' and ddeur='$ddeur' and autorise='$autorise' and type='A' ");
+		$reponse =command("UPDATE r_dde_acces set code='' , date_auto='' where user='$bene' and ddeur='$ddeur' and autorise='$autorise' and type='A' ");
 		ajout_log( $bene, "Fin d'autorisation d'accès au compte par $autorise à $ddeur" );
 		}
 		
@@ -22,8 +71,8 @@ include 'param.php';
 		{
 		$date_jour=date('Y-m-d');
 
-		$r1 =command("","select * from r_dde_acces where type='A' and code<>'' and code<>'????' and date_dde<'$date_jour' ");
-		while ($d1 = mysql_fetch_array($r1) ) 
+		$r1 =command("select * from r_dde_acces where type='A' and code<>'' and code<>'????' and date_dde<'$date_jour' ");
+		while ($d1 = fetch_command($r1) ) 
 			{
 			$bene=$d1["user"];
 			$autorise=$d1["autorise"];
@@ -39,9 +88,9 @@ include 'param.php';
 		$date_jour=date('Y-m-d')." ".$heure_jour=date("H\hi:s");
 		if ($ligne!="")
 			{
-			$r1 =command("","select * from r_sms where idx='$user' and ligne='$ligne'  ");
-			if (! mysql_fetch_array($r1) ) 
-				command("","INSERT INTO r_sms VALUES ('$date_jour' , '$user', '$ligne', '$num_seq' ) ");
+			$r1 =command("select * from r_sms where idx='$user' and ligne='$ligne'  ");
+			if (! fetch_command($r1) ) 
+				command("INSERT INTO r_sms VALUES ('$date_jour' , '$user', '$ligne', '$num_seq' ) ");
 			}
 		}
 		
@@ -49,10 +98,10 @@ include 'param.php';
 	
 	// entete formulaire
 	// formulaire ("");
-	function formulaire ($action)
+	function formulaire ($action, $source="")
 		{
-		commentaire_html("Formualire $action");
-		echo "<form method=\"POST\" action=\"\">";
+		commentaire_html("Formulaire $action");
+		echo "<form method=\"POST\" action=\"$source\">";
 		echo "<input type=\"hidden\" name=\"action\" value=\"$action\"> " ;
 		}
 // ----------------------------------------------------------------- Mise en forme
@@ -86,27 +135,27 @@ include 'param.php';
 	  }
 
 	function VerifierPortable($telephone)  
-	{  
-	if (
-		( (strlen(strstr($telephone,"06"))!=10) && (strlen(strstr($telephone,"07"))!=10) )
-	&&
-		( (strlen(strstr($telephone,"+336"))!=12) && (strlen(strstr($telephone,"+337"))!=12) )
-		)
-								
-		return false; 		
-	else		
-	  return true;
+		{  
+		if (
+			( (strlen(strstr($telephone,"06"))!=10) && (strlen(strstr($telephone,"07"))!=10) )
+		&&
+			( (strlen(strstr($telephone,"+336"))!=12) && (strlen(strstr($telephone,"+337"))!=12) )
+			)
+									
+			return false; 		
+		else		
+		  return true;
 	  }	  
+	  
 	Function erreur($texte)
 		{
-		echo "<div id=\"msg_erreur\"><center><FONT color=\"#ff0000\" >Erreur : $texte</FONT><br></center></div >";
+		echo "<div id=\"msg_erreur\"><center><FONT color=\"#ff0000\" >".traduire('Erreur')." : $texte</FONT><br></center></div >";
 		ajout_log_jour("Msg erreur : $texte");
-
 		}	
 	
 	Function msg_ok($texte)
 		{
-		echo "<div id=\"msg_ok\" class=\"CSS_msg_ok\"><center> $texte<br></center></div >";
+		echo "<div id=\"msg_ok\" class=\"CSS_msg_ok\"><center>$texte<br></center></div >";
 		}	
 		
 	function remplace_carcateres($nom)
@@ -334,12 +383,6 @@ include 'param.php';
 		$p="TECH_sequence_$valeur";
 		$idx= parametre($p)+1; 
 		ecrit_parametre($p,$idx);
-		/*
-		$reponse = mysql_query("select * from r_sequence ");
-		$donnees = mysql_fetch_array($reponse) ;
-		$idx=$donnees["$valeur"]+1;
-		$reponse = mysql_query("UPDATE r_sequence SET $valeur='$idx'") ;
-		*/
 		return ($idx);
 		}
 	
@@ -358,20 +401,22 @@ include 'param.php';
 		
 		if ($sans_lien=="")
 			{
-			echo "<form method=\"POST\" action=\"index.php\" $blank >";
+			$source= "index.php";
+
+			echo "<form method=\"POST\" action=\"$source\" $blank >";
 			if ($size=="")
-				echo "<input type=\"image\" src=\"$image\" title=\"$title\">";
+				echo "<input type=\"image\" src=\"$image\" title=\"".traduire($title)."\">";
 			else
-				echo "<input type=\"image\" src=\"$image\" width=\"$size\" height=\"$size\" title=\"$title\">";
+				echo "<input type=\"image\" src=\"$image\" width=\"$size\" height=\"$size\" title=\"".traduire($title)."\">";
 			echo "<input type=\"hidden\" name=\"action\" value=\"$action\">";
 			echo "$param </form>";
 			}
 		else
 			{
 			if ($size=="")
-				echo "<input type=\"image\" src=\"$image\" title=\"$title\">";
+				echo "<input type=\"image\" src=\"$image\" title=\"".traduire($title)."\">";
 			else
-				echo "<input type=\"image\" src=\"$image\" width=\"$size\" height=\"$size\" title=\"$title\">";
+				echo "<input type=\"image\" src=\"$image\" width=\"$size\" height=\"$size\" title=\"".traduire($title)."\">";
 			}
 
 		}
@@ -381,9 +426,9 @@ include 'param.php';
 		echo "<div id=\"logo\"> <center><a href=\"index.php\"><img src=\"images/logo.png\" width=\"200\" height=\"150\" ></a> </div>  <center>";	
 		if ($titre!="")
 			{
-			echo "<h3>La Consigne Numérique Solidaire</h3>";
-			echo "<p><i><b><font size=\"5\">'' Mon essentiel à l'abri en toute confiance '' .</b></i></font>";
-			echo "<p>Sauvegardez gratuitement de façon sécurisée vos documents, photos et informations essentielles .";
+			echo "<h3>".traduire('La Consigne Numérique Solidaire')."</h3>";
+			echo "<p><i><b><font size=\"5\">'' ".traduire('Mon essentiel à l\'abri en toute confiance')." '' .</b></i></font>";
+			echo "<p>".traduire('Sauvegardez gratuitement de façon sécurisée vos documents, photos et informations essentielles .');
 			}
 		}		
 
@@ -403,19 +448,15 @@ include 'param.php';
 		
 		if (!is_numeric($id))
 			{
-			$reponse = command("","select * FROM `r_user`  where id='$id' ");
-			$donnees = mysql_fetch_array($reponse)	;	
+			$reponse = command("select * FROM `r_user`  where id='$id' ");
+			$donnees = fetch_command($reponse)	;	
 			$id= $donnees["idx"];	
 			}	
 
 		if ($acteur=="")
 			$acteur=$id;
-	
-	// c'est un bug de transformer l'acteur en libellé
-	//	if (($acteur!="") && (is_numeric($acteur) ) )
-	//		$acteur=libelle_user($acteur);
 			
-		$reponse = command("","INSERT INTO `log`  VALUES ('$date_log $heure_jour' , '$id', '$ligne', '$acteur','$ip' ) ");
+		$reponse = command("INSERT INTO `log`  VALUES ('$date_log $heure_jour' , '$id', '$ligne', '$acteur','$ip' ) ");
 		}
 
 	function ajout_log_tech( $ligne, $prio="P2")
@@ -425,7 +466,7 @@ include 'param.php';
 		$heure_jour=date("H\hi.s");	
 		$ip= $_SERVER["REMOTE_ADDR"];
 		$ligne=addslashes($ligne);
-		$reponse = command("","INSERT INTO `z_log_t`  VALUES ('$date_log $heure_jour' , '$ligne', '$ip', '$prio' ) ");
+		$reponse = command("INSERT INTO `z_log_t`  VALUES ('$date_log $heure_jour' , '$ligne', '$ip', '$prio' ) ");
 		}		
 
 	function ajout_log_jour( $ligne)
@@ -443,18 +484,12 @@ include 'param.php';
 	function purge_log ()
 		{
 		$date=date('Y-m-d',  mktime(0,0,0 , date("m")-3, date("d"), date ("Y")));
-		$r1 = command("","DELETE FROM log WHERE ligne regexp 'connexion' and date<$date  ");
+		$r1 = command("DELETE FROM log WHERE ligne regexp 'connexion' and date<$date  ");
 		$date=date('Y-m-d',  mktime(0,0,0 , date("m")-1, date("d"), date ("Y")));
-		$r1 = command("","DELETE FROM z_log_t WHERE date<$date  ");		
+		$r1 = command("DELETE FROM z_log_t WHERE date<$date  ");		
 		}
 				
-	function command($flag,$ligne)
-		{
-		if ($flag!="")
-			echo "<p>$ligne";
-		ajout_log_jour($ligne);
-		return( mysql_query($ligne) );	
-		}
+
 	// ----------------------------------------------------------------- Tempo connexion
 
 	
@@ -462,47 +497,47 @@ include 'param.php';
 		{
 		$date_log=date('Y-m-d');	
 		$heure_jour=date("H\hi.s");
-		command("","UPDATE r_user set last_cx='$date_log $heure_jour' where idx='$idx' ");	
+		command("UPDATE r_user set last_cx='$date_log $heure_jour' where idx='$idx' ");	
 		}
 		
 	function maj_last_hash_ctrl($idx)
 		{
 		$date_log=date('Y-m-d');	
 		$heure_jour=date("H\hi.s");
-		command("","UPDATE r_user set last_hash_ctrl='$date_log $heure_jour' where idx='$idx' ");	
+		command("UPDATE r_user set last_hash_ctrl='$date_log $heure_jour' where idx='$idx' ");	
 		}
 		
 	function ajout_echec_cx ($id)
 		{
 		if ($_SERVER['REMOTE_ADDR']!="127.0.0.1")
 			{
-			$reponse = command("","select * from cx where id='$id' ");
-			if ($donnees = mysql_fetch_array($reponse) )
+			$reponse = command("select * from cx where id='$id' ");
+			if ($donnees = fetch_command($reponse) )
 				{
 				$tempo=min( 120, $donnees["tempo"]+4);
-				$reponse = command("","UPDATE cx SET tempo='$tempo' where id='$id' ") ;
+				$reponse = command("UPDATE cx SET tempo='$tempo' where id='$id' ") ;
 				}
 			else
-				$reponse = command("","INSERT INTO `cx` VALUES ( '$id', '4') ");
+				$reponse = command("INSERT INTO `cx` VALUES ( '$id', '4') ");
 			}
 		}
 		
 	function supp_echec_cx ($id)
 		{
-		$reponse = command("","delete from cx where id='$id' ");
+		$reponse = command("delete from cx where id='$id' ");
 		}
 		
 	function tempo_cx ($id)
 		{
-		$reponse = command("","select * from cx where id='$id' ");
-		if ($donnees = mysql_fetch_array($reponse) )
+		$reponse = command("select * from cx where id='$id' ");
+		if ($donnees = fetch_command($reponse) )
 			sleep ($donnees["tempo"]);		
 		}
 
 	function decremente_echec_cx ($pas=1)
 		{
-		$r1 = command("","select * from cx ");
-			while ($donnees = mysql_fetch_array($r1) )
+		$r1 = command("select * from cx ");
+			while ($donnees = fetch_command($r1) )
 				{
 				$tempo=$donnees["tempo"]-$pas;
 				$id=$donnees["id"];
@@ -520,7 +555,7 @@ include 'param.php';
 	
 	function liste_profil( $user_droit_org, $val_init)
 		{
-		echo " <form method=\"post\" > <input  type=\"hidden\" name=\"action\" value=\"modif_profil\"/> ";
+		echo "<form method=\"post\" > <input  type=\"hidden\" name=\"action\" value=\"modif_profil\"/> ";
 		echo "<SELECT name=\"profil\" onChange=\"this.form.submit();\"  >";
 		if ($user_droit_org=="R")
 			{
@@ -534,6 +569,7 @@ include 'param.php';
 			affiche_un_choix($val_init,"E","Exploitant");
 			affiche_un_choix($val_init,"F","Fonctionnel");
 			affiche_un_choix($val_init,"T","Formateur");
+			affiche_un_choix($val_init,"t","Traducteur");
 			affiche_un_choix($val_init,"s","AS inactif");
 			affiche_un_choix($val_init,"R","Responsable");
 			affiche_un_choix($val_init,"S","Acteur social");
@@ -558,7 +594,7 @@ include 'param.php';
 		if (VerifierPortable($tel))	
 			{
 			$m = "<form method=\"POST\" action=\"index.php\">$tel ";
-			$m .= "<input type=\"image\" src=\"images/sms.png\" width=\"20\" height=\"20\" title=\"Envoyer un SMS\">";
+			$m .= "<input type=\"image\" src=\"images/sms.png\" width=\"20\" height=\"20\" title=\"".traduire('Envoyer un SMS')."\">";
 			$m .= "<input type=\"hidden\" name=\"tel\" value=\"$tel\">";
 			$m .= "<input type=\"hidden\" name=\"action\" value=\"sms_test\"></form>";
 			$tel =$m;
@@ -571,7 +607,7 @@ include 'param.php';
 		if (VerifierAdresseMail($mail))	
 			{
 			$m = "<form method=\"POST\" action=\"index.php\">$mail ";
-			$m .= "<input type=\"image\" src=\"images/mail2.png\" width=\"20\" height=\"20\" title=\"Envoyer un Mail\">";
+			$m .= "<input type=\"image\" src=\"images/mail2.png\" width=\"20\" height=\"20\"  title=\"".traduire('Envoyer un Mail')."\">";
 			$m .= "<input type=\"hidden\" name=\"mail\" value=\"$mail\">";
 			$m .= "<input type=\"hidden\" name=\"action\" value=\"mail_test\"></form>";
 			$mail =$m;
@@ -580,4 +616,95 @@ include 'param.php';
 		return  ($mail) ;
 		}		
 		
+	function pied_de_page($r="")
+		{
+		global $user_lang ;
+		
+		if ($r!="")
+			echo "<center><p><br><a id=\"accueil\" href=\"index.php\">".traduire('Retour à la page d\'accueil.')."</a>"; 
+
+		echo "<br><br>";
+		echo "<hr><center> ";
+
+		echo "<table> <tr> <td align=\"right\" valign=\"bottom\" ></td>";
+		
+		if ($user_lang!="fr")
+			echo "<td><a href=\"index.php?action=fr\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"français\" alt=\"français\" src=\"images/flag_fr.png\"/></a></td><td> | </td>";
+		if ($user_lang!="gb")
+			echo "<td><a href=\"index.php?action=gb\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"english\" alt=\"anglais\" src=\"images/flag_gb.png\"/></a></td><td> | </td>";
+		if ($user_lang!="de")
+				echo "<td><a href=\"index.php?action=de\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"allemand\" alt=\"allemand\" src=\"images/flag_de.png\"/></a></td><td> | </td>";
+		if ($user_lang!="es")
+				echo "<td><a href=\"index.php?action=es\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"espagnol\" alt=\"espagnol\" src=\"images/flag_es.png\"/></a></td><td> | </td>";
+		if ($user_lang!="ru")
+				echo "<td><a href=\"index.php?action=ru\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"russe\" alt=\"russe\" src=\"images/flag_ru.png\"/></a></td><td> | </td>";
+						
+		echo "<td><a id=\"lien_conditions\" href=\"conditions.html\">".traduire('Conditions d\'utilisation')."</a>";
+		echo "- <a id=\"lien_contact\" href=\"index.php?action=contact\">".traduire('Nous contacter')."</a>";
+		echo "- Copyright <a href=\"http://adileos.doc-depot.com\">ADILEOS 2014</a> ";
+		$version= parametre("DD_version_portail") ;
+		if ($_SERVER['REMOTE_ADDR']=="127.0.0.1")
+			echo "- <a href=\"version.htm\"target=_blank > $version </a>";	
+		else
+			echo "- $version ";	
+
+		echo "- <a href=\"index.php?action=bug\">".traduire('Signaler un bug ou demander une évolution').".</a> </td> ";
+		fermeture_bdd() ;	
+		exit();
+		}
+		
+	function  addslashes2($memo)
+		{
+		 return(addslashes($memo));
+		}
+	
+	function affiche_un_choix($val_init, $val, $libelle="")
+		{
+		if ($libelle=="")
+			$libelle=$val;
+			
+		$libelle=traduire($libelle);
+			
+		if (( $val_init!=$val) || ($val_init=="") || ($val==""))
+				echo "<OPTION  VALUE=\"$val\"> $libelle </OPTION>";
+			else
+				echo "<OPTION  VALUE=\"$val\" selected> $libelle </OPTION>";
+		}
+		
+	// ========================================================== BDD ==========================================
+	function command($ligne, $flag="")
+		{
+		if ($flag!="")
+			echo "<p>$ligne";
+		ajout_log_jour($ligne);
+		return( mysql_query($ligne) );	
+		}
+	
+	function fetch_command ($reponse)
+		{
+		return(  mysql_fetch_array($reponse) );
+		}
+
+	function nbre_colonnes ($reponse)
+		{
+		return(  mysql_num_fields($reponse) );
+		}
+		
+	function nbre_enreg ($reponse)
+		{
+		return(  mysql_fetch_row($reponse) );
+		}	
+	
+	// nom utilisé
+	function ouverture_bdd ()
+		{
+		global 	$ZZ_CLE;
+		
+		require_once "connex_inc.php";
+		}
+
+	function fermeture_bdd ()
+		{
+		return(  mysql_close( ) );
+		}
 ?>

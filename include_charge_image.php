@@ -96,8 +96,8 @@
 	
 	function existe_doublon($ref, $nom,$taille)
 		{
-		$reponse =command("","select * from r_attachement where ref='$ref' ");
-	 	while ($donnees = mysql_fetch_array($reponse) ) 
+		$reponse =command("select * from r_attachement where ref='$ref' ");
+	 	while ($donnees = fetch_command($reponse) ) 
 			{
 			$num=$donnees["num"];
 			$l_num=strstr($num,".");
@@ -221,7 +221,8 @@
 							
 					$pdf->Output("upload_pdf/$idx.$n.pdf");
 					
-					pdfEncrypt("upload_pdf/$idx.$n.pdf", decrypt($pw) , "upload_prot/$idx.$n.pdf","P");
+					if ($pw!="")
+						pdfEncrypt("upload_pdf/$idx.$n.pdf", decrypt($pw) , "upload_prot/$idx.$n.pdf","P");
 					}
 				}
 			else
@@ -237,7 +238,8 @@
 						met_cadenas("$idx.$n.jpg");
 						supp_fichier("upload_mini/_$idx.$n.jpg");
 						}
-					pdfEncrypt("upload_pdf/$idx.$n", decrypt($pw) , "upload_prot/$idx.$n","P" );
+					if ($pw!="")
+						pdfEncrypt("upload_pdf/$idx.$n", decrypt($pw) , "upload_prot/$idx.$n","P" );
 					}
 				else
 					if (!est_doc($n))  // si c'est un doc on garde
@@ -265,7 +267,7 @@
 					$date=	$date_jour=date('Y-m-d')." ".$heure_jour=date("H\hi");
 					if ($ref[0]=='A') $t='A'; else $t='P';
 					$u = substr($ref,strpos($ref,"-")+1 );
-					$reponse = command("","INSERT INTO `r_attachement`  VALUES ( '$ref', '$idx.$n', '$date', '$type', '$ident','','','','','','$acteur', '$sens_doc_original','$idx','$u','$t')");
+					$reponse = command("INSERT INTO `r_attachement`  VALUES ( '$ref', '$idx.$n', '$date', '$type', '$ident','','','','','','$acteur', '$sens_doc_original','$idx','$u','$t')");
 					if ($mode=="1")
 						ajout_log( $user, "Ajout fichier par Mail $n / Type : $type / $ident" ,$acteur);
 					else

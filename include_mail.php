@@ -53,19 +53,20 @@
 		{
 		maj_compteur_envoi_mail();
 		
+		$envir = parametre("TECH_identite_environnement");
+			
+		// Sujet du mail
+		$subject = "$envir : $subject";			
+		
 		// Le message vers le gestionnaire est réduit (pas d'image ni slogan)
 		if ($to!=parametre('DD_mail_gestinonnaire'))
 			{
-			// Sujet du mail
-			$subject = "DOC-DEPOT : $subject";		
 			// contenu du message
-			$body = "<center><a href=\"http://doc-depot.com\"><img src=\"http://doc-depot.com/images/logo.png\" width=\"150\" height=\"100\" ></a><p>
-					<h3>La Consigne Numérique Solidaire</h3>
-					<font size=\"5\">'' Mon essentiel à l'abri en toute confiance ''</font> <p> $body";
+			$body = "<center><a href=\"https://doc-depot.com\"><img src=\"http://doc-depot.com/images/logo.png\" width=\"150\" height=\"100\" ></a><p>
+					<h3>".traduire('La Consigne Numérique Solidaire')."</h3>
+					<font size=\"5\">'' ".traduire("Mon essentiel à l'abri en toute confiance")." ''</font> <p> $body";
 			}
-		else
-			$subject = "DD : $subject";
-		
+
 		if (($_SERVER['REMOTE_ADDR']=="127.0.0.1"))
 			{
 			echo "<table border=\"2\"> <tr> <td>$to <hr>" ;
@@ -98,6 +99,7 @@
 
 	function envoi_mail_brut($to,$subject,$body)		
 		{
+
 		maj_compteur_envoi_mail();
 		ecrit_parametre("TECH_nb_sms_envoyes",parametre("TECH_nb_sms_envoyes")+1) ;
 
@@ -119,7 +121,7 @@
 	function envoi_SMS($subject,$body)		
 		{
 		ajout_log_tech( "Envoi SMS au $subject : '$body' ");
-		if ( ($body!=parametre('FORM_msg_rdv')) || ($to!=parametre('FORM_tel_rdv'))) 
+		if ( ($body!=parametre('FORM_msg_rdv')) || ($subject!=parametre('FORM_tel_rdv'))) 
 			envoi_mail_brut(parametre('DD_mail_pour_gateway_sms'),$subject,$body);
 		}
 
@@ -212,14 +214,14 @@ function TTT_mail($aff=true)
 			else
 				{
 				$cmd= "SELECT * from  r_user WHERE ((telephone='0$n') or (telephone='+33$n')  ) and droit='' ";
-				$reponse = command( "",$cmd); 
-				if ($donnees = mysql_fetch_array($reponse)) 
+				$reponse = command($cmd); 
+				if ($donnees = fetch_command($reponse)) 
 						{
 						$date_jour=date('Y-m-d')." ".$heure_jour=date("H\hi:s");
 						$idx=$donnees["idx"];
 						$ligne = imap_fetchbody($mBox, $i, 1);
 						
-						if ($donnees = mysql_fetch_array($reponse))
+						if ($donnees = fetch_command($reponse))
 							{
 							// cas où il y a 2 fois le même téléphone==> anormal
 							ajout_log_tech ("2 fois le même numéro $n pour un bénéficiaire ! ","P1");
@@ -229,7 +231,7 @@ function TTT_mail($aff=true)
 							if (!strstr(strtolower($ligne), "activation"))
 								{
 								$cmd= "INSERT INTO r_sms VALUES ('$date_jour', '$idx', '$ligne' ) ";
-								$reponse = command( "",$cmd); 
+								$reponse = command($cmd); 
 								}
 							else
 								recept_mail($idx,date('Y-m-d'));
@@ -496,8 +498,8 @@ class MailAttachmentManager
 					if ($aff)
 						echo "<br> $jk/$i ($a) : $filename ";
 					
-					$reponse = command ("","SELECT * FROM r_user WHERE ( id='$id' or telephone='$id') and droit='' "); 
-					if ($donnees = mysql_fetch_array($reponse))
+					$reponse = command ("SELECT * FROM r_user WHERE ( id='$id' or telephone='$id') and droit='' "); 
+					if ($donnees = fetch_command($reponse))
 						{
 						echo " x0 ";
 						$droit=$donnees["droit"];
@@ -511,13 +513,13 @@ class MailAttachmentManager
 							// vérifiction si cela ne vient pas d'un référent de confiance
 							$vient_de_RC=false;
 							
-							$r1 = command( "","SELECT * FROM r_user WHERE mail='$from')"); 
-							if ($d1 = mysql_fetch_array($r1))  // on a trouver un utilisateur
+							$r1 = command("SELECT * FROM r_user WHERE mail='$from')"); 
+							if ($d1 = fetch_command($r1))  // on a trouver un utilisateur
 								if ($d1["droit"]=='S') // c'est bien un Acteur Social
 									{
 									$rc_idx=$d1["idx"];
-									$r2 = command( "","SELECT * FROM r_referent WHERE user='$user' and nom='$rc_idx' and organisme='' "); 
-									if ($d2 = mysql_fetch_array($r2))  
+									$r2 = command( "SELECT * FROM r_referent WHERE user='$user' and nom='$rc_idx' and organisme='' "); 
+									if ($d2 = fetch_command($r2))  
 										$vient_de_RC=true;
 									}
 							
@@ -534,6 +536,7 @@ class MailAttachmentManager
 									include ("vcard.php");
 									$ligne= extrait_vcard("tmp/$filename");
 									ajoute_note( $user, $ligne );
+									ajout_log( $user,"Contact VCF reçu : '$ligne' ",$user);
 									}
 								else
 									 {		
@@ -548,7 +551,10 @@ class MailAttachmentManager
 										{
 
 										if (charge_image("1","tmp/$filename","$filename",$donnees["lecture"],"P-$user", $sujet, "MMS",$from, $user))
+											{
 											envoi_SMS($telephone , "MMS déposé dans votre espace personnel.");
+											ajout_log( $user,"MMS reçu de $telephone et déposé dans espace personnel : '$filename' ",$user);
+											}
 										}
 									}
 									

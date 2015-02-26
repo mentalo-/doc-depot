@@ -17,8 +17,8 @@
 		commentaire_html("purge_rdv");
 
 		echo "<br>Purge Rdv";
-		$reponse =command("","select * from  DD_rdv where etat='Envoyé' ");		
-		while ($donnees = mysql_fetch_array($reponse) ) 
+		$reponse =command("select * from  DD_rdv where etat='Envoyé' ");		
+		while ($donnees = fetch_command($reponse) ) 
 				{
 				$date =$donnees["date"];	
 				$ilyaunmois =date('Y-m-d H\hi',  mktime(0,0,0 , date("m")-1, date("d"), date ("Y")));
@@ -26,7 +26,7 @@
 				if ( $ilyaunmois > $date  )
 					{
 					$user =$donnees["user"];	
-					command("","delete from DD_rdv where user='$user' and date='$date' ");
+					command("delete from DD_rdv where user='$user' and date='$date' ");
 					}
 				}
 		}
@@ -161,8 +161,8 @@ function random_chaine($car)
 		// ----------------------------------------------------------------------- traitement des RDV				
 			Echo "<p>TTT rdv ";
 			
-			$reponse =command("","select * from  DD_rdv where etat='A envoyer' ");		
-			while ($donnees = mysql_fetch_array($reponse) ) 
+			$reponse =command("select * from  DD_rdv where etat='A envoyer' ");		
+			while ($donnees = fetch_command($reponse) ) 
 				{
 				$date=$donnees["date"];	
 				$avant=$donnees["avant"];	
@@ -188,8 +188,8 @@ function random_chaine($car)
 					{
 					$ligne=stripcslashes($donnees["ligne"]);
 					$user_idx=$donnees["user"];
-					$r1 =command("","SELECT * from  r_user WHERE idx='$user_idx' ");
-					if ($d1 = mysql_fetch_array($r1) ) 
+					$r1 =command("SELECT * from  r_user WHERE idx='$user_idx' ");
+					if ($d1 = fetch_command($r1) ) 
 						{
 						$telephone_user=$d1["telephone"];
 						
@@ -200,7 +200,7 @@ function random_chaine($car)
 								ajout_log( $user_idx,"RDV - Envoi SMS au $telephone_user : '$ligne' ",$auteur);
 								}
 
-						command("","UPDATE DD_rdv set etat='Envoyé' where user='$user_idx' and date='$date' ");
+						command("UPDATE DD_rdv set etat='Envoyé' where user='$user_idx' and date='$date' ");
 						}
 					else
 						echo "User inconnu $user_idx ";
@@ -243,6 +243,7 @@ function random_chaine($car)
 			
 			}
 
+	/*
 	commentaire_html("TTT: Affiche Indicateurs");
 
 	// Affichage des principaux indicaturs
@@ -256,7 +257,7 @@ function random_chaine($car)
 	
 	echo "<p> Nbre de mails envoyés : ". parametre("TECH_nb_mail_envoyes");
 	echo "<p> Nbre de SMS envoyés : ". parametre("TECH_nb_sms_envoyes");
-	
+	*/
 
 	echo "</body>";
 

@@ -13,8 +13,8 @@
 
 		$idx=$_SESSION['user_idx'];
 
-		$reponse = mysql_query("SELECT * from  r_user WHERE idx='$idx'"); 
-		$donnees = mysql_fetch_array($reponse);
+		$reponse = command("SELECT * from  r_user WHERE idx='$idx'"); 
+		$donnees = fetch_command($reponse);
 		$code_lecture=$donnees["lecture"];	
 		
 

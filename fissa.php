@@ -19,12 +19,18 @@
         <meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\" />
  <?php
 include 'calendrier.php';
+include 'general.php';
 include 'inc_style.php';
+    echo "<meta http-equiv=\\\"Content-Type\\\" content=\\\"text/html; charset=iso-8859-1\\\" />";
 ?> 		    
 		</head>
 		<body>
 	
        <?php 
+	   
+	   
+		$user_lang='fr';
+		
 		$nom=array();
 		$liste_nom=array();
 		$pres_repas=array();
@@ -32,7 +38,7 @@ include 'inc_style.php';
 		$commentaire=array();
 		$nb_usager=100;
 	
-	$bdd = variable("support");
+	$bdd = variable_s("support");
 	if ($bdd!="") 
 		$_SESSION['support']=$bdd;
 	else
@@ -42,7 +48,7 @@ include 'inc_style.php';
 	// ConnexiondD
 	include "connex_inc.php";
 	
-	$cmd= "SELECT * FROM fissa WHERE support='$bdd' ";
+	$cmd= "SELECT * FROM fct_fissa WHERE support='$bdd' ";
 	$reponse = mysql_query($cmd); 
 	$donnees = mysql_fetch_array($reponse);
 	
@@ -55,7 +61,7 @@ include 'inc_style.php';
 	$libelle=$donnees["libelle"];
 
 	/*
-	$logo = variable("logo");
+	$logo = variable_s("logo");
 	if ($logo!="") 
 		$_SESSION['logo']=$logo;
 	else
@@ -63,46 +69,7 @@ include 'inc_style.php';
 		*/
 	$logo="";
 	
-	function variable($libelle)
-		{
-		if (isset ($_POST[$libelle]))
-			return(mysql_real_escape_string($_POST[$libelle]));
-		if (isset ($_GET[$libelle]))
-			return(mysql_real_escape_string($_GET[$libelle]));
-		return("");
-		}
-	
-	function pied_de_page()
-		{
-		mysql_close( );	
-		echo "<br><br>";
-		echo "<hr><center> <a href=\"conditions.html\">Conditions d'utilisation</a>";
 
-		echo "- <a href=\"mailto:doc-depot@fixeo.com\">Nous contacter</a>";
-		echo "- Copyright ADILEOS 2014 ";
-		if ($_SERVER['REMOTE_ADDR']=="127.0.0.1")
-			{
-			echo "- <a href=\"version.htm\" > V0.11 </a>";	
-			echo "- <a href=\"evolution.htm\" > Evolutions </a> ";
-			}
-		echo "- <a href=\"index.php?action=bug\">Signaler un bug ou demander une évolution.</a><p> ";
-
-		exit();
-		}
-
-	function  addslashes2($memo)
-		{
-		 return(addslashes($memo));
-		}
-
-				
-	function affiche_un_choix($val_init, $val)
-		{
-		if (( $val_init!=$val) || ($val_init=="") || ($val==""))
-				echo "<OPTION  VALUE=\"$val\"> $val </OPTION>";
-			else
-				echo "<OPTION  VALUE=\"$val\" selected> $val </OPTION>";
-		}
 // ---------------------------------------------------------------------------------------	
 	function charge_date($d)
 		{
@@ -206,18 +173,27 @@ function chgt_nom(  $nom, $nouveau)
 			}
 		}	
 
-function liste_presence( $val_init )
+function liste_presence( $val_init , $nom ="")
 		{
 		global $acteur;
 		
 		echo "</td> <td> ";
 		echo "<SELECT name=\"presence\"  onChange=\"this.form.submit();\">";
-		affiche_un_choix($val_init,"Visite");
-		affiche_un_choix($val_init,"Visite+Repas");
-		affiche_un_choix($val_init,"Refusé");
+		if ((!strstr($nom,"(A)")) && (!strstr($nom,"(B)")) && (!strstr($nom,"(S)")) )		
+			{
+			affiche_un_choix($val_init,"Visite");
+			affiche_un_choix($val_init,"Visite+Repas");
+			affiche_un_choix($val_init,"Refusé");
+			}
+		else
+			{
+			if ((!strstr($nom,"(B)")) && (!strstr($nom,"(S)")) )	
+				affiche_un_choix($val_init,"Activité");	
+			else
+				affiche_un_choix($val_init,"$acteur");
+			}
 		affiche_un_choix($val_init,"Pour info");
-		affiche_un_choix($val_init,"$acteur");
-		affiche_un_choix($val_init,"Activité");
+
 		affiche_un_choix($val_init,"Erreur saisie");
 		echo "</SELECT>";
 		}
@@ -271,7 +247,7 @@ function choix_qte( $val_init )
 				{
 				$nom=$donnees["nom"];
 				$t = $t."$nom; ";
-				//echo "$nom; ";
+
 				$i++; 		
 				}
 		return $t;
@@ -300,7 +276,7 @@ function choix_qte( $val_init )
 		
 		$l= date('Y-m-d',  mktime(0,0,0 , date("m")-3, date("d"), date ("Y")));
 		
-		$reponse = mysql_query("SELECT *,count(*) as TOTAL FROM $bdd where date>'$l' and nom<>'Synth'  group by nom order by nom "); 
+		$reponse = mysql_query("SELECT *,count(*) as TOTAL FROM $bdd where date>'$l' and nom<>'Synth'  group by nom order by nom limit 40 "); 
 		
 		while ($donnees = mysql_fetch_array($reponse) ) 
 				{
@@ -313,7 +289,7 @@ function choix_qte( $val_init )
 						if (strpos($n,"$profil")!==FALSE)
 							{
 							if ( (strpos($n,"(B)")!==FALSE) ||(strpos($n,"(S)")!==FALSE) )
-								echo "<a href=\"fissa.php?action=nouveau&qte=1&date_jour=$date_jour&nom=$n&memo=&presence=&commentaire=\">$n</a>; " ;
+								echo "<a href=\"fissa.php?action=nouveau&qte=1&date_jour=$date_jour&nom=$n&memo=&presence=Acteur+Social&commentaire=\">$n</a>; " ;
 						if ( (strpos($n,"(A)")!==FALSE))
 								echo "<a href=\"fissa.php?action=nouveau&qte=1&date_jour=$date_jour&nom=$n&memo=&presence=Activité&commentaire=\">$n</a>; " ;
 							}
@@ -358,13 +334,14 @@ function choix_qte( $val_init )
 //		echo "<BR><BR><b>$beneficiaire : </b>";	
 //		echo presents($date);
 	
+		echo "<BR><b>Synthèse : </b><BR>";
 		$i=0; 
 		$reponse = mysql_query("SELECT * FROM $bdd WHERE date='$date' and nom='Synth' "); 
 		while (($donnees = mysql_fetch_array($reponse) ) && ($i<10000))
 				{
 				$c=$donnees["commentaire"];
 				$c=nl2br (stripcslashes($c));
-				echo "<BR><b>Synthèse : </b><BR>$c ";
+				echo "$c ";
 				$i++; 		
 				}
 				
@@ -373,15 +350,19 @@ function choix_qte( $val_init )
 				
 		echo "<BR><BR><b> Détails : </b> ";		
 		for($i=0;$i<$imax;$i++)
-			if (($nom[$i]!="") /*&&  ($commentaire[$i]!="")*/)
+			if (($nom[$i]!="") /* &&  ($commentaire[$i]!="") */ )
 				if (strpos($nom[$i],"(B)")===FALSE)
 					if (strpos($nom[$i],"(S)")===FALSE)
 							{
 							echo "<BR> ";
 							$valeur=$nom[$i];
 							echo "- $valeur ";
+							
+							$valeur=$pres_repas[$i];
+							echo "($valeur) : ";
+
 							$valeur=$qte[$i];
-							echo "( X $valeur) : ";
+							//echo "( X $valeur) : ";
 							$valeur=$commentaire[$i];
 							echo " $valeur";
 							}
@@ -417,8 +398,23 @@ function date_getMicroTime()
 		{
 		global $nb_usager,$nom,$commentaire,$imax, $pres_repas, $bdd, $libelle;
 		
+		$reponse = command("","SELECT * FROM fct_fissa WHERE support='$bdd' "); 
+		if ($donnees = mysql_fetch_array($reponse) )
+			{
+			$idx=$donnees["organisme"];
+			
+			$reponse = command("","SELECT * FROM r_organisme WHERE idx='$idx' "); 
+			if ($donnees = mysql_fetch_array($reponse) )
+				$mail_struct=$donnees["mail"];
+			
+			$dest="";
+			$reponse = mysql_query("SELECT * FROM r_user WHERE droit='R' and organisme='$idx' "); 
+			while ($donnees = mysql_fetch_array($reponse) ) 
+				$dest.=$donnees["mail"].";";				
+			}
+			
 		$headers  = 'MIME-Version: 1.0\r\nContent-type: text/html; charset=utf-8'. "\r\n";
-		$headers  .= "From: FISSA $libelle <cafe115.alpirim@gmail.com>" . "\r\n"; 
+		$headers  .= "From: FISSA $libelle <$mail_struct>" . "\r\n"; 
 
 		Echo "Envoi mails de la journée du $date";
 		$i=0; 
@@ -433,8 +429,7 @@ function date_getMicroTime()
 		
 		$synth ="$libelle : aujourd'hui, $date, $r personnes accueillies, dont $r3 repas.";
 		
-		$dest = "115-hautsdeseine@ch-nanterre.fr,cafe115.alpirim@gmail.com";
-		Echo "<BR><BR>- Envoiynthèse $bdd à $dest : ";
+		Echo "<BR><BR>- Envoi Synthèse $bdd à $dest : ";
 		
 		if  (mail2 ( $dest , "FISSA $libelle (synthèse) : $date ", "$synth", $headers   )) echo "OK"; else echo "Echec";
 		
@@ -466,7 +461,6 @@ function date_getMicroTime()
 							$txt = $txt. " $valeur ; ";
 							}
 
-		$dest = "jm@fixeo.com,cafe115.alpirim@gmail.com,emilie.legall@ville-issy.fr,les-helices@wanadoo.fr,patriciachardon.alpirim@gmail.com";
 		Echo "<BR><BR>- Envoi rapport detaillé à $dest : ";
 		if  (mail2 ( $dest , "FISSA $libelle (détails) : $date", "$txt", $headers   )) echo "OK"; else echo "Echec";
 		
@@ -567,20 +561,20 @@ if ( !isset($_SESSION['pass']) ||($_SESSION['pass']==false) )
 		
 		if ($action=="nouveau")
 			{
-			$nom1= variable("nom");
-			$type= variable("type");
-
+			$nom1= variable_s("nom");
+			$type= variable_s("type");
 			
 			if ($type=="Bénéficiaire femme")
 				$nom1 .= " (F)";
-			if ($type==" Bénévole")
+			if ($type=="Bénévole")
 				$nom1 .= " (B)";
 			if ($type=="Salarié")
 				$nom1 .= " (S)";
 			if ($type=="Activité")
 				$nom1 .= " (A)";		
-				
-			nouveau($date_jour,$nom1, $_GET["presence"],$_GET["commentaire"],$memo,$_GET["qte"]);
+			
+			
+			nouveau($date_jour,$nom1, $_GET["presence"],$_GET["commentaire"],$memo);
 			}
 
 		if ($action=="chgt_nom")
@@ -782,7 +776,7 @@ if ( !isset($_SESSION['pass']) ||($_SESSION['pass']==false) )
 		
 			echo "<ul id=\"menu-bar\">";
 			echo "<li><a href=\"fissa.php?date_jour=$date_jour&action=rapport\" target=_blank>Rapport du $date_jour </a></li>";
-			echo "<li><a href=\"stat.php\" target=_blank>Statistiques</a>";
+		//	echo "<li><a href=\"stat.php\" target=_blank>Statistiques</a>";
 			echo "<li><a href=\"index.php?action=dx\">Deconnexion</a>";
 			echo "</ul> </td>";
 			
@@ -830,7 +824,8 @@ if ( !isset($_SESSION['pass']) ||($_SESSION['pass']==false) )
 			echo "</SELECT>";
 			echo "</td> <td>"; 
 			echo "<input type=\"submit\" value=\"Ajouter\" >  ";
-			echo "</td>  <td></td>";
+			echo "</td>";
+//			<td></td>";
 			echo " </form> ";	
 			// =====================================================================loc NOUVEAU
 			echo "<td></td> <td><form method=\"GET\" action=\"fissa.php\">";
@@ -845,7 +840,9 @@ if ( !isset($_SESSION['pass']) ||($_SESSION['pass']==false) )
 			echo "<input type=\"submit\" value=\"Créer Nouveau\" >  ";
 			echo "</td></form> ";	
 
-			echo "<tr> <td bgcolor=\"#FFCC66\"> Prénom / Nom </td> <td bgcolor=\"#FFCC66\"> Evénement </td><td bgcolor=\"#FFCC66\"> Qte </td><td bgcolor=\"#FFCC66\"> Memo </td><td bgcolor=\"#FFCC66\"> Commentaire </td>";		
+			echo "<tr> <td bgcolor=\"#FFCC66\"> Prénom / Nom </td> <td bgcolor=\"#FFCC66\"> Evénement </td>";
+			//<td bgcolor=\"#FFCC66\"> Qte </td>
+			echo "<td bgcolor=\"#FFCC66\"> Memo </td><td bgcolor=\"#FFCC66\"> Commentaire </td>";		
 			for($i=0;$i<$imax;$i++)
 				if ($nom[$i]!="")
 					{
@@ -860,15 +857,15 @@ if ( !isset($_SESSION['pass']) ||($_SESSION['pass']==false) )
 					echo "<a href=\"fissa.php?action=suivi&nom=$nom1&date_jour=$date_jour\" target=_blank> <b>$nom1</b> </a></td>";
 					$valeur=$pres_repas[$i];
 					if (($nom1!= "Mail") && ($valeur!="Atelier") )
-						liste_presence($valeur);
+						liste_presence($valeur, $nom[$i]);
 					else
 						echo "</td> <input type=\"hidden\" name=\"presence\" value=\"$valeur\"> <td>";
 					echo "</td> <td>";
 					$valeur =$qte[$i];
 					if ($valeur=="")
 						$valeur="1";
-					choix_qte( $valeur );
-					echo " </td> <td>";
+					//choix_qte( $valeur );
+					//echo " </td> <td>";
 					$reponse = mysql_query("SELECT * FROM $bdd where date='0000-00-00' and nom='$nom1' "); 
 					if ($donnees = mysql_fetch_array($reponse) )
 						$n=$donnees["commentaire"];	

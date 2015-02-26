@@ -14,8 +14,8 @@
 		$idx=$_SESSION['user_idx'];
 		$acteur=$_SESSION['acteur'];
 		
-		$reponse = mysql_query("SELECT * from  r_user WHERE idx='$idx'"); 
-		if ($donnees = mysql_fetch_array($reponse))
+		$reponse = command("SELECT * from  r_user WHERE idx='$idx'"); 
+		if ($donnees = fetch_command($reponse))
 			{
 			$code_lecture=$donnees["lecture"];	
 			charge_image("0",$tempFile,$_FILES['file']['name'],$code_lecture,"A-$idx", "" , "Autres", $acteur, $idx);

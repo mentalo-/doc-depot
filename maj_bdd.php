@@ -4,6 +4,14 @@
 		require_once "connex_inc.php"; 
 		require_once 'exploit.php';		
 	
+		function maj_version( $version )
+			{
+			echo "<p>MAJ -> $version";
+			ecrit_parametre("DD_version_bdd", $version);
+			ecrit_parametre("DD_version_portail", $version);
+			return ($version);
+			}
+			
 		$version=parametre("DD_version_bdd");
 		echo "<p> Version actuelle -> $version <br>";
 		
@@ -271,7 +279,7 @@
 				ecrit_parametre("DD_version_portail", $version);
 				}
 				
-		if ($version<"V0.49")
+		if ($version<"V1.01")
 				{
 				$version="V1.01";
 
@@ -281,4 +289,25 @@
 				ecrit_parametre("DD_version_portail", $version);
 				}
 
+		// 	----------------------------------------------------------------------------------------------
+		$nelle_version="V1.02";
+		if ($version<$nelle_version)
+				{
+				//backup_tables(false);  // A utiliser si changement de structure ou de contenu de la base
+				
+				// ------------------------------------------- Bloc Spécifique à la montée de version
+				command("ALTER TABLE z_traduire ADD original TEXT not null ");
+				command("ALTER TABLE z_traduire ADD commentaire TEXT not null ");
+				command("UPDATE `z_traduire` SET `original`=`fr` WHERE 1");
+				
+				command("ALTER TABLE r_user ADD langue TEXT not null ");
+				command("UPDATE `r_user` SET `langue`=`fr` WHERE `langue`=``");
+
+				command("CREATE TABLE IF NOT EXISTS `fct_fissa` ( `organisme` text NOT NULL, `support` text NOT NULL,  `libelle` text NOT NULL,  `acteur` text NOT NULL,  `beneficiaire` text NOT NULL,  `mails_rapports` text NOT NULL,  `mails_rapport_detaille` text NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=latin1; ");
+
+				// ------------------------------------------- Fin bloc spécifique
+
+				// ------------------------------------------- Bloc générique
+				$version=maj_version($nelle_version);
+				}
 ?>
