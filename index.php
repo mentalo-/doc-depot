@@ -1377,7 +1377,7 @@ function maj_mdp_fichier($idx, $pw )
 		global $action;
 		
 		$reponse = command("select * from r_user where id='$id' ");
-		if (!fetch_command($reponse) )
+		if (!$donnees=fetch_command($reponse) )
 			{
 			if (strlen($id)>7 )
 				{
@@ -1388,11 +1388,14 @@ function maj_mdp_fichier($idx, $pw )
 						if ( testpassword($pw)>65 ) 
 							{
 							// si changement d'"id" vérifier qu'il n'existe pas déja
+							$_SESSION['droit']=$donnees['droit'];
 							$pw=encrypt($pw);
 							$reponse = command("UPDATE `r_user` SET id='$id', pw='$pw', nom='$nom', prenom='$prenom'  where idx='$idx'  ");
 							ajout_log( $id, traduire("Finalisation compte")." $id / $nom / $prenom" );
 							$_SESSION['pass']=true;	 
-							$_SESSION['user']=$idx;				
+							$_SESSION['user']=$idx;		
+
+							
 							msg_ok(traduire("Compte créé avec succès"));
 							return(TRUE);
 							}

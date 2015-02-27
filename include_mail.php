@@ -36,8 +36,8 @@
 		// Entete
 		$headers  = "MIME-Version: 1.0 \n"; 
 		$headers .='Content-Type: text/html; charset="iso-8859-1"'."\n";
-		$headers .="'From: $from'\n";
-		$headers .="'Reply-To: $from'\n";
+		$headers .="From: $from\n";
+		$headers .="Reply-To: $from\n";
         $headers .='Content-Transfer-Encoding: 8bit'."\n";			
 		
 		// mise en forme HTML
