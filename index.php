@@ -171,9 +171,6 @@ if ( isset($_SESSION['pass']) && ($_SESSION['pass']==true) )
 	
 		case "visu_image":
 
-// Bizarre : impacte la visualisation de l'image		
-//			verification_acces(variable_s("nom"));
-
 			// Définit le contenu de l'en-tête - dans ce cas, image/jpeg
 			header('Content-Type: image/jpeg');
 
@@ -578,7 +575,7 @@ function maj_mdp_fichier($idx, $pw )
 
 	function liste_AS( $organisme )
 		{
-		$reponse =command("select * from  r_user where organisme=\"$organisme\" and droit='S'  ");
+		$reponse =command("select * from  r_user where organisme=\"$organisme\" and (droit='S' or droit='R')  ");
 
 		echo "<td> <SELECT name=\"nom\"   >";
 		affiche_un_choix("","Tous");
@@ -1151,8 +1148,14 @@ function maj_mdp_fichier($idx, $pw )
 				visu_referent_user($idx, $user, $masque);
 			else
 				{
+				$r1 =command("select * from  r_organisme where idx='$organisme' ");
+				$d1 = fetch_command($r1);
+				
+				$tel=$d1["tel"];	
+				$mail=formate_mail($d1["mail"]);	
+				$adresse=stripcslashes($d1["adresse"]);	
 				$organisme=libelle_organisme($organisme);
-				echo "<tr><td> $organisme </td><td> $idx   </td><td> </td><td> </td><td></td><td> </td>";
+				echo "<tr><td> $organisme </td><td> </td><td> </td><td> $tel </td><td> $mail</td><td> $adresse</td>";
 				}
 			}
 		}
@@ -1846,9 +1849,21 @@ function maj_mdp_fichier($idx, $pw )
 			}
 		echo "</table></div>";
 		}
-	
-	function affiche_beneficiaire($libelle,$ligne_cmd,$filtre1="",$filtre2="")
+
+		
+	function bouton_beneficiaire($nom,$organisme,$filtre1="")
 		{
+		global $user_idx;
+		
+		if ($filtre1!="")
+			$filtre2="and (nom REGEXP '$filtre' or prenom REGEXP '$filtre' or telephone REGEXP '$filtre' or mail REGEXP '$filtre' or anniv REGEXP '$filtre' or adresse REGEXP '$filtre'or nationalite REGEXP '$filtre' ) ";
+		else
+			$filtre2="";
+		
+		$libelle_organisme= libelle_organisme($organisme);
+		echo "<table><tr>";
+		$libelle= "Je suis le référent de ";
+		
 		echo "<table><tr><td><img src=\"images/bene.png\" width=\"35\" height=\"35\" ></td><td> <ul id=\"menu-bar\">";
 		echo "<li> <a href=\"index.php?action=ajout_beneficiaire\"  >+ ".traduire($libelle)." </a> ";
 		echo "<ul> <a href=\"index.php?action=verif_existe_user\"  > ".traduire('Vérifier si bénéficiaire existe déjà')."</a> </li> </ul>";
@@ -1862,52 +1877,65 @@ function maj_mdp_fichier($idx, $pw )
 		echo "</table><div class=\"CSSTableGenerator\" ><table> ";
 		echo "<tr><td>   </td><td> ".traduire('Nom')."  </td><td> ".traduire('Prénom')." </td><td>  ".traduire('Téléphone')." </td><td> ".traduire('Mail')." </td><td> ".traduire('Anniv')." </td><td> ".traduire('Nationalité')."  </td><td> ".traduire('Ville natale')." </td><td> ".traduire('Adresse')." </td>";
 		
-		$reponse =command($ligne_cmd);		
+		affiche_beneficiaire(2,$organisme, $user_idx, $filtre2);		
+		
+		affiche_beneficiaire(1,$organisme, $user_idx, $filtre2);		
+		echo "</table></div>";
+		}		
+		
+		
+	function affiche_beneficiaire($mode,$organisme,$user_idx,$filtre2="")
+		{
+		
+		if ($mode==1) // on affiche  ceux qui sont lié à la structure
+			$reponse =command("select * from  r_referent where nom='Tous'  and organisme='$organisme' ");		
+		else //mode=2 ==> on affiche ceux qui sont RCpersonnellement 
+			$reponse =command("select * from  r_referent where nom='$user_idx' and organisme='$organisme' ");		
+
 		while ($donnees = fetch_command($reponse) ) 
 			{
 			if (isset($donnees["user"]))
 				$nom1=$donnees["user"];
-				else
+			else
 				$nom1=$donnees["idx"];
-
-			$r1 =command("select * from  r_user where idx='$nom1' $filtre2 ");
-			if ($d1 = fetch_command($r1))
+			
+			$tst_doublon=false;
+			if ($mode==2)
 				{
+				$r1 =command("select * from  r_referent where nom='Tous' and organisme='$organisme' ");
+				if ($d1 = fetch_command($r1))
+					$tst_doublon=TRUE;
+				}
 				
-				$mail=$d1["mail"];	
-				$nom=$d1["nom"];
-				$prenom=$d1["prenom"];				
-				$telephone=$d1["telephone"];	
-				$anniv=$d1["anniv"];	
-				$nationalite=$d1["nationalite"];
-				$ville_nat=$d1["ville_nat"];				
-				$adresse=stripcslashes($d1["adresse"]);	
-				echo "<tr>";
-				$mail= formate_mail($mail);
-				$telephone= formate_telephone($telephone);
-				
-				lien_c ("images/voir.png", "detail_user", param("user","$nom1" ), traduire("Voir le détail") );
-				echo "<td>$nom   </a></td><td> $prenom </td><td> $telephone</td><td> $mail</td>";
-				echo "<td> $anniv </td><td> $nationalite   </td><td> $ville_nat </td><td> $adresse </td>";
+			if (!$tst_doublon)
+				{
+				$r1 =command("select * from  r_user where idx='$nom1' $filtre2 ");
+				if ($d1 = fetch_command($r1))
+					{
+					
+					$mail=$d1["mail"];	
+					$nom=$d1["nom"];
+					$prenom=$d1["prenom"];				
+					$telephone=$d1["telephone"];	
+					$anniv=$d1["anniv"];	
+					$nationalite=$d1["nationalite"];
+					$ville_nat=$d1["ville_nat"];				
+					$adresse=stripcslashes($d1["adresse"]);	
+					echo "<tr>";
+					$mail= formate_mail($mail);
+					$telephone= formate_telephone($telephone);
+					
+					lien_c ("images/voir.png", "detail_user", param("user","$nom1" ), traduire("Voir le détail") );
+					echo "<td>$nom   </a></td><td> $prenom </td><td> $telephone</td><td> $mail</td>";
+					echo "<td> $anniv </td><td> $nationalite   </td><td> $ville_nat </td><td> $adresse </td>";
+					}
 				}
 			}
-		echo "</table></div>";
+
 		
 		}
 		
-	function bouton_beneficiaire($nom,$organisme,$filtre="")
-		{
-		global $user_idx;
-		
-		if ($filtre!="")
-			$filtre2="and (nom REGEXP '$filtre' or prenom REGEXP '$filtre' or telephone REGEXP '$filtre' or mail REGEXP '$filtre' or anniv REGEXP '$filtre' or adresse REGEXP '$filtre'or nationalite REGEXP '$filtre' ) ";
-		else
-			$filtre2="";
-		
-		$libelle_organisme= libelle_organisme($organisme);
-		echo "<table><tr>";
-		affiche_beneficiaire("Je suis le référent de ","select * from  r_referent where (nom='$user_idx' or nom='Tous' ) and organisme='$organisme' ", $filtre, $filtre2);		
-		}
+
 		
 	FUNCTION nouveau_organisme($organisme,$tel,$mail,$adresse,$sigle,$doc)
 		{
@@ -2465,7 +2493,7 @@ function affiche_membre($idx)
 			if ($user_idx==$U_idx)
 				echo "<td> - ".traduire('Pour accèder à cette fonction il faut disposer d\'un n° de téléphone portable')." </td> ";
 			else
-				echo "<td> - ".traduire('Fonction non accessible car le bénéficiaire ne dispose pas d\'un n° de téléphone portable')." ->$U_idx<- </td> ";
+				echo "<td> - ".traduire('Fonction non accessible car le bénéficiaire ne dispose pas d\'un n° de téléphone portable')."</td> ";
 			}
 		else
 			echo "<li> <a href=\"index.php?action=rdv\"  >+ ".traduire('Rendez-vous')." </a> </li></ul></td>";
@@ -2517,10 +2545,10 @@ function affiche_membre($idx)
 	function verification_acces( $nom_fichier )
 		{
 		$u2=$_SESSION['user'];	
-		if (!verification_acces2( $nom_fichier ))
+//		if (!verification_acces2( $nom_fichier ))
 			{
 		
-			ajout_log_tech( "Tentative d'accès au fichier $nom_fichier non autorisé à ".libelle_user($u2) ,"P0");
+//			ajout_log_tech( "Tentative d'accès au fichier $nom_fichier non autorisé à ".libelle_user($u2) ,"P0");
 			}
 //		else
 //			ajout_log_tech( "Vérification ok accès acès à $nom_fichier par ".libelle_user($u2) ,"P2");
@@ -2581,7 +2609,6 @@ function affiche_membre($idx)
 				case "enreg_contact":				
 				case "bug":
 				case "contact":				
-
 
 				case "maj_user":
 				case "reinit_mdp":
@@ -4732,7 +4759,7 @@ if (isset($_POST['pass']))
 		
 		echo "<p>".traduire('Chaque bénéficiaire de la formation a pour référent tous les acteurs socicaux de la formation');
 		// initialisation pour chaque bénéficiaire que de tous les Acteur sociaux
-		$reponse = command("Select * from r_user where (id REGEXP 'FORM_A')");
+		$reponse = command("Select * from r_user where (id REGEXP 'FORM_A') or (id REGEXP 'FORM_R')");
 		while ($donnees = fetch_command($reponse) )
 			{
 			$idx=$donnees["idx"];
