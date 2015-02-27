@@ -109,9 +109,12 @@ if ( isset($_SESSION['pass']) && ($_SESSION['pass']==true) )
 		case "visu_fichier":
 			// Connexion BdD
 			include "connex_inc.php";
-
+			
 			$id=rand(1000000,999999999999);
 			$fichier=variable_s('num');
+
+			verification_acces( $fichier );
+
 			ajout_log_tech( "Visu_fichier $fichier - ".variable_s('code'));
 			if (variable_s('code')!="")
 				{
@@ -141,6 +144,9 @@ if ( isset($_SESSION['pass']) && ($_SESSION['pass']==true) )
 
 			$id=rand(1000,9999);
 			$fichier=variable_s('num');
+
+			verification_acces( $fichier );
+
 			copy("upload/$fichier","upload_tmp/$id.$fichier");
 
 			header("Location: upload_tmp/$id.$fichier");			
@@ -164,6 +170,10 @@ if ( isset($_SESSION['pass']) && ($_SESSION['pass']==true) )
 			break;
 	
 		case "visu_image":
+
+// Bizarre : impacte la visualisation de l'image		
+//			verification_acces(variable_s("nom"));
+
 			// Définit le contenu de l'en-tête - dans ce cas, image/jpeg
 			header('Content-Type: image/jpeg');
 
@@ -268,9 +278,9 @@ require_once "connex_inc.php";
 	echo "<link rel=\"icon\" type=\"image/png\" href=\"images/identification.png\" />";
 	echo "<title>Doc-Depot.com </title>";
     echo "<meta http-equiv=\\\"Content-Type\\\" content=\\\"text/html; charset=iso-8859-1\\\" />";
-	if (isset($_SESSION['profil']))
+	if (isset($_SESSION['droit']))
 		{
-		if ($_SESSION['profil']=="")
+		if ($_SESSION['droit']=="")
 			$refr=TIME_OUT_BENE+10;
 		else
 			$refr=TIME_OUT+10;
@@ -719,7 +729,6 @@ function maj_mdp_fichier($idx, $pw )
 					echo " $date : $l_num <br>$type <br> $ident";
 					}	
 
-		
 			if ((($action=="ajout_admin") &&  (substr($ref,0,1)=="A")) ) 
 					{
 					formulaire ("modif_type_doc");
@@ -728,7 +737,6 @@ function maj_mdp_fichier($idx, $pw )
 					echo "</form>";
 					}
 			}
-		
 		}
 
 		
@@ -1295,55 +1303,54 @@ function maj_mdp_fichier($idx, $pw )
 						erreur(traduire("L'identifiant est trop court (au moins 8 caractères)."));
 					else
 						{
-						$pw=encrypt($pw);
-						$code_lecture=encrypt($code_lecture);					
-
-						if ($droit!="")
+						$reponse = command("select * from r_user where id='$id' ");
+						if ( (!fetch_command($reponse) ) || ($id!="jm") || ($id!="jean-michel.cot")|| ($id!="jm.cot") || ($id!="contact")|| ($id!="fixeo"))
 							{
-							if (($mail!="") || ( VerifierAdresseMail($mail)) )
+							$pw=encrypt($pw);
+							$code_lecture=encrypt($code_lecture);					
+
+							if ($droit!="")
 								{
-								if ( ($organisme!="") || ($droit=="R") || ($droit=="E") || ($droit=="F"))
+								if (($mail!="") || ( VerifierAdresseMail($mail)) )
 									{
-									$idx=inc_index("user");
-									
-									$plus="";
-									if ($telephone[0]=='+')
-										$plus='+';
-									$telephone = $plus.preg_replace('`[^0-9]`', '', $telephone);
-									
-									command("INSERT INTO `r_user`  VALUES (  '$idx', '$id', '$pw','$droit','$mail','$organisme','$nom','$prenom','$anniv','$telephone','$nationalite','$ville_nat','$adresse','$recept_mail' ,'$prenom_p','$prenom_m','$date_jour','$code_lecture','','' ,'' ,'','$type_user','fr')");
-									ajout_log( $idx, traduire("Création utilisateur")."  $idx / $droit / $nom/ $prenom",	 $user_idx );
+									if ( ($organisme!="") || ($droit=="R") || ($droit=="E") || ($droit=="F"))
+										{
+										$idx=inc_index("user");
 										
-									$body= traduire("Bonjour").", $prenom $nom ";
-									$body.= "<p> $user_prenom $user_nom ".traduire("vous a créé un compte sur 'Doc-depot.com': ");
-									$body.= "<p> ".traduire("Pour accepter et finaliser la création de votre compte sur 'Doc-depot.com', merci de cliquer sur ce")." <a id=\"lien\" href=\"".serveur."index.php?action=finaliser_user&idx=".addslashes(encrypt($idx))."\">".traduire('lien')."</a> ". traduire("et compléter les informations manquantes.");
-									$body .= "<p> <hr> <center> Copyright ADILEOS 2014 </center>";
-									// Envoyer mail pour demander saisie pseudo et PW
-									envoi_mail($mail,traduire("Finaliser la création de votre compte"),$body);
+										$plus="";
+										if ($telephone[0]=='+')
+											$plus='+';
+										$telephone = $plus.preg_replace('`[^0-9]`', '', $telephone);
 										
-									envoi_mail(parametre('DD_mail_gestinonnaire'),traduire("Création du compte")." $prenom $nom ".traduire('par')." $user_prenom $user_nom ","",true);
+										command("INSERT INTO `r_user`  VALUES (  '$idx', '$id', '$pw','$droit','$mail','$organisme','$nom','$prenom','$anniv','$telephone','$nationalite','$ville_nat','$adresse','$recept_mail' ,'$prenom_p','$prenom_m','$date_jour','$code_lecture','','' ,'' ,'','$type_user','fr')");
+										ajout_log( $idx, traduire("Création utilisateur")."  $idx / $droit / $nom/ $prenom",	 $user_idx );
+											
+										$body= traduire("Bonjour").", $prenom $nom ";
+										$body.= "<p> $user_prenom $user_nom ".traduire("vous a créé un compte sur 'Doc-depot.com': ");
+										$body.= "<p> ".traduire("Pour accepter et finaliser la création de votre compte sur 'Doc-depot.com', merci de cliquer sur ce")." <a id=\"lien\" href=\"".serveur."index.php?action=finaliser_user&idx=".addslashes(encrypt($idx))."\">".traduire('lien')."</a> ". traduire("et compléter les informations manquantes.");
+										$body .= "<p> <hr> <center> Copyright ADILEOS 2014 </center>";
+										// Envoyer mail pour demander saisie pseudo et PW
+										envoi_mail($mail,traduire("Finaliser la création de votre compte"),$body);
+											
+										envoi_mail(parametre('DD_mail_gestinonnaire'),traduire("Création du compte")." $prenom $nom ".traduire('par')." $user_prenom $user_nom ","",true);
+										}
+									else
+										erreur (traduire("La structure sociale doit être renseignée."));
 									}
 								else
-									erreur (traduire("La structure sociale doit être renseignée."));
-								}
+									erreur (traduire("Format de mail incorrect ou absent")." $mail.");
+								}	
 							else
-								erreur (traduire("Format de mail incorrect ou absent")." $mail.");
-							}	
-						else
-							{
-							$idx=inc_index("user");
-							$reponse = command("select * from r_user where id='$id' ");
-							if ( (!fetch_command($reponse) ) || ($id!="jm") || ($id!="jean-michel.cot")|| ($id!="jm.cot") || ($id!="contact")|| ($id!="fixeo"))
 								{
+								$idx=inc_index("user");
 								command("INSERT INTO `r_user`  VALUES (  '$idx', '$id', '$pw','$droit','$mail','$organisme','$nom','$prenom','$anniv','$telephone','$nationalite','$ville_nat','$adresse','$recept_mail' ,'$prenom_p','$prenom_m','$date_jour','$code_lecture','$nss','','','','$type_user','fr')");
 								ajout_log( $idx, traduire("Création compte Bénéficiaire")."  $idx / $nom/ $prenom", $user_idx );
 								}
-							else
-								{
-								$idx="";
-								erreur (traduire("Identifiant déjà existant"));
-								}
+
 							}
+						else
+							erreur (traduire("Identifiant déjà existant"));
+
 						}
 				}
 			}
@@ -1386,7 +1393,6 @@ function maj_mdp_fichier($idx, $pw )
 							ajout_log( $id, traduire("Finalisation compte")." $id / $nom / $prenom" );
 							$_SESSION['pass']=true;	 
 							$_SESSION['user']=$idx;				
-							unset($_SESSION['profil']);				
 							msg_ok(traduire("Compte créé avec succès"));
 							return(TRUE);
 							}
@@ -2179,8 +2185,8 @@ function autorise_acces($ddeur,$bene,$autorise)
 	$code=$str;
 	
 	$reponse =command("UPDATE r_dde_acces set code='$code' , date_auto='$date_jour', autorise='$autorise' where user='$bene' and ddeur='$ddeur' and date_dde>='$date_jour' ");
-	ajout_log( $bene, traduire("Autorisation d'accès au compte partagé par ").libelle_user($autorise)." à ".libelle_user($ddeur), $autorise );
-	ajout_log( $ddeur, traduire("Autorisation d'accès au compte partagé par ").libelle_user($autorise)." à ".libelle_user($ddeur), $autorise );
+	ajout_log( $ddeur, traduire("Autorisation d'accès au compte de")." ".libelle_user($bene)." ".traduire("par")." ".libelle_user($autorise)." ".traduire("à")." ".libelle_user($ddeur), $autorise );
+	ajout_log( $bene, traduire("Autorisation d'accès au compte de")." ".libelle_user($bene)." ".traduire("par")." ".libelle_user($autorise)." ".traduire("à")." ".libelle_user($ddeur) );
 	}	
 
 
@@ -2214,7 +2220,8 @@ function autorise_acces($ddeur,$bene,$autorise)
 					}
 				$date_dde=$d1["date_dde"];
 				$qui=$d1["user"];
-				$code=$d1["code"];
+//				$code=$d1["code"];
+				$code="";
 				$date_auto=$d1["date_auto"];
 				$autorise=$d1["autorise"];
 				
@@ -2455,7 +2462,7 @@ function affiche_membre($idx)
 			if ($user_idx==$U_idx)
 				echo "<td> - ".traduire('Pour accèder à cette fonction il faut disposer d\'un n° de téléphone portable')." </td> ";
 			else
-				echo "<td> - ".traduire('Fonction non accessible car le bénéficiaire ne dispose pas d\'un n° de téléphone portable')." </td> ";
+				echo "<td> - ".traduire('Fonction non accessible car le bénéficiaire ne dispose pas d\'un n° de téléphone portable')." ->$U_idx<- </td> ";
 			}
 		else
 			echo "<li> <a href=\"index.php?action=rdv\"  >+ ".traduire('Rendez-vous')." </a> </li></ul></td>";
@@ -2501,8 +2508,55 @@ function affiche_membre($idx)
 			echo "</table></div>";
 		else
 			echo "<hr>";
+		}
 
-
+		
+	function verification_acces( $nom_fichier )
+		{
+		$u2=$_SESSION['user'];	
+		if (!verification_acces2( $nom_fichier ))
+			{
+		
+			ajout_log_tech( "Tentative d'accès au fichier $nom_fichier non autorisé à ".libelle_user($u2) ,"P0");
+			}
+//		else
+//			ajout_log_tech( "Vérification ok accès acès à $nom_fichier par ".libelle_user($u2) ,"P2");
+	
+		}
+	function verification_acces2( $nom_fichier )
+		{
+		$u2=$_SESSION['user'];		// Acteur
+		
+		$reponse =command("select * from  r_attachement where num='$nom_fichier' ");	
+		if ($donnees = fetch_command($reponse) )
+			{
+			if ($donnees['user']==$u2) // cas on c'est un doc du bénéficiaire
+				return (true);	
+			else
+				{
+				$u1=$_SESSION['user_idx'];	 // cas on c'est le RC qui accede au doc du bénéficiaire
+				$reponse =command("select * from  r_referent where (nom='$u1' and  user='$u2') or  (nom='$u2' and  user='$u1')  ");	
+				if ($donnees = fetch_command($reponse) ) 
+					return (true);		
+				else
+					{
+					// il faut aussi tester le cas ou le bénéficiaire à désigné 'tous'  d'un structure
+					$reponse =command("select * from  r_user where  idx='$u2'");
+					$donnees = fetch_command($reponse);
+					$org = $donnees['organisme'];
+					
+					$reponse =command("select * from  r_referent where organisme='$org' and  user='$u1' and nom='Tous' ");	
+					if ($donnees = fetch_command($reponse) ) 
+						return (true);		
+					}
+				}
+			} 
+		else
+			{
+			ajout_log_tech( "Tentative d'accès à un fichier inexistant $nom_fichier par ".libelle_user($u2) ,"P0");
+			// le fichier n'existe pas 
+			}	
+		return (false);	
 		}
 
 	// liste des  autorisées
@@ -2511,17 +2565,21 @@ function affiche_membre($idx)
 		
 		switch ($action)
 				{
+				// liste des actions ne nécessitant pas de droits
 				case "":
 				case "fr":
 				case "es":
 				case "de":
 				case "gb":
 				case "ru":
+				case "dx":
 				case "recup_mdp":
 				case "enreg_bug":
-				case "enreg_contact":
+				case "enreg_contact":				
 				case "bug":
-				case "contact":
+				case "contact":				
+
+
 				case "maj_user":
 				case "reinit_mdp":
 				case "changer_mdp":
@@ -2574,15 +2632,7 @@ function affiche_membre($idx)
 				case "draganddrop":
 				case "rdv":
 				case "ajout_rdv":
-				case "en_trop":
-				case "integrite":
-				case "authenticite":
-				case "force_supervision_sms":
-				case "desactive_sms2mail":
-				case "active_sms2mail":
-				case "liste_compte":
-				case "afflog":
-				case "afflog_t":
+
 				case "histo": 
 				case "membres_organisme":
 				case "renvoyer_mail":
@@ -2622,22 +2672,39 @@ function affiche_membre($idx)
 				case "ajout_beneficiaire":
 				case "verif_existe_user":
 				case "verif_user":
-				case "dx":
 				case "upload":
 				case "modifier_user":
 				case "supp_filtre":
 				case "alerte_admin":
 				case "raz_mdp":
 				case "raz_mdp1":
-				case "init_formation": 
-				case "raz_mdp_formation":
 				case "dde_acces" :
 				case "sms_test" :
 				case "sms_envoi" :
 				case "mail_test" :
 				case "mail_envoi" :
-				case "collegues" :
 				
+				// liste des actions nécessitant des droits de administrateur	
+				
+				// liste des actions nécessitant des droits de Fonctionnel	
+				
+				// liste des actions nécessitant des droits de exploitant	
+				case "en_trop":
+				case "integrite":
+				case "authenticite":
+				case "force_supervision_sms":
+				case "desactive_sms2mail":
+				case "active_sms2mail":
+				case "liste_compte":
+				case "afflog":
+				case "afflog_t":
+				
+				// liste des actions nécessitant des droits de Formateur			
+				case "init_formation": 
+				case "raz_mdp_formation":				
+				
+				// liste des actions nécessitant des droits d'AS uniquement
+				case "collegues" :
 				case "cc_activite" :
 				case "cc_maj_rdv" :
 				case "cc_ajout" :
@@ -2687,7 +2754,6 @@ require_once 'include_crypt.php';
 	
 	// ------------------------------------------------------------------------------ traitement des actions sans mot de passe
 	$action=variable("action");	
-
 
 	// on vérifie que l'action demandée (champ en clair) fait bien partie de la liste officielle ==> évite le piratage
 	$action = verif_action_autorise($action);	
@@ -3161,7 +3227,7 @@ require_once 'include_crypt.php';
 				aff_logo();
 			
 			debut_cadre("700");
-			echo "<p><br><p>".traduire('Pour récupérer votre mot de passe, merci de compléter ce formulaire')." : <p>";
+			echo "<p><br><p>".traduire('Pour récupérer votre mot de passe, merci de compléter ce formulaire avec les informations saisies lors de la création du compte')." : <p>";
 			echo "<TABLE><TR> ";
 			formulaire ("valider_dde_mdp_avec_code");
 			echo "<tr><td> ".traduire('Nom').":</td><td><input ctype=\"text\" size=\"20\" name=\"nom\" value=\"".variable("nom")."\"/></td>";
@@ -3356,7 +3422,6 @@ require_once 'include_crypt.php';
 		if ( (isset ($_SESSION['pass'])) && ($_SESSION['pass']==TRUE)) 
 				ajout_log( $_SESSION['user_idx'], traduire('Déconnexion') );
 		$_SESSION['pass']=false;// et hop le mot de passe... poubelle !
-		unset($_SESSION['profil']);	
 		echo "<div id=\"msg_dx\">".traduire('Vous êtes déconnecté!')."</div><br>";
 		}
 
@@ -3374,12 +3439,12 @@ if (isset($_POST['pass']))
 	$heure_jour=date("H\hi.s");	
 	$_SESSION['bene']="";
 	// verifion si la variable = mot de passe...
-		if ( ( 
-			(encrypt($_POST['pass'])==$mot_de_passe) // on vérifie le mot de passe 
-			||
-			// cas particulier en mode poste de développement on vérifie aussu un mot de passe en clair 
-			(($_POST['pass']==$mot_de_passe) && ($_SERVER['REMOTE_ADDR']=="127.0.0.1")	 )
-			) && ( !strstr($donnees["droit"] ,"-" ) ) ) // ceux qui sont désactivé ne peuvent pas accéder
+	if ( ( 
+		(encrypt($_POST['pass'])==$mot_de_passe) // on vérifie le mot de passe 
+		||
+		// cas particulier en mode poste de développement on vérifie aussu un mot de passe en clair 
+		(($_POST['pass']==$mot_de_passe) && ($_SERVER['REMOTE_ADDR']=="127.0.0.1")	 )
+		) && ( !strstr($donnees["droit"] ,"-" ) ) ) // ceux qui sont désactivé ne peuvent pas accéder
 			{
 			supp_echec_cx ($_POST['id']);
 			$ip= $_SERVER["REMOTE_ADDR"];
@@ -3400,7 +3465,6 @@ if (isset($_POST['pass']))
 				
 			$_SESSION['user_idx']=$donnees["idx"];
 			$_SESSION['droit']= $donnees["droit"];
-			$_SESSION['profil']= $donnees["droit"];
 			
 			if (($donnees["droit"]=="A") && ($ancien_droit!="A"))
 				envoi_mail( parametre('DD_mail_gestinonnaire') , "Connexion administrateur : ".$donnees["nom"]." ".$donnees["prenom"], "IP : $ip" );
@@ -3465,7 +3529,12 @@ if (isset($_POST['pass']))
 		$pw=$donnees["pw"];
 		$user_nom=$donnees["nom"];
 		$user_prenom=$donnees["prenom"];
-		$user_droit=$donnees["droit"];
+		$user_droit_org=$donnees["droit"];
+		
+		if (!isset($_SESSION['droit']))
+			$user_droit=$donnees["droit"];
+		else
+			$user_droit=$_SESSION['droit'];
 		$user_type_user=$donnees["type_user"];
 		$user_anniv=$donnees["anniv"];
 		$user_telephone=$donnees["telephone"];
@@ -3650,10 +3719,12 @@ if (isset($_POST['pass']))
 		
 	if ( ($action=="supp_user") &&(  ($user_droit=="A") || ($user_droit=="R") ) )
 		supp_user(variable("idx"));
-		
-	if (($action=="modif_profil") && ( ($user_droit=="R") || ($user_droit=="A") ) )
+	
+
+
+	if (($action=="modif_profil") && ( ($user_droit_org=="R") || ($user_droit_org=="A") ) )
 		{
-		$_SESSION['profil']=variable("profil");
+		$_SESSION['droit']=variable("profil");
 		$action="";
 		}
 
@@ -3724,10 +3795,10 @@ if (isset($_POST['pass']))
 		$user_droit_org=$donnees["droit"];
 		$user_type_user=$donnees["type_user"];
 		
-		if (!isset($_SESSION['profil']))
+		if (!isset($_SESSION['droit']))
 			$user_droit=$donnees["droit"];
 		else
-			$user_droit=$_SESSION['profil'];
+			$user_droit=$_SESSION['droit'];
 		$user_anniv=$donnees["anniv"];
 		$user_telephone=$donnees["telephone"];
 		$user_mail=$donnees["mail"];
@@ -3741,6 +3812,8 @@ if (isset($_POST['pass']))
 		supp_fichier("tmp/A-$user_idx.pdf");	
 		supp_fichier("tmp/_A-$user_idx.pdf");	
 	
+
+
 		echo "<table border=\"0\" >";	
 		echo "<tr> <td> ";		
 		echo "<a href=\"index.php\" > ";
@@ -3753,10 +3826,10 @@ if (isset($_POST['pass']))
 		if (($user_droit_org=="R") || ($user_droit_org=="A") )
 			{
 			echo "<td>".traduire('Profil')." :</td><td>";
-			if (!isset($_SESSION['profil']))
+			if (!isset($_SESSION['droit']))
 				liste_profil($user_droit_org,$user_droit_org);
 			else
-				liste_profil($user_droit_org,$_SESSION['profil']);
+				liste_profil($user_droit_org,$_SESSION['droit']);
 			echo "</td>";
 
 			}
@@ -3949,8 +4022,9 @@ if (isset($_POST['pass']))
 		
 			echo "<TR> <td> </td><td><input type=\"submit\"  id=\"envoi\"  value=\"".traduire('Envoyer sms signé de ')." $user_nom $user_prenom \"/></td> ";
 			echo "</form> </table> ";
+
 			fin_cadre();
-		
+		rappel_regles_messages();
 		pied_de_page("x");
 		}			
 	
@@ -4002,16 +4076,20 @@ if (isset($_POST['pass']))
 				echo "<td> $mail</td>".param("mail",$mail);
 				
 			//echo param("origine",$user_nom." ".$user_prenom);
-			//echo param("mail_org",$user_mail);
+			param("mail_org",$user_mail);
 			echo "<TR> <td>".traduire('Titre').": </td><td><input type=\"text\" name=\"titre\" size=\"70\" value=\"$titre\"/></td>";
 			echo "<TR> <td>".traduire('Texte').": </td><td><TEXTAREA rows=\"5\" cols=\"70\" name=\"msg\" >$msg</TEXTAREA></td>";
 			echo "<TR> <td> </td><td><input type=\"submit\"  id=\"envoi\"  value=\"".traduire('Envoyer mail signé de')." $user_nom $user_prenom\"/></td> ";
 			echo "</form> </table> ";
 			fin_cadre();
-		
+			
+			rappel_regles_messages();
+			
 		pied_de_page("x");
 		}			
 		
+	
+
 		// !!!!!!!!!!!!! ZONE COMPLEXE  !!!!!!!!!!!
 		if (($_SESSION['bene']!="") && ($action!="") && ($action!="dde_acces") && ($user_droit=="S"))
 			{
@@ -4579,7 +4657,8 @@ if (isset($_POST['pass']))
 			//-----------------------------------*/ 
 			echo "</table>";
 			}
-	
+
+
 
 	if (($action=="modif_champ_bug") && ($user_droit=="F") )
 		{
@@ -4932,7 +5011,7 @@ if (isset($_POST['pass']))
 			}
 			
 	if ( ($user_droit=="S") && ($action=="verif_existe_user") )
-		{
+			{
 			echo "<table><tr><td width> <ul id=\"menu-bar\">";
 			echo "<li><a href=\"index.php?action=verif_user\"  > ".traduire('Vérification existence')." </a></li>";
 			echo "</ul></td></table>";

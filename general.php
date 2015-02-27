@@ -64,7 +64,8 @@ include 'param.php';
 		$date_jour=date('Y-m-d');
 
 		$reponse =command("UPDATE r_dde_acces set code='' , date_auto='' where user='$bene' and ddeur='$ddeur' and autorise='$autorise' and type='A' ");
-		ajout_log( $bene, "Fin d'autorisation d'accès au compte par $autorise à $ddeur" );
+		ajout_log( $bene, traduire("Fin d'autorisation d'accès au compte de")." ".libelle_user($bene).traduire("par")." ".libelle_user($autorise)." ".traduire("à")." ".libelle_user($ddeur) );
+		ajout_log( $autorise, traduire("Fin d'autorisation d'accès au compte de")." ".libelle_user($bene)." ".traduire("par")." ".libelle_user($autorise)." ".traduire("à")." ".libelle_user($ddeur), $ddeur);
 		}
 		
 	function purge_dde_acces()
@@ -267,7 +268,8 @@ include 'param.php';
 				$m=8;		
 				
 			return(sprintf("%02dh%02d",$h,$m));
-			}			
+			}		
+			
 	function filtre_xss($var)
 		{
 		if ((stristr($var,"<script")===FALSE) 
@@ -515,7 +517,18 @@ include 'param.php';
 			if ($donnees = fetch_command($reponse) )
 				{
 				$tempo=min( 120, $donnees["tempo"]+4);
+				
+				$tmax= parametre("DD_seuil_tempo_cx_max") ;
+				if ( ($tempo >= $tmax ) && ($tempo < $tmax+4 ) )
+					alerte_sms("Seuil nbre connexion dépassé pour $id");
+					
 				$reponse = command("UPDATE cx SET tempo='$tempo' where id='$id' ") ;
+				
+				$nb_echec= parametre("nbre_echec_sur_periode");
+				ecrit_parametre("nbre_echec_sur_periode", $nb_echec+1 );
+				
+				if (parametre("DD_nbre_echec_max_par_periode")==$nb_echec)
+					alerte_sms("Depassement nombre d'echec de connexion par période");
 				}
 			else
 				$reponse = command("INSERT INTO `cx` VALUES ( '$id', '4') ");
@@ -670,7 +683,11 @@ include 'param.php';
 			else
 				echo "<OPTION  VALUE=\"$val\" selected> $libelle </OPTION>";
 		}
-		
+	function rappel_regles_messages()
+		{
+		echo "<center><p>".traduire("Il est interdit d’envoyer des messages à caractère injurieux, insultants, dénigrants, diffamatoires, dégradants ou susceptibles de porter atteinte à la vie privée des personnes ou à leur dignité, relatifs à la race, l’origine nationale, les mœurs, la religion, les opinions politiques, les origines sociales, l’âge ou le handicap ;")." : ";
+
+		}
 	// ========================================================== BDD ==========================================
 	function command($ligne, $flag="")
 		{

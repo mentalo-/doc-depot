@@ -35,8 +35,8 @@
 
 		
 	echo "<div class=\"CSSTableGenerator\" ><table><tr><td > Date  </td><td> Prio </td><td> Evénement </td><td> Ip </td>";
-	$reponse =command("","select * from  z_log_t  order by date desc limit 0,15");		
-	while ($donnees = mysql_fetch_array($reponse) ) 
+	$reponse =command("select * from  z_log_t  order by date desc limit 0,15");		
+	while ($donnees = fetch_command($reponse) ) 
 			{
 			$date=$donnees["date"];	
 			$ligne=$donnees["ligne"];
@@ -48,8 +48,8 @@
 
 	
 		echo "<div class=\"CSSTableGenerator\" ><table><tr><td > Date </td><td> IP</td><td> Action </td><td> Compte </td><td> Acteur </td>";
-		$reponse =command("","select * from  log  order by date desc limit 0,10");		
-		while ($donnees = mysql_fetch_array($reponse) ) 
+		$reponse =command("select * from  log  order by date desc limit 0,10");		
+		while ($donnees = fetch_command($reponse) ) 
 				{
 				$date=$donnees["date"];	
 				$ligne=$donnees["ligne"];

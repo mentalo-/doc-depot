@@ -74,7 +74,13 @@ function random_chaine($car)
 	if ($time_ttt-$ancien_ttt>14) 
 		{
 		ecrit_parametre("TECH_date_dernier_ttt","$time_ttt") ;
-			
+		
+		if ( ($time_ttt-parametre("TECH_date_mesure_echec_sur_periode")) > parametre("DD_periode_mesure_nbre_echec_max") )  
+			{
+			ecrit_parametre("TECH_date_mesure_echec_sur_periode", $time_ttt);
+			ecrit_parametre("TECH_nbre_echec_sur_periode", "0");			
+			}
+		
 		if (date('Y-m-d-h',  time()) != date('Y-m-d-h',  $ancien_ttt ))
 			if ($heure==0)
 				{

@@ -30,11 +30,14 @@
 			return;
 			}
 		
+		if ($from=="")
+			$from="Doc-Depot <pas_de_reponse@doc-depot.com>";
+			
 		// Entete
 		$headers  = "MIME-Version: 1.0 \n"; 
 		$headers .='Content-Type: text/html; charset="iso-8859-1"'."\n";
-		$headers .="From: $from\n";
-		$headers .="Reply-To: $from\n";
+		$headers .="'From: $from'\n";
+		$headers .="'Reply-To: $from'\n";
         $headers .='Content-Transfer-Encoding: 8bit'."\n";			
 		
 		// mise en forme HTML
@@ -123,8 +126,15 @@
 		ajout_log_tech( "Envoi SMS au $subject : '$body' ");
 		if ( ($body!=parametre('FORM_msg_rdv')) || ($subject!=parametre('FORM_tel_rdv'))) 
 			envoi_mail_brut(parametre('DD_mail_pour_gateway_sms'),$subject,$body);
+		}	
+		
+	function alerte_SMS($body)		
+		{
+		if (parametre('DD_tel_alarme1')!="")
+			envoi_SMS(parametre('DD_tel_alarme1'),$body);	
+		if (parametre('DD_tel_alarme2')!="")
+			envoi_SMS(parametre('DD_tel_alarme2'),$body);
 		}
-
 
 		
 function TTT_mail($aff=true)

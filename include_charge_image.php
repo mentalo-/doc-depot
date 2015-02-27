@@ -116,12 +116,27 @@
   function charge_image($mode,$nom1,$n,$pw,$ref, $sujet,$type, $acteur="", $user="")
 		{
 		global $user_idx;
-		
+	
 		$sens_doc_original="P";
 		
 		if (!isset($user_idx))
 			$user_idx="";
-		
+			
+		$ext= extension_fichier($n);
+		if ( strpos(  parametre("DD_alerte_extension_fichier"), $ext )!="")
+			{
+			alerte_SMS ("tentative de chargement de fichiers suspects '$n' par ".libelle_user($user_idx));
+			ajout_log( $user, "Chargement fichier type interdit $n ",$acteur );		
+			erreur("Type de fichier interdit.");
+			return (false);
+			}		
+
+		if ( !est_image($n) && !est_doc($n) && !(extension_fichier($n)=="pdf")  )
+			{
+			erreur (" Type de fichier non accepté.");
+			return (false);
+			}	
+			
 		// cas VCF 
 		if (extension_fichier($n)=="vcf")
 			{

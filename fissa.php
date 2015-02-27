@@ -42,15 +42,13 @@ include 'inc_style.php';
 	if ($bdd!="") 
 		$_SESSION['support']=$bdd;
 	else
-//		$bdd=$_SESSION['support'];
-			$bdd='effectif';
+		$bdd=$_SESSION['support'];
 		
 	// ConnexiondD
 	include "connex_inc.php";
 	
-	$cmd= "SELECT * FROM fct_fissa WHERE support='$bdd' ";
-	$reponse = mysql_query($cmd); 
-	$donnees = mysql_fetch_array($reponse);
+	$reponse = command("SELECT * FROM fct_fissa WHERE support='$bdd' "); 
+	$donnees = fetch_command($reponse);
 	
 	$beneficiaire=$donnees["beneficiaire"];
 	if ($beneficiaire=="") $beneficiaire="Bénéficiaires";
@@ -83,8 +81,8 @@ include 'inc_style.php';
 			}
 		$i=0; 
 		
-		$reponse = mysql_query("SELECT DISTINCT * FROM $bdd WHERE date='$d' and pres_repas!='Suivi' "); 
-		while (($donnees = mysql_fetch_array($reponse) ) && ($i<10000))
+		$reponse = command("SELECT DISTINCT * FROM $bdd WHERE date='$d' and pres_repas!='Suivi' "); 
+		while (($donnees = fetch_command($reponse) ) && ($i<10000))
 			if ($donnees["nom"]!="Synth")
 				{
 				$nom[$i]=$donnees["nom"];
@@ -107,9 +105,9 @@ include 'inc_style.php';
 		for($i=0;$i<200;$i++) $liste_nom[$i]="";
 		$j=0; 		
 		
-		$reponse = mysql_query("select nom from $bdd group by nom ASC");
+		$reponse = command("select nom from $bdd group by nom ASC");
 			
-		while (($donnees = mysql_fetch_array($reponse) ) && ($j<10000))
+		while (($donnees = fetch_command($reponse) ) && ($j<10000))
 			if ($donnees["nom"]!="Synth")
 				{
 				$liste_nom[$j]=$donnees["nom"];
@@ -127,16 +125,16 @@ function nouveau( $d, $nom, $pres,$com ,$memo,$qte="1")
 			
 		if ($nom!="")
 			{
-			$r1 = mysql_query("SELECT DISTINCT count(*) FROM $bdd WHERE date='0000-00-00' and nom='$nom' ");
-			$r2=mysql_fetch_row($r1); 
+			$r1 = command("SELECT DISTINCT count(*) FROM $bdd WHERE date='0000-00-00' and nom='$nom' ");
+			$r2=nbre_enreg($r1); 
 			if ($r2[0]==0)
 				{
 				$cmd = "INSERT INTO `$bdd`  VALUES ( '$nom', '', '','','$qte')";
-				$reponse = mysql_query($cmd);
+				$reponse = command($cmd);
 				}
 				
-			$r1 = mysql_query("SELECT  count(*) FROM $bdd WHERE date='$d' and nom='$nom' ");
-			$r2=mysql_fetch_row($r1); 
+			$r1 = command("SELECT  count(*) FROM $bdd WHERE date='$d' and nom='$nom' ");
+			$r2=nbre_enreg($r1); 
 			$r=$r2[0];	
 			$com= addslashes2($com);
 			$nom= addslashes2($nom);
@@ -144,19 +142,19 @@ function nouveau( $d, $nom, $pres,$com ,$memo,$qte="1")
 			if ($r==0)
 				{
 				$cmd = "INSERT INTO `$bdd`  VALUES ( '$nom', '$d', '$pres','$com','$qte')";
-				$reponse = mysql_query($cmd);
+				$reponse = command($cmd);
 				}
 			else
 				{
 				$cmd = "UPDATE $bdd set commentaire='$memo' where nom='$nom' and date='0000-00-00' ";
-				$reponse = mysql_query($cmd);				
+				$reponse = command($cmd);				
 				
 				if ( $pres!="Erreur saisie")
 					$cmd="UPDATE $bdd SET commentaire='$com', pres_repas='$pres' , qte='$qte' WHERE nom='$nom' AND date='$d'" ;
 				else
 					$cmd="DELETE FROM $bdd  WHERE nom='$nom' AND date='$d'" ;
 							
-				$reponse = mysql_query($cmd);
+				$reponse = command($cmd);
 				}
 			}
 		}
@@ -165,11 +163,11 @@ function chgt_nom(  $nom, $nouveau)
 		{
 		global $bdd;
 		
-		if ($nom!="")
+		if (($nom!="") && ($nouv!="Synth")&& ($nouv!="Mail"))
 			{
 			$nouveau= addslashes2($nouveau);
 			$cmd="UPDATE $bdd SET nom='$nouveau' WHERE nom='$nom' " ;
-			$reponse = mysql_query($cmd);
+			$reponse = command($cmd);
 			}
 		}	
 
@@ -222,8 +220,8 @@ function choix_qte( $val_init )
 		
 		$i=0; 
 		echo "<BR> ";
-		$reponse = mysql_query("SELECT  * FROM $bdd order by date ASC"); 
-		while (($donnees = mysql_fetch_array($reponse) ) && ($i<10000))
+		$reponse = command("SELECT  * FROM $bdd order by date ASC"); 
+		while (($donnees = fetch_command($reponse) ) && ($i<10000))
 			if ($donnees["nom"]!="Synth")
 				if ((strstr($donnees["pres_repas"],"Visite")) || (strstr($donnees["pres_repas"],"Refusé")) )
 					{
@@ -242,8 +240,8 @@ function choix_qte( $val_init )
 
 		$t="";
 		$i=0; 
-		$reponse = mysql_query("SELECT * FROM $bdd WHERE date='$date' and nom <>'Synth' and ( pres_repas='Visite+Repas' or pres_repas='Visite' or pres_repas='Refusé' ) group by nom ASC"); 
-		while (($donnees = mysql_fetch_array($reponse) ) && ($i<10000))
+		$reponse = command("SELECT * FROM $bdd WHERE date='$date' and nom <>'Synth' and ( pres_repas='Visite+Repas' or pres_repas='Visite' or pres_repas='Refusé' ) group by nom ASC"); 
+		while (($donnees = fetch_command($reponse) ) && ($i<10000))
 				{
 				$nom=$donnees["nom"];
 				$t = $t."$nom; ";
@@ -259,8 +257,8 @@ function choix_qte( $val_init )
 
 		$t="";
 		$i=0; 
-		$reponse = mysql_query("SELECT * FROM $bdd WHERE date='$date' and nom <>'Synth' and (pres_repas='$acteur' ) group by nom ASC"); 
-		while (($donnees = mysql_fetch_array($reponse) ) && ($i<10000))
+		$reponse = command("SELECT * FROM $bdd WHERE date='$date' and nom <>'Synth' and (pres_repas='$acteur' ) group by nom ASC"); 
+		while (($donnees = fetch_command($reponse) ) && ($i<10000))
 				{
 				$nom=$donnees["nom"];
 				$t = $t."$nom; ";
@@ -276,13 +274,13 @@ function choix_qte( $val_init )
 		
 		$l= date('Y-m-d',  mktime(0,0,0 , date("m")-3, date("d"), date ("Y")));
 		
-		$reponse = mysql_query("SELECT *,count(*) as TOTAL FROM $bdd where date>'$l' and nom<>'Synth'  group by nom order by nom limit 40 "); 
+		$reponse = command("SELECT *,count(*) as TOTAL FROM $bdd where date>'$l' and nom<>'Synth' and nom<>'Mail'  group by nom order by nom limit 40 "); 
 		
-		while ($donnees = mysql_fetch_array($reponse) ) 
+		while ($donnees = fetch_command($reponse) ) 
 				{
 				$n=$donnees["nom"];
-				$r2 = mysql_query("SELECT * FROM $bdd WHERE date='$date_jour' and nom='$n' "); 
-				if (! mysql_fetch_array($r2))
+				$r2 = command("SELECT * FROM $bdd WHERE date='$date_jour' and nom='$n' "); 
+				if (! fetch_command($r2))
 					{
 					if ($profil!="")
 						{
@@ -320,12 +318,12 @@ function choix_qte( $val_init )
 		echo "<table border=\"0\" >";	
 		echo "<tr> <td width=\"600\"> ";
 
-		$r1 = mysql_query("SELECT DISTINCT pres_repas,count(*) FROM $bdd WHERE date='$date' and nom <>'Synth'  ");
-		$r2=mysql_fetch_row($r1); 
+		$r1 = command("SELECT DISTINCT pres_repas,count(*) FROM $bdd WHERE date='$date' and nom <>'Synth'  ");
+		$r2=nbre_enreg($r1); 
 		$r=$r2[0];
 		/*
-		$r1 = mysql_query("SELECT DISTINCT count(*) FROM $bdd WHERE date='$date' and nom <>'Synth' and pres_repas='Visite+Repas' ");
-		$r2=mysql_fetch_row($r1); 
+		$r1 = command("SELECT DISTINCT count(*) FROM $bdd WHERE date='$date' and nom <>'Synth' and pres_repas='Visite+Repas' ");
+		$r2=nbre_enreg($r1); 
 		$r3=$r2[0];
 		*/
 		$txt="FISSA : Rapport d'activité du $date concernant '$libelle' <br>";
@@ -336,8 +334,8 @@ function choix_qte( $val_init )
 	
 		echo "<BR><b>Synthèse : </b><BR>";
 		$i=0; 
-		$reponse = mysql_query("SELECT * FROM $bdd WHERE date='$date' and nom='Synth' "); 
-		while (($donnees = mysql_fetch_array($reponse) ) && ($i<10000))
+		$reponse = command("SELECT * FROM $bdd WHERE date='$date' and nom='Synth' "); 
+		while (($donnees = fetch_command($reponse) ) && ($i<10000))
 				{
 				$c=$donnees["commentaire"];
 				$c=nl2br (stripcslashes($c));
@@ -371,26 +369,10 @@ function choix_qte( $val_init )
 
 		}
 
-function date_getMicroTime() 
-	{
-	list($usec, $sec) = explode(' ', microtime());
-	return ((float) $usec + (float) $sec);
-	}
 
 	function mail2($dest, $titre, $contenu, $headers)
 		{
-		$total = 0;
-		$n=0;
-		while(($total < 1.5) && ($n<20))
-			{
-			$start = date_getMicroTime();
-			for($i = 0 ; $i < 999999 ; $i++) 1; // Temps de pause entre chaque tentative, carleep() n'est pas dispour Free.fr
-				mail ( $dest , $titre, $contenu,$headers );
-			$total = round(date_getMicroTime() - $start, 3);
-			$n++;
-			}
-		echo " ($n) ";
-		return ($n<20);
+		mail ( $dest , $titre, $contenu,$headers );
 		}
 	
 	
@@ -398,18 +380,19 @@ function date_getMicroTime()
 		{
 		global $nb_usager,$nom,$commentaire,$imax, $pres_repas, $bdd, $libelle;
 		
-		$reponse = command("","SELECT * FROM fct_fissa WHERE support='$bdd' "); 
-		if ($donnees = mysql_fetch_array($reponse) )
+		$reponse = command("SELECT * FROM fct_fissa WHERE support='$bdd' "); 
+		if ($donnees = fetch_command($reponse) )
 			{
 			$idx=$donnees["organisme"];
+			$dest=$donnees["mails_rapports"].";";
 			
-			$reponse = command("","SELECT * FROM r_organisme WHERE idx='$idx' "); 
-			if ($donnees = mysql_fetch_array($reponse) )
+			$reponse = command("SELECT * FROM r_organisme WHERE idx='$idx' "); 
+			if ($donnees = fetch_command($reponse) )
 				$mail_struct=$donnees["mail"];
 			
-			$dest="";
-			$reponse = mysql_query("SELECT * FROM r_user WHERE droit='R' and organisme='$idx' "); 
-			while ($donnees = mysql_fetch_array($reponse) ) 
+			
+			$reponse = command("SELECT * FROM r_user WHERE droit='R' and organisme='$idx' "); 
+			while ($donnees = fetch_command($reponse) ) 
 				$dest.=$donnees["mail"].";";				
 			}
 			
@@ -419,12 +402,12 @@ function date_getMicroTime()
 		Echo "Envoi mails de la journée du $date";
 		$i=0; 
 				
-		$r1 = mysql_query("SELECT DISTINCT count(*) FROM $bdd WHERE date='$date' and nom <>'Synth' and ( pres_repas='Visite+Repas' or pres_repas='Visite' or pres_repas='Refusé' ) ");
-		$r2=mysql_fetch_row($r1); 
+		$r1 = command("SELECT DISTINCT count(*) FROM $bdd WHERE date='$date' and nom <>'Synth' and ( pres_repas='Visite+Repas' or pres_repas='Visite' or pres_repas='Refusé' ) ");
+		$r2=nbre_enreg($r1); 
 		$r=$r2[0];
 		
-		$r1 = mysql_query("SELECT DISTINCT count(*) FROM $bdd WHERE date='$date' and nom <>'Synth' and pres_repas='Visite+Repas' ");
-		$r2=mysql_fetch_row($r1); 
+		$r1 = command("SELECT DISTINCT count(*) FROM $bdd WHERE date='$date' and nom <>'Synth' and pres_repas='Visite+Repas' ");
+		$r2=nbre_enreg($r1); 
 		$r3=$r2[0];
 		
 		$synth ="$libelle : aujourd'hui, $date, $r personnes accueillies, dont $r3 repas.";
@@ -441,8 +424,8 @@ function date_getMicroTime()
 		
 		$i=0; 
 		$txt=$txt ."\n\nSynthèse : ";
-		$reponse = mysql_query("SELECT * FROM $bdd WHERE date='$date' and nom='Synth' "); 
-		while (($donnees = mysql_fetch_array($reponse) ) && ($i<10000))
+		$reponse = command("SELECT * FROM $bdd WHERE date='$date' and nom='Synth' "); 
+		while (($donnees = fetch_command($reponse) ) && ($i<10000))
 				{
 				$c=$donnees["commentaire"];
 				$txt = $txt." $c" ;
@@ -474,8 +457,8 @@ function date_getMicroTime()
 
 		$date_jour=date('Y-m-d');
 		$i=0; 
-		$reponse = mysql_query("SELECT * FROM $bdd WHERE commentaire<>'' and date='0000-00-00' order by nom DESC "); 
-		while (($donnees = mysql_fetch_array($reponse) ) && ($i<10000))
+		$reponse = command("SELECT * FROM $bdd WHERE commentaire<>'' and date='0000-00-00' order by nom DESC "); 
+		while (($donnees = fetch_command($reponse) ) && ($i<10000))
 				{
 				if ($i==0)
 					echo "<b>Memo: </b> ";
@@ -492,11 +475,11 @@ function date_getMicroTime()
 
 		$i=0; 
 		if ($detail=="")
-			$reponse = mysql_query("SELECT * FROM $bdd WHERE nom='$nom' and date<>'0000-00-00' and pres_repas<>'pda' order by date DESC "); 
+			$reponse = command("SELECT * FROM $bdd WHERE nom='$nom' and date<>'0000-00-00' and pres_repas<>'pda' order by date DESC "); 
 		else
-			$reponse = mysql_query("SELECT * FROM $bdd WHERE nom='$nom' and date<>'0000-00-00' and pres_repas='Suivi' order by date DESC "); 
+			$reponse = command("SELECT * FROM $bdd WHERE nom='$nom' and date<>'0000-00-00' and pres_repas='Suivi' order by date DESC "); 
 		
-		while (($donnees = mysql_fetch_array($reponse) ) && ($i<10000))
+		while (($donnees = fetch_command($reponse) ) && ($i<10000))
 				{
 				$c=$donnees["commentaire"];
 				$d=$donnees["date"];
@@ -515,39 +498,6 @@ function date_getMicroTime()
 	// -======================================================================aisie
 
 
-	
-/*
-if(isset($_POST['pass']))
-	{
-	$id=$_POST['id'];
-	$reponse = mysql_query("SELECT * FROM user WHERE id='$id'"); 
-	$donnees = mysql_fetch_array($reponse);
-	$mot_de_passe=$donnees["pw"];
-	$date_log=date('Y-m-d');	
-	// verifioni la variable = mot de passe...
-		if ($_POST['pass']==$mot_de_passe) 
-			{
-			$_SESSION['pass']=true;	 
-			}
-			else
-			{
-			echo '<p class="center"tyle="font-size:16px;font-weight:bold;color:red">Mot de passe incorrect !</span><br />'. $_SESSION['pass']=false;
-			}
-
-	}
-	
-if ( !isset($_SESSION['pass']) ||($_SESSION['pass']==false) )
-	//i pas de valeur pass en session on affiche le formulaire...
-	{
-	echo "<img src=\"cafe115.jpg\" width=\"250\" height=\"100\" >  ";	
-	echo "<p><TABLE><TR> <td><form class=\"center\" action=\"#\" method=\"post\"> Identifiant: </td><td><input class=\"center\" type=\"text\" name=\"id\" value=\"\"/></td>";
-	echo "<TR> <td>Mot de passe: </td><td><input class=\"center\" type=\"password\" name=\"pass\" value=\"\"/><input type=\"submit\" value=\"Go\"/></td>";
-	echo "</form> </table> ";
-	echo "<p><a href=\"fissa.php?action=dde_mdp\" > (Si vous avez oublié votre mot de passe, cliquez ici )</a><p>";
-	exit;
-	} // mot de pass invalide =>TOP la page ne'affiche pas ! 
-	
-*/	
 	if (isset ($_GET["memo"])) $memo=$_GET["memo"]; else  	$memo="";	
 	
 	if (!isset ($_GET["date_jour"]))
@@ -568,7 +518,7 @@ if ( !isset($_SESSION['pass']) ||($_SESSION['pass']==false) )
 				$nom1 .= " (F)";
 			if ($type=="Bénévole")
 				$nom1 .= " (B)";
-			if ($type=="Salarié")
+			if ($type=="$acteur")
 				$nom1 .= " (S)";
 			if ($type=="Activité")
 				$nom1 .= " (A)";		
@@ -626,8 +576,8 @@ if ( !isset($_SESSION['pass']) ||($_SESSION['pass']==false) )
 					echo "<tr> <td> Identifiant : </td> <td> $nom </td> ";	
 					echo "</table >";					
 
-					$reponse = mysql_query("SELECT * FROM $bdd WHERE nom='$nom' and date<>'0000-00-00' order by date DESC "); 
-					while ($donnees = mysql_fetch_array($reponse) ) 
+					$reponse = command("SELECT * FROM $bdd WHERE nom='$nom' and date<>'0000-00-00' order by date DESC "); 
+					while ($donnees = fetch_command($reponse) ) 
 							{
 							$d=$donnees["date"];
 							$p=$donnees["pres_repas"];
@@ -675,8 +625,8 @@ if ( !isset($_SESSION['pass']) ||($_SESSION['pass']==false) )
 		
 				if ($com=="")
 					{
-					$reponse = mysql_query("SELECT * FROM $bdd WHERE date='$date_jour' and nom='$nom' and pres_repas='Suivi' "); 
-					if ($donnees = mysql_fetch_array($reponse))
+					$reponse = command("SELECT * FROM $bdd WHERE date='$date_jour' and nom='$nom' and pres_repas='Suivi' "); 
+					if ($donnees = fetch_command($reponse))
 						$commentaire=stripcslashes($donnees["commentaire"]);
 					else
 						$commentaire="";
@@ -684,19 +634,19 @@ if ( !isset($_SESSION['pass']) ||($_SESSION['pass']==false) )
 				else
 					{
 					$com=addslashes2($com);
-					$reponse = mysql_query("SELECT * FROM $bdd WHERE date='$date_jour' and nom='$nom' and pres_repas='Suivi' "); 
+					$reponse = command("SELECT * FROM $bdd WHERE date='$date_jour' and nom='$nom' and pres_repas='Suivi' "); 
 					
-					if ($donnees = mysql_fetch_array($reponse))
-						$reponse = mysql_query("UPDATE $bdd set commentaire='$com' where nom='$nom' and date='$date_jour' and pres_repas='Suivi' ");
+					if ($donnees = fetch_command($reponse))
+						$reponse = command("UPDATE $bdd set commentaire='$com' where nom='$nom' and date='$date_jour' and pres_repas='Suivi' ");
 					else
-						$reponse = mysql_query("INSERT INTO `$bdd`  VALUES ( '$nom', '$date_jour', 'Suivi','$com','1')");					
+						$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom', '$date_jour', 'Suivi','$com','1')");					
 					$commentaire=$com;
 					}
 
 				if ($pda=="")
 					{
-					$reponse = mysql_query("SELECT * FROM $bdd WHERE nom='$nom' and pres_repas='pda' "); 
-					if ($donnees = mysql_fetch_array($reponse))
+					$reponse = command("SELECT * FROM $bdd WHERE nom='$nom' and pres_repas='pda' "); 
+					if ($donnees = fetch_command($reponse))
 						$pda=stripcslashes($donnees["commentaire"]);
 					else
 						$pda="";
@@ -704,12 +654,12 @@ if ( !isset($_SESSION['pass']) ||($_SESSION['pass']==false) )
 				else
 					{
 					$pda=addslashes2($pda);
-					$reponse = mysql_query("SELECT * FROM $bdd WHERE nom='$nom' and pres_repas='pda' "); 
+					$reponse = command("SELECT * FROM $bdd WHERE nom='$nom' and pres_repas='pda' "); 
 					
-					if ($donnees = mysql_fetch_array($reponse))
-						$reponse = mysql_query("UPDATE $bdd set commentaire='$pda' where nom='$nom' and pres_repas='pda' ");
+					if ($donnees = fetch_command($reponse))
+						$reponse = command("UPDATE $bdd set commentaire='$pda' where nom='$nom' and pres_repas='pda' ");
 					else
-						$reponse = mysql_query("INSERT INTO `$bdd`  VALUES ( '$nom', '$date_jour', 'pda','$pda','1')");					
+						$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom', '$date_jour', 'pda','$pda','1')");					
 					$pda=stripcslashes($pda);
 					}					
 				
@@ -747,7 +697,7 @@ if ( !isset($_SESSION['pass']) ||($_SESSION['pass']==false) )
 	default:
 			// =====================================================================loc IMAGE
 			echo "<table border=\"0\" >";	
-			echo "<tr> <td> <a href=\"index.php\"> <img src=\"images/logo.png\" width=\"200\" height=\"100\"  > </a> </td> ";		
+			echo "<tr> <td> <a href=\"index.php\"> <img src=\"images/logo.png\" width=\"150\" height=\"100\"  > </a> </td> ";		
 
 			charge_date($date_jour);
 
@@ -761,7 +711,7 @@ if ( !isset($_SESSION['pass']) ||($_SESSION['pass']==false) )
 			$m=substr($date_jour,5,2);
 			$j=substr($date_jour,8,2);
 			$veille=date('Y-m-d',  mktime(0,0,0 , $m, $j-1, $a));
-			echo " <a href=\"fissa.php?action=date&date_jour=$veille\"> < </a> </td> <td> ";
+			echo "<a href=\"fissa.php?action=date&date_jour=$veille\"> < </a> </td> <td> ";
 			echo "<form method=\"GET\" action=\"fissa.php\">";
 			echo "<input type=\"hidden\" name=\"action\" value=\"date\"> " ;	
 			echo "<input type=\"text\" name=\"date_jour\" size=\"10\" value=\"$date_jour\" class=\"calendrier\" >";
@@ -776,7 +726,7 @@ if ( !isset($_SESSION['pass']) ||($_SESSION['pass']==false) )
 		
 			echo "<ul id=\"menu-bar\">";
 			echo "<li><a href=\"fissa.php?date_jour=$date_jour&action=rapport\" target=_blank>Rapport du $date_jour </a></li>";
-		//	echo "<li><a href=\"stat.php\" target=_blank>Statistiques</a>";
+			echo "<li><a href=\"stat.php\" target=_blank>Statistiques</a>";
 			echo "<li><a href=\"index.php?action=dx\">Deconnexion</a>";
 			echo "</ul> </td>";
 			
@@ -785,7 +735,7 @@ if ( !isset($_SESSION['pass']) ||($_SESSION['pass']==false) )
 			if ($logo!="")
 				echo "<td> <a href=\"fissa.php\"> <img src=\"images/$logo\" width=\"200\" height=\"100\"  > </a> </td>";
 			
-			echo "  </table> <P> ";
+			echo " <td> $bdd </td> </table> <P> ";
 			
 			// =====================================================================loc Liste présents
 			echo "<table border=\"2\" >";
@@ -866,8 +816,8 @@ if ( !isset($_SESSION['pass']) ||($_SESSION['pass']==false) )
 						$valeur="1";
 					//choix_qte( $valeur );
 					//echo " </td> <td>";
-					$reponse = mysql_query("SELECT * FROM $bdd where date='0000-00-00' and nom='$nom1' "); 
-					if ($donnees = mysql_fetch_array($reponse) )
+					$reponse = command("SELECT * FROM $bdd where date='0000-00-00' and nom='$nom1' "); 
+					if ($donnees = fetch_command($reponse) )
 						$n=$donnees["commentaire"];	
 					else
 					  $n="";

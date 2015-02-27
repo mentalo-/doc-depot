@@ -296,14 +296,35 @@
 				//backup_tables(false);  // A utiliser si changement de structure ou de contenu de la base
 				
 				// ------------------------------------------- Bloc Spécifique à la montée de version
-				command("ALTER TABLE z_traduire ADD original TEXT not null ");
-				command("ALTER TABLE z_traduire ADD commentaire TEXT not null ");
-				command("UPDATE `z_traduire` SET `original`=`fr` WHERE 1");
+				command("ALTER TABLE z_traduire ADD original TEXT not null ","1");
+				command("ALTER TABLE z_traduire ADD commentaire TEXT not null ","1");
+				command("UPDATE `z_traduire` SET `original`=`fr` WHERE 1","1");
 				
-				command("ALTER TABLE r_user ADD langue TEXT not null ");
-				command("UPDATE `r_user` SET `langue`=`fr` WHERE `langue`=``");
+				command("ALTER TABLE r_user ADD langue TEXT not null ","1");
+				command("UPDATE `r_user` SET `langue`=`fr` WHERE `langue`=``","1");
 
-				command("CREATE TABLE IF NOT EXISTS `fct_fissa` ( `organisme` text NOT NULL, `support` text NOT NULL,  `libelle` text NOT NULL,  `acteur` text NOT NULL,  `beneficiaire` text NOT NULL,  `mails_rapports` text NOT NULL,  `mails_rapport_detaille` text NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=latin1; ");
+				command("CREATE TABLE IF NOT EXISTS `fct_fissa` ( `organisme` text NOT NULL, `support` text NOT NULL,  `libelle` text NOT NULL,  `acteur` text NOT NULL,  `beneficiaire` text NOT NULL,  `mails_rapports` text NOT NULL,  `mails_rapport_detaille` text NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=latin1; ","1");
+
+				// ------------------------------------------- Fin bloc spécifique
+
+				// ------------------------------------------- Bloc générique
+				$version=maj_version($nelle_version);
+				}
+		// 	----------------------------------------------------------------------------------------------
+		$nelle_version="V1.03";
+		if ($version<=$nelle_version)
+				{
+				//backup_tables(false);  // A utiliser si changement de structure ou de contenu de la base
+				
+				// ------------------------------------------- Bloc Spécifique à la montée de version
+				ecrit_parametre("DD_nbre_echec_max_par_periode", "10");
+				ecrit_parametre("DD_periode_mesure_nbre_echec_max", "300");
+				ecrit_parametre("TECH_nbre_echec_sur_periode", "0");
+				ecrit_parametre("TECH_date_mesure_echec_sur_periode", time());
+
+				ecrit_parametre("DD_seuil_tempo_cx_max", "116");
+				
+				ecrit_parametre("DD_alerte_extension_fichier", ";php;php3;php4;js;ls;cgi;pl;phtml;exe;com;dll;asp;aspx;htaccess;sh;");
 
 				// ------------------------------------------- Fin bloc spécifique
 
