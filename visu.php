@@ -1,6 +1,4 @@
-  <?php  
-
-
+<?php  
 session_start(); 
 
 error_reporting(E_ALL | E_STRICT);
@@ -10,7 +8,6 @@ include 'general.php';
 if ( isset($_SESSION['pass']) && ($_SESSION['pass']==true) )
 	switch (variable_s('action'))
 		{
-		
 		case "exporter":	
 			include "connex_inc.php";
 			include 'include_crypt.php';
@@ -78,15 +75,15 @@ if ( isset($_SESSION['pass']) && ($_SESSION['pass']==true) )
 				$txt.= "</table>";
 				$zip->addFromString('historique.htm',$txt );				
 				
-				$zip->close();			
+				$zip->close();
 				
+				// méthode d'origine
+				//header("Location: dir_zip/$id.zip");
 				ajout_log($user_idx, traduire("Génération d'un fichier de sauvegarde (fonction export)"),$user_idx);
-				//header('Content-Transfer-Encoding: binary'); //Transfert en binaire (fichier).
-				//header('Content-Disposition: attachment; filename="Archive.zip"'); //Nom du fichier.
-				//header('Content-Length: '.filesize("dir_zip/$user_idx.zip")+3); 
-				//readfile("dir_zip/$user_idx.zip");
-				
-				header("Location: dir_zip/$id.zip");			
+				header('Content-Transfer-Encoding: binary'); //Transfert en binaire (fichier).
+				header('Content-Disposition: attachment; filename="Archive.zip"'); //Nom du fichier.
+				header('Content-Length: '.filesize("dir_zip/$id.zip")); 
+				readfile("dir_zip/$id.zip");
 
 				ajout_log($_SESSION['user'], traduire("Export des fichiers et données du compte"),$_SESSION['user']);
 				}
@@ -173,4 +170,4 @@ if ( isset($_SESSION['pass']) && ($_SESSION['pass']==true) )
 		}
 
 	
-	?> 
+	?>

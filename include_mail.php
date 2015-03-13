@@ -155,7 +155,7 @@ function TTT_mail($aff=true)
 			if ($alarme=="") $alarme=0;
 			$alarme++;
 			ecrit_parametre("TECH_alarme_acces_bal",$alarme);
-			if($alarme==4)
+			if($alarme==parametre("nb_echec_alarme_acces_bal"))
 				{
 				ajout_log_tech( "Début alarme accès boite mail $login ","P0");
 				envoi_mail(parametre('DD_mail_gestinonnaire'),"Alarme accès boite mail $login ","");
@@ -165,7 +165,7 @@ function TTT_mail($aff=true)
 		return;
 		}
 	else
-		if ($alarme>=4)
+		if ($alarme>=parametre("nb_echec_alarme_acces_bal"))
 			{
 			ajout_log_tech( "Fin alarme accès boite mail $login ","P0");
 			envoi_mail(parametre('DD_mail_gestinonnaire'),"Fin alarme accès boite mail $login ","");

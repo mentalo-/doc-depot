@@ -344,4 +344,32 @@
 				// ------------------------------------------- Bloc générique
 				$version=maj_version($nelle_version);
 				}
+				
+		$nelle_version="V1.05";
+		if ($version<=$nelle_version)
+				{
+				//backup_tables(false);  // A utiliser si changement de structure ou de contenu de la base
+				
+				// ------------------------------------------- Bloc Spécifique à la montée de version
+				ecrit_parametre("TECH_sequence_offre", '1');	
+				ecrit_parametre("TECH_sequence_creneau", '1');	
+				ecrit_parametre("TECH_sequence_usager", '1');	
+				
+				ecrit_parametre("nb_echec_alarme_acces_bal",'10');
+				
+				command("CREATE TABLE IF NOT EXISTS `fct_fissa` (
+						  `organisme` text NOT NULL,
+						  `support` text NOT NULL,
+						  `libelle` text NOT NULL,
+						  `acteur` text NOT NULL,
+						  `beneficiaire` text NOT NULL,
+						  `mails_rapports` text NOT NULL,
+						  `mails_rapport_detaille` text NOT NULL
+						) ENGINE=InnoDB DEFAULT CHARSET=latin1;";
+
+				// ------------------------------------------- Fin bloc spécifique
+
+				// ------------------------------------------- Bloc générique
+				$version=maj_version($nelle_version);
+				}
 ?>

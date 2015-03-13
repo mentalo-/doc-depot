@@ -2,7 +2,7 @@
 // traduire() : Ok
 
 include 'param.php';
-
+include 'bdd.php';
 
 	function jour($t)
 		{
@@ -99,7 +99,7 @@ include 'param.php';
 	
 	// entete formulaire
 	// formulaire ("");
-	function formulaire ($action, $source="")
+	function formulaire ($action, $source="index.php")
 		{
 		commentaire_html("Formulaire $action");
 		echo "<form method=\"POST\" action=\"$source\">";
@@ -404,6 +404,8 @@ include 'param.php';
 		if ($sans_lien=="")
 			{
 			$source= "index.php";
+			if ( ($action=="visu_image") || ($action=="visu_image_mini")|| ($action=="visu_fichier")|| ($action=="visu_doc") )
+				$source= "visu.php";
 
 			echo "<form method=\"POST\" action=\"$source\" $blank >";
 			if ($size=="")
@@ -486,7 +488,7 @@ include 'param.php';
 	function purge_log ()
 		{
 		$date=date('Y-m-d',  mktime(0,0,0 , date("m")-3, date("d"), date ("Y")));
-		$r1 = command("DELETE FROM log WHERE ligne regexp 'connexion' and date<$date  ");
+		$r1 = command("DELETE FROM log WHERE ligne like '%connexion%' and date<$date  ");
 		$date=date('Y-m-d',  mktime(0,0,0 , date("m")-1, date("d"), date ("Y")));
 		$r1 = command("DELETE FROM z_log_t WHERE date<$date  ");		
 		}
@@ -688,40 +690,54 @@ include 'param.php';
 		echo "<center><p>".traduire("Il est interdit d’envoyer des messages à caractère injurieux, insultants, dénigrants, diffamatoires, dégradants ou susceptibles de porter atteinte à la vie privée des personnes ou à leur dignité, relatifs à la race, l’origine nationale, les mœurs, la religion, les opinions politiques, les origines sociales, l’âge ou le handicap ;")." : ";
 
 		}
-	// ========================================================== BDD ==========================================
-	function command($ligne, $flag="")
+
+		
+		
+	function verification_acces( $nom_fichier )
 		{
-		if ($flag!="")
-			echo "<p>$ligne";
-		ajout_log_jour($ligne);
-		return( mysql_query($ligne) );	
-		}
+		$u2=$_SESSION['user'];	
+		if (!verification_acces2( $nom_fichier ))
+			{
+			ajout_log_tech( "Tentative d'accès au fichier $nom_fichier non autorisé à ".libelle_user($u2) ,"P0");
+			}
+		else
+			ajout_log_tech( "Vérification ok accès acès à $nom_fichier par ".libelle_user($u2) ,"P2");
 	
-	function fetch_command ($reponse)
+		}
+	function verification_acces2( $nom_fichier )
 		{
-		return(  mysql_fetch_array($reponse) );
+		$u2=$_SESSION['user'];		// Acteur
+		
+		$reponse =command("select * from  r_attachement where num='$nom_fichier' ");	
+		if ($donnees = fetch_command($reponse) )
+			{
+			if ($donnees['user']==$u2) // cas on c'est un doc du bénéficiaire
+				return (true);	
+			else
+				{
+				$u1=$_SESSION['user_idx'];	 // cas on c'est le RC qui accede au doc du bénéficiaire
+				$reponse =command("select * from  r_referent where (nom='$u1' and  user='$u2') or  (nom='$u2' and  user='$u1')  ");	
+				if ($donnees = fetch_command($reponse) ) 
+					return (true);		
+				else
+					{
+					// il faut aussi tester le cas ou le bénéficiaire à désigné 'tous'  d'un structure
+					$reponse =command("select * from  r_user where  idx='$u2'");
+					$donnees = fetch_command($reponse);
+					$org = $donnees['organisme'];
+					
+					$reponse =command("select * from  r_referent where organisme='$org' and  user='$u1' and nom='Tous' ");	
+					if ($donnees = fetch_command($reponse) ) 
+						return (true);		
+					}
+				}
+			} 
+		else
+			{
+			ajout_log_tech( "Tentative d'accès à un fichier inexistant $nom_fichier par ".libelle_user($u2) ,"P0");
+			// le fichier n'existe pas 
+			}	
+		return (false);	
 		}
 
-	function nbre_colonnes ($reponse)
-		{
-		return(  mysql_num_fields($reponse) );
-		}
-		
-	function nbre_enreg ($reponse)
-		{
-		return(  mysql_fetch_row($reponse) );
-		}	
-	
-	// nom utilisé
-	function ouverture_bdd ()
-		{
-		global 	$ZZ_CLE;
-		
-		require_once "connex_inc.php";
-		}
-
-	function fermeture_bdd ()
-		{
-		return(  mysql_close( ) );
-		}
 ?>

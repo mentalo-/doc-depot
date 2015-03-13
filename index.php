@@ -1,7 +1,7 @@
 <?php 
 
 // ------------------------------------------------------
-// DOC-DEPOT : COPYRIGTH ADILEOS - Décembre 2013/Octobre 2014
+// DOC-DEPOT : COPYRIGTH ADILEOS - Décembre 2013/Mars 2015
 
 session_start(); 
 
@@ -19,172 +19,6 @@ include 'general.php';
 		$_SESSION['pass']=false;
 		
 	$_SESSION['LAST_ACTIVITY'] = time(); // update last activity time stamp
-
-	
-if ( isset($_SESSION['pass']) && ($_SESSION['pass']==true) )
-	switch (variable_s('action'))
-		{
-		
-		case "exporter":	
-			include "connex_inc.php";
-			include 'include_crypt.php';
-			
-			$user_idx=$_SESSION['user_idx'];
-			$reponse = command("SELECT * from  r_user WHERE idx='$user_idx'"); 
-			$donnees = fetch_command($reponse);
-			$id=$donnees["id"];
-			if (encrypt(variable("pw"))!=$donnees["pw"]) 
-				{
-				erreur (traduire("Mot de passe Incorrect").". ");
-				break; 
-				}
-			
-			$id=rand(1000000,999999999999);
-			$zip = new ZipArchive(); 
-			$j=1;
-			if ($zip->open("dir_zip/$id.zip", ZipArchive::CREATE) === true)
-				{
-				$reponse =command("select * from r_attachement where  ref='A-$user_idx' or ref='P-$user_idx' ");
-				while (($donnees = fetch_command($reponse) ) && ($j<100))
-					{
-					$f=$donnees["num"];
-					 if(!$zip->addFile('upload/'.$f, $f))
-						{
-						  echo 'Impossible d&#039;ajouter &quot;'.$f.'&quot;.<br/>';
-						}
-					$j++; 	
-					}
-				
-				// Ajout d’un fichier avec Notes et SMS
-				$zip->addFile('SMS-et-notes.htm');
-				$txt="<table>";
-				// Ajout direct.
-				$reponse =command("select * from  r_sms where (idx='$user_idx') order by date desc");		
-				while ($donnees = fetch_command($reponse) ) 
-					{
-					$date=$donnees["date"];	
-					$ligne=stripcslashes($donnees["ligne"]);
-					$txt.= "<tr> <td>$date </td><td> $ligne </td>";
-					}
-				$txt.= "</table>";
-				$zip->addFromString('SMS-et-notes.htm',$txt );
-
-				
-				// Ajout d’un fichier avec Notes et SMS
-				$zip->addFile('historique.htm');
-				$txt="<table><tr><td> ".traduire('Date').":   </td><td> ".traduire('Evénement').":</td><td> ".traduire('Acteur').":</td>";
-
-				$reponse =command("select * from  log where (user='$user_idx' ) or (acteur='$user_idx' or acteur='$id') order by date DESC ");		
-				while ($donnees = fetch_command($reponse) ) 
-					{
-					$date=$donnees["date"];	
-					$ligne=stripcslashes($donnees["ligne"]);
-					$acteur=$donnees["acteur"];
-					$ip=$donnees["ip"];
-					if (is_numeric($donnees["user"]))
-						$user=libelle_user($donnees["user"]);
-
-					if (($acteur!="") && (is_numeric($acteur) ) )
-						$acteur=libelle_user($acteur);
-					$txt.= "<tr><td title=\"$ip\">  $date  </td><td> $ligne </td><td> $acteur </td>";
-					}
-	
-				$txt.= "</table>";
-				$zip->addFromString('historique.htm',$txt );				
-				
-				$zip->close();			
-				
-				ajout_log($user_idx, traduire("Génération d'un fichier de sauvegarde (fonction export)"),$user_idx);
-				//header('Content-Transfer-Encoding: binary'); //Transfert en binaire (fichier).
-				//header('Content-Disposition: attachment; filename="Archive.zip"'); //Nom du fichier.
-				//header('Content-Length: '.filesize("dir_zip/$user_idx.zip")+3); 
-				//readfile("dir_zip/$user_idx.zip");
-				
-				header("Location: dir_zip/$id.zip");			
-
-				ajout_log($_SESSION['user'], traduire("Export des fichiers et données du compte"),$_SESSION['user']);
-				}
-			break;
-			
-		case "visu_fichier":
-			// Connexion BdD
-			include "connex_inc.php";
-			
-			$id=rand(1000000,999999999999);
-			$fichier=variable_s('num');
-
-			verification_acces( $fichier );
-
-			ajout_log_tech( "Visu_fichier $fichier - ".variable_s('code'));
-			if (variable_s('code')!="")
-				{
-
-				if ( est_image($fichier))
-					copy("upload_prot/$fichier.pdf","upload_tmp/$id.pdf");
-				else
-					copy("upload_prot/$fichier","upload_tmp/$id.pdf");
-				}
-			else
-				copy("upload/$fichier","upload_tmp/$id.pdf");
-			 
-			header("Location: upload_tmp/$id.pdf");			
-			$bene= $_SESSION['bene'];
-			if ($bene=="") 
-				$bene=$_SESSION['user'];
-			
-			$fichier = substr($fichier,strpos($fichier,".")+1 );
-
-			ajout_log($bene, traduire("Acces au fichier")." $fichier ".traduire('en lecture'),$_SESSION['user']);
-
-			break;
-
-		case "visu_doc":
-			// Connexion BdD
-			include "connex_inc.php";
-
-			$id=rand(1000,9999);
-			$fichier=variable_s('num');
-
-			verification_acces( $fichier );
-
-			copy("upload/$fichier","upload_tmp/$id.$fichier");
-
-			header("Location: upload_tmp/$id.$fichier");			
-			$bene= $_SESSION['bene'];
-			if ($bene=="") 
-				$bene=$_SESSION['user'];
-			
-			ajout_log($bene, traduire("Acces au fichier")." $fichier ".traduire("en lecture"),$_SESSION['user']);
-			pied_de_page();
-			break;
-			
-		case "visu_image_mini":
-			// Définit le contenu de l'en-tête - dans ce cas, image/jpeg
-			header('Content-Type: image/jpeg');
-			$im = imagecreatefromjpeg( "upload_mini/".variable_s("nom"));
-			imagejpeg($im);
-
-			// Libération de la mémoire
-			imagedestroy($im);
-			exit();
-			break;
-	
-		case "visu_image":
-
-			// Définit le contenu de l'en-tête - dans ce cas, image/jpeg
-			header('Content-Type: image/jpeg');
-
-			// Création d'une image vide et ajout d'un texte
-			$im = imagecreatefromjpeg("upload/".variable_s("nom") );
-			imagejpeg($im);
-
-			// Libération de la mémoire
-			imagedestroy($im);
-			exit();
-			break;
-
-		default : break;
-		}
 
 ?> 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
@@ -282,7 +116,7 @@ require_once "connex_inc.php";
 		else
 			$refr=TIME_OUT+10;
 
-			echo "<META HTTP-EQUIV=\"refresh\" CONTENT=\"$refr\">";
+		echo "<META HTTP-EQUIV=\"refresh\" CONTENT=\"$refr\">";
 		}
 	echo "</head><body>";
 
@@ -300,7 +134,7 @@ require_once "connex_inc.php";
 		$message .= "<p>Impact : $impact";
 		$message .= "<p>Auteur : $qui";
 		envoi_mail(parametre('DD_mail_fonctionnel'),"Bug $idx ",$message, true);
-		if ($type=="Bug") // les bugs sont aussi remontés à l'exploitant
+		if ($type=="Bugs") // les bugs sont aussi remontés à l'exploitant
 			envoi_mail(parametre('DD_mail_gestinonnaire'),"Bug $idx ",$message, true);
 		ajout_log( "", "Création Bug $idx :$titre /  $type / $impact / $qui", "");
 		return ($idx);
@@ -364,9 +198,11 @@ require_once "connex_inc.php";
 			else
 				$filtre=" where ";
 
+			affiche_liste_bug("select * from  z_bug $filtre (etat='New') order by domaine desc");
+			echo"<p>";
 			affiche_liste_bug("select * from  z_bug $filtre (etat='OK pour MEP') order by domaine desc");
 			echo"<p>";
-			affiche_liste_bug("select * from  z_bug $filtre (etat<>'En production' and etat<>'Abandonné' and etat<>'OK pour MEP') order by domaine desc");
+			affiche_liste_bug("select * from  z_bug $filtre (etat<>'En production' and etat<>'Abandonné' and etat<>'OK pour MEP' and etat<>'New') order by domaine desc");
 			echo"<p>";
 			affiche_liste_bug("select * from  z_bug $filtre (etat='En production' ) order by version desc");
 			echo"<p>";
@@ -464,7 +300,7 @@ require_once "connex_inc.php";
 			echo "<tr><td> ".traduire('Titre')."</td><td>". saisie_champ_bug($idx,"titre",$donnees["titre"],100)."</td>";
 			echo "<tr><td> ".traduire('Description')."</td><td>". saisie_champ_bug_area($idx,"descript",$donnees["descript"],100)."</td>";
 			echo "<tr><td> ".traduire('Type')."</td><td>";  liste_type_bug($idx,"type",$donnees["type"]);  echo "</td>";
-			echo "<tr><td> ".traduire('Impact')."</td><td>";  liste_impact_bug( $idx,"impact",$donnees["impact"]); echo"</td>";
+			echo "<tr><td> ".traduire('Effort')."</td><td>";  liste_impact_bug( $idx,"impact",$donnees["impact"]); echo"</td>";
 			echo "<tr><td> ".traduire('Origine')."</td><td>".  saisie_champ_bug($idx,"testeur",$donnees["testeur"])."</td>";
 			echo "<tr><td> ".traduire('Etat')."</td><td>";  liste_etat_bug($idx,"etat",$donnees["etat"]); echo "</td>";
 			echo "<tr><td> ".traduire('Priorité')."</td><td>"; liste_prioite_bug($idx,"domaine",$donnees["domaine"]); echo "</td>";
@@ -662,19 +498,19 @@ function maj_mdp_fichier($idx, $pw )
 					if (($doc_autorise=="") || (stristr($doc_autorise, ";$type_org;") === FALSE) )
 						{
 						if ($flag_acces=="") 
-							lien("index.php?action=visu_image_mini&nom=$num", "visu_image", param ("nom","$num"), "", "","B",$sans_lien);
+							lien("visu.php?action=visu_image_mini&nom=$num", "visu_image", param ("nom","$num"), "", "","B",$sans_lien);
 						else
-							lien("index.php?action=visu_image_mini&nom=-$num", "visu_fichier", param ("num","$num").param ("code","$flag_acces"), traduire("Document protégé"), "","B",$sans_lien);
+							lien("visu.php?action=visu_image_mini&nom=-$num", "visu_fichier", param ("num","$num").param ("code","$flag_acces"), traduire("Document protégé"), "","B",$sans_lien);
 						echo " $type <br> $ident ";
 						}
 					else
 						{
-						lien("index.php?action=visu_image_mini&nom=-$num", "visu_image", param ("nom","$num"), "", "","B",$sans_lien);
+						lien("visu.php?action=visu_image_mini&nom=-$num", "visu_image", param ("nom","$num"), "", "","B",$sans_lien);
 						echo " $type <br> $ident $num  ";
 						}
 					}
 				else
-					lien("index.php?action=visu_image_mini&nom=$num", "visu_image", param ("nom","$num"), "", "","B",$sans_lien);
+					lien("visu.php?action=visu_image_mini&nom=$num", "visu_image", param ("nom","$num"), "", "","B",$sans_lien);
 
 				}
 			else
@@ -688,8 +524,8 @@ function maj_mdp_fichier($idx, $pw )
 						}
 					else
 						{
-						$icone_a_afficher="index.php?action=visu_image_mini&nom=$num.jpg";
-						$icone_a_afficher_cadenas="index.php?action=visu_image_mini&nom=-$num.jpg";
+						$icone_a_afficher="visu.php?action=visu_image_mini&nom=$num.jpg";
+						$icone_a_afficher_cadenas="visu.php?action=visu_image_mini&nom=-$num.jpg";
 						$l_num="";
 						}
 							
@@ -2128,7 +1964,94 @@ function maj_mdp_fichier($idx, $pw )
 			}
 		return($ligne);
 		}	
+	
+
+//================================================================================== Offres =====
 		
+	function titre_offres()
+		{
+		global $user_droit;
+
+		echo "<div class=\"CSSTableGenerator\" ><table><tr><td> ".traduire('Structure sociale')." </td><td> ".traduire('Offre')." </td><td> ".traduire('Début')." </td><td> ".traduire('fin')." </td><td> ".traduire('Etat')." </td><td> ".traduire('Param1')." </td><td> ".traduire('Param2')." </td>" ;
+		}
+
+	function liste_offres( $val_init="" )
+		{
+		echo "<td> <SELECT name=\"offres\" id=\"offres\"  >";
+		affiche_un_choix($val_init,"FISSA");
+		affiche_un_choix($val_init,"Planning Usagers");
+		affiche_un_choix($val_init,"Planning Accueillants");			
+		affiche_un_choix($val_init,"Pack SMS");			
+		affiche_un_choix($val_init,"SMS Groupé");			
+		affiche_un_choix($val_init,"Suivi Usagers");
+		echo "</SELECT></td>";
+		}
+		
+	FUNCTION supp_offre()
+		{
+		$idx_offre=variable("idx_offre");
+		$reponse =command("DELETE FROM `DD_offres`  where idx='$idx_offre' ");
+		}	
+		
+	FUNCTION nouvelle_offre ()
+		{
+		$organisme=variable("organisme");
+		$offre=variable("offre");
+		$debut=variable("debut");
+		$fin=variable("fin");
+		$etat=variable("etat");
+		$param1=variable("param1");
+		$param2=variable("param2");		
+		$idx=inc_index("offre");
+		$reponse = command( "INSERT INTO `DD_offres`  VALUES ('$idx','$organisme', '$offre', '$debut', '$fin', '$etat', '$param1', '$param2')");
+		}		
+		
+	function gestion_offres()
+		{
+		global $action, $user_droit;
+
+		echo "<table><tr><td width> <ul id=\"menu-bar\">";
+		echo "<li><a href=\"index.php?action=ajout_offre\"  > + ".traduire('Offres')." </a></li>";
+		echo "</ul></td></table>";
+
+		titre_offres();
+		if ($action=="ajout_offre") 
+				{
+				formulaire ("nouvelle_offre");
+				echo "<tr> " ;
+				liste_organisme( "" );
+				liste_offres( );
+				echo "<td>  <input type=\"texte\" name=\"debut\" class=\"calendrier\"   size=\"10\" value=\"\"> </td>" ;
+				echo "<td>  <input type=\"texte\" name=\"fin\"  class=\"calendrier\"  size=\"10\" value=\"\"> </td>" ;
+				echo "<td>  <input type=\"texte\" name=\"etat\"   size=\"10\" value=\"\"> </td>" ;
+				echo "<td>  <input type=\"texte\" name=\"param1\"   size=\"10\" value=\"\"> </td>" ;
+				echo "<td>  <input type=\"texte\" name=\"param2\"   size=\"10\" value=\"\"> </td>" ;
+				echo "<td><input type=\"submit\"   id=\"nouvelle_offre\"  value=\"".traduire('Valider')."\" > </form></td> ";
+				}
+
+		$reponse =command("select * from  DD_offres order by organisme asc");
+
+		while ($donnees = fetch_command($reponse) ) 
+				{
+				$idx_offre=$donnees["idx"];
+				$orga=$donnees["organisme"];
+				$organisme=libelle_organisme($orga);		
+				$offre=$donnees["offre"];
+				$debut=$donnees["debut"];
+				$fin=$donnees["fin"];
+				$etat=$donnees["etat"];
+				$p1=$donnees["param1"];
+				$p2=$donnees["param2"];
+				echo "<tr><td> $organisme </td><td> $offre</td><td> $debut</td><td> $fin</td><td> $etat</td><td> $p1</td><td> $p2</td>";
+				if ($action=="ajout_offre")  
+					lien_c ("images/croixrouge.png", "supp_offre", param("idx_offre","$orga" ),traduire("Supprimer") );
+				}
+			echo "</table></div><HR>";				
+		}
+
+
+//================================================================================== affectation =====
+	
 	FUNCTION supp_affectation($organisme,$responsable)
 		{
 		global $action,$user_idx;
@@ -2418,9 +2341,11 @@ function affiche_titre_user($user)
 	$organisme=$donnees["organisme"];
 	$organisme=libelle_organisme($organisme);
 	$adresse=stripcslashes($donnees["adresse"]);
-		
+	
+	$user=encrypt($user);
 	echo "<table><tr><td> <ul id=\"menu-bar\">";
-	echo "<li> <a   > $nom-$prenom ( $anniv ) </a></li>";
+	echo "<li> <a href=\"index.php?action=detail_user2&user=$user\" > $nom-$prenom ( $anniv ) </a></li>";
+//	echo "<li> <a > $nom-$prenom ( $anniv ) </a></li>";
 	echo "</ul></td><td> - ".traduire('Domiciliation').": $organisme / $adresse / $tel / $mail </td></table>";
 	}
 
@@ -2445,7 +2370,7 @@ function affiche_membre($idx)
 		}
 	}
 
-	function liste_avant( $val_init , $mode="")
+	function liste_avant( $val_init , $mode="", $autre="")
 		{
 		echo "<td><SELECT name=\"avant\" $mode >";
 		affiche_un_choix($val_init,"15min");
@@ -2453,6 +2378,8 @@ function affiche_membre($idx)
 		affiche_un_choix($val_init,"4H");
 		affiche_un_choix($val_init,"La veille", traduire("La veille soir"));
 		affiche_un_choix($val_init,"24H");
+		if ($autre!="")
+			affiche_un_choix($val_init,$autre);
 		echo "</SELECT></td>";
 		}	
 	// ------------------------------------------------------------------------- Rendez-vous --------------------------------
@@ -2541,55 +2468,6 @@ function affiche_membre($idx)
 			echo "<hr>";
 		}
 
-		
-	function verification_acces( $nom_fichier )
-		{
-		$u2=$_SESSION['user'];	
-//		if (!verification_acces2( $nom_fichier ))
-			{
-		
-//			ajout_log_tech( "Tentative d'accès au fichier $nom_fichier non autorisé à ".libelle_user($u2) ,"P0");
-			}
-//		else
-//			ajout_log_tech( "Vérification ok accès acès à $nom_fichier par ".libelle_user($u2) ,"P2");
-	
-		}
-	function verification_acces2( $nom_fichier )
-		{
-		$u2=$_SESSION['user'];		// Acteur
-		
-		$reponse =command("select * from  r_attachement where num='$nom_fichier' ");	
-		if ($donnees = fetch_command($reponse) )
-			{
-			if ($donnees['user']==$u2) // cas on c'est un doc du bénéficiaire
-				return (true);	
-			else
-				{
-				$u1=$_SESSION['user_idx'];	 // cas on c'est le RC qui accede au doc du bénéficiaire
-				$reponse =command("select * from  r_referent where (nom='$u1' and  user='$u2') or  (nom='$u2' and  user='$u1')  ");	
-				if ($donnees = fetch_command($reponse) ) 
-					return (true);		
-				else
-					{
-					// il faut aussi tester le cas ou le bénéficiaire à désigné 'tous'  d'un structure
-					$reponse =command("select * from  r_user where  idx='$u2'");
-					$donnees = fetch_command($reponse);
-					$org = $donnees['organisme'];
-					
-					$reponse =command("select * from  r_referent where organisme='$org' and  user='$u1' and nom='Tous' ");	
-					if ($donnees = fetch_command($reponse) ) 
-						return (true);		
-					}
-				}
-			} 
-		else
-			{
-			ajout_log_tech( "Tentative d'accès à un fichier inexistant $nom_fichier par ".libelle_user($u2) ,"P0");
-			// le fichier n'existe pas 
-			}	
-		return (false);	
-		}
-
 	// liste des  autorisées
 	function verif_action_autorise($action)
 		{
@@ -2627,6 +2505,7 @@ function affiche_membre($idx)
 				case "dde_mdp":
 				case "dde_mdp2":
 				case "detail_user":
+				case "detail_user2":
 				case "recept_mail":
 				case "supp_recept_mail":
 				case "user_inactif":
@@ -2715,7 +2594,11 @@ function affiche_membre($idx)
 				case "mail_envoi" :
 				
 				// liste des actions nécessitant des droits de administrateur	
-				
+				case "nouvelle_offre" :				
+				case "offres" :				
+				case "ajout_offre" :				
+				case "supp_offre" :				
+
 				// liste des actions nécessitant des droits de Fonctionnel	
 				
 				// liste des actions nécessitant des droits de exploitant	
@@ -2739,7 +2622,21 @@ function affiche_membre($idx)
 				case "cc_maj_rdv" :
 				case "cc_ajout" :
 				case "cc_jour" :
-				case "cc_user" :
+				case "cc_usager" :
+				case "cc_usagers" :
+				case "cc_accueillant" :
+				case "cc_precedent" :
+				case "cc_suivant" :
+				case "ajout_creneau_usager" :
+				case "planning_select" :
+				case "supp_creneau_a_confirmer" :
+				case "supp_creneau" :
+				case "usager_a_modifier" :
+				case "nouveau_usager" :
+				case "supp_filtre_usager" :
+				case "usager_a_inactiver" :
+				case "cc_detail_usager" :
+				
 				
 				
 					ajout_log_jour("----------------------------------------------------------------------------------- [ Action= $action ] ");
@@ -3495,6 +3392,7 @@ if (isset($_POST['pass']))
 				
 			$_SESSION['user_idx']=$donnees["idx"];
 			$_SESSION['droit']= $donnees["droit"];
+			$_SESSION['filtre']= "";
 			
 			if (($donnees["droit"]=="A") && ($ancien_droit!="A"))
 				envoi_mail( parametre('DD_mail_gestinonnaire') , "Connexion administrateur : ".$donnees["nom"]." ".$donnees["prenom"], "IP : $ip" );
@@ -3506,7 +3404,7 @@ if (isset($_POST['pass']))
 			$reponse =command("UPDATE r_dde_acces set type='-' where user='$idx' and type='' and date_dde>='$date_log' ");
 			$label = libelle_user($idx);
 			$last_cx = "";
-			$reponse =command("select * from  log where ( user='$idx' or user='$id'or user='$label'  ) and  (ligne regexp 'Connexion') and  (not (ligne regexp 'Déconnexion')) and ( not (ligne regexp 'Echec Connexion'))  order by date DESC ");		
+			$reponse =command("select * from  log where ( user='$idx' or user='$id'or user='$label'  ) and  (ligne Like '%Connexion%') and  (not (ligne Like '%Déconnexion%')) and ( not (ligne Like '%Echec Connexion%'))  order by date DESC ");		
 			if ($donnees = fetch_command($reponse))// c'est la connexion actuelle
 				if ($donnees = fetch_command($reponse) )// c'est la connexion précédente
 					{
@@ -3516,7 +3414,7 @@ if (isset($_POST['pass']))
 						maj_last_cx($idx);
 						$ligne_last_cx = traduire('Dernière connexion')." :<br> $last_cx. ";
 						
-						$reponse =command("select * from  log where ( user='$idx' or user='$id'  or user='$label' ) and  (ligne regexp 'Echec Connexion') order by date DESC ");		
+						$reponse =command("select * from  log where ( user='$idx' or user='$id'  or user='$label' ) and  (ligne Like '%Echec Connexion%') order by date DESC ");		
 						$donnees = fetch_command($reponse); 
 						$last_echec_cx=$donnees["date"];	
 						if ($last_echec_cx>$last_cx)
@@ -3613,6 +3511,12 @@ if (isset($_POST['pass']))
 
 	if ($action=="detail_user")
 		$_SESSION['bene']=variable("user");
+	if ($action=="detail_user2")
+		{
+		$_SESSION['bene']=variable_get("user");	
+		$action="detail_user";
+		}
+		
 	if ($action=="")
 		$_SESSION['bene']=$user_idx;
 	if (($user_droit=="R") || ($user_droit=="A")) 
@@ -3957,6 +3861,25 @@ if (isset($_POST['pass']))
 			$r1 =command("select * from  r_organisme where idx='$user_organisme' ");
 			$d1 = fetch_command($r1);
 			$logo=$d1["logo"];
+
+			echo "<td><center> ";
+				//* ----------------------------------FISSA
+			$reponse = command("SELECT * from  fct_fissa WHERE organisme='$user_organisme'"); 
+			if ($donnees = fetch_command($reponse))
+				{
+				$b=$donnees["support"];
+				echo "<a href=\"fissa.php?support=$b&logo=$logo\"><img src=\"images/fissa.jpg\" width=\"150\" height=\"40\"></a> ";
+				}
+
+			//* ---------------------------------- Calendrier
+			$jfissa=0;
+			$reponse = command("SELECT * from  fct_calendrier WHERE organisme='$user_organisme'"); 
+			if ($donnees = fetch_command($reponse))
+				echo "<br> <a href=\"index.php?action=cc_activite\"><img src=\"images/calendrier.jpg\" width=\"100\" height=\"40\"> </a>";
+
+			//-----------------------------------*/ 		
+			echo "</center></td>";
+			
 			if ($logo!="")
 				echo "<td> <img src=\"images/$logo\" width=\"200\" height=\"100\"  > </td>";
 			}
@@ -4515,7 +4438,7 @@ if (isset($_POST['pass']))
 			echo "<hr><center><p>";
 			debut_cadre("700");
 			echo "<p><br>".traduire('Pour confirmer la génération d\'un export, il vous faut saisir à nouveau votre mot de passe')." <p>";
-			formulaire ("exporter");
+			formulaire ("exporter","visu.php");
 			echo "<table><tr><td>".traduire('Mot de passe').": <input type=\"password\" name=\"pw\" id=\"pwd\" value=\"\">  </td>";
 			echo "<td><input type=\"checkbox\" onchange=\"document.getElementById('pwd').type = this.checked ? 'text' : 'password' ; document.getElementById('pwd1').type = this.checked ? 'text' : 'password' \"> ".traduire('Voir saisie')."<td>";
 
@@ -4656,35 +4579,6 @@ if (isset($_POST['pass']))
 					echo "<tr><td>  <img src=\"images/organisme.png\" width=\"25\" height=\"25\" ></td><td> ".traduire('Structure sociale').": $orga </td><td> / $adresse </td><td> / $telephone </td><td> / $mail </td><td> (".traduire('Resp.:').responsables_organisme($user_organisme).")</td>";
 					}
 			
-			//* ----------------------------------FISSA
-			$jfissa=0;
-			$reponse = command("SELECT * from  fct_fissa WHERE organisme='$user_organisme'"); 
-			while($donnees = fetch_command($reponse))
-				{
-				if ($jfissa++==0)
-					echo "<td>--> </td><td>";
-				$l=$donnees["libelle"];
-				$b=$donnees["support"];
-				echo "<a href=\"fissa.php?support=$b&logo=$logo\"> $l </a>";
-				}
-			if ($jfissa!=0)
-				echo "</td>";
-			//-----------------------------------*/ 
-
-			//* ---------------------------------- Calendrier
-			$jfissa=0;
-			$reponse = command("SELECT * from  fct_calendrier WHERE organisme='$user_organisme'"); 
-			while($donnees = fetch_command($reponse))
-				{
-				if ($jfissa++==0)
-					echo "<td>--> </td><td>";
-				$l=$donnees["libelle"];
-				$idx_activite=encrypt($donnees["idx_activite"]);
-				echo "<a href=\"index.php?action=cc_activite\"> $l </a>";
-				}
-			if ($jfissa!=0)
-				echo "</td>";
-			//-----------------------------------*/ 
 			echo "</table>";
 			}
 
@@ -4817,169 +4711,8 @@ if (isset($_POST['pass']))
 	// au dela les fonctions ne sont pas accesssibles pour les profils E et F
 	if ( ($user_droit=="E") || ($user_droit=="F")|| ($user_droit=="T")|| ($user_droit=="t"))
 		pied_de_page("x");
-
-	if ( (($user_droit=="S") || ($user_droit=="R")) && ($action=="cc_activite") )
-		{
-		echo "<table><tr><td><ul id=\"menu-bar\">";
-		echo "<li><a href=\"index.php?action=cc_usagers\"  > ".traduire('Usagers')."</a>";
-		echo "</ul ></td>";
-	
-		$reponse =command("select * from  fct_calendrier where organisme='$user_organisme' ");
-		while ($donnees = fetch_command($reponse) ) 
-			{
-			for ($j=0;$j<7;$j++)
-				$jour_ouvert[$j]=$donnees["$j"];
-				
-			$libelle=$donnees["libelle"];
-			$idx_activite=$donnees["idx_activite"];
-			echo "<tr><td><H4> ".$libelle. " - << ";
-			
-			$t0=mktime(0,0,0 ,date('m'), 1, date('Y'));
-			echo date('m-Y',$t0)." >> </H4></td></table>";
-			echo "<table><tr><td></td><td>";
-			for ($h=8; $h<20; $h++)
-				echo "<td> $h</td><td> </td><td> </td><td> </td><td></td>";
-
-			for ($i=$t0; $i<$t0+30*60*60*24; $i+= 60*60*24)
-				{
-				echo "<tr><td>";
-				//echo "$i</td><td>";
-				$j=date('w',$i);
-				if ($jour_ouvert[$j]!="") 
-					{
-					
-					// on regarde les heures d'ouvertures
-					$r1 =command("select * from  cc_creneau where date='$i' and user='' ");
-					if ($d1 = fetch_command($r1) )
-							$d3= explode("/",$d1['horaire']);  // Spécifique
-						else
-							$d3= explode("/",$jour_ouvert[$j]); // standard
-					$d1=$d3[0];
-					$f1=$d3[1];	
-					
-					for ($m=0;$m<24*4;$m++)
-						$occupation[$m]="";
-						
-					$r1 =command("select * from  cc_creneau where date='$i' and user<>'' ");
-					while($d2 = fetch_command($r1) )
-						{
-						$d3= explode("/",$d2['horaire']);
-						$d2=$d3[0];
-						$f2=$d3[1];		
-						for ($m=$d2*4;$m<$f2*4;$m++) 
-							$occupation[$m]=" <a title=\"Occupé\">#</a>";
-						}	
-					$ej=encrypt($i);
-					$ea=encrypt($idx_activite);
-					echo "<a href=\"index.php?action=cc_jour&jour=$ej&activite=$ea\">";
-					echo libelle_jour (date('w',$i)).'</td><td> '. date('d',$i);	
-					echo "</a><td >|</td>";					
-					for ($h=8; $h<20; $h++)
-						{
-
-						if (($h>=$d1) && ($h<$f1)) 
-							{
-							for ($m=0; $m<4; $m++)
-								{
-
-								if ($occupation[$h*4+$m]!="")
-									echo "<td width=\"10\" BGCOLOR=\"orange\" >".$occupation[$h*4+$m]." </td>";
-								else
-									{
-									// on mémorise les rdv de la journée
-									$ej=encrypt($i);
-									$ea=encrypt($idx_activite);
-										{
-										$eh=encrypt($m);
-										$occupation[$h*4+$m]=" <a href=\"index.php?action=cc_ajout&jour=$ej&activite=$ea&heure=$eh\" title=\"ajout\">+</a>";
-										echo "<td width=\"10\" BGCOLOR=\"green\" >".$occupation[$h*4+$m]." </td>";
-										}
-									}
-								}
-							}
-						else
-							{
-							for ($m=0; $m<60; $m+=15)
-								echo "<td width=\"10\" BGCOLOR=\"lightgrey\" > </td>";
-							}		
-						
-						echo "<td >|</td>";
-						}			
-					}
-					
-				}
-			echo "</table>";
-			echo "<hr>";
-			}
-		pied_de_page("x");
-		}
-					
-
-	if ( (($user_droit=="S") || ($user_droit=="R")) && ($action=="cc_maj_activite") )
-		{
-		$idx_activite=variable_get("idx_activite");	
 		
-		// MAJ activité
-		// - libellé
-		// - horaires
-		// - texte standard
-
-		pied_de_page("x");
-		}	
-		
-	if ( (($user_droit=="S") || ($user_droit=="R")) && ($action=="cc_maj_rdv") )
-		{
-		$idx_activite=variable_get("idx_activite");	
-		
-		// MAJ rdv
-		// Changement texte et délai d'alerte
-		// possibilité suppression
-		// Ajout commentaire
-
-		pied_de_page("x");
-		}
-					
-					
-	if ( (($user_droit=="S") || ($user_droit=="R")) && ($action=="cc_ajout") )
-		{
-		$idx_activite=variable_get("activite");	
-		$t0=variable_get("jour");	
-		
-		// Ajout rdv
-		// choix usager
-		// Saisie commentaire, texte et délai d'alerte
-		
-		pied_de_page("x");
-		}
-						
-
-	if ( (($user_droit=="S") || ($user_droit=="R")) && ($action=="cc_jour") )
-		{
-		$idx_activite=variable_get("activite");	
-		$t0=variable_get("jour");	
-		
-		// mise à jour horaire d'ouverture de la journée
-		// possibilité de déclarer fermer 
-		// + commentaire 
-
-		echo "<table border=\"2\">";
-		$reponse =command("select * from  cc_creneau where date='$t0' and idx_activite='$idx_activite' ");		
-		if ($donnees = fetch_command($reponse) )
-			{
-			$horaire=$donnees["horaire"];
-			$commentaire=$donnees["commentaire"];
-			}
-		else
-			echo traduire("Journée standard");
-		
-		echo "<tr><td> horaires </td><td>".$donnees["idx"]."</td>";
-		echo "<tr><td> Commentaire</td><td>".  saisie_champ_bug_area($idx,"commentaire",$donnees["commentaire"],100)."</td>";			
-		echo "</table>";
-		pied_de_page("x");
-		}		
-
-
-
+include 'planning.php';
 		
 	if ( ($user_droit=="S") && ($action=="collegues") )
 		{
@@ -5129,7 +4862,7 @@ if (isset($_POST['pass']))
 		
 		if (( (($user_droit=="S") && ($action!="rdv") )||  ($user_droit=="R")) && ($action=="detail_user"))
 			if (isset($_GET["user"]))
-				bouton_referent(variable("user"));
+				bouton_referent(variable_get("user"));
 			else
 				bouton_referent($user);
 				
@@ -5243,7 +4976,16 @@ if (isset($_POST['pass']))
 		if ($action!="ajout_user") 
 			if ($user_droit=="A")
 				bouton_affectation();	
-							
+
+		if ($action=="nouvelle_offre") 
+			nouvelle_offre();
+
+		if ($action=="supp_offre") 
+			supp_offre();
+
+		if ($user_droit=="A")
+				gestion_offres();	
+				
 		if ($user_droit!="")	
 			if (($action!="ajout_affectation") &&($action!="ajout_admin") && ($action!="rdv") && ($action!="ajout_photo")&& ($action!="ajout_referent") && ($action!="ajout_user") )
 				if ( (( ($user_droit=="S") ) && ($action!="detail_user") ) || ($user_droit=="A"))

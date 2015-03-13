@@ -1,10 +1,11 @@
-  <?php  
+<?php  
 	session_start(); 
 	
 	include "connex_inc.php";
 	include 'general.php';
  	include 'include_crypt.php';
 	include 'include_charge_image.php';	
+	include 'exploit.php';	
 	
 	
 	if (!empty($_FILES)) 
@@ -25,4 +26,4 @@
 		 ajout_log_tech("Incohérence: Tentative d'ajout de fichier sur compte $idx qui n'existe pas par $acteur !");
 
 		} 
-	?> 
+	?>

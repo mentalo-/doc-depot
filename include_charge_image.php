@@ -131,14 +131,14 @@
 			return (false);
 			}		
 
-		if ( !est_image($n) && !est_doc($n) && !(extension_fichier($n)=="pdf")  )
+		if ( !est_image($n) && !est_doc($n) && !($ext=="pdf") && !($ext=="vcf") )
 			{
 			erreur (" Type de fichier non accepté.");
 			return (false);
 			}	
 			
 		// cas VCF 
-		if (extension_fichier($n)=="vcf")
+		if ($ext=="vcf")
 			{
 			include ("vcard.php");
 			if ($mode=="1") // chargement par mail
@@ -288,7 +288,7 @@
 					else
 						ajout_log( $user, "Chargement fichier $n / Type : $type / $ident",$acteur );		
 					
-/*					
+					
 					$num = "$idx.$n";
 					ctrl_une_signature("hash_chi", "upload_chi/".$num.".chi" , $num);
 					ctrl_une_signature("hash", "upload/".$num, $num);			
@@ -296,7 +296,7 @@
 					ctrl_une_signature("hash_prot", "upload_prot/".$num, $num);
 					ctrl_une_signature("hash_mini", "upload_mini/".$num, $num);
 					
-*/
+
 					return (true);
 					}
 				else

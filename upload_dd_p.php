@@ -1,10 +1,11 @@
-  <?php  
+<?php  
 	session_start(); 
 	
 	include "connex_inc.php";
 	include 'general.php';
  	include 'include_crypt.php';
 	include 'include_charge_image.php';	
+	include 'exploit.php';	
 	
 	
 	if (!empty($_FILES)) 
@@ -21,4 +22,4 @@
 		charge_image("0",$tempFile,$_FILES['file']['name'],$code_lecture,"P-$idx", "" , "Autres", $idx, $idx);
 
 		} 
-	?> 
+	?>
