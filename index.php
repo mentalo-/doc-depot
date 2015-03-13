@@ -2629,14 +2629,18 @@ function affiche_membre($idx)
 				case "cc_suivant" :
 				case "ajout_creneau_usager" :
 				case "planning_select" :
+				case "planning_ajout" :
 				case "supp_creneau_a_confirmer" :
 				case "supp_creneau" :
 				case "usager_a_modifier" :
 				case "nouveau_usager" :
+				case "modif_usager" :
+
 				case "supp_filtre_usager" :
 				case "usager_a_inactiver" :
 				case "cc_detail_usager" :
-				
+				case "nouveau_planning" :
+				case "modifier_calendrier" :
 				
 				
 					ajout_log_jour("----------------------------------------------------------------------------------- [ Action= $action ] ");
@@ -3861,14 +3865,15 @@ if (isset($_POST['pass']))
 			$r1 =command("select * from  r_organisme where idx='$user_organisme' ");
 			$d1 = fetch_command($r1);
 			$logo=$d1["logo"];
-
+			$_SESSION['logo']=$logo;
+			
 			echo "<td><center> ";
 				//* ----------------------------------FISSA
 			$reponse = command("SELECT * from  fct_fissa WHERE organisme='$user_organisme'"); 
 			if ($donnees = fetch_command($reponse))
 				{
-				$b=$donnees["support"];
-				echo "<a href=\"fissa.php?support=$b&logo=$logo\"><img src=\"images/fissa.jpg\" width=\"150\" height=\"40\"></a> ";
+				$_SESSION['support']=$donnees["support"];
+				echo "<a href=\"fissa.php\"><img src=\"images/fissa.jpg\" width=\"150\" height=\"40\"></a> ";
 				}
 
 			//* ---------------------------------- Calendrier
@@ -3886,7 +3891,6 @@ if (isset($_POST['pass']))
 	
 		echo "</table>";
 
-		
 
 		
 		if ($user_droit=="")	 
