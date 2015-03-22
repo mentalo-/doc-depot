@@ -29,16 +29,22 @@ include 'inc_style.php';
 	function mise_en_forme_date_aaaammjj( $date_jour)
 		{
 		$d3= explode("/",$date_jour);  
-		$a=$d3[2];
+		if (isset($d3[2]))
+			$a=$d3[2];
+		else
+			$a=date("Y");
+		if ($a<100) $a+=2000;
 		$m=$d3[1];
 		$j=$d3[0];	
+		if (($j<1) || ($j>31) || ($m<1) || ($m>12) )
+			return("");
 		
 		return( "$a-$m-$j" );
 		}
 // ---------------------------------------------------------------------------------------	
 	function charge_date($date_jour)
 		{
-		global $exclus, $imax, $nom_charge, $pres_repas, $qte, $nb_usager,$commentaire, $synth,$bdd;
+		global $exclus, $imax, $nom_charge, $pres_repas, $nb_usager,$commentaire, $synth,$bdd;
 
 		for($i=0;$i<$nb_usager;$i++) 
 			{
@@ -55,7 +61,6 @@ include 'inc_style.php';
 				{
 				$nom_charge[$i]=$donnees["nom"];
 				$pres_repas[$i]=$donnees["pres_repas"];
-				$qte[$i]=$donnees["qte"];
 				$commentaire[$i]=$donnees["commentaire"];
 				$i++; 		
 				}
@@ -82,7 +87,7 @@ include 'inc_style.php';
 		while (($donnees = fetch_command($reponse) ) && ($j<10000))
 			if ($donnees["nom"]!="Synth")
 				{
-				$liste_nom[$j]=$donnees["nom"];
+				$liste_nom[$j]=stripcslashes($donnees["nom"]);
 				$j++; 		
 				}
 		$jmax=$j;
@@ -91,7 +96,7 @@ include 'inc_style.php';
 	// =========================================================== procedures générales
 
 	
-	function nouveau( $date_jour, $nom, $pres,$com ,$memo,$qte="1")
+	function nouveau( $date_jour, $nom, $pres,$com ,$memo)
 		{
 		global $bdd;
 			
@@ -103,7 +108,7 @@ include 'inc_style.php';
 			$r2=nbre_enreg($r1); 
 			if ($r2[0]==0)
 				{
-				$cmd = "INSERT INTO `$bdd`  VALUES ( '$nom', '', '','','$qte')";
+				$cmd = "INSERT INTO `$bdd`  VALUES ( '$nom', '', '','')";
 				$reponse = command($cmd);
 				}
 				
@@ -117,7 +122,7 @@ include 'inc_style.php';
 				{
 				if ( $pres!="Erreur saisie")
 					{
-					$cmd = "INSERT INTO `$bdd`  VALUES ( '$nom', '$d', '$pres','$com','$qte')";
+					$cmd = "INSERT INTO `$bdd`  VALUES ( '$nom', '$d', '$pres','$com')";
 					$reponse = command($cmd);
 					}
 				}
@@ -127,7 +132,7 @@ include 'inc_style.php';
 				$reponse = command($cmd);				
 				
 				if ( $pres!="Erreur saisie")
-					$cmd="UPDATE $bdd SET commentaire='$com', pres_repas='$pres' , qte='$qte' WHERE nom='$nom' AND date='$d'" ;
+					$cmd="UPDATE $bdd SET commentaire='$com', pres_repas='$pres'  WHERE nom='$nom' AND date='$d'" ;
 				else
 					$cmd="DELETE FROM $bdd  WHERE nom='$nom' AND date='$d'" ;
 							
@@ -184,33 +189,7 @@ include 'inc_style.php';
 		echo "</SELECT>";
 		}
 
-	function choix_qte( $val_init )
-		{
-		echo "<SELECT name=\"qte\"  onChange=\"this.form.submit();\">";
-		for ($i=1; $i<16; $i++)
-			affiche_un_choix($val_init,"$i");
-		echo "</SELECT>";
-		}
-	function statistic()
-		{
-		global $bdd;
-		
-		$i=0; 
-		echo "<BR> ";
-		$reponse = command("SELECT  * FROM $bdd order by date ASC"); 
-		while (($donnees = fetch_command($reponse) ) && ($i<10000))
-			if ($donnees["nom"]!="Synth")
-				if ((strstr($donnees["pres_repas"],"Visite")) || (strstr($donnees["pres_repas"],"Refusé")) )
-					{
-					$nom=$donnees["nom"];
-					$pres_repas=$donnees["pres_repas"];
-					$date=$donnees["date"];
-					echo "$date;$nom;$pres_repas;<p>";
-					$i++; 		
-					}
-		}
-
-		
+	
 	function presents($date)
 		{
 		global $bdd;
@@ -220,7 +199,7 @@ include 'inc_style.php';
 		$reponse = command("SELECT * FROM $bdd WHERE date='$date' and nom <>'Synth' and ( pres_repas='Visite+Repas' or pres_repas='Visite' or pres_repas='Refusé' ) group by nom ASC"); 
 		while (($donnees = fetch_command($reponse) ) && ($i<10000))
 				{
-				$nom=$donnees["nom"];
+				$nom=stripcslashes($donnees["nom"]);
 				$t = $t."$nom; ";
 
 				$i++; 		
@@ -237,9 +216,8 @@ include 'inc_style.php';
 		$reponse = command("SELECT * FROM $bdd WHERE date='$date' and nom <>'Synth' and (pres_repas='$acteur' ) group by nom ASC"); 
 		while (($donnees = fetch_command($reponse) ) && ($i<10000))
 				{
-				$nom=$donnees["nom"];
+				$nom=stripcslashes($donnees["nom"]);
 				$t = $t."$nom; ";
-				//echo "$nom; ";
 				$i++; 		
 				}
 		return $t;
@@ -271,11 +249,11 @@ include 'inc_style.php';
 								echo "<tr> <td width=\"1000\"> $titre: ";
 								$nu++;
 								}
-								
+							$n_court=substr($n, 0, strlen($n)-3);
 							if ( (strpos($n,"(B)")!==FALSE) ||(strpos($n,"(S)")!==FALSE) )
-								echo "<a href=\"fissa.php?action=nouveau&qte=1&date_jour=$date_jour&nom=$n&memo=&presence=Acteur+Social&commentaire=\">$n</a>; " ;
+								echo "<a href=\"fissa.php?action=nouveau&date_jour=$date_jour&nom=$n&memo=&presence=Acteur+Social&commentaire=\">$n_court</a>; " ;
 							if ( (strpos($n,"(A)")!==FALSE))
-								echo "<a href=\"fissa.php?action=nouveau&qte=1&date_jour=$date_jour&nom=$n&memo=&presence=Activité&commentaire=\">$n</a>; " ;
+								echo "<a href=\"fissa.php?action=nouveau&date_jour=$date_jour&nom=$n&memo=&presence=Activité&commentaire=\">$n_court</a>; " ;
 
 							}
 						}
@@ -287,8 +265,8 @@ include 'inc_style.php';
 								echo "<tr> <td width=\"1000\"> $titre: ";							
 								$nu++;
 								}		
-								
-							echo "<a href=\"fissa.php?action=nouveau&qte=1&date_jour=$date_jour&nom=$n&memo=&presence=Visite&commentaire=\">$n</a>; " ;
+							$n_court=stripcslashes($n);
+							echo "<a href=\"fissa.php?action=nouveau&date_jour=$date_jour&nom=$n&memo=&presence=Visite&commentaire=\">$n_court</a>; " ;
 							}
 					
 					}
@@ -299,7 +277,7 @@ include 'inc_style.php';
 
 	function rapport($date)
 		{
-		global $nb_usager,$nom_charge,$commentaire,$imax, $pres_repas, $qte, $bdd, $acteur, $beneficiaire, $libelle;
+		global $nb_usager,$nom_charge,$commentaire,$imax, $pres_repas, $bdd, $acteur, $beneficiaire, $libelle;
 		
 		$i=0; 
 		$date_gb=mise_en_forme_date_aaaammjj( $date);
@@ -356,8 +334,6 @@ include 'inc_style.php';
 							$valeur=$pres_repas[$i];
 							echo "($valeur) : ";
 
-							$valeur=$qte[$i];
-							//echo "( X $valeur) : ";
 							$valeur=stripcslashes($commentaire[$i]);
 							echo " $valeur";
 							}		
@@ -376,8 +352,6 @@ include 'inc_style.php';
 							$valeur=$pres_repas[$i];
 							echo "($valeur) : ";
 
-							$valeur=$qte[$i];
-							//echo "( X $valeur) : ";
 							$valeur=stripcslashes($commentaire[$i]);
 							echo " $valeur";
 							}
@@ -527,7 +501,6 @@ include 'inc_style.php';
 	$nom_charge=array();
 	$liste_nom=array();
 	$pres_repas=array();
-	$qte=array();
 	$commentaire=array();
 	$nb_usager=100;
 	
@@ -564,8 +537,16 @@ include 'inc_style.php';
 		if (!isset ($_GET["date_jour"]))
 			$date_jour=date('d/m/Y');
 		else 
+			{
 			$date_jour=variable_s("date_jour");
-
+			if ( mise_en_forme_date_aaaammjj($date_jour)=="")
+				{
+				erreur("Format de date incorrect");
+				$action="";
+				$date_jour=date('d/m/Y');
+				}
+			}
+			
 			if ($action=="nouveau")
 				{
 				if ($type=="Bénéficiaire femme")
@@ -708,7 +689,7 @@ include 'inc_style.php';
 		default:
 				// =====================================================================loc IMAGE
 				echo "<table border=\"0\" >";	
-				echo "<tr> <td> <a href=\"index.php\"> <img src=\"images/logo.png\" width=\"150\" height=\"100\"  > </a> </td> ";		
+				echo "<tr> <td> <a href=\"index.php\"> <img src=\"images/logo.png\" width=\"140\" height=\"100\"  > </a> </td> ";		
 
 				charge_date($date_jour);
 
@@ -724,13 +705,18 @@ include 'inc_style.php';
 				$j=$d3[0];	
 				
 				$veille=date($format_date,  mktime(0,0,0 , $m, $j-1, $a));
-				echo "<a href=\"fissa.php?action=date&date_jour=$veille\"> < </a> </td> <td> ";
+				echo "<a href=\"fissa.php?action=date&date_jour=$veille\"> <img src=\"images/gauche.png\" width=\"20\" height=\"20\"> </a> </td> <td> ";
 				echo "<form method=\"GET\" action=\"fissa.php\">";
 				echo "<input type=\"hidden\" name=\"action\" value=\"date\"> " ;	
 				echo "<input type=\"text\" name=\"date_jour\" size=\"10\" value=\"$date_jour\" class=\"calendrier\" >";
+				echo "<br>";
+				$aujourdhui=date('d/m/Y');
+				if ($date_jour!=$aujourdhui)
+					echo " <a href=\"fissa.php?action=date&date_jour=$aujourdhui\"> Aujourd'jui</a>";
+				
 				echo "</td> <td> ";
 				$jsuivant=date($format_date,  mktime(0,0,0 , $m, $j+1, $a));
-				echo " <a href=\"fissa.php?action=date&date_jour=$jsuivant\"> > </a> </td> <td> ";
+				echo " <a href=\"fissa.php?action=date&date_jour=$jsuivant\"> <img src=\"images/droite.png\"  width=\"20\" height=\"20\">  </a> </td> <td> ";
 				echo "<input type=\"submit\" value=\"Valider\" >  ";
 				echo " </form> ";
 				
@@ -761,7 +747,9 @@ include 'inc_style.php';
 				proposition("(A)","Activités");					
 				echo "  </table> <P> ";
 				
-				affiche_memo();
+				if ($date_jour==date('d/m/Y'))
+					affiche_memo();
+					
 				echo "<table border=\"2\" >";
 				
 				// =====================================================================loc AJOUTER
@@ -771,9 +759,8 @@ include 'inc_style.php';
 				echo "<input type=\"hidden\" name=\"memo\" value=\"\"> " ;	
 				echo "<input type=\"hidden\" name=\"commentaire\" value=\"\"> " ;
 				echo "<input type=\"hidden\" name=\"presence\" value=\"Visite\"> " ;	
-				echo "<input type=\"hidden\" name=\"qte\" value=\"1\"> " ;	
 				echo "<input type=\"hidden\" name=\"date_jour\"  value=\"$date_jour\">";
-				echo "<tr> <td> ";
+				echo "<tr> <td bgcolor=\"#d4ffaa\"> ";
 				echo "<SELECT name=nom>";
 				echo "<OPTION  VALUE=\"\">  </OPTION>";
 				for ($j=0;$j<$jmax;$j++)
@@ -783,17 +770,16 @@ include 'inc_style.php';
 						echo "<OPTION  VALUE=\"$sel\"> $sel </OPTION>";
 					}
 				echo "</SELECT>";
-				echo "</td> <td>"; 
+				echo "</td> <td bgcolor=\"#d4ffaa\">"; 
 				echo "<input type=\"submit\" value=\"Ajouter\" >  ";
 				echo "</td>";
 	//			<td></td>";
 				echo " </form> ";	
 				// =====================================================================loc NOUVEAU
-				echo "<td></td> <td><form method=\"GET\" action=\"fissa.php\">";
+				echo "<td bgcolor=\"#d4ffaa\"></td> <td bgcolor=\"#d4ffaa\"><form method=\"GET\" action=\"fissa.php\">";
 				echo "<input type=\"hidden\" name=\"action\" value=\"nouveau\"> " ;
 				echo "<input type=\"hidden\" name=\"date_jour\"  value=\"$date_jour\">";
 				echo "<input type=\"hidden\" name=\"memo\" value=\"\"> " ;	
-				echo "<input type=\"hidden\" name=\"qte\" value=\"1\"> " ;
 				echo "<input type=\"text\" name=\"nom\" size=\"30\" value=\"\">";	
 				liste_type();
 				echo "<input type=\"hidden\" name=\"commentaire\" value=\"\"> " ;	
@@ -802,7 +788,6 @@ include 'inc_style.php';
 				echo "</td></form> ";	
 
 				echo "<tr> <td bgcolor=\"#3f7f00\"><font color=\"white\"> Prénom / Nom </td> <td bgcolor=\"#3f7f00\"> <font color=\"white\">Evénement </td>";
-				//<td bgcolor=\"#FFCC66\"> Qte </td>
 				echo "<td bgcolor=\"#3f7f00\"> <font color=\"white\">Memo </td><td bgcolor=\"#3f7f00\"> <font color=\"white\">Commentaire </font></td>";		
 				$ncolor=0;
 				for($i=0;$i<$imax;$i++)
@@ -824,11 +809,6 @@ include 'inc_style.php';
 						else
 							echo "</td> <input type=\"hidden\" name=\"presence\" value=\"$valeur\"> <td bgcolor=\"$color\">";
 						echo "</td> <td bgcolor=\"$color\">";
-						$valeur =$qte[$i];
-						if ($valeur=="")
-							$valeur="1";
-						//choix_qte( $valeur );
-						//echo " </td> <td>";
 						$reponse = command("SELECT * FROM $bdd where date='0000-00-00' and nom='$nom1' "); 
 						if ($donnees = fetch_command($reponse) )
 							$n=stripcslashes($donnees["commentaire"]);	
@@ -836,7 +816,6 @@ include 'inc_style.php';
 						  $n="";
 						  
 						echo "<TEXTAREA rows=\"1\" cols=\"20\" name=\"memo\" onChange=\"this.form.submit();\">$n</TEXTAREA>";
-							
 						echo "</td> <td bgcolor=\"$color\"> ";
 
 						$valeur=stripcslashes($commentaire[$i]);
@@ -856,7 +835,6 @@ include 'inc_style.php';
 				echo "<input type=\"hidden\" name=\"nom\"  value=\"Synth\">";
 				echo "<input type=\"hidden\" name=\"date_jour\"  value=\"$date_jour\">";
 				echo "<input type=\"hidden\" name=\"femme\" value=\"\"> " ;
-				echo "<input type=\"hidden\" name=\"qte\" value=\"1\"> " ;
 				echo "<input type=\"hidden\" name=\"presence\"  value=\"Synth\">";
 				if ($synth=="") 
 					$synth="Faits marquants:\n ";

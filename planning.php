@@ -1,5 +1,7 @@
 <?php 
 
+	$restriction_ad =  $_SESSION['ad'] || ( (($user_droit=="S") || ($user_droit=="R"))  )  ;
+	
 	if ( (($user_droit=="S") || ($user_droit=="R")) && ($action=="cc_usager") )
 		{
 		$action="cc_usagers";
@@ -16,7 +18,13 @@
 		{
 		$r1 =command("select * from  cc_user where idx='$idx'  ");
 		$d1 = fetch_command($r1);
-		return($d1["nom"]." ".$d1["prenom"]);
+		return(stripcslashes($d1["nom"]." ".$d1["prenom"]));
+		}			
+	function libelle_activite( $idx)
+		{
+		$r1 =command("select * from  fct_calendrier where idx_activite='$idx'  ");
+		$d1 = fetch_command($r1);
+		return(stripcslashes($d1["libelle"]));
 		}	
 		
 	if (($action=="supp_filtre_usager") )
@@ -80,9 +88,9 @@
 	
 	function affiche_titre_heure($debut_min,$fin_max )
 		{	
-		echo "<table><tr><td></td><td>";
+		echo "<table><tr><td></td><td></td><td></td>";
 		for ($h=$debut_min; $h<$fin_max; $h++)
-			echo "<td> $h</td><td> </td><td> </td><td> </td><td></td>";
+			echo "<td> </td><td> </td><td> </td><td> </td><td></td>";
 		}
 		
 	function liste_usager_activite($activite)
@@ -153,11 +161,14 @@
 		echo "</SELECT></td>";
 		}		
 
-	if ( (($user_droit=="S") || ($user_droit=="R")) && ($action=="supp_creneau") )
+	if ( ($restriction_ad) && ($action=="supp_creneau") )
 		{
 		$idx=variable("idx");	
 		command("delete from cc_creneau where idx='$idx' ");
-		$action="cc_creneau";
+		if ($_SESSION['ad'])
+			$action="cc_activite";
+		else
+			$action="cc_creneau";
 		}	
 	
 	if ( (($user_droit=="S") || ($user_droit=="R")) && ($action=="usager_a_inactiver") )
@@ -168,7 +179,7 @@
 		}	
 	
 	
-	function affiche_journee_calendrier($idx_activite, $nb_max,   $act, $i, $debut_min, $fin_max, $mode="")
+	function affiche_journee_calendrier($idx_activite, $nb_max, $act, $i, $debut_min, $fin_max, $mode="")
 		{
 		global $jour_ouvert, $aff_date,$couleur_libre, $couleur_occupe,$couleur_plein, $occupation, $nb_occupation;
 		 
@@ -184,10 +195,10 @@
 		else
 			echo '</td><td> </td>';	
 					
-		if ($mode=="")
-			echo "<td ><a href=\"index.php?action=cc_ajout&jour=$ej&activite=$ea\"> + </a>|</td>";		
+		if ( ($mode=="") && (!$_SESSION['ad']) )
+			echo "<td ><a href=\"".$_SERVER['PHP_SELF'] ."?action=cc_ajout&jour=$ej&activite=$ea\"> + </a></td><td >|</td>";		
 		else
-			echo "<td >|</td>";
+			echo "<td ></td><td >|</td>";
 			
 		for ($m=0;$m<24*4;$m++)
 			{
@@ -225,13 +236,13 @@
 					$eh=encrypt("$eh");	
 					
 					if ($occupation[$h*4+$m]=="libre")
-						echo "<td width=\"10\" BGCOLOR=\"".$couleur_libre[$act]."\" ><a href=\"index.php?action=cc_ajout&jour=$ej&activite=$ea&heure=$eh\" title=\"ajout\">+</a></td>";									
+						echo "<td width=\"10\" BGCOLOR=\"".$couleur_libre[$act]."\" ><a href=\"".$_SERVER['PHP_SELF'] ."?action=cc_ajout&jour=$ej&activite=$ea&heure=$eh\" title=\"ajout\">+</a></td>";									
 					else
 						{
 						if ( $nb_occupation[$h*4+$m]<$nb_max)
-							echo "<td width=\"10\" ".$occupation[$h*4+$m]." BGCOLOR=\"".$couleur_occupe[$act]."\" ><a href=\"index.php?action=cc_ajout&jour=$ej&activite=$ea&heure=$eh\" title=\"ajout\">+</a></td>";
+							echo "<td width=\"10\" ".$occupation[$h*4+$m]." BGCOLOR=\"".$couleur_occupe[$act]."\" ><a href=\"".$_SERVER['PHP_SELF'] ."?action=cc_ajout&jour=$ej&activite=$ea&heure=$eh\" title=\"ajout\">+</a></td>";
 						else
-							echo "<td width=\"10\" ".$occupation[$h*4+$m]." BGCOLOR=\"".$couleur_plein[$act]."\" >#</td>";
+							echo "<td width=\"10\" ".$occupation[$h*4+$m]." BGCOLOR=\"".$couleur_plein[$act]."\" > </td>";
 						}
 					}
 				}
@@ -240,7 +251,7 @@
 		}
 	
 
-	if ( (($user_droit=="S") || ($user_droit=="R")) && ($action=="ajout_creneau_usager") )
+	if ( ($restriction_ad) && ($action=="ajout_creneau_usager") )
 		{
 		$idx_activite=variable("activite");	
 		$jour=variable("jour");	
@@ -296,10 +307,10 @@
 		$action="cc_usagers";
 		}	
 		
-	if ( (($user_droit=="S") || ($user_droit=="R")) && ($action=="cc_precedent") )
+	if ( ($restriction_ad) && ($action=="cc_precedent") )
 		$_SESSION["mois"]-=1;
 		
-	if ( (($user_droit=="S") || ($user_droit=="R")) && ($action=="cc_suivant") )
+	if ( ($restriction_ad) && ($action=="cc_suivant") )
 		$_SESSION["mois"]+=1;	
 		
 	if ( (($user_droit=="S") || ($user_droit=="R")) && ($action=="planning_select") )
@@ -311,17 +322,26 @@
 			$_SESSION["d$act"]="checked";	
 		}
 		
-	if ( (($user_droit=="S") || ($user_droit=="R")) && (($action=="cc_activite")  ||($action=="cc_precedent") || ($action=="cc_suivant") || ($action=="planning_deselect")   || ($action=="planning_select")  ) )
+	if ( ($action=="cc_activite")  ||($action=="cc_precedent") || ($action=="cc_suivant") || ($action=="planning_deselect")   || ($action=="planning_select")   )
+		if ($restriction_ad)
 		{
-		echo "<table><tr><td><ul id=\"menu-bar\">";
-		echo "<li><a href=\"index.php?action=cc_usager\"  > ".traduire('Usagers')."</a>";
-		echo "</ul ></td>";
-		echo "<td><ul id=\"menu-bar\">";
-		echo "<li><a href=\"index.php?action=cc_accueillant\"  > ".traduire('Accueillants')."</a>";		
-		echo "</ul ></td>";
-		echo "<td><ul id=\"menu-bar\">";
-		echo "<li><a href=\"index.php?action=planning_ajout\"  > ".traduire('Calendrier')."</a>";
+		echo "<table><tr>";
 
+		if (($user_droit=="S") || ($user_droit=="R"))
+			{
+			echo "<td><ul id=\"menu-bar\"><li><a href=\"".$_SERVER['PHP_SELF'] ."?action=cc_usager\"  > ".traduire('Usagers')."</a>";
+			echo "</ul ></td>";
+			echo "<td><ul id=\"menu-bar\">";
+			echo "<li><a href=\"".$_SERVER['PHP_SELF'] ."?action=cc_accueillant\"  > ".traduire('Accueillants')."</a>";		
+			echo "</ul ></td>";
+			echo "<td><ul id=\"menu-bar\">";
+			echo "<li><a href=\"".$_SERVER['PHP_SELF'] ."?action=planning_ajout\"  > ".traduire('Calendrier')."</a>";
+			}
+
+		$eu = encrypt($_SESSION['user']);
+		if  ( $_SESSION['ad']) 
+			echo "<td><a href=\"".$_SERVER['PHP_SELF'] ."?action=cc_detail_usager&usager=$eu\">Voir mes prochains créneaux</a></td>";
+			
 		echo "<td> | </td>";
 		if (isset($_SESSION["mois"]))
 			$mois=$_SESSION["mois"];
@@ -332,8 +352,8 @@
 			}
 			
 		$t0=mktime(0,0,0 ,date('m')+$mois, 1, date('Y'));
-		$tfin=mktime(0,0,0 ,date('m')+$mois+1, 1, date('Y'));
-		echo "<td> <a href=\"index.php?action=cc_precedent\"  > << </a> ".date('m-Y',$t0)." <a href=\"index.php?action=cc_suivant\"> >> </a></td>";		
+		$tfin=mktime(0,0,0 ,date('m')+$mois+1, 0, date('Y'));
+		echo "<td> <a href=\"".$_SERVER['PHP_SELF'] ."?action=cc_precedent\"  ><img src=\"images/gauche.png\" width=\"20\" height=\"20\"></a> ".date('m-Y',$t0)." <a href=\"".$_SERVER['PHP_SELF'] ."?action=cc_suivant\"><img src=\"images/droite.png\" width=\"20\" height=\"20\"></a></td>";		
 		echo "<td> | </td>";
 
 		for ($j=0;$j<7;$j++)			
@@ -345,7 +365,29 @@
 		
 		$debut=date('Y-m-d',$t0);
 		$fin= date('Y-m-d',$tfin);
-		$reponse =command("select * from  fct_calendrier where organisme='$user_organisme' and ( debut>'$debut' or debut='') and ( fin<'$fin' or fin='')");
+		
+		switch( $user_droit) 
+			{
+			
+			case 'R':
+			case 'S':
+				if ($_SESSION['ad'])	
+					$reponse =command("select * from  fct_calendrier where organisme='$user_organisme' and ( debut<'$fin' or debut='') and ( fin>='$debut' or fin='') and type='A' and acces_direct<>'' ");
+				else
+					$reponse =command("select * from  fct_calendrier where organisme='$user_organisme' and ( debut<'$fin' or debut='') and ( fin>='$debut' or fin='') ","x");
+				
+				break;
+
+			case '':
+			case ' ':
+				$reponse =command("select * from  fct_calendrier where organisme='$user_organisme' and ( debut<'$fin' or debut='') and ( fin>='$debut' or fin='') and acces_direct<>'' and type='' ");
+				break;
+				
+			case 'B':
+				$reponse =command("select * from  fct_calendrier where organisme='$user_organisme' and ( debut<'$fin' or debut='') and ( fin>='$debut' or fin='') and acces_direct<>'' and type='A' ");
+				break;
+			}
+
 		while ($donnees = fetch_command($reponse) ) 
 			{
 			$d3= explode("/",$donnees['horaires']);
@@ -359,6 +401,7 @@
 				}
 				
 			$libelle[$act]=$donnees["libelle"];
+			$type[$act]=$donnees["type"];
 			$idx_activite[$act]=$donnees["idx_activite"];
 			if($liste_activite=="")
 				$liste_activite=$idx_activite[$act];
@@ -398,8 +441,14 @@
 			
 			$act++;
 			}
-		$act_max=$act;
+		$act_max=$act;	
 		
+		if ($liste_activite=="")
+			{
+			$debut_min=8;
+			$fin_max=20;
+			}
+
 		affiche_titre_heure($debut_min,$fin_max );
 
 		for ($i=$t0; $i<$tfin; $i+= 60*60*24)
@@ -408,12 +457,18 @@
 			$aff_date=true;
 			$date_du_jour= date('Y-m-d',$i);
 			
-			$r0 = command("select * from  cc_creneau where activite IN ($liste_activite) and date='$i' order by activite");
-			$d0 = fetch_command($r0) ;
+			if ($liste_activite!="")
+				{
+				$r0 = command("select * from  cc_creneau where activite IN ($liste_activite) and date='$i' order by activite");
+				$d0 = fetch_command($r0) ;
+				}
+			else
+				$d0 = false ;
+
 			
 			if ($j==1)
 				{
-				echo "<tr><td></td><td></td><td></td>";
+				echo "<tr><td></td><td></td><td></td><td></td>";
 				for ($h=$debut_min; $h<$fin_max; $h++)
 					echo "<td>-</td><td>-</td><td>-</td><td>-</td><td>|</td>";
 				}
@@ -426,13 +481,37 @@
 					&& ($jour_ouvert[$act][$j]!="") 
 					&& ( ($debut_act[$act]<$date_du_jour) || ($debut_act[$act]=="") )
 					&& ( ($fin_act[$act]>$date_du_jour) || ($fin_act[$act]=="") ) )
+						{
 						affiche_journee_calendrier($idx_activite[$act], $nb_max[$act], $act, $i,$debut_min,$fin_max);
+						// détail par personne
+						if (
+							(isset ($_SESSION["detaille"]) && ($_SESSION["detaille"]=="") )
+							||
+							(( $restriction_ad ) && ($type[$act]!="") )
+							)
+							{
+							$reponse =command("select * from  cc_creneau where activite='$idx_activite[$act]' and  date='$i' and user<>'' ");
+							while($donnees = fetch_command($reponse) )
+								{
+								$idx=$donnees["idx"];
+								$horaire=$donnees["horaire"];
+								$eu = encrypt($donnees["user"]);
+								if ( ( $_SESSION['ad']) && ($donnees["user"]!=$_SESSION['user'] ) )
+									$usager= libelle_usager($donnees["user"]);
+								else
+									$usager= "<a href=\"".$_SERVER['PHP_SELF'] ."?action=cc_detail_usager&usager=$eu\">".libelle_usager($donnees["user"])."</a>";
+								$preavis=$donnees["preavis"];
+								$commentaire=$donnees["commentaire"];
+								
+								affiche_journee_creneau($idx, $usager,$debut_min,$fin_max,$horaire, $commentaire);
+								}	
+							}								
+						}
 					}
 				}	
 			}
 		echo "</table>";
 		echo "<hr>";
-
 		pied_de_page("");
 		}
 					
@@ -465,8 +544,11 @@
 		{
  		global $occupation,$nb_occupation;
 		
-		echo "<tr><td>$usager</td>";
-		lien_c ("images/croixrouge.png", "supp_creneau", param("idx","$idx" ), traduire("Supprimer") );	
+		echo "<tr><td>$usager</td><td ></td>";
+		if ( (!$_SESSION['ad']) || ($usager==$_SESSION['user']) )
+			lien_c ("images/croixrouge.png", "supp_creneau", param("idx","$idx" ), traduire("Supprimer") );	
+		else
+				echo "<td ></td>";	
 		echo "<td >|</td>";		
 		for ($m=0;$m<24*4;$m++)
 			{
@@ -481,20 +563,27 @@
 			for ($m=0; $m<4; $m++)
 				{
 				if ($occupation[$h*4+$m]=="")
-					echo "<td width=\"10\" BGCOLOR=\"lightgrey\" >  </td>";
+					{
+					if ($color!="grey")
+						echo "<td width=\"10\" BGCOLOR=\"lightgrey\" > </td>";
+					else
+						echo "<td width=\"10\"  > </td>";
+					
+					}
 				else
-					echo "<td width=\"10\"  BGCOLOR=\"$color\" >#</td>";
+					echo "<td width=\"10\"  BGCOLOR=\"$color\" > </td>";
 				}
 			echo "<td >|</td>";
-			}	
-		lien_c ("images/croixrouge.png", "supp_creneau", param("idx","$idx" ), traduire("Supprimer") );	
+			}
+		if ( (!$_SESSION['ad']) || ($usager==$_SESSION['user']) )
+			lien_c ("images/croixrouge.png", "supp_creneau", param("idx","$idx" ), traduire("Supprimer") );	
 		echo "<td >$commentaire</td>";
 
 		}
 
 	 function titre_tableau_usager()
 		{
-			echo "</table><p>";
+			echo "<p>";
 			echo "<div class=\"CSSTableGenerator\" ><table> ";
 			echo "<tr>	<td> ".traduire('Date')." </td>
 								<td> ".traduire('Heure')." </td>
@@ -503,11 +592,12 @@
 								<td> ".traduire('Préavis par SMS')." </td>
 								<td> ".traduire('Etat')." </td>
 								<td> ".traduire('Commentaire')." </td>
+								<td> </td>
 								";
 		}
 		
 					
-	if ( (($user_droit=="S") || ($user_droit=="R")) &&  ($action=="cc_ajout")  )
+	if ( ($restriction_ad) &&  ($action=="cc_ajout")  )
 		{
 		$idx_activite=variable_get("activite");	
 		$t0=variable_get("jour");	
@@ -521,6 +611,9 @@
 		$reponse =command("select * from  fct_calendrier where organisme='$user_organisme' and idx_activite='$idx_activite'" );
 		if ($donnees = fetch_command($reponse) ) 
 			{
+			$duree_creneau=$donnees['duree_creneau'];
+			$validation=$donnees['validation'];
+			
 			$d3= explode("/",$donnees['horaires']);
 			$debut_min=$d3[0];
 			$fin_max=$d3[1];
@@ -533,37 +626,47 @@
 			echo "<p>$libelle ";
 			$couleur_libre[$act]=$donnees["couleur_libre"];
 			if ($couleur_libre[$act]=="")
-				$couleur_libre[$act]="green";
+				$couleur_libre[$act]="ligthgreen";
 			$couleur_occupe[$act]=$donnees["couleur_occupe"];
+			if ($couleur_occupe[$act]=="")
 				$couleur_occupe[$act]="yellow";
 			$couleur_plein[$act]=$donnees["couleur_plein"];
+			if ($couleur_plein[$act]=="")
 				$couleur_plein[$act]="red";
 			$nb_max=$donnees["nbre"];
 			$type=$donnees["type"];
 			
+		
 			$aff_date=true;
 			affiche_titre_heure($debut_min,$fin_max);
 			affiche_journee_calendrier($idx_activite,$nb_max,0,$t0,$debut_min,$fin_max,"1");
 
-			echo "<tr><td></td><td></td><td></td>";
+			$date_du_jour= date('Y-m-d',$t0);
+			
+			echo "<tr><td></td><td></td><td></td><td></td>";
 			for ($h=$debut_min; $h<$fin_max; $h++)
 				echo "<td>-</td><td>-</td><td>-</td><td>-</td><td>|</td>";			
-
-				$date_du_jour= date('Y-m-d',$t0);
-
-			$reponse =command("select * from  cc_creneau where activite='$idx_activite' and  date='$t0' and user<>'' ");
+			
+			if (($_SESSION['ad']) && ($type=="") )
+				$reponse =command("select * from  cc_creneau where activite='$idx_activite' and  date='$t0' and user='".$_SESSION['user']."' ");
+			else
+				$reponse =command("select * from  cc_creneau where activite='$idx_activite' and  date='$t0' and user<>'' ");
 			while($donnees = fetch_command($reponse) )
 				{
 				$idx=$donnees["idx"];
 				$horaire=$donnees["horaire"];
 				$eu = encrypt($donnees["user"]);
-				$usager= "<a href=\"index.php?action=cc_detail_usager&usager=$eu\">".libelle_usager($donnees["user"])."</a>";
+				if ( ( $_SESSION['ad']) && ($donnees["user"]!=$_SESSION['user'] ) )
+					$usager= libelle_usager($donnees["user"]);
+				else				
+					$usager= "<a href=\"".$_SERVER['PHP_SELF'] ."?action=cc_detail_usager&usager=$eu\">".libelle_usager($donnees["user"])."</a>";
 				$preavis=$donnees["preavis"];
 				$commentaire=$donnees["commentaire"];
-				
-				affiche_journee_creneau($idx, $usager,$debut_min,$fin_max,$horaire, $commentaire);
+				affiche_journee_creneau($idx, $usager,$debut_min,$fin_max,$horaire, $commentaire, "lightgreen");
 				}
-				
+			echo "</table> ";
+
+			
 			if ($m!="")
 				{
 				titre_tableau_usager();
@@ -577,29 +680,55 @@
 				echo "<input type=\"hidden\" name=\"jour\"  value=\"$t0\"> " ;
 				echo "<input type=\"hidden\" name=\"heure\"  value=\"".$heure."H".$minute."\"> " ;
 				
-				if ($type=="")
+				if ($_SESSION['ad'])
 					{
-					liste_usager_activite($idx_activite);
-					liste_quart_d_heure();
-					liste_avant( "1H" , "", traduire("non") );
-					echo "<input type=\"hidden\" name=\"etat\"  value=\"Validé\"> " ;
+					echo "<input type=\"hidden\" name=\"usager\"  value=\"".$_SESSION['user']."\"> " ;
+					echo "<td>".libelle_usager($_SESSION['user'])."</td>";
+					
+					if ($type=="") // type usager
+						{
+						echo "<input type=\"hidden\" name=\"duree\"  value=\"$duree_creneau\"> " ;
+						echo "<td>$duree_creneau</td>";
+						liste_avant( "1H" , "", traduire("non") );
+						}
+					else
+						{
+						liste_d_heure($duree_creneau);
+						liste_avant( traduire("non") , "", traduire("non") );
+						}
+					if ($validation=="oui")
+						echo "<input type=\"hidden\" name=\"etat\"  value=\"???\"> " ;
+					else
+						echo "<input type=\"hidden\" name=\"etat\"  value=\"Validé\"> " ;
+					
 					echo "<td> </td>";
 					}
 				else
 					{
-					liste_accueillants($idx_activite);
-					liste_d_heure("3H0");
-					liste_avant( traduire("non") , "", traduire("non") );
-					liste_etat_creneau("Validé");
+					if ($type=="")
+						{
+						liste_usager_activite($idx_activite);
+						liste_quart_d_heure();
+						liste_avant( "1H" , "", traduire("non") );
+						echo "<input type=\"hidden\" name=\"etat\"  value=\"Validé\"> " ;
+						echo "<td> </td>";
+						}
+					else
+						{
+						liste_accueillants($idx_activite);
+						liste_d_heure("3H0");
+						liste_avant( traduire("non") , "", traduire("non") );
+						liste_etat_creneau("Validé");
+						}
 					}
-
+					
 				echo "<td> <input type=\"texte\" name=\"commentaire\"   size=\"70\" value=\"\"> </td>";
 				echo "<td><input type=\"submit\" id=\"ajout_creneau_usager\" value=\"".traduire('Ajouter')."\" ></form> </td> ";
 				echo "</table></div>";
 				}
-			echo "</table>";
+
 			}
-		pied_de_page("");
+		pied_de_page("x");
 		}
 
 
@@ -607,10 +736,6 @@
 		{
 		$idx_activite=variable_get("activite");	
 		$t0=variable_get("jour");	
-		
-		// mise à jour horaire d'ouverture de la journée
-		// possibilité de déclarer fermer 
-		// + commentaire 
 
 		echo "<table border=\"2\">";
 		$reponse =command("select * from  cc_creneau where date='$t0' and activite='$idx_activite' ");		
@@ -630,15 +755,15 @@
 
 	function titre_usagers()
 		{
-		echo "</table><p>";
+		echo "<p>";
 		echo "<div class=\"CSSTableGenerator\" ><table> ";
 		echo "<tr>	<td> Nom </td>
-								<td> Prenom </td>
-								<td> Téléphone </td>
-								<td> Mail </td>
-								<td> Adresse </td>
-								<td> Commentaire </td>
-								";
+					<td> Prenom </td>
+					<td> Téléphone </td>
+					<td> Mail </td>
+					<td> Adresse </td>
+					<td> Commentaire </td>
+					";
 		}
 
 	function visu_usager($donnees)
@@ -652,7 +777,7 @@
 			$etat=$donnees["etat"];
 			$adresse=stripcslashes($donnees["adresse"]);
 			$commentaire=stripcslashes($donnees["commentaire"]);
-			echo "<tr>	<td> <a href=\"index.php?action=cc_detail_usager&usager=$eu\">$nom </a></td>
+			echo "<tr>	<td> <a href=\"".$_SERVER['PHP_SELF'] ."?action=cc_detail_usager&usager=$eu\">$nom </a></td>
 						<td> $prenom </td>
 						<td> $tel </td>
 						<td> $mail </td>
@@ -715,70 +840,109 @@
 		pied_de_page("");
 		}
 
-	if ( (($user_droit=="S") || ($user_droit=="R")) && ($action=="cc_detail_usager") )
+		
+		
+			
+	if ( (($user_droit=="S") || ($user_droit=="R")) && ($action=="modif_usager") )
 		{
-		$idx_usager=variable_get("usager");
+		$idx=variable("usager");
+		$nom=variable("nom");
+		$prenom=variable("prenom");
+		$mail=variable("mail");
+		$tel=variable("tel");
+		$adresse=variable("adresse");
+		$commentaire=variable("commentaire");
+		if (($nom!="") && ($prenom!=""))
+			command("UPDATE cc_user set nom='$nom', prenom='$prenom', mail='$mail',  adresse='$adresse', tel='$tel', commentaire='$commentaire' where idx='$idx'");
+		$action="cc_detail_usager2";
+		}
 		
-		echo "<table><tr><td> </td><td>  <ul id=\"menu-bar\">";
-		echo "<li><a> + ".traduire('Usagers')." </a></li>";
-		echo "</ul></td><td> - </td>";
-		
-		$date_du_jour=mktime(0,0,0 ,date('m'), date('d'), date('Y'));
-		
-		formulaire("cc_usagers");
-		titre_usagers();	
-		formulaire ("nouveau_usager");
-		echo "<tr>";
-		echo "<td> <input type=\"texte\" name=\"nom\"   size=\"20\" value=\"\"> </td>";
-		echo "<td> <input type=\"texte\" name=\"prenom\"   size=\"20\" value=\"\"> </td>";
-		echo "<td> <input type=\"texte\" name=\"tel\"   size=\"10\" value=\"\"> </td>" ;
-		echo "<td> <input type=\"texte\" name=\"mail\"   size=\"25\" value=\"\"> </td>" ;
-		echo "<td> <input type=\"texte\" name=\"adresse\" size=\"40\"  value=\"\"> </td> " ;
-		echo "<td> <input type=\"texte\" name=\"commentaire\" size=\"40\"  value=\"\"> </td> " ;
-		echo "<input type=\"hidden\" name=\"type\"  value=\"\"> " ;
-		echo "<input type=\"hidden\" name=\"organisme\"  value=\"\"> " ;
-		echo "<td><input type=\"submit\" id=\"nouveau_usager\" value=\"".traduire('Ajouter')."\" ></form> </td> ";
-		echo "</table></div>";	
-		
-		$debut_min=8; $fin_max=20;
-		affiche_titre_heure($debut_min,$fin_max);
-		
-		$reponse =command("select * from  cc_creneau where user='$idx_usager' order by date desc");
-		while ($donnees = fetch_command($reponse) )
+	if ( ($restriction_ad) && ( ($action=="cc_detail_usager") || ($action=="cc_detail_usager2"))  )
+		{
+		if ($action=="cc_detail_usager")
+			$idx_usager=variable_get("usager");
+		else
+			$idx_usager=$idx;
+	
+		$reponse =command("select * from  cc_user where idx='$idx_usager' ");
+		if ($donnees = fetch_command($reponse) ) 
 			{
-			$idx=$donnees["idx"];
-			$horaire=$donnees["horaire"];
-			$date=$donnees["date"];
-			if ($date<$date_du_jour)
-				$color="grey";
-			else 
-				$color="yellow";
-			$date= date('d-m-Y',$date); 
-			$preavis=$donnees["preavis"];
-			$commentaire=$donnees["commentaire"];	
+			$eu=encrypt($idx_usager);
+			$nom=$donnees["nom"];
+			$prenom=$donnees["prenom"];
+			$mail=$donnees["mail"];
+			$tel=$donnees["tel"];
+			$adresse=stripcslashes($donnees["adresse"]);
+			$commentaire=stripcslashes($donnees["commentaire"]);
 
-			affiche_journee_creneau($idx, $date,$debut_min,$fin_max,$horaire, $commentaire,$color);
+			echo "<table><tr><td> </td><td>  <ul id=\"menu-bar\">";
+			echo "<li><a> $nom - $prenom </a></li>";
+			echo "</ul></td><td> - </td>";
+			echo "</table>";	
+	
+			$date_du_jour=mktime(0,0,0 ,date('m'), date('d'), date('Y'));
+			if (!$_SESSION['ad'])
+				{
+				titre_usagers();	
+				formulaire ("modif_usager");
+				echo "<tr>";
+				echo "<td> <input type=\"texte\" name=\"nom\"   size=\"20\" value=\"$nom\"> </td>";
+				echo "<td> <input type=\"texte\" name=\"prenom\"   size=\"20\" value=\"$prenom\"> </td>";
+				echo "<td> <input type=\"texte\" name=\"tel\"   size=\"10\" value=\"$tel\"> </td>" ;
+				echo "<td> <input type=\"texte\" name=\"mail\"   size=\"25\" value=\"$mail\"> </td>" ;
+				echo "<td> <input type=\"texte\" name=\"adresse\" size=\"40\"  value=\"$adresse\"> </td> " ;
+				echo "<td> <input type=\"texte\" name=\"commentaire\" size=\"40\"  value=\"$commentaire\"> </td> " ;
+				echo "<input type=\"hidden\" name=\"usager\"  value=\"$idx_usager\"> " ;
+				echo "<td><input type=\"submit\" id=\"modif_usager\" value=\"".traduire('Modifier')."\" ></form> </td> ";
+				echo "</table>";	
+				}
+				
+			echo "Prochains créneaux";
+			$aujourdhui=mktime(0,0,0 ,date('m'), date('d'), date('Y'));
+			
+			echo "<p><div class=\"CSSTableGenerator\" ><table> ";
+			echo "<tr><td> Date </td><td> Heure </td><td> Activité </td><td> Commentaire</td><td> Préavis</td><td> Etat </td>";
+			
+			$reponse =command("select * from  cc_creneau where user='$idx_usager' and date>='$aujourdhui' order by date desc");
+			while ($donnees = fetch_command($reponse) )
+				{
+				$idx=$donnees["idx"];
+				$horaire=$donnees["horaire"];
+				$activite=libelle_activite($donnees["activite"]);
+				$date=$donnees["date"];
+				if ($date<$date_du_jour)
+					$color="grey";
+				else 
+					$color="yellow";
+				$date= date('d-m-Y',$date); 
+				$preavis=$donnees["preavis"];
+				$etat=$donnees["etat"];
+				$commentaire=stripcslashes($donnees["commentaire"]);	
+				if ($etat=="???")
+					$etat="Non validé";
+				echo "<tr><td> $date </td><td> $horaire </td><td> $activite </td><td> $commentaire</td><td> $preavis</td><td> $etat</td>";
+				}
+			echo "</table></div>";	
 			}
-		echo "</table></div>";	
-		
+		else
+			erreur ("Usager inconnu");
 		pied_de_page("");
 		}
 
 
 	function titre_plannings()
 		{
-		echo "</table><p>";
+		echo "<p>";
 		echo "<div class=\"CSSTableGenerator\" ><table> ";
-		echo "<tr>				<td> Libelle </td>
-								<td> Type </td>	
-								<td> Horaire min </td>
-								<td> Horaire max </td>
-
-								<td> Date début </td>
-								<td> Date fin </td>
-								<td> Durée créneau</td>
-								<td> Nbre </td>
-								<td> </td>";
+		echo "<tr>	<td> Libelle </td>
+					<td> Type </td>	
+					<td> Horaire min </td>
+					<td> Horaire max </td>
+					<td> Date début </td>
+					<td> Date fin </td>
+					<td> Durée créneau</td>
+					<td> Nbre </td>
+					<td> </td>";
 		}
 
 	function liste_type_creneau($val_init="")
@@ -803,7 +967,7 @@
 		if( ($libelle!="") && ($horaire_min!="") && ($horaire_max!="") && ($date_debut!="") )
 			{
 			$idx_calendrier=inc_index("calendrier");
-			$reponse =command("insert into fct_calendrier VALUES ('$user_organisme','$idx_calendrier', '$libelle', '', '$horaire_min/$horaire_min','','','','','','','', '$duree', '','','', '$nbre', '$type', '$date_debut', '$date_fin' ) ");		
+			$reponse =command("insert into fct_calendrier VALUES ('$user_organisme','$idx_calendrier', '$libelle', '', '$horaire_min/$horaire_min','','','','','','','', '$duree', '','','', '$nbre', '$type', '$date_debut', '$date_fin' , '','','') ");		
 			}
 		else
 			erreur (traduire("Merci de completer les champs Libellé, horaires et date de début a minima."));
@@ -817,7 +981,8 @@
 		echo "<table><tr><td> </td><td>  <ul id=\"menu-bar\">";
 		echo "<li><a> + ".traduire('Calendriers')." </a></li>";
 		echo "</ul></td><td> - </td>";
-
+		echo "</table>";
+		
 		if ($action=="planning_ajout")
 			{
 			$libelle="";	
@@ -885,13 +1050,13 @@
 		echo "<table><tr><td> </td><td>  <ul id=\"menu-bar\">";
 		echo "<li><a> + ".traduire('Calendriers')." </a></li>";
 		echo "</ul></td><td> - </td>";
+		echo "</table>";
 		
 		$idx=variable("idx");
 		$reponse =command("select * from  fct_calendrier where idx_activite='$idx' ");
 		if ($donnees = fetch_command($reponse) )
 			{
-			echo "</table><p>";
-			echo "<div class=\"CSSTableGenerator\" ><table><tr> <td></td><td></td>";
+			echo "<p><div class=\"CSSTableGenerator\" ><table><tr> <td></td><td></td>";
 			formulaire ("modif_planning");
 			echo "<tr>";
 			$libelle=$donnees["libelle"];		

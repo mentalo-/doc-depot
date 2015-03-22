@@ -142,29 +142,84 @@ if ( isset($_SESSION['pass']) && ($_SESSION['pass']==true) )
 			break;
 			
 		case "visu_image_mini":
-			// Définit le contenu de l'en-tête - dans ce cas, image/jpeg
-			header('Content-Type: image/jpeg');
-			$im = imagecreatefromjpeg( "upload_mini/".variable_s("nom"));
-			imagejpeg($im);
+		
+			switch( extension_fichier(variable_s("nom")) ) 
+				{
+				case "jpg": case "jpeg" :
+					// Définit le contenu de l'en-tête - dans ce cas, image/jpeg
+					header('Content-Type: image/jpeg');
+					$im = imagecreatefromjpeg( "upload_mini/".variable_s("nom"));
+					imagejpeg($im);
 
-			// Libération de la mémoire
-			imagedestroy($im);
-			exit();
-			break;
+					// Libération de la mémoire
+					imagedestroy($im);
+					exit();
+					break;	
+
+				case "png": 
+					// Définit le contenu de l'en-tête - dans ce cas, image/jpeg
+					header('Content-Type: image/png');
+					$im = imagecreatefrompng( "upload_mini/".variable_s("nom"));
+					imagepng($im);
+
+					// Libération de la mémoire
+					imagedestroy($im);
+					exit();
+					break;
+					
+				case "gif": 
+					// Définit le contenu de l'en-tête - dans ce cas, image/jpeg
+					header('Content-Type: image/gif');
+					$im = imagecreatefromgif( "upload_mini/".variable_s("nom"));
+					imagegif($im);
+
+					// Libération de la mémoire
+					imagedestroy($im);
+					exit();
+					break;
+				}
 	
 		case "visu_image":
+			switch( extension_fichier(variable_s("nom")) ) 
+				{
+				case "jpg": case "jpeg" :
+					// Définit le contenu de l'en-tête - dans ce cas, image/jpeg
+					header('Content-Type: image/jpeg');
 
-			// Définit le contenu de l'en-tête - dans ce cas, image/jpeg
-			header('Content-Type: image/jpeg');
+					// Création d'une image vide et ajout d'un texte
+					$im = imagecreatefromjpeg("upload/".variable_s("nom") );
+					imagejpeg($im);
 
-			// Création d'une image vide et ajout d'un texte
-			$im = imagecreatefromjpeg("upload/".variable_s("nom") );
-			imagejpeg($im);
+					// Libération de la mémoire
+					imagedestroy($im);
+					exit();
+					break;
+				case "png": 
+					// Définit le contenu de l'en-tête - dans ce cas, image/jpeg
+					header('Content-Type: image/png');
 
-			// Libération de la mémoire
-			imagedestroy($im);
-			exit();
-			break;
+					// Création d'une image vide et ajout d'un texte
+					$im = imagecreatefrompng("upload/".variable_s("nom") );
+					imagepng($im);
+
+					// Libération de la mémoire
+					imagedestroy($im);
+					exit();
+					break;	
+
+				case "gif": 
+					// Définit le contenu de l'en-tête - dans ce cas, image/jpeg
+					header('Content-Type: image/gif');
+
+					// Création d'une image vide et ajout d'un texte
+					$im = imagecreatefromgif("upload/".variable_s("nom") );
+					imagegif($im);
+
+					// Libération de la mémoire
+					imagedestroy($im);
+					exit();
+					break;				
+				}
 
 		default : break;
 		}

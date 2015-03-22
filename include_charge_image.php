@@ -189,25 +189,25 @@
 			}
 
 		if ( est_image($n) )
-			{
-			$size = getimagesize("upload/$idx.$n");	
-			$hauteur=250;
-			// mode paysage, a4, etc.
-			if ($size[0]>$size[1])
 				{
-				$sens='L';
-				$sens_doc_original='L';
-				}
-			else
-				{
-				$sens='P';
-				$hauteur=190;
-				}
-				
-			imagethumb("upload/$idx.$n","upload_mini/$idx.$n",$hauteur);
-			met_cadenas("$idx.$n");
+				$size = getimagesize("upload/$idx.$n");	
+				$hauteur=250;
+				// mode paysage, a4, etc.
+				if ($size[0]>$size[1])
+					{
+					$sens='L';
+					$sens_doc_original='L';
+					}
+				else
+					{
+					$sens='P';
+					$hauteur=190;
+					}
+					
+				imagethumb("upload/$idx.$n","upload_mini/$idx.$n",$hauteur);
+				met_cadenas("$idx.$n");
 
-			if (substr($ref,0,1)=="A")
+				if (substr($ref,0,1)=="A")
 					{
 					if ($sens=="L")
 						{
@@ -273,7 +273,7 @@
 			return (false);	
 			}		
 	
-			if ( est_image($n) || est_doc($n) || (extension_fichier($n)=="pdf")  )
+		if ( est_image($n) || est_doc($n) || (extension_fichier($n)=="pdf")  )
 				{
 				if ($r) 
 					{
@@ -288,14 +288,12 @@
 					else
 						ajout_log( $user, "Chargement fichier $n / Type : $type / $ident",$acteur );		
 					
-					
 					$num = "$idx.$n";
 					ctrl_une_signature("hash_chi", "upload_chi/".$num.".chi" , $num);
 					ctrl_une_signature("hash", "upload/".$num, $num);			
 					ctrl_une_signature("hash_pdf", "upload_pdf/".$num, $num);			
 					ctrl_une_signature("hash_prot", "upload_prot/".$num, $num);
 					ctrl_une_signature("hash_mini", "upload_mini/".$num, $num);
-					
 
 					return (true);
 					}
@@ -494,7 +492,13 @@ function rotateImage($sourceFile,$destImageName,$degreeOfRotation)
 		{
 		// On charge d'abord les images
 		$source = imagecreatefrompng("images/cadenas.png"); // Le logo est la source
-		$destination = imagecreatefromjpeg("upload_mini/$image"); // La photo est la destination
+		switch ( extension_fichier($image) )
+			  {    //create the image according to the content type
+				case "jpg":
+				case "jpeg":	$destination = imagecreatefromjpeg("upload_mini/$image"); 	break;
+				case "gif":		$destination = imagecreatefromgif("upload_mini/$image"); 	break;
+				case "png":		$destination = imagecreatefrompng("upload_mini/$image"); 	break;
+			  }
 		 
 		// Les fonctions imagesx et imagesy renvoient la largeur et la hauteur d'une image
 		$largeur_source = imagesx($source);
@@ -510,6 +514,12 @@ function rotateImage($sourceFile,$destImageName,$degreeOfRotation)
 		imagecopymerge($destination, $source, $destination_x, $destination_y, 0, 0, $largeur_source, $hauteur_source, 60);
 		 
 		// On affiche l'image de destination qui a été fusionnée avec le logo
-		imagejpeg($destination, "upload_mini/-$image");
+		switch( extension_fichier($image) )// La photo est la destination
+			  {    //create the image according to the content type
+				case "jpg":
+				case "jpeg":	imagejpeg($destination, "upload_mini/-$image"); 	break;
+				case "gif":		imagegif($destination, "upload_mini/-$image"); 	break;
+				case "png":		imagepng($destination, "upload_mini/-$image"); 	break;
+			  }
 		}
 	?> 

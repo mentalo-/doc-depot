@@ -1386,14 +1386,17 @@ function maj_mdp_fichier($idx, $pw )
 			$id=$donnees["id"];				
 			
 			$adresse=stripcslashes($donnees["adresse"]);	
-			if ( ($user_droit=="A") || ($user_droit=="R"))
+			if ( ($user_droit=="S") || ($user_droit=="s") || ($user_droit=="A") || ($user_droit=="R"))
 				{
 				// !!!
 				if ($donnees["droit"]=="S")
 					$nom=  "<img src=\"images/actif.png\"width=\"20\" height=\"20\"> $nom ";
 				if ($donnees["droit"]=="s")
 					$nom=  "<img src=\"images/inactif.png\"width=\"20\" height=\"20\"> $nom  ";
-					
+				}
+
+			if ( ($user_droit=="A") || ($user_droit=="R"))
+				{
 				if ($id=="???")
 					$nom= "$nom (compte non finalisé: <a  id=\"lien\"  href=\"index.php?action=renvoyer_mail&idx=".encrypt($idx)."\"> renvoyer mail</a>)";
 				else
@@ -1559,7 +1562,7 @@ function maj_mdp_fichier($idx, $pw )
 			echo "<td>  <input type=\"texte\" name=\"mail\"   size=\"35\" value=\"$mail\"> </td>" ;
 			if ($user_droit=='R')
 				{
-				echo "<input type=\"hidden\" name=\"droit\"  value=\"S\"> " ; // T328
+				echo "<input type=\"hidden\" name=\"droit\"  value=\"$droit\"> " ; // T328
 				liste_organisme_du_responsable ($user_idx);
 				}
 			else
@@ -1812,13 +1815,7 @@ function maj_mdp_fichier($idx, $pw )
 		$reponse = command($cmd);
 		ajout_log( $user_idx, traduire("Suppresion organisme")." $l " );
 		}		
-		
-	function libelle_organisme($organisme	)
-		{
-		$r1 =command("select * from  r_organisme where idx='$organisme' ");
-		$d1 = fetch_command($r1);
-		return(stripcslashes($d1["organisme"]));
-		}
+
 	
 	function doc_autorise($organisme	)
 		{
@@ -2370,23 +2367,12 @@ function affiche_membre($idx)
 		}
 	}
 
-	function liste_avant( $val_init , $mode="", $autre="")
-		{
-		echo "<td><SELECT name=\"avant\" $mode >";
-		affiche_un_choix($val_init,"15min");
-		affiche_un_choix($val_init,"1H");
-		affiche_un_choix($val_init,"4H");
-		affiche_un_choix($val_init,"La veille", traduire("La veille soir"));
-		affiche_un_choix($val_init,"24H");
-		if ($autre!="")
-			affiche_un_choix($val_init,$autre);
-		echo "</SELECT></td>";
-		}	
+
 	// ------------------------------------------------------------------------- Rendez-vous --------------------------------
 	function titre_rdv($user_telephone)
 		{
 		echo "<div class=\"CSSTableGenerator\" > ";
-		echo "<table><tr><td width=\"10%\"> ".traduire('Date')." </td><td width=\"10%\"> ".traduire('Heure')." </td><td> ".traduire('Message envoyé par SMS au')." $user_telephone </td><td> ".traduire('Préavis')." </td><td> ".traduire('Etat')." </td>";		
+		echo "<table><tr><td width=\"10%\"> ".traduire('Date')." </td><td width=\"10%\"> ".traduire('Heure')." </td><td> ".traduire('Message envoyé par SMS au')." $user_telephone </td><td> ".traduire('Préavis')." </td><td> ".traduire('Etat')." </td><td> ".traduire('Auteur')." </td>";		
 		}
 		
 	function rdv($U_idx)
@@ -2457,7 +2443,8 @@ function affiche_membre($idx)
 			$etat=$donnees["etat"];	
 			$idx=$donnees["idx"];	
 			$ligne=stripcslashes($donnees["ligne"]);
-			echo "<tr><td> $date </td><td> $heure </td><td> $ligne </td><td> $avant </td><td> $etat </td>";
+			$auteur=libelle_user($donnees["user"]);
+			echo "<tr><td> $date </td><td> $heure </td><td> $ligne </td><td> $avant </td><td> $etat </td><td> $auteur </td>";
 			if ( ($action=="rdv") && ($etat=="A envoyer")) 
 				lien_c ("images/croixrouge.png", "rdv", param("idx","$idx" ) , traduire("Supprimer"));
 			$j++;
@@ -3350,7 +3337,7 @@ require_once 'include_crypt.php';
 
 	if ($action=="dx") 
 		{
-		if ( (isset ($_SESSION['pass'])) && ($_SESSION['pass']==TRUE)) 
+		if ( (isset ($_SESSION['pass'])) && ($_SESSION['pass']==TRUE)  ) 
 				ajout_log( $_SESSION['user_idx'], traduire('Déconnexion') );
 		$_SESSION['pass']=false;// et hop le mot de passe... poubelle !
 		echo "<div id=\"msg_dx\">".traduire('Vous êtes déconnecté!')."</div><br>";
@@ -3358,6 +3345,7 @@ require_once 'include_crypt.php';
 
 // ------------------------------------------------------------------------------ FIN des actions sans identification (pas de mot de passe)		
 
+$_SESSION['ad']=false;	
 // ---------------------------------------on récupére les information de la personne connectée
 if (isset($_POST['pass']))
 	{
@@ -3397,6 +3385,7 @@ if (isset($_POST['pass']))
 			$_SESSION['user_idx']=$donnees["idx"];
 			$_SESSION['droit']= $donnees["droit"];
 			$_SESSION['filtre']= "";
+			$_SESSION['ad']=false;	
 			
 			if (($donnees["droit"]=="A") && ($ancien_droit!="A"))
 				envoi_mail( parametre('DD_mail_gestinonnaire') , "Connexion administrateur : ".$donnees["nom"]." ".$donnees["prenom"], "IP : $ip" );
@@ -4544,7 +4533,7 @@ if (isset($_POST['pass']))
 			modif_user	(variable("idx"));
 				
 			
-		if ( (($user_droit=="R") || ($user_droit=="S") ) && (($action=="") ||($action=="modif_organisme")  ) )
+		if ( (($user_droit=="R") || ($user_droit=="S") ) && (($action=="") ||($action=="modif_organisme") || ($action=="modif_tel")|| ($action=="modif_domicile") ) )
 			{
 			echo "<table>";
 			$r1 =command("select * from  r_organisme where idx='$user_organisme' ");

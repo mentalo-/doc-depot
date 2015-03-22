@@ -23,7 +23,18 @@ include 'bdd.php';
 			}
 		}
 		
-		
+	function liste_avant( $val_init , $mode="", $autre="")
+		{
+		echo "<td><SELECT name=\"avant\" $mode >";
+		affiche_un_choix($val_init,"15min");
+		affiche_un_choix($val_init,"1H");
+		affiche_un_choix($val_init,"4H");
+		affiche_un_choix($val_init,"La veille", traduire("La veille soir"));
+		affiche_un_choix($val_init,"24H");
+		if ($autre!="")
+			affiche_un_choix($val_init,$autre);
+		echo "</SELECT></td>";
+		}			
 	function traduire($ligne)
 		{
 		global $user_lang;
@@ -58,6 +69,13 @@ include 'bdd.php';
 		return($d1["nom"]." ".$d1["prenom"]);
 		}	
 
+				
+	function libelle_organisme($organisme	)
+		{
+		$r1 =command("select * from  r_organisme where idx='$organisme' ");
+		$d1 = fetch_command($r1);
+		return(stripcslashes($d1["organisme"]));
+		}
 
 	function supp_acces($ddeur,$bene,$autorise)
 		{
@@ -99,8 +117,11 @@ include 'bdd.php';
 	
 	// entete formulaire
 	// formulaire ("");
-	function formulaire ($action, $source="index.php")
+	function formulaire ($action, $source="")
 		{
+		if ($source=="")
+			$source=$_SERVER['PHP_SELF'] ;
+
 		commentaire_html("Formulaire $action");
 		echo "<form method=\"POST\" action=\"$source\">";
 		echo "<input type=\"hidden\" name=\"action\" value=\"$action\"> " ;
@@ -278,6 +299,7 @@ include 'bdd.php';
 			&& (stristr($var,"<embed")===FALSE)
 			)
 			return($var);
+	
 		return("");
 		}
 
@@ -375,7 +397,9 @@ include 'bdd.php';
 			if ($libelle=="action")
 				return(addslashes(mysql_real_escape_string(filtre_xss($_GET[$libelle]))));
 			else
+				{
 				return(addslashes(mysql_real_escape_string(decrypt(filtre_xss(strtr($_GET[$libelle], ' ',  '+'))))));
+				}
 			}
 		return("");
 		}

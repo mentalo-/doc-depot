@@ -7,6 +7,82 @@
 	</head>
 	<body>
 
+	
+<h4> V1.06	(en ligne le xx/xx/2015 ) ( Ad.php )</h4>  
+Evolutions
+<br> +	Ajout accès via AD.PHP
+
+	
+
+<h4> V1.05.03  (en ligne le 15/03/2015 ) ( )</h4>  
+Evolutions
+<br> +	FISSA : supression function statistic() non utilisé<br> Bugs	
+<br> - l'affichage d'alarme ne tenait pas compte du nouveau paramètre
+<br> - on ne remettait pas à 0 le compteur d'alarme d'accès à la BAL si on pouvait ré acceder à la bal avant d'atteindre le seuil d'alerte
+<br> Bugs	
+<br> - FISSA : il manquait un stripcslashes sur les noms		
+
+
+<h4> V1.05	(en ligne le 13/03/2015 ) (visu, bdd, fissa, stat, general, up_load_dd, include_charge_image, 
+		calendrier .jpg, calendrier, include_mail , droite.png, gauche.png )</h4>  
+Evolutions
+<br> + les responsables voient tous les bénéficiaire ayant désigné la strucutre en confiance
+<br> + les responsables sont listés dans la proposition des AS d'une structure
+<br> + T308: Si le RC est une structure on affiche désormais aussi ses coordonnées
+<br> + T198: un bénéficiaire peut apparaitre 2 fois dans la liste de l'AS
+<br> + Technique : isolaton des sources dans visu.php (visualisation des fichiers) et bdd.php (accès base de données)
+<br> + A la reconnexion les filtres étaient encore actifs
+<br> + T290: après une action sur un bénéficiaire, le RC peut anouveau visualiser la fiche du bénéficiaire en cliquant sur son nom (le RC n'a plus desoin de repasser par l'écran d'accueil et reselectionner le bénéficiaire)
+<br> + FISSA: MAJ statistiques et suppression stat hebdo et mensuelles
+<br> + T327 FISSA: utilisation des focntions générique de doc-depot
+<br> + liste des bugs: On affiche en 1er les New
+<br> + "Impact" ==> "Effort"
+<br> + FISSA: suppression du code inutile ("cnil")
+<br> + 1ere partie de calendrier: 
+<br> + Affichage des logos Fissa et calendrier si fonction existe : 
+<br> + FISSA: homogéneisation du format des dates avec doc-depot
+<br> + FISSA/Stat: la liste des nouveaux est désormais à la fin
+<br> + Ajout module source : retour_arriere et chargement_sql
+<br> + La durée de déclenchement d'alarme est désormais paramétrable et passe de la valeur 4 à 10 
+<br> + la base de données de FISSA n'est plus transmise en paramètre mais est variable de session
+<br> + FISSA: affichage rappel CNIL
+<br> + FISSA: on ne peut pas renvoyer un mail s'il a déjà été renvoyé
+<br> + FISSA: Optimisation de la proposition d'ajout rapide
+<br> + FISSA/Stat: Optimisation de l'affichage en mode synthètique
+<br> + FISSA/Stat: en mode détaillé, on naffiche plus les bénéficiaires et Accueillants
+<br> + FISSA + Stat: même code couleur que doc-depot
+<br> + FISSA + Stat: suppression du paramètre qte (inutilisé)
+<br> + FISSA: le memo n'est affiché que si le jour courant est affiché
+<br> Bugs	
+<br> - restait un affichage parasite sur le depot par mail
+<br> - T235(Suite) :
+<br> - T342 : Génération d'image perturbé par structure logicielle , Du aux espaces avant balise <php et après ?>
+<br> - L'utilisation de REGEXP était non approprié (remplacé par like "%...%' ==> impact sur message de connexion et déconnexion
+<br> - T234/237 : le controle de Hash lors du dépot ne marchait pas 
+<br> - les bugs signalés n'étaient envoyés à l'exploitant
+<br> - FISSA: suppression des slash
+<br> - FISSA : si on relance une commande erreur de saisie cela rajoute l'information 
+
+
+
+
+<h4> V1.04  (en ligne le 27/02/2015 ) ( )</h4>  
+<br> Bugs	
+<br> - A la création d'un compte les droits n'était pas initialisés
+
+	<h4> V1.03  (en ligne le ??/2015 ) (X.php, exploit, general, )</h4>  
+Evolutions
+<br> + T339: Déverrouillage : affichage de la précision que ce sont les informations saisies lors de la création qui sont demandées
+<br> + Ajout  d'un texte de rappel des exigences sur l'envoi de mail ou SMS pesonnel
+<br> + T321: envoi SMS d'alerte vers exploitant si seuil max de temporisation sur echec connexion atteint 
+<br> + T319: envoi SMS d'alerte vers exploitant si chargement d'un fichier avec une extension interdite
+<br> Bugs	
+<br> - L'envoi de mail n'a pas de mail d'origine
+<br> - X.php ne contient pas les nouvelles procédures d'accès bdd
+<br> - T341 : on peut changer plusieurs fois de profil dans une même connexion (Suppression variable session 'profil')
+<br> - T340 : on pouvait créer 2 idenitifiants identiques en créant un Acteur social
+<br> - Suppression des / dans mail de synthèse
+
 <h4> V1.02  (en ligne le ??/2015 ) ( General, TTT_mail, include_mail )</h4>  
 Evolutions
 <br> + Suppression lien vers traduction() car inutile
@@ -22,6 +98,20 @@ Evolutions
 <br> + On trace désormais les ajouts de notes
 <br> + On trace désormais les dépots de MMS
 <br> + On envoie un mail à l'administrateur à la connexion d'un exploitant  avec indication nom et prénom
+<br> + On propose désormais les sous-menu déposer et gérer les documents pour l'administratif, l'espace perso et justifictifs
+<br> + T295: suppession des destructions de sessions lors du TO (pass devient false)
+<br> + utilisation fonction  VerifierPortable($telephone) pour l'envoi de mot de passe
+<br> + changement de format de la ligne command
+<br> + Fonction de fermeture de base de données
+<br> + La liste des référents de confiance sont regroupé par structure
+<br> + Ajout des champs original et commentaire pour traduction
+<br> + T316: On mémorise la langue d'usage de l'utilisateur
+<br> + dans la visualisation d'un organisme, on visualise aussi les fct_fissa
+<br> + FISSA : on ne liste plus les mail dans les ajouts rapide
+<br> + T333: les demande d'acces n'étaient pas complétement tracées dans l'historique 
+<br> + T335: on affiche les adresses mails autorisées pour les envois par mail
+<br> + T337: Historique: on affiche aussi dans l'historique des responsable et RC la fin d'autorisation
+<br> + T318 (partiel) Vérification acces fichier Vs utilisateur 
 <br> Bugs	
 <br> - Correction faute orthographe : "cérer" au lieu de "créer", "prenez" <-- "prennez", 
 <br> - la création de dossier alors qu'il n'y a pas de code de lecture crée un message d'erreur et proposait à tord un lien vers le fichier crypté 
@@ -31,6 +121,14 @@ Evolutions
 <br> - T299: les SMS initialisés pour la formation sont envoyés même s'ils ne sont pas mofifiés
 <br> - le dépot d'une image ou un pdf alors qu'il n'y a pas de code de lecture crée un message d'erreur 
 <br> - une partie du formulaire upload apparait en production
+<br> - On affichait à tord le menu collègues lors de l'ajout de justificatifs
+<br> - T248 : les demandes d'accès refonctionnent mais sans code de lecture 
+<br> - T330 : on pouvait créer des identifiants avec moins de 8 caractéres
+<br> - T328: la modification d'un AS entrainait son changement de profil et devenait un Bénéficiaire
+<br> - T338: Un nouvel AS ne pouvait pas déposer de justificatif à la 1ere connexion 
+<br> - T329: Pas de RDV possible si responsable avec profil AS
+<br> - T336: Historique: le libelle des acteur n'apparait pas sur fin d'autorisation 
+
 
 <h4> V1.01  (en ligne le /2015 ) (  )</h4>  
 Evolutions
