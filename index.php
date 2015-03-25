@@ -1280,18 +1280,16 @@ function maj_mdp_fichier($idx, $pw )
 
 	FUNCTION modification_user($idx,$nom, $prenom , $telephone, $mail, $droit)
 		{
-		global $user_id;
+		global $user_idx;
 		
 		$reponse = command("UPDATE `r_user` SET mail='$mail', telephone='$telephone', nom='$nom', prenom='$prenom', droit='$droit'  where idx='$idx'  ");
-		ajout_log( $idx, traduire("Modification nom/prenom/tel/mail par")." $user_id" );
+		ajout_log( $idx, traduire("Modification nom/prenom/tel/mail"), $user_idx );
 		}		
 		
 	FUNCTION modification_langue($idx,$langue)
 		{
-		global $user_id;
-		
 		$reponse = command("UPDATE `r_user` SET langue='$langue' where idx='$idx'  ");
-		ajout_log( $idx, traduire("Modification langue en ")." $user_id" );
+		ajout_log( $idx, traduire("Modification langue en ")." '$langue'" );
 		}		
 		
 	FUNCTION modif_domicile($idx,$organisme, $adresse)
@@ -1725,10 +1723,10 @@ function maj_mdp_fichier($idx, $pw )
 		
 	function affiche_beneficiaire($mode,$organisme,$user_idx,$filtre2="")
 		{
-		
+	
 		if ($mode==1) // on affiche  ceux qui sont lié à la structure
 			$reponse =command("select * from  r_referent where nom='Tous'  and organisme='$organisme' ");		
-		else //mode=2 ==> on affiche ceux qui sont RCpersonnellement 
+		else //mode=2 ==> on affiche ceux qui sont RC personnellement 
 			$reponse =command("select * from  r_referent where nom='$user_idx' and organisme='$organisme' ");		
 
 		while ($donnees = fetch_command($reponse) ) 
@@ -1737,11 +1735,11 @@ function maj_mdp_fichier($idx, $pw )
 				$nom1=$donnees["user"];
 			else
 				$nom1=$donnees["idx"];
-			
+		
 			$tst_doublon=false;
 			if ($mode==2)
 				{
-				$r1 =command("select * from  r_referent where nom='Tous' and organisme='$organisme' ");
+				$r1 =command("select * from  r_referent where nom='Tous' and organisme='$organisme' and user='$nom1' ");
 				if ($d1 = fetch_command($r1))
 					$tst_doublon=TRUE;
 				}
@@ -4875,8 +4873,7 @@ include 'planning.php';
 			$ligne=variable ('ligne');
 			$date=mef_date_BdD(variable ('date'));
 			$heure=mef_heure_BdD(variable ('heure')	);
-			
-			
+						
 			$avant=variable ('avant');
 			$user1=variable ('user');
 			if ( ($ligne!="") && ($date!="") && ($heure!=""))

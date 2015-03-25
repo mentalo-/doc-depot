@@ -365,7 +365,47 @@
 						  `beneficiaire` text NOT NULL,
 						  `mails_rapports` text NOT NULL,
 						  `mails_rapport_detaille` text NOT NULL
-						) ENGINE=InnoDB DEFAULT CHARSET=latin1;";
+						) ENGINE=InnoDB DEFAULT CHARSET=latin1;");
+
+				// ------------------------------------------- Fin bloc spécifique
+
+				// ------------------------------------------- Bloc générique
+				$version=maj_version($nelle_version);
+				}
+				
+				
+				
+		$nelle_version="V1.06";
+		if ($version<=$nelle_version)
+				{
+				//backup_tables(false);  // A utiliser si changement de structure ou de contenu de la base
+				
+				// ------------------------------------------- Bloc Spécifique à la montée de version
+			
+				command("CREATE TABLE IF NOT EXISTS `fct_fissa` (
+						  `organisme` text NOT NULL,
+						  `support` text NOT NULL,
+						  `libelle` text NOT NULL,
+						  `acteur` text NOT NULL,
+						  `beneficiaire` text NOT NULL,
+						  `mails_rapports` text NOT NULL,
+						  `mails_rapport_detaille` text NOT NULL
+						) ENGINE=InnoDB DEFAULT CHARSET=latin1;");
+
+				// ------------------------------------------- Fin bloc spécifique
+
+				// ------------------------------------------- Bloc générique
+				$version=maj_version($nelle_version);
+				}
+				
+				
+		$nelle_version="V1.07";
+		if ($version<=$nelle_version)
+				{
+				//backup_tables(false);  // A utiliser si changement de structure ou de contenu de la base
+				
+				// ------------------------------------------- Bloc Spécifique à la montée de version
+			
 
 				// ------------------------------------------- Fin bloc spécifique
 
