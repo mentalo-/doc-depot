@@ -278,7 +278,8 @@ include 'inc_style.php';
 	function rapport($date)
 		{
 		global $nb_usager,$nom_charge,$commentaire,$imax, $pres_repas, $bdd, $acteur, $beneficiaire, $libelle;
-		
+
+		$date_a_afficher=$date;		
 		$i=0; 
 		$date_gb=mise_en_forme_date_aaaammjj( $date);
 		$reponse = command("SELECT * FROM $bdd WHERE date='$date_gb' and nom='Mail' "); 
@@ -292,7 +293,6 @@ include 'inc_style.php';
 		else
 			echo "Mails déjà envoyés.";
 			
-			
 		echo "<table border=\"0\" >";	
 		echo "<tr> <td width=\"800\"> ";
 
@@ -303,8 +303,18 @@ include 'inc_style.php';
 		$txt="FISSA : Rapport d'activité du $date concernant '$libelle' <br>";
 		echo "<BR>$txt";
 
-		$date=mise_en_forme_date_aaaammjj( $date);
-	
+		$date=mise_en_forme_date_aaaammjj( $date);		
+		
+		$r1 = command("SELECT DISTINCT count(*) FROM $bdd WHERE date='$date' and nom <>'Synth' and ( pres_repas='Visite+Repas' or pres_repas='Visite' or pres_repas='Refusé' ) ");
+		$r2=nbre_enreg($r1); 
+		$r=$r2[0];
+		
+		$r1 = command("SELECT DISTINCT count(*) FROM $bdd WHERE date='$date' and nom <>'Synth' and pres_repas='Visite+Repas' ");
+		$r2=nbre_enreg($r1); 
+		$r3=$r2[0];
+		
+		echo "<BR>Aujourd'hui, $date_a_afficher, $r personnes accueillies, dont $r3 repas.<BR>";		
+		
 		echo "<BR><b>Synthèse : </b><BR>";
 		$i=0; 
 		$reponse = command("SELECT * FROM $bdd WHERE date='$date' and nom='Synth' "); 
@@ -386,7 +396,7 @@ include 'inc_style.php';
 						
 			$reponse = command("SELECT * FROM r_user WHERE droit='R' and organisme='$idx' "); 
 			while ($donnees = fetch_command($reponse) ) 
-				$dest.=$donnees["mail"].";";				
+				$dest.=$donnees["mail"].",";				
 			}
 
 		$headers  = 'MIME-Version: 1.0\r\nContent-type: text/html; charset="iso-8859-1"'. "\r\n";
@@ -445,7 +455,7 @@ include 'inc_style.php';
 		if  (mail2 ( $dest , "FISSA : Rapport d'activité $libelle du $date", "$txt", $headers   )) echo "OK"; else echo "Echec";
 		
 		$date_jour=date($format_date );
-		nouveau($date,"Mail", "Mail","Envoyé le $date_a_afficher","");
+		nouveau($date_a_afficher,"Mail", "Mail","Envoyé le $date_a_afficher","");
 		}
 		
 	function affiche_memo()
@@ -462,6 +472,8 @@ include 'inc_style.php';
 				$c=stripcslashes($donnees["commentaire"]);
 				$n=$donnees["nom"];
 				echo "<BR><a href=\"fissa.php?action=suivi&nom=$n&date_jour=$date_jour\" target=_blank> <b>$n</b> </a> : $c";
+				echo "<a title=\"Suppresion mémo\"  href=\"fissa.php?action=supp_memo&nom=$n\"> <img src=\"images/croixrouge.png\"width=\"15\" height=\"15\"><a>";
+				
 				$i++; 		
 				}
 		}
@@ -569,7 +581,13 @@ include 'inc_style.php';
 				charge_date($date_jour);
 				rapport($date_jour);
 				}
-			
+
+			if ($action=="supp_memo")
+				{
+				$nom=variable_s("nom");
+				command("UPDATE $bdd set commentaire='' where nom='$nom' and date='0000-00-00' ") ;
+				}
+				
 			if ($action=="mail")
 				{
 				charge_date($date_jour);

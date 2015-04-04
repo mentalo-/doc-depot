@@ -116,9 +116,12 @@ include 'general.php';
 		
 		$s_org= floor($a-2013 + ($m-1)*52/12 + $j/7);
 		$s_org+=($a-2013)*52;
-		return ($s_org);
+		return ($s_org-1);
 		}
 
+		
+		
+		
 	if ( !isset($_SESSION['pass']) ||($_SESSION['pass']==false) )
 		// si pas de valeur pass en session on affiche le formulaire...
 		Echo "Merci de vous reconnecter";
