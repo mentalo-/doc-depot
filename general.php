@@ -458,7 +458,17 @@ include 'bdd.php';
 			echo "<p><i><b><font size=\"5\">'' ".traduire('Mon essentiel à l\'abri en toute confiance')." '' .</b></i></font>";
 			echo "<p>".traduire('Sauvegardez gratuitement de façon sécurisée vos documents, photos et informations essentielles .');
 			}
-		}		
+		}	
+	
+	function aff_logo_multiple()
+		{
+		echo "<div id=\"logo\"> <center>";
+		echo "<a href=\"index.php\"><img src=\"images/logo.png\" width=\"200\" height=\"150\" ></a>";
+		echo "<a href=\"index.php\"><img src=\"images/fissa.jpg\" width=\"200\" height=\"150\" ></a>";
+		echo "<a href=\"alerte.php\"><img src=\"images/logo-alerte.jpg\" width=\"200\" height=\"150\" ></a>";
+		echo "</div>  <center>";	
+		}	
+		
 
 	function lien_c($image, $action, $param , $title="", $size="20")
 		{
@@ -554,7 +564,7 @@ include 'bdd.php';
 				ecrit_parametre("nbre_echec_sur_periode", $nb_echec+1 );
 				
 				if (parametre("DD_nbre_echec_max_par_periode")==$nb_echec)
-					alerte_sms("Depassement nombre d'echec de connexion par période");
+					alerte_sms("Dépassement nombre d'échec de connexion par période");
 				}
 			else
 				$reponse = command("INSERT INTO `cx` VALUES ( '$id', '4') ");
@@ -662,7 +672,7 @@ include 'bdd.php';
 		if ($r!="")
 			echo "<center><p><br><a id=\"accueil\" href=\"index.php\">".traduire('Retour à la page d\'accueil.')."</a>"; 
 
-		echo "<br><br>";
+		echo "<br>";
 		echo "<hr><center> ";
 
 		echo "<table> <tr> <td align=\"right\" valign=\"bottom\" ></td>";
@@ -687,7 +697,7 @@ include 'bdd.php';
 		else
 			echo "- $version ";	
 
-		echo "- <a href=\"index.php?action=bug\">".traduire('Signaler un bug ou demander une évolution').".</a> </td> ";
+		echo "- <a href=\"index.php?action=bug\">".traduire('Signaler un bug ou demander une évolution').".</a> </td> </table>";
 		fermeture_bdd() ;	
 		exit();
 		}

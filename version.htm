@@ -8,18 +8,59 @@
 	<body>
 
 	
-<h4> V1.06	(en ligne le xx/xx/2015 ) ( Ad.php )</h4>  
+<h4> V1.09	(en ligne le /04/2015 ) (alerte, alerte_ttt, bdd, fissa, general, include mail, X531_)</h4>  
 Evolutions
-<br> +	Ajout accès via AD.PHP
+<br> +	Exploitation : possibilité de prendre le profil d'un utilisateur sans modification et sans envoi de SMS et mail
+<br> +	Exploitation : possibilité de passer des commandes SQL
+<br> +	Exploitation : mémorisation dans le log des actions et date pour FISSA
+<br> +	Exploitation : on trace dans le log_technique les montées de version et les archivages PHP+SQL
+<br> +	Exploitation : x.php devient x531_.php
+<br> +	Exploitation : alerte SMS , on indique désormais l'environnement
+<br> +	Possibilité d'afficher la liste des structures ayant déployées doc-depot (pour alerte)
+<br> +	Plus de de message de renvoi si on fait "précédent"
+<br> +	Alerte et traitement alerte
+<br> +	les message Ok ne restent affichés que 3 secondes
+<br> +	Alerte : suppression alerte si reception STOP
+<br> Bugs	
+<br> - correction faute orthographe alerte SMS
+<br> - correction si mise à jour mail et téléphone vide
 
 	
+<h4> V1.08	(en ligne le 04/04/2015 ) (stat, fissa )</h4>  
+Evolutions
+<br> +	On peut supprimer un memo directement 
+<br> - On refait apparaitre la ligne de synthèses dans le rapport (idem mail)
+<br> Bugs	
+<br> - Stat: il y avait une semaine de décalage 
+<br> - les envois de mail apparaissaient dans les memo
+<br> - le séparateur pour les adresses mail d'envoi est "," et non ";"
+
+<h4> V1.07	(en ligne le 25/03/2015 ) ( maj_bdd )</h4>  
+<br> Bugs	
+<br> - La création d'un bénéficiaire n'était pas visible par le Référent de confiance
+
+
+<h4> V1.06	(en ligne le 22/03/2015 ) ( Ad.php, inc_style, visu, fissa )</h4>  
+Evolutions
+<br> +	Ajout accès via AD.PHP
+<br> +	suppression de la nécessité que la mise en forme d'un tableau prenne 100% de la hauteur
+<br> +	la génération de la miniature avec cadenas tient compte des formats png et gif
+<br> +	visu permet de visualiser les image png et GIF
+<br> +	on affiche désormais les auteurs des rdv 
+<br> +	on affiche si les collegues sont actifs ou non
+<br> + FISSA: on propose le lien vers la date du jour si on affiche une autre date
+<br> Bugs	
+<br> - La modication d'un AS inactif le rendait actif
+<br> - sur modification coordonnées responsable on n'affichait plus les coordonnees des ses structures
+<br> - la modification des coordonnées 	d'un AS par un responsable était mal tracé dasn l'historique
+<br> - on ne tracé pas la nouvelle langue dasn l'historique
 
 <h4> V1.05.03  (en ligne le 15/03/2015 ) ( )</h4>  
 Evolutions
-<br> +	FISSA : supression function statistic() non utilisé<br> Bugs	
+<br> +	FISSA : supression function statistic() non utilisé
+<br> Bugs	
 <br> - l'affichage d'alarme ne tenait pas compte du nouveau paramètre
 <br> - on ne remettait pas à 0 le compteur d'alarme d'accès à la BAL si on pouvait ré acceder à la bal avant d'atteindre le seuil d'alerte
-<br> Bugs	
 <br> - FISSA : il manquait un stripcslashes sur les noms		
 
 

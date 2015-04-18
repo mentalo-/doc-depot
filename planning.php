@@ -1,7 +1,7 @@
 <?php 
 
 	$restriction_ad =  $_SESSION['ad'] || ( (($user_droit=="S") || ($user_droit=="R"))  )  ;
-	
+
 	if ( (($user_droit=="S") || ($user_droit=="R")) && ($action=="cc_usager") )
 		{
 		$action="cc_usagers";
@@ -90,7 +90,13 @@
 		{	
 		echo "<table><tr><td></td><td></td><td></td>";
 		for ($h=$debut_min; $h<$fin_max; $h++)
-			echo "<td> </td><td> </td><td> </td><td> </td><td></td>";
+			{
+			$unit=$h%10;
+			$diz=($h-$unit)/10;
+			if ($diz==0)
+				$diz="";
+			echo "<td>$diz</td><td>$unit</td><td>h </td><td> </td><td></td>";
+			}
 		}
 		
 	function liste_usager_activite($activite)
@@ -189,7 +195,7 @@
 		$ea=encrypt("$idx_activite");
 		if ($aff_date)
 			{
-			echo libelle_jour (date('w',$i))."</td><td>". date('d',$i)."</td>";	
+			echo libelle_jour (date('w',$i))."</td><td>". date('d/m',$i)."</td>";	
 			$aff_date=FALSE;
 			}
 		else
@@ -236,11 +242,11 @@
 					$eh=encrypt("$eh");	
 					
 					if ($occupation[$h*4+$m]=="libre")
-						echo "<td width=\"10\" BGCOLOR=\"".$couleur_libre[$act]."\" ><a href=\"".$_SERVER['PHP_SELF'] ."?action=cc_ajout&jour=$ej&activite=$ea&heure=$eh\" title=\"ajout\">+</a></td>";									
+						echo "<td width=\"10\" BGCOLOR=\"".$couleur_libre[$act]."\" ><a class=\"div_sans_underline\"  href=\"".$_SERVER['PHP_SELF'] ."?action=cc_ajout&jour=$ej&activite=$ea&heure=$eh\" title=\"ajout\">+</a></td>";									
 					else
 						{
 						if ( $nb_occupation[$h*4+$m]<$nb_max)
-							echo "<td width=\"10\" ".$occupation[$h*4+$m]." BGCOLOR=\"".$couleur_occupe[$act]."\" ><a href=\"".$_SERVER['PHP_SELF'] ."?action=cc_ajout&jour=$ej&activite=$ea&heure=$eh\" title=\"ajout\">+</a></td>";
+							echo "<td width=\"10\" ".$occupation[$h*4+$m]." BGCOLOR=\"".$couleur_occupe[$act]."\" ><a class=\"div_sans_underline\" href=\"".$_SERVER['PHP_SELF'] ."?action=cc_ajout&jour=$ej&activite=$ea&heure=$eh\" title=\"ajout\">+</a></td>";
 						else
 							echo "<td width=\"10\" ".$occupation[$h*4+$m]." BGCOLOR=\"".$couleur_plein[$act]."\" > </td>";
 						}
@@ -374,7 +380,7 @@
 				if ($_SESSION['ad'])	
 					$reponse =command("select * from  fct_calendrier where organisme='$user_organisme' and ( debut<'$fin' or debut='') and ( fin>='$debut' or fin='') and type='A' and acces_direct<>'' ");
 				else
-					$reponse =command("select * from  fct_calendrier where organisme='$user_organisme' and ( debut<'$fin' or debut='') and ( fin>='$debut' or fin='') ","x");
+					$reponse =command("select * from  fct_calendrier where organisme='$user_organisme' and ( debut<'$fin' or debut='') and ( fin>='$debut' or fin='') ");
 				
 				break;
 
@@ -483,7 +489,8 @@
 					&& ( ($fin_act[$act]>$date_du_jour) || ($fin_act[$act]=="") ) )
 						{
 						affiche_journee_calendrier($idx_activite[$act], $nb_max[$act], $act, $i,$debut_min,$fin_max);
-						// détail par personne
+						
+						//if (0==1)// affichage des détail par personne
 						if (
 							(isset ($_SESSION["detaille"]) && ($_SESSION["detaille"]=="") )
 							||

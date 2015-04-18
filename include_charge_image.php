@@ -472,20 +472,25 @@ function rotateImage($sourceFile,$destImageName,$degreeOfRotation)
 	   case "image/jpg":
 	   case "image/jpeg":
 	   case "image/pjpeg": //for IE
-			$src_img=imagecreatefromjpeg("$sourceFile");
-					break;
+				$src_img=imagecreatefromjpeg("$sourceFile");
+				//rotate the image according to the spcified degree
+			  $src_img = imagerotate($src_img, $degreeOfRotation, 0);
+			  //output the image to a file
+			  imagejpeg ($src_img,$destImageName);
+				break;
 		case "image/gif":
 			$src_img = imagecreatefromgif("$sourceFile");
+			  $src_img = imagerotate($src_img, $degreeOfRotation, 0);
+			  imagegif ($src_img,$destImageName);			
 					break;
 		case "image/png":
 			case "image/x-png": //for IE
 			$src_img = imagecreatefrompng("$sourceFile");
-					break;
+			$src_img = imagerotate($src_img, $degreeOfRotation, 0);
+			imagepng ($src_img,$destImageName);
+			break;
 	  }
-	  //rotate the image according to the spcified degree
-	  $src_img = imagerotate($src_img, $degreeOfRotation, 0);
-	  //output the image to a file
-	  imagejpeg ($src_img,$destImageName);
+
 	}
 
 	function met_cadenas($image)

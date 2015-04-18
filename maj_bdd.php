@@ -6,6 +6,8 @@
 	
 		function maj_version( $version )
 			{
+			ajout_log_tech( "Montée de version BDD : $version" , "P0");
+
 			echo "<p>MAJ -> $version";
 			ecrit_parametre("DD_version_bdd", $version);
 			ecrit_parametre("DD_version_portail", $version);
@@ -425,5 +427,55 @@
 
 				// ------------------------------------------- Bloc générique
 				$version=maj_version($nelle_version);
+				}		
+		
+		$nelle_version="V1.09";
+		if ($version<=$nelle_version)
+				{
+				//backup_tables(false);  // A utiliser si changement de structure ou de contenu de la base
+				
+				// ------------------------------------------- Bloc Spécifique à la montée de version
+				command("DROP TABLE `cc_alerte` ");
+				command("CREATE TABLE IF NOT EXISTS `cc_alerte` (
+						  `creation` text NOT NULL,
+						  `tel` text NOT NULL,
+						  `dept` text NOT NULL,
+						  `sueil` text NOT NULL,
+						  `dernier_ttt` text NOT NULL,
+						  `dernier_envoi` text NOT NULL,
+						  `debut_alerte` text NOT NULL,
+						  `stop` text NOT NULL,
+						  `ip` text NOT NULL,
+						  `modif` text NOT NULL
+						) ENGINE=InnoDB DEFAULT CHARSET=latin1;");
+						
+				ecrit_parametre("DD_alerte_dept",'1');
+
+				// ------------------------------------------- Fin bloc spécifique
+
+				// ------------------------------------------- Bloc générique
+				$version=maj_version($nelle_version);
 				}
+				
+		$nelle_version="V1.10";
+		if ($version<=$nelle_version)
+				{
+				backup_tables(false);  // A utiliser si changement de structure ou de contenu de la base
+				
+				// ------------------------------------------- Bloc Spécifique à la montée de version
+						
+				command("ALTER TABLE effectif ADD user TEXT not null ","1");
+				command("ALTER TABLE ZZ_SEC_CATH ADD user TEXT not null ","1");
+				command("ALTER TABLE ZZ_assol ADD user TEXT not null ","1");
+
+				command("ALTER TABLE effectif ADD modif TEXT not null ","1");
+				command("ALTER TABLE ZZ_SEC_CATH ADD modif TEXT not null ","1");
+				command("ALTER TABLE ZZ_assol ADD modif TEXT not null ","1");
+				// ------------------------------------------- Fin bloc spécifique
+
+				// ------------------------------------------- Bloc générique
+				$version=maj_version($nelle_version);
+				}
+
+
 ?>

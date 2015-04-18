@@ -1,12 +1,21 @@
 <?php
-	
+
+
 	// ========================================================== BDD ==========================================
 	function command($ligne, $flag="")
 		{
 		if ($flag!="")
-			echo "<p>$ligne";
-		ajout_log_jour($ligne);
-		return( mysql_query($ligne) );	
+			echo "<p>$ligne ";
+			
+		if (isset ($_SESSION['chgt_user']) && 	($_SESSION['chgt_user']==true) && (strpos( strtolower($ligne),"select" )===false) )
+			{
+			return(false);
+			}
+		else
+			{
+			ajout_log_jour($ligne);
+			return( mysql_query($ligne) );	
+			}
 		}
 	
 	function fetch_command ($reponse)

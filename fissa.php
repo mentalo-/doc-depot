@@ -10,6 +10,7 @@ include 'general.php';
 include 'inc_style.php';	 
 
 		if (isset ($_GET["action"])) $action=$_GET["action"]; else  	$action="";	
+		
 		if ((isset ($_GET["nom"])) && ($action=="suivi"))
 			{
 			$nom = $_GET["nom"];
@@ -20,6 +21,8 @@ include 'inc_style.php';
 		
 		if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > TIME_OUT)) 
 			$_SESSION['pass']=false;
+		$_SESSION['LAST_ACTIVITY'] = time();
+		
 		$refr=TIME_OUT+10;
 
 		echo "<META HTTP-EQUIV=\"refresh\" CONTENT=\"$refr\">";		
@@ -71,7 +74,7 @@ include 'inc_style.php';
 		
 		$exclus="";
 		for ($i=0; $i<$imax; $i++)
-			$exclus.="'".$nom_charge[$i]."',";
+			$exclus.="'".addslashes2($nom_charge[$i])."',";
 		$exclus=  " and nom NOT IN (".$exclus." '' ) " ;
 		}
 	
@@ -99,40 +102,52 @@ include 'inc_style.php';
 	function nouveau( $date_jour, $nom, $pres,$com ,$memo)
 		{
 		global $bdd;
-			
+		$nom=str_replace("\"","",$nom);
+		$nom_slash= addslashes2($nom);	
+		
 		if ($nom!="")
 			{
 			$d=mise_en_forme_date_aaaammjj( $date_jour);
 			
-			$r1 = command("SELECT DISTINCT count(*) FROM $bdd WHERE date='0000-00-00' and nom='$nom' ");
+			$r1 = command("SELECT DISTINCT count(*) FROM $bdd WHERE date='0000-00-00' and nom='$nom_slash' ");
 			$r2=nbre_enreg($r1); 
 			if ($r2[0]==0)
 				{
-				$cmd = "INSERT INTO `$bdd`  VALUES ( '$nom', '', '','')";
+				$user= $_SESSION['user_idx'];
+				$modif=time();
+				$cmd = "INSERT INTO `$bdd`  VALUES ( '$nom', '', '','','$user','$modif')";
 				$reponse = command($cmd);
 				}
 				
-			$r1 = command("SELECT  count(*) FROM $bdd WHERE date='$d' and nom='$nom' ");
+			$r1 = command("SELECT  count(*) FROM $bdd WHERE date='$d' and nom='$nom_slash' ");
 			$r2=nbre_enreg($r1); 
 			$r=$r2[0];	
 			$com= addslashes2($com);
 			$nom= addslashes2($nom);
 			$memo= addslashes2($memo);
+			$user= $_SESSION['user_idx'];
+			$modif=time();
 			if ($r==0)
 				{
 				if ( $pres!="Erreur saisie")
 					{
-					$cmd = "INSERT INTO `$bdd`  VALUES ( '$nom', '$d', '$pres','$com')";
+					if  (strstr($nom,"(A)") && ($pres=="Visite")) 
+						$pres="Activité";
+					
+					if ( ((!strstr($nom,"(B)")) || (!strstr($nom,"(S)")) ) & ($pres=="Visite") )		
+						$pres="Acteur Social";
+
+					$cmd = "INSERT INTO `$bdd`  VALUES ( '$nom', '$d', '$pres','$com','$user','$modif')";
 					$reponse = command($cmd);
 					}
 				}
 			else
 				{
-				$cmd = "UPDATE $bdd set commentaire='$memo' where nom='$nom' and date='0000-00-00' ";
-				$reponse = command($cmd);				
-				
+				$cmd = "UPDATE $bdd set commentaire='$memo' , user='$user' , modif='$modif' where nom='$nom' and date='0000-00-00' ";
+				$reponse = command($cmd);					
+
 				if ( $pres!="Erreur saisie")
-					$cmd="UPDATE $bdd SET commentaire='$com', pres_repas='$pres'  WHERE nom='$nom' AND date='$d'" ;
+					$cmd="UPDATE $bdd SET commentaire='$com', pres_repas='$pres' , user='$user' , modif='$modif'  WHERE nom='$nom_slash' AND date='$d'" ;
 				else
 					$cmd="DELETE FROM $bdd  WHERE nom='$nom' AND date='$d'" ;
 							
@@ -148,7 +163,10 @@ include 'inc_style.php';
 		if (($nom!="") && ($nom!="Synth")&& ($nom!="Mail"))
 			{
 			$nouveau= addslashes2($nouveau);
-			$cmd="UPDATE $bdd SET nom='$nouveau' WHERE nom='$nom' " ;
+			$user= $_SESSION['user_idx'];
+			$modif=time();
+			$nom_slash= addslashes2($nom);	
+			$cmd="UPDATE $bdd SET nom='$nouveau' , user='$user', modif='$modif' WHERE nom='$nom_slash' " ;
 			$reponse = command($cmd);
 			}
 		}	
@@ -196,7 +214,9 @@ include 'inc_style.php';
 
 		$t="";
 		$i=0; 
-		$reponse = command("SELECT * FROM $bdd WHERE date='$date' and nom <>'Synth' and ( pres_repas='Visite+Repas' or pres_repas='Visite' or pres_repas='Refusé' ) group by nom ASC"); 
+		$crit_bene="  ( not (nom like '%(B)%')) and ( not (nom like '%(S)%')) and ( not (nom like '%(A)%')) and (nom<>'Synth') and (nom<>'Mail') and (pres_repas<>'Pour info')  ";
+
+		$reponse = command("SELECT * FROM $bdd WHERE date='$date' and $crit_bene group by nom ASC"); 
 		while (($donnees = fetch_command($reponse) ) && ($i<10000))
 				{
 				$nom=stripcslashes($donnees["nom"]);
@@ -213,7 +233,8 @@ include 'inc_style.php';
 
 		$t="";
 		$i=0; 
-		$reponse = command("SELECT * FROM $bdd WHERE date='$date' and nom <>'Synth' and (pres_repas='$acteur' ) group by nom ASC"); 
+		$crit_AS=" (nom like '%(B)%' or nom like '%(S)%' )";
+		$reponse = command("SELECT * FROM $bdd WHERE date='$date' and $crit_AS group by nom ASC");  
 		while (($donnees = fetch_command($reponse) ) && ($i<10000))
 				{
 				$nom=stripcslashes($donnees["nom"]);
@@ -226,7 +247,6 @@ include 'inc_style.php';
 	function proposition($profil, $titre="", $fin_cadre="")
 		{
 		global  $exclus, $date_jour, $bdd, $acteur;
-
 
 		$date_jour2=  mise_en_forme_date_aaaammjj($date_jour);
 		$nu=0;
@@ -246,7 +266,7 @@ include 'inc_style.php';
 							{
 							if ( ($nu==0) && ($titre!="") )
 								{
-								echo "<tr> <td width=\"1000\"> $titre: ";
+								echo "<tr> <td width=\"1000\"><hr> $titre: ";
 								$nu++;
 								}
 							$n_court=substr($n, 0, strlen($n)-3);
@@ -275,110 +295,26 @@ include 'inc_style.php';
 				echo "</td>";				
 		}
 
-	function rapport($date)
+	function mail2($dest, $titre, $contenu, $libelle, $mail_struct )
 		{
-		global $nb_usager,$nom_charge,$commentaire,$imax, $pres_repas, $bdd, $acteur, $beneficiaire, $libelle;
-
-		$date_a_afficher=$date;		
-		$i=0; 
-		$date_gb=mise_en_forme_date_aaaammjj( $date);
-		$reponse = command("SELECT * FROM $bdd WHERE date='$date_gb' and nom='Mail' "); 
-		if (!fetch_command($reponse) )  // il existe déjà un mail
-			{
-			echo "<form method=\"GET\" action=\"fissa.php\">";
-			echo "<input type=\"hidden\" name=\"action\" value=\"mail\"> " ;
-			echo "<input type=\"hidden\" name=\"date_jour\"  value=\"$date\">";
-			echo "<input type=\"submit\" value=\">>> Envoi Mail Synthèse et Rapport d'activité >>>\" ></form>";	
-			}
-		else
-			echo "Mails déjà envoyés.";
-			
-		echo "<table border=\"0\" >";	
-		echo "<tr> <td width=\"800\"> ";
-
-		$r1 = command("SELECT DISTINCT pres_repas,count(*) FROM $bdd WHERE date='$date' and nom <>'Synth'  ");
-		$r2=nbre_enreg($r1); 
-		$r=$r2[0];
-
-		$txt="FISSA : Rapport d'activité du $date concernant '$libelle' <br>";
-		echo "<BR>$txt";
-
-		$date=mise_en_forme_date_aaaammjj( $date);		
 		
-		$r1 = command("SELECT DISTINCT count(*) FROM $bdd WHERE date='$date' and nom <>'Synth' and ( pres_repas='Visite+Repas' or pres_repas='Visite' or pres_repas='Refusé' ) ");
-		$r2=nbre_enreg($r1); 
-		$r=$r2[0];
+		// Entete
+		$headers  = "MIME-Version: 1.0 \n"; 
+		$headers .='Content-Type: text/html; charset="iso-8859-1"'."\n";
+        $headers .='Content-Transfer-Encoding: 8bit'."\n";			
+
+		$headers  .= "From: FISSA $libelle <$mail_struct>" . "\r\n"; 
 		
-		$r1 = command("SELECT DISTINCT count(*) FROM $bdd WHERE date='$date' and nom <>'Synth' and pres_repas='Visite+Repas' ");
-		$r2=nbre_enreg($r1); 
-		$r3=$r2[0];
+		// mise en forme HTML
+		$contenu = "<html><body>$contenu</body></html>";	
+		$contenu = '=?iso-8859-1?B?'.base64_encode($contenu).'?=';
 		
-		echo "<BR>Aujourd'hui, $date_a_afficher, $r personnes accueillies, dont $r3 repas.<BR>";		
-		
-		echo "<BR><b>Synthèse : </b><BR>";
-		$i=0; 
-		$reponse = command("SELECT * FROM $bdd WHERE date='$date' and nom='Synth' "); 
-		while (($donnees = fetch_command($reponse) ) && ($i<10000))
-				{
-				$c=$donnees["commentaire"];
-				$c=nl2br (stripcslashes($c));
-				echo "$c ";
-				$i++; 		
-				}
-				
-		echo "<BR><BR><b>$beneficiaire : </b>";	
-		echo presents($date);
-					
-		echo "<BR><BR><b>$acteur : </b>";
-		echo accueillants($date);
-				
-		echo "<BR><BR><b> Activités : </b> ";		
-		for($i=0;$i<$imax;$i++)
-			if (($nom_charge[$i]!="")  &&  ($commentaire[$i]!="")  )
-				if (strpos($nom_charge[$i],"(A)"))
-							{
-							echo "<BR> ";
-							$valeur=$nom_charge[$i];
-							echo "- $valeur ";
-							
-							$valeur=$pres_repas[$i];
-							echo "($valeur) : ";
-
-							$valeur=stripcslashes($commentaire[$i]);
-							echo " $valeur";
-							}		
-							
-		echo "<BR><BR><b> Détails : </b> ";		
-		for($i=0;$i<$imax;$i++)
-			if (($nom_charge[$i]!="")  &&  ($commentaire[$i]!="")  )
-				if (strpos($nom_charge[$i],"(B)")===FALSE)
-					if (strpos($nom_charge[$i],"(S)")===FALSE)
-						if (strpos($nom_charge[$i],"(A)")===FALSE)
-							{
-							echo "<BR> ";
-							$valeur=$nom_charge[$i];
-							echo "- $valeur ";
-							
-							$valeur=$pres_repas[$i];
-							echo "($valeur) : ";
-
-							$valeur=stripcslashes($commentaire[$i]);
-							echo " $valeur";
-							}
-				
-		echo "<BR><BR> </td></table>";
-
-		}
-
-
-	function mail2($dest, $titre, $contenu, $headers)
-		{
 		mail ( $dest , $titre, $contenu,$headers );
 		return(true);
 		}
 	
 	
-	function envoi_mail($date)
+	function rapport_mail2($date, $envoi_mail)
 		{
 		global $nb_usager,$nom_charge,$commentaire,$imax, $pres_repas, $bdd, $libelle,$format_date ;
 
@@ -388,24 +324,41 @@ include 'inc_style.php';
 		if ($donnees = fetch_command($reponse) )
 			{
 			$idx=$donnees["organisme"];
-			$dest=$donnees["mails_rapports"];
+			$dest=$donnees["mails_rapport_detaille"].",";
+			$dest_synthese=$donnees["mails_rapports"].",";
 			
 			$reponse = command("SELECT * FROM r_organisme WHERE idx='$idx' "); 
 			if ($donnees = fetch_command($reponse) )
+				{
 				$mail_struct=$donnees["mail"];
-						
+				$dest_synthese.=$mail_struct.",";
+				}
+				
 			$reponse = command("SELECT * FROM r_user WHERE droit='R' and organisme='$idx' "); 
 			while ($donnees = fetch_command($reponse) ) 
 				$dest.=$donnees["mail"].",";				
 			}
 
-		$headers  = 'MIME-Version: 1.0\r\nContent-type: text/html; charset="iso-8859-1"'. "\r\n";
-		$headers  .= "From: FISSA $libelle <$mail_struct>" . "\r\n"; 
-
-		Echo "Envoi mails de la journée du $date";
+		if (!$envoi_mail)
+			{
+			$date_gb=mise_en_forme_date_aaaammjj( $date);
+			$reponse = command("SELECT * FROM $bdd WHERE date='$date_gb' and nom='Mail' "); 
+			if (!fetch_command($reponse) )  // il existe déjà un mail
+				{
+				echo "<form method=\"GET\" action=\"fissa.php\">";
+				echo "<input type=\"hidden\" name=\"action\" value=\"mail\"> " ;
+				echo "<input type=\"hidden\" name=\"date_jour\"  value=\"$date\">";
+				echo "<input type=\"submit\" value=\">>> Envoi Mail Synthèse et Rapport d'activité >>>\" ></form>";	
+				}
+			else
+				echo "Mails déjà envoyés.";
+			}
+		else
+			Echo "Envoi mails de la journée du $date";
+			
+		echo "<a href=\"javascript:window.close();\">Fermer la fenêtre</a>"; 
 		$i=0; 
 			
-
 		$date=mise_en_forme_date_aaaammjj( $date);		
 		
 		$r1 = command("SELECT DISTINCT count(*) FROM $bdd WHERE date='$date' and nom <>'Synth' and ( pres_repas='Visite+Repas' or pres_repas='Visite' or pres_repas='Refusé' ) ");
@@ -416,48 +369,94 @@ include 'inc_style.php';
 		$r2=nbre_enreg($r1); 
 		$r3=$r2[0];
 		
-		$synth ="$libelle : aujourd'hui, $date_a_afficher, $r personnes accueillies, dont $r3 repas.";
+		$synth ="<b>$libelle</b> : aujourd'hui, $date_a_afficher, $r personnes accueillies, dont $r3 repas.";		
 		
-		Echo "<BR><BR>- Envoi Synthèse $bdd à $dest : '$synth' ";
-		
-		if  (mail2 ( $dest , "FISSA : Synthèse d'activité $libelle du $date_a_afficher ", "$synth", $headers   )) echo "OK"; else echo "Echec";
+		if ( $envoi_mail)
+			{
+			Echo "<BR><BR>- Envoi Synthèse $bdd à '$dest_synthese' ";
+			
+			if  (mail2 ( $dest_synthese , "FISSA : Synthèse d'activité $libelle du $date_a_afficher ", "$synth",  $libelle, $mail_struct   )) 
+				 {
+				 echo "OK"; 
+				 ajout_log_tech( "FISSA : Envoi Synthèse $bdd du $date à $dest_synthese ");
+				 }
+			else echo "Echec";
+			}
 
-		$txt= $synth. "\n\nPrésents : ";	
+		$txt= $synth. "<BR><BR><b>Présents</b> : ";	
 		$txt= $txt . presents($date);
 		
-		$txt= $txt ."\n\nAccueillants :" ;
-		$txt= $txt . accueillants($date);
-		
+		$acc=accueillants($date);
+		if ($acc!="")
+			{
+			$txt= $txt ."<BR><BR><b>Accueillants</b> :" ;
+			$txt= $txt . $acc ;
+			}
+	
+		$flag=false;
+		for($i=0;$i<$imax;$i++)
+			if ($nom_charge[$i]!="")   
+				if (strpos($nom_charge[$i],"(A)"))
+					{
+					if (!$flag)
+						{
+						$txt= $txt ."<BR><BR><b> Activités</b>  : ";
+						$flag=true;
+						}
+					$valeur=$nom_charge[$i];
+					$txt= $txt . " $valeur, ";
+					}			
 		$i=0; 
-		$txt=$txt ."\n\nSynthèse : ";
 		$reponse = command("SELECT * FROM $bdd WHERE date='$date' and nom='Synth' "); 
 		while (($donnees = fetch_command($reponse) ) && ($i<10000))
 				{
 				$c=stripcslashes($donnees["commentaire"]);
-				$txt = $txt." $c" ;
+				$txt=$txt ."<BR><BR><b>Synthèse</b> :  $c";
 				$i++; 		
 				}
-		
-		$txt = $txt. "\n\n Détails :  ";		
+				
+		$flag=false;		
 		for($i=0;$i<$imax;$i++)
 			if (($nom_charge[$i]!="") &&  ($commentaire[$i]!=""))
-				if (!strstr($pres_repas[$i],"(B)"))
-					if (!strstr($pres_repas[$i],"(S)"))
-						if (!strstr($pres_repas[$i],"(A)"))
-							{
-							$valeur=$nom_charge[$i];
-							$txt = $txt. "\n\n- $valeur :  ";
-							$valeur=stripcslashes($commentaire[$i]);
-							$txt = $txt. " $valeur ; ";
-							}
+				{
+				if (!$flag)
+					{
+					$txt = $txt. "<BR><BR><b>Détails</b> :  ";		
+					$flag=true;
+					}
+				$valeur=$nom_charge[$i];
+				$txt = $txt. "<BR>- $valeur :  ";
+				$valeur=stripcslashes($commentaire[$i]);
+				$txt = $txt. " $valeur ; ";
+				}
 
-		Echo "<BR><BR>- Envoi rapport detaillé à $dest : ";
-		if  (mail2 ( $dest , "FISSA : Rapport d'activité $libelle du $date", "$txt", $headers   )) echo "OK"; else echo "Echec";
+		$txt = $txt. "<center><a href=\"https://doc-depot.com\">
+								<img src=\"http://doc-depot.com/images/logo.png\" width=\"75\" height=\"50\" ></a>\"".traduire('La Consigne Numérique Solidaire').'"';		
+
+		$txt = $txt. "<a href=\"https://doc-depot.com\"><img src=\"http://doc-depot.com/images/fissa.jpg\" width=\"75\" height=\"50\" ></a>".traduire("Suivi Simplifé d'Activité");						
+		$txt = $txt." - ". traduire("Services fournis par ")."<a href=\"https://adileos.doc-depot.com\"><img src=\"http://doc-depot.com/images/adileos.jpg\" width=\"150\" height=\"25\" ></a>";						
 		
-		$date_jour=date($format_date );
-		nouveau($date_a_afficher,"Mail", "Mail","Envoyé le $date_a_afficher","");
+		
+		if ( $envoi_mail)
+			{
+			Echo "<BR><BR>- Envoi rapport detaillé à $dest : ";
+			if  (mail2 ( $dest , "FISSA : Rapport d'activité $libelle du $date", "$txt", $libelle, $mail_struct  )) 
+				 {
+				 echo "OK"; 
+				 ajout_log_tech( "FISSA : Envoi rapport detaillé $bdd du $date à $dest ");
+				 }
+			 else echo "Echec";
+			
+			$date_jour=date($format_date );
+			nouveau($date_a_afficher,"Mail", "Mail","Envoyé le $date_a_afficher","");
+			}
+		else
+			echo "<hr>";
+
+		echo $txt;
 		}
-		
+
+	
 	function affiche_memo()
 		{
 		global $bdd,$format_date ;
@@ -482,26 +481,38 @@ include 'inc_style.php';
 		{
 		global $bdd;
 
+		$nom_slash= addslashes2($nom);	
+
 		$i=0; 
 		if ($detail=="")
-			$reponse = command("SELECT * FROM $bdd WHERE nom='$nom' and date<>'0000-00-00' and pres_repas<>'pda' order by date DESC "); 
+			$reponse = command("SELECT * FROM $bdd WHERE nom='$nom_slash' and date<>'0000-00-00' and pres_repas<>'pda' order by date DESC "); 
 		else
-			$reponse = command("SELECT * FROM $bdd WHERE nom='$nom' and date<>'0000-00-00' and pres_repas='Suivi' order by date DESC "); 
-		
+			$reponse = command("SELECT * FROM $bdd WHERE nom='$nom_slash' and date<>'0000-00-00' and pres_repas='Suivi' order by date DESC "); 
+
+		$ncolor=0;
+		echo "<table>";
 		while (($donnees = fetch_command($reponse) ) && ($i<10000))
 				{
+				if (($ncolor++ %2 )==0) $color="#ffffff" ; else $color="#d4ffaa" ; 	
+
 				$c=stripcslashes($donnees["commentaire"]);
-				$d=$donnees["date"];
+				$date_jour=$donnees["date"];
+				$d3= explode("-",$date_jour);  
+				$a=$d3[0];
+				$m=$d3[1];
+				$j=$d3[2];	
+				$d ="$j/$m/$a";
 				$p=$donnees["pres_repas"];
 				$c=nl2br ($c);
 				if ($p=="Suivi") 
-					echo "<BR><b>$d ($p) : $c </b>"; 
+					echo "<tr><td bgcolor=\"$color\"><b>$d  </td><td bgcolor=\"$color\">$p </td><td bgcolor=\"$color\">$c </b>"; 
 				else
-					echo "<BR>$d ($p) : $c ";
+					echo "<tr><td bgcolor=\"$color\">$d </td><td bgcolor=\"$color\">$p </td><td bgcolor=\"$color\"> $c </td> ";
 				$i++; 		
 				}
-		
-			}
+		echo "</table>";
+
+		}
 			
 
 	// -======================================================================aisie
@@ -579,28 +590,32 @@ include 'inc_style.php';
 			if ($action=="rapport")
 				{
 				charge_date($date_jour);
-				rapport($date_jour);
+				rapport_mail2($date_jour, false);
 				}
 
 			if ($action=="supp_memo")
 				{
 				$nom=variable_s("nom");
-				command("UPDATE $bdd set commentaire='' where nom='$nom' and date='0000-00-00' ") ;
+				$user= $_SESSION['user_idx'];
+				$modif=time();
+				$nom_slash= addslashes2($nom);	
+				command("UPDATE $bdd set commentaire='', user='$user' , modif='$modif' where nom='$nom_slash' and date='0000-00-00' ") ;
 				}
 				
 			if ($action=="mail")
 				{
 				charge_date($date_jour);
-				envoi_mail($date_jour);
+				rapport_mail2($date_jour, true);
 				}
+
+		ajout_log_jour("----------------------------------------------------------------------------------- [ FISSA = $action ] $date_jour ");
 		
 		charge_nom();	
 		switch ($action)
 			{
-					
 			case "rapport":
 			case "mail":
-						echo "<p><a href=\"javascript:window.close();\">Fermer la fenêtre</a>"; 
+
 						break;
 						
 			case "suivi":
@@ -609,33 +624,34 @@ include 'inc_style.php';
 			
 				// =====================================================================locelection
 				
+				$nom_slash= addslashes2($nom);	
 				
 				if ($nom!="")
 					{
+					echo "<table><tr> <td width=\"60%\">";
+					echo "<ul id=\"menu-bar\">";					
 					if ($nom!="Synth")
 						{
+						echo "<li><a href=\"\" >Suivi et Accompagnement de <b> $nom </b> </a></li>";
+						echo "</ul> </td><td>";
 						echo "<form method=\"GET\" action=\"fissa.php\">";
 						echo "<input type=\"hidden\" name=\"action\" value=\"$action\"> " ;
 						echo "<input type=\"hidden\" name=\"nom\" value=\"$nom\"> " ;
-						echo "<tr> <td> ";
 						echo "<input type=\"text\" name=\"date_jour\" size=\"10\" value=\"$date_jour\" class=\"calendrier\"></td>";
 						echo "<td>"; 
-						echo "<input type=\"submit\" value=\"Selectionner\" > </td> </form>  ";
-						
-						echo "<p>Suivi et Accompagnement de <b> $nom </b>";	
-
-						if ($action!="accompagnement")
-							echo "<a href=\"fissa.php?action=accompagnement&nom=$nom&date_jour=$date_jour\" > ( N'afficher que l'accompagnement )</a><p>";
-						else
-							echo "<a href=\"fissa.php?action=suivi&nom=$nom&date_jour=$date_jour\" > ( Afficher tout l'historique )</a><p>";
-						
+						echo "<input type=\"submit\" value=\"Selectionner\" > </td> </form>";
 						}
 					else
-						echo "<p> Historique des faits marquants <p>";	
-			
+						{
+						echo "<li><a href=\"\" >Historique des synthèses </b> </a></li>";
+						echo "</ul> </td>";
+						}
+					echo "<td> - <a href=\"javascript:window.close();\">Fermer la fenêtre</a></td>"; 
+					echo "</table> ";						
 					if ($com=="")
 						{
-						$reponse = command("SELECT * FROM $bdd WHERE date='$date_jour' and nom='$nom' and pres_repas='Suivi' "); 
+						$date_jour_gb=mise_en_forme_date_aaaammjj( $date_jour);
+						$reponse = command("SELECT * FROM $bdd WHERE date='$date_jour_gb' and nom='$nom_slash' and pres_repas='Suivi' "); 
 						if ($donnees = fetch_command($reponse))
 							$com=stripcslashes($donnees["commentaire"]);
 						else
@@ -643,19 +659,22 @@ include 'inc_style.php';
 						}
 					else
 						{
+						$date_jour_gb=mise_en_forme_date_aaaammjj( $date_jour);
 						$com=addslashes2($com);
-						$reponse = command("SELECT * FROM $bdd WHERE date='$date_jour' and nom='$nom' and pres_repas='Suivi' "); 
+						$reponse = command("SELECT * FROM $bdd WHERE date='$date_jour_gb' and nom='$nom_slash' and pres_repas='Suivi' "); 
 						
+						$user= $_SESSION['user_idx'];
+						$modif=time();
 						if ($donnees = fetch_command($reponse))
-							$reponse = command("UPDATE $bdd set commentaire='$com' where nom='$nom' and date='$date_jour' and pres_repas='Suivi' ");
+							$reponse = command("UPDATE $bdd set commentaire='$com' , user='$user' , modif='$modif' where nom='$nom_slash' and date='$date_jour_gb' and pres_repas='Suivi' ");
 						else
-							$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom', '$date_jour', 'Suivi','$com','1')");					
+							$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom_slash', '$date_jour_gb', 'Suivi','$com','$user','$modif')","x");					
 						//$commentaire=$com;
 						}
 
 					if ($pda=="")
 						{
-						$reponse = command("SELECT * FROM $bdd WHERE nom='$nom' and pres_repas='pda' "); 
+						$reponse = command("SELECT * FROM $bdd WHERE nom='$nom_slash' and pres_repas='pda' "); 
 						if ($donnees = fetch_command($reponse))
 							$pda=stripcslashes($donnees["commentaire"]);
 						else
@@ -664,39 +683,47 @@ include 'inc_style.php';
 					else
 						{
 						$pda=addslashes2($pda);
-						$reponse = command("SELECT * FROM $bdd WHERE nom='$nom' and pres_repas='pda' "); 
+						$reponse = command("SELECT * FROM $bdd WHERE nom='$nom_slash' and pres_repas='pda' "); 
 						
+						$user= $_SESSION['user_idx'];
+						$modif=time();
 						if ($donnees = fetch_command($reponse))
-							$reponse = command("UPDATE $bdd set commentaire='$pda' where nom='$nom' and pres_repas='pda' ");
+							$reponse = command("UPDATE $bdd set commentaire='$pda' , user='$user' , modif='$modif' where nom='$nom_slash' and pres_repas='pda' ");
 						else
-							$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom', '$date_jour', 'pda','$pda','1')");					
+							$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom_slash', '', 'pda','$pda','$user','$modif')");					
 						$pda=stripcslashes($pda);
 						}					
 					
 					if ($nom!="Synth")
 						{
-						echo "<P> <table border=\"2\" >";
-						echo "<tr> <td> ";
+						echo "<TABLE><TR> <td></td><td > <div class=\"CSS_titre\"  >";
+
+						echo "<table border=\"0\" >";
+						echo "<tr> <td> Suivi : ";
 						echo "<form method=\"GET\" action=\"fissa.php\">";
 						echo "<input type=\"hidden\" name=\"action\" value=\"suivi\"> " ;
 						echo "<input type=\"hidden\" name=\"nom\"  value=\"$nom\">";
 						echo "<input type=\"hidden\" name=\"date_jour\"  value=\"$date_jour\">";
-						echo "<TEXTAREA rows=\"4\" cols=\"110\" name=\"com\">$com</TEXTAREA>";
-						echo "</td> <td>";
-						echo "<input type=\"submit\" value=\"MaJ Suivi\" >  ";
+						echo "<TEXTAREA rows=\"4\" cols=\"110\" name=\"com\" onChange=\"this.form.submit();\">$com</TEXTAREA>";
+						echo "</td> ";
 						echo "</form> ";
-						echo "<tr> <td> ";
+						echo "<tr> <td> Plan d'action :  ";
 						echo "<form method=\"GET\" action=\"fissa.php\">";
 						echo "<input type=\"hidden\" name=\"action\" value=\"pda\"> " ;
 						echo "<input type=\"hidden\" name=\"nom\"  value=\"$nom\">";
 						echo "<input type=\"hidden\" name=\"date_jour\"  value=\"$date_jour\">";
-						echo "<TEXTAREA rows=\"4\" cols=\"110\" name=\"pda\">$pda</TEXTAREA>";
-						echo "</td> <td>";
-						echo "<input type=\"submit\" value=\"MaJ Plan d'action\" >  ";
+						echo "<TEXTAREA rows=\"4\" cols=\"110\" name=\"pda\" onChange=\"this.form.submit();\">$pda</TEXTAREA>";
+						echo "</td> ";
 						echo "</form> ";
 						echo "</table>  ";
-						}
-					echo "<a href=\"javascript:window.close();\">Fermer la fenêtre</a>"; 
+						fin_cadre();
+
+						if ($action!="accompagnement")
+								echo "<a href=\"fissa.php?action=accompagnement&nom=$nom&date_jour=$date_jour\" > ( N'afficher que l'accompagnement )</a>";
+							else
+								echo "<a href=\"fissa.php?action=suivi&nom=$nom&date_jour=$date_jour\" > ( Afficher tout l'historique )</a>";
+						}						
+
 					if  (($action=="suivi") || ($action=="pda"))
 						histo($nom,"");
 					else
@@ -707,16 +734,12 @@ include 'inc_style.php';
 		default:
 				// =====================================================================loc IMAGE
 				echo "<table border=\"0\" >";	
-				echo "<tr> <td> <a href=\"index.php\"> <img src=\"images/logo.png\" width=\"140\" height=\"100\"  > </a> </td> ";		
-
+				echo "<tr> <td> <a href=\"fissa.php\"> <img src=\"images/fissa.jpg\" width=\"140\" height=\"100\"  ></a></td> ";		
 				charge_date($date_jour);
-
-				echo "<td><table> <tr><td>  </td><td>  </td><td>  </td><td>  </td><td>  </td>";
-				echo "<td><a href=\"fissa.php\"> <img src=\"images/fissa.jpg\" width=\"200\" height=\"40\"> $libelle <a> </td> <tr> <td> ";
 
 				$i=0;
 				// =====================================================================loc DATE
-				echo "<td> ";
+				echo "<td width=\"450\"><center> <table> <tr> <td><b>$libelle</b> : </td><td>";
 				$d3= explode("/",$date_jour);  
 				$a=$d3[2];
 				$m=$d3[1];
@@ -730,32 +753,32 @@ include 'inc_style.php';
 				echo "<br>";
 				$aujourdhui=date('d/m/Y');
 				if ($date_jour!=$aujourdhui)
-					echo " <a href=\"fissa.php?action=date&date_jour=$aujourdhui\"> Aujourd'jui</a>";
+					echo " <a href=\"fissa.php?action=date&date_jour=$aujourdhui\">Aujourd'jui</a>";
 				
 				echo "</td> <td> ";
 				$jsuivant=date($format_date,  mktime(0,0,0 , $m, $j+1, $a));
 				echo " <a href=\"fissa.php?action=date&date_jour=$jsuivant\"> <img src=\"images/droite.png\"  width=\"20\" height=\"20\">  </a> </td> <td> ";
 				echo "<input type=\"submit\" value=\"Valider\" >  ";
-				echo " </form> ";
+				echo " </form> </table>";
 				
 				// =====================================================================loc RAPPORT
-				echo "</td> <td width=\"450\"> ";
-			
-				echo "<ul id=\"menu-bar\">";
+
+				echo "<hr><ul id=\"menu-bar\">";
 				echo "<li><a href=\"fissa.php?date_jour=$date_jour&action=rapport\" target=_blank>Rapport du $date_jour </a></li>";
 				echo "<li><a href=\"stat.php\" target=_blank>Statistiques</a>";
 				echo "<li><a href=\"index.php?action=dx\">Deconnexion</a>";
 				echo "</ul> </td>";
 				
-				echo "</td> </table> ";
-			
+				echo "</td>";
+				echo "<td><a href=\"index.php\"> <img src=\"images/logo.png\" width=\"70\" height=\"50\"><a></td>";			
 				if ($logo!="")
 					echo "<td> <a href=\"fissa.php\"> <img src=\"images/$logo\" width=\"200\" height=\"100\"  > </a> </td>";
 				
-				echo "</table> <P> ";
+				echo "</table> ";
 				
 				// =====================================================================loc Liste présents
-				echo "<table border=\"2\" >";
+				echo "<TABLE><TR> <td></td><td > <div class=\"CSS_titre\"  >";
+				echo "<table border=\"0\" >";
 				
 				// =====================================================================loc AJOUTER
 
@@ -764,14 +787,15 @@ include 'inc_style.php';
 				proposition("(B)","Bénévoles");				
 				proposition("(A)","Activités");					
 				echo "  </table> <P> ";
-				
+				fin_cadre();
+
 				if ($date_jour==date('d/m/Y'))
 					affiche_memo();
 					
-				echo "<table border=\"2\" >";
+				echo "<table id=\"dujour\"  border=\"2\" >";
 				
 				// =====================================================================loc AJOUTER
-				echo "<form method=\"GET\" action=\"fissa.php\">";
+				echo "<form method=\"GET\" action=\"fissa.php#dujour\">";
 				echo "<input type=\"hidden\" name=\"action\" value=\"nouveau\"> " ;
 				echo "<input type=\"hidden\" name=\"femme\" value=\"\"> " ;
 				echo "<input type=\"hidden\" name=\"memo\" value=\"\"> " ;	
@@ -791,7 +815,7 @@ include 'inc_style.php';
 				echo "</td> <td bgcolor=\"#d4ffaa\">"; 
 				echo "<input type=\"submit\" value=\"Ajouter\" >  ";
 				echo "</td>";
-	//			<td></td>";
+
 				echo " </form> ";	
 				// =====================================================================loc NOUVEAU
 				echo "<td bgcolor=\"#d4ffaa\"></td> <td bgcolor=\"#d4ffaa\"><form method=\"GET\" action=\"fissa.php\">";
@@ -812,8 +836,8 @@ include 'inc_style.php';
 					if ($nom_charge[$i]!="")
 						{
 						if (($ncolor++ %2 )==0) $color="#ffffff" ; else $color="#d4ffaa" ; 
-						echo "<tr> <td bgcolor=\"$color\"> ";
-						echo "<form method=\"GET\" action=\"fissa.php\">";
+						echo "<tr id=\"E$i\" > <td bgcolor=\"$color\"> ";
+						echo "<form method=\"GET\" action=\"fissa.php#E$i\">";
 						echo "<input type=\"hidden\" name=\"action\" value=\"nouveau\"> " ;
 						echo "<input type=\"hidden\" name=\"femme\" value=\"\"> " ;
 						echo "<input type=\"hidden\" name=\"date_jour\"  value=\"$date_jour\">";
@@ -827,7 +851,9 @@ include 'inc_style.php';
 						else
 							echo "</td> <input type=\"hidden\" name=\"presence\" value=\"$valeur\"> <td bgcolor=\"$color\">";
 						echo "</td> <td bgcolor=\"$color\">";
-						$reponse = command("SELECT * FROM $bdd where date='0000-00-00' and nom='$nom1' "); 
+						$nom_slash1= addslashes2($nom1);	
+
+						$reponse = command("SELECT * FROM $bdd where date='0000-00-00' and nom='$nom_slash1' "); 
 						if ($donnees = fetch_command($reponse) )
 							$n=stripcslashes($donnees["commentaire"]);	
 						else
@@ -837,7 +863,7 @@ include 'inc_style.php';
 						echo "</td> <td bgcolor=\"$color\"> ";
 
 						$valeur=stripcslashes($commentaire[$i]);
-						echo "<TEXTAREA rows=\"1\" cols=\"60\" name=\"commentaire\"onChange=\"this.form.submit();\" >$valeur</TEXTAREA>";
+						echo "<TEXTAREA rows=\"1\" cols=\"60\" name=\"commentaire\" onChange=\"this.form.submit();\" >$valeur</TEXTAREA>";
 						echo " </form> ";
 						echo "</td>";
 
@@ -846,9 +872,10 @@ include 'inc_style.php';
 				// =====================================================================locYNTHESE
 				
 				echo "<font size=\"2\">Rappel CNIL: \"les informations personnelles enregistrées doivent être «adéquates, pertinentes et non excessives au regard des finalités pour lesquelles elles sont collectées (article 6-3°)\"</font>";
-				echo "<table border=\"2\" >";
-				echo "<tr> <td> ";
-				echo "<form method=\"GET\" action=\"fissa.php\">";
+				echo "<TABLE><TR> <td></td><td > <div class=\"CSS_titre\"  >";
+				echo "<table id=\"synthese\"  border=\"0\" >";
+				echo "<tr> <td> <a href=\"fissa.php?action=suivi&nom=Synth\" target=_blank> Synthèse de la journée </a>";
+				echo "<form method=\"GET\" action=\"fissa.php#synthese\">";
 				echo "<input type=\"hidden\" name=\"action\" value=\"nouveau\"> " ;
 				echo "<input type=\"hidden\" name=\"nom\"  value=\"Synth\">";
 				echo "<input type=\"hidden\" name=\"date_jour\"  value=\"$date_jour\">";
@@ -858,13 +885,11 @@ include 'inc_style.php';
 					$synth="Faits marquants:\n ";
 				else 
 					$synth=stripcslashes($synth);
-				echo "<TEXTAREA rows=\"8\" cols=\"110\" name=\"commentaire\">$synth</TEXTAREA>";
-				echo "</td> <td>";
-				echo "<input type=\"submit\" value=\"Maj Synthése\" >";
-				echo "<p><p><a href=\"fissa.php?action=suivi&nom=Synth\" target=_blank> Historique </a>";
+				echo "<TEXTAREA rows=\"6\" cols=\"120\" name=\"commentaire\" onChange=\"this.form.submit();\" >$synth</TEXTAREA>";
+				echo "</td> ";
 				echo "</form> ";
 				echo "</table>  ";
-
+				fin_cadre();
 
 				// =====================================================================loc CHANGEMENT NOM
 				echo "<P> <table border=\"0\" ><tr> <td>";
@@ -879,17 +904,17 @@ include 'inc_style.php';
 						echo "<OPTION  VALUE=\"$sel\"> $sel </OPTION>";
 					}
 				echo "</SELECT>";
-				echo "</td> <td> à tranformer en </td> <td>";
+				echo "</td> <td> à transformer en </td> <td>";
 				echo "<input type=\"text\" name=\"nouveau\" size=\"20\" value=\"\">";	
 				echo "<input type=\"submit\" value=\"MaJ nom\" >  ";
 				echo " </form> ";
 				echo "</table>  ";
 				
 					// =====================================================================loc Histo
-				echo "<P> <table border=\"0\" ><tr> <td>";
+				echo "<P> <table border=\"0\" ><tr> <td>Consulter l'historique de </td><td>";
 				echo "<form method=\"GET\" action=\"fissa.php\" target=_blank>";
 				echo "<input type=\"hidden\" name=\"action\" value=\"suivi\"> " ;
-				echo "<SELECT name=nom>";
+				echo "<SELECT name=nom onChange=\"this.form.submit();\">";
 				echo "<OPTION  VALUE=\"\">  </OPTION>";
 				for ($j=0;$j<$jmax;$j++)
 					{
@@ -898,8 +923,7 @@ include 'inc_style.php';
 						echo "<OPTION  VALUE=\"$sel\"> $sel </OPTION>";
 					}
 				echo "</SELECT>";
-				echo "<input type=\"submit\" value=\"Historique\" >  ";
-				echo "</form> ";
+				echo "</form>  </td>";
 				echo "</table>  ";
 				break;
 		}

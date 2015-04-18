@@ -30,18 +30,28 @@
 				
 			foreach(glob("$version/*.sql") as $filename)
 				{
+				echo "<hr> Fichier -> '$filename' <br>";
+				
+				$nbc=0;
 				$templine = '';
 				$lines = file($filename); // Read entire file
 				foreach ($lines as $line)
 					{
-					if (substr($line, 0, 2) == '--' || $line == '') // Skip all comments
+
+					if (substr($line, 0, 2) == '--' || $line == '')   // Skip all comments ;
+						$templine = '';
+						else
 						$templine .= $line;
+						
 					if (substr(trim($line), -1, 1) == ';')
 						{
-						mysql_query($templine) or print('Error: '.mysql_error() . '<br >');
+						$nbc++;
+						mysql_query($templine) or print('Error: '.mysql_error() . '<br>$templine');
 						$templine = '';
 						}
+						
 					}
+				echo "<hr> $nbc Requêtes exécutées.";
 				}
 		
 		}

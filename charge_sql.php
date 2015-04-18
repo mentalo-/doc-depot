@@ -7,9 +7,9 @@
 		include 'exploit.php';		
 			
 		$filename = $_GET["f"] ;
-					
-		echo "<p> Fichier -> $filename <br>";
-
+		echo "<p> Fichier -> '$filename' <br>";
+		
+		$nbc=0;
 		$templine = '';
 		$lines = file($filename); // Read entire file
 		foreach ($lines as $line)
@@ -21,11 +21,14 @@
 				$templine .= $line;
 				
 			if (substr(trim($line), -1, 1) == ';')
-				{	
-				echo "<p>$templine<p>";
-				mysql_query($templine) or print('Error: '.mysql_error() . '<br >');
+				{
+				$nbc++;
+				mysql_query($templine) or print('Error: '.mysql_error() . '<br>$templine');
 				$templine = '';
 				}
+				
 			}
+		echo "<hr> $nbc Requêtes exécutées.";
+
 		}
 	?>

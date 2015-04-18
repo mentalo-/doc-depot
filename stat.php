@@ -149,7 +149,7 @@ include 'general.php';
 
 				// ===================================================================== Bloc DATE
 				echo "<table border=\"0\" >";
-				echo "<td> <a href=\"\"> <img src=\"images/fissa.jpg\" width=\"200\" height=\"40\">  <a> </td>   ";
+				echo "<td> <a href=\"\"> <img src=\"images/fissa.jpg\" width=\"140\" height=\"100\"  >  <a> </td>   ";
 				echo "<td> Debut:</td> <td> ";
 				echo "<form method=\"GET\" action=\"stat.php\">";
 				echo "<input type=\"hidden\" name=\"action\" value=\"date\"> " ;	
@@ -177,9 +177,9 @@ include 'general.php';
 				else
 					echo "<input type=\"submit\" value=\"Vue Synthètique\" >  ";
 				echo " </form> ";		
-
+				echo "</td> <td> <a href=\"javascript:window.close();\">Fermer la fenêtre</a></td> "; 
 				echo " </form> </table>";	
-						echo "<a href=\"javascript:window.close();\">Fermer la fenêtre</a>"; 
+
 						
 						
 			$crit_bene="  ( not (nom like '%(B)%')) and ( not (nom like '%(S)%')) and ( not (nom like '%(A)%')) and (nom<>'Synth') and (nom<>'Mail') and (pres_repas<>'Pour info')  ";
@@ -288,7 +288,8 @@ include 'general.php';
 			else
 				$ratio="-";
 			echo "<td width=\"20\">".$ratio."</td>";
-			
+		
+		$date_jour_fr=  $date_jour;
 		if (!$detail)
 			{
 			$date_jour=mise_en_forme_date_aaaammjj( $date_jour);
@@ -321,7 +322,7 @@ include 'general.php';
 				$nom=$d1["nom"];
 				if (($ncolor++ %2 )==0) $color="#ffffff" ; else $color="#d4ffaa" ; 
 
-				echo "<tr> <td bgcolor=\"$color\"> $num - <a href=\"fissa.php?action=suivi&nom=$nom&date_jour=$date_jour\" target=_blank> <b>$nom</b> </a></td><td bgcolor=\"$color\"> </td>";
+				echo "<tr> <td bgcolor=\"$color\"> $num - <a href=\"fissa.php?action=suivi&nom=$nom&date_jour=$date_jour_fr\" target=_blank> <b>$nom</b> </a></td><td bgcolor=\"$color\"> </td>";
 				$nb = $d1["TOTAL"];
 				echo "<td width=\"20\" bgcolor=\"$color\"> $nb </td>";
 				// if ($nbr!=0) echo "<td width=\"20\" bgcolor=\"$color\">($nbr)</td>";
@@ -346,7 +347,7 @@ include 'general.php';
 				$tot = $d1["TOTAL"];
 				$nom=$d1["nom"];
 				if (($ncolor++ %2 )==0) $color="#ffffff" ; else $color="#d4ffaa" ; 
-				echo "<tr> <td bgcolor=\"$color\"> $num - <a href=\"fissa.php?action=suivi&nom=$nom&date_jour=$date_jour\" target=_blank> <b>$nom  </b></td><td bgcolor=\"$color\"> </td>";
+				echo "<tr> <td bgcolor=\"$color\"> $num - <a href=\"fissa.php?action=suivi&nom=$nom&date_jour=$date_jour_fr\" target=_blank> <b>$nom  </b></td><td bgcolor=\"$color\"> </td>";
 				$nb = $d1["TOTAL"];
 				echo "<td width=\"20\" bgcolor=\"$color\"> $nb </td>";
 				}
@@ -372,7 +373,7 @@ include 'general.php';
 				$tot = $d1["TOTAL"];
 				$nom=$d1["nom"];
 				if (($ncolor++ %2 )==0) $color="#ffffff" ; else $color="#d4ffaa" ; 
-				echo "<tr> <td bgcolor=\"$color\"> $num - <a href=\"fissa.php?action=suivi&nom=$nom&date_jour=$date_jour\" target=_blank> <b>$nom  </b></td><td bgcolor=\"$color\"> </td>";
+				echo "<tr> <td bgcolor=\"$color\"> $num - <a href=\"fissa.php?action=suivi&nom=$nom&date_jour=$date_jour_fr\" target=_blank> <b>$nom  </b></td><td bgcolor=\"$color\"> </td>";
 				$nb = $d1["TOTAL"];
 				echo "<td width=\"20\" bgcolor=\"$color\"> $nb </td>";
 				}

@@ -146,7 +146,7 @@ function random_chaine($car)
 					{
 					if (parametre("TECH_alarme_supervision_sms") =="")
 						{
-						envoi_mail(parametre('DD_mail_gestinonnaire'),"Début alarme délais supervision gateway sms ","");
+						envoi_mail(parametre('DD_mail_gestinonnaire'),"Début alarme délais supervision gateway sms","");
 						ajout_log_tech( "Dépassement délais supervision gateway SMS ","P0");
 						ecrit_parametre("TECH_alarme_supervision_sms",time()) ;
 						}
@@ -246,25 +246,10 @@ function random_chaine($car)
 					}
 				ecrit_parametre("TECH_alarme_delais_TTT",'') ;
 				}
-			
-			}
 
-	/*
-	commentaire_html("TTT: Affiche Indicateurs");
-
-	// Affichage des principaux indicaturs
-	titre_kpi();
-	
-	$date=date('Y-m-d',  mktime(0,0,0 , date("m"), date("d")-1, date ("Y")));
-	kpi("$date");
-	
-	$date=date('Y-m-d',  mktime(0,0,0 , date("m"), date("d")-7, date ("Y")));
-	kpi("$date");
-	
-	echo "<p> Nbre de mails envoyés : ". parametre("TECH_nb_mail_envoyes");
-	echo "<p> Nbre de SMS envoyés : ". parametre("TECH_nb_sms_envoyes");
-	*/
-
+		require_once "alerte_ttt.php";
+		}	
+		
 	echo "</body>";
 
 	

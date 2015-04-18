@@ -1,4 +1,4 @@
-  <?php  
+<?php  
 
 	
 // cast-128 gost rijndael-128 twofish arcfour cast-256 loki97 rijndael-192 saferplus wake blowfish-compat des rijndael-256 serpent xtea blowfish enigma rc2 tripledes
@@ -120,4 +120,4 @@
 		pied_de_page("x");
 		}
 		
-	?> 
+	?>

@@ -1,11 +1,37 @@
 <?php 
 
 // ------------------------------------------------------
-// DOC-DEPOT : COPYRIGTH ADILEOS - Décembre 2013/Mars 2015
+// DOC-DEPOT : COPYRIGTH ADILEOS - Décembre 2013/Avril 2015
 
 session_start(); 
 
 error_reporting(E_ALL | E_STRICT);
+/*
+// mi en commentaire car empeche les test seleniçum 
+
+// { Début - Première partie
+if(!empty($_POST) OR !empty($_FILES))
+	{
+    $_SESSION['sauvegarde'] = $_POST ;
+    $_SESSION['sauvegardeFILES'] = $_FILES ;
+
+    $fichierActuel = $_SERVER['PHP_SELF'] ;
+    if(!empty($_SERVER['QUERY_STRING']))
+       $fichierActuel .= '?' . $_SERVER['QUERY_STRING'] ;
+    header('Location: ' . $fichierActuel);
+    exit;
+	}
+// } Fin - Première partie
+
+// { Début - Seconde partie
+if(isset($_SESSION['sauvegarde']))
+	{
+    $_POST = $_SESSION['sauvegarde'] ;
+    $_FILES = $_SESSION['sauvegardeFILES'] ;
+    unset($_SESSION['sauvegarde'], $_SESSION['sauvegardeFILES']);
+	}
+// } Fin - Seconde partie
+*/
 
 include 'general.php';
 
@@ -24,6 +50,11 @@ include 'general.php';
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">
 
+<script src="http://code.jquery.com/jquery-1.5.1.min.js"></script> 
+		<script type="text/javascript">
+			$(document).ready(function() { $('#msg_ok').delay(3000).fadeOut();});
+		</script>
+		
 <script language="JavaScript">
 function afficheNouveauType(){
     if (document.getElementById('organisme').value=="")
@@ -95,6 +126,7 @@ window.onload = function() {
 
 <script>
 	</script>
+
  <?php
 	//	header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 	//	header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date dans le passé
@@ -1258,7 +1290,7 @@ function maj_mdp_fichier($idx, $pw )
 	FUNCTION modif_tel($idx,$telephone, $mail)
 		{
 		$plus="";
-		if ($telephone[0]=='+')
+		if (isset ($telephone[0]) && ($telephone[0]=='+') )
 			$plus='+';
 		$telephone = $plus.preg_replace('`[^0-9]`', '', $telephone);
 		if ($mail!="")
@@ -1976,9 +2008,6 @@ function maj_mdp_fichier($idx, $pw )
 		affiche_un_choix($val_init,"FISSA");
 		affiche_un_choix($val_init,"Planning Usagers");
 		affiche_un_choix($val_init,"Planning Accueillants");			
-		affiche_un_choix($val_init,"Pack SMS");			
-		affiche_un_choix($val_init,"SMS Groupé");			
-		affiche_un_choix($val_init,"Suivi Usagers");
 		echo "</SELECT></td>";
 		}
 		
@@ -2041,7 +2070,9 @@ function maj_mdp_fichier($idx, $pw )
 				if ($action=="ajout_offre")  
 					lien_c ("images/croixrouge.png", "supp_offre", param("idx_offre","$orga" ),traduire("Supprimer") );
 				}
-			echo "</table></div><HR>";				
+			echo "</table></div>";				
+		if ($action=="ajout_offre") 
+			pied_de_page("x");
 		}
 
 
@@ -2461,6 +2492,7 @@ function affiche_membre($idx)
 				{
 				// liste des actions ne nécessitant pas de droits
 				case "":
+				case "liste":
 				case "fr":
 				case "es":
 				case "de":
@@ -2497,6 +2529,7 @@ function affiche_membre($idx)
 				case "user_actif":
 				case "phpinfo":
 				case "archivage_php":
+				case "cmd_sql":
 				case "dde_chgt_cle":
 				case "chgt_cle":
 				case "supp_upload":
@@ -2583,6 +2616,7 @@ function affiche_membre($idx)
 				case "offres" :				
 				case "ajout_offre" :				
 				case "supp_offre" :				
+				case "nouveau_fissa" :				
 
 				// liste des actions nécessitant des droits de Fonctionnel	
 				
@@ -2594,6 +2628,8 @@ function affiche_membre($idx)
 				case "desactive_sms2mail":
 				case "active_sms2mail":
 				case "liste_compte":
+				case "chgt_user":
+				
 				case "afflog":
 				case "afflog_t":
 				
@@ -2734,7 +2770,7 @@ require_once 'include_crypt.php';
 			}	
 		if ($action=="enreg_contact")
 			{
-			aff_logo();
+			aff_logo_multiple();
 			$ip= $_SERVER["REMOTE_ADDR"];
 			tempo_cx ($ip);
 			enreg_contact(variable("qui"),variable("coordonnees"),variable("descript"));
@@ -2745,10 +2781,7 @@ require_once 'include_crypt.php';
 		if ($action=="bug")
 			{
 			$date_jour=date('Y-m-d');
-			aff_logo();
-			$ip= $_SERVER["REMOTE_ADDR"];
-			ajout_echec_cx ($ip);
-			
+			aff_logo_multiple();
 			debut_cadre("700");
 			echo "<p><br>".traduire('Signaler un bug ou demander une évolution')." : ";
 			formulaire ("enreg_bug");
@@ -2782,9 +2815,7 @@ require_once 'include_crypt.php';
 		if ($action=="contact")
 			{
 			$date_jour=date('Y-m-d');
-			aff_logo();
-			$ip= $_SERVER["REMOTE_ADDR"];
-			ajout_echec_cx ($ip);
+			aff_logo_multiple();
 			debut_cadre("700");
 			echo "<p><br> ".traduire('Pour faire une demande auprès du support de Doc-depot.com, merci de remplir le formulaire suivant')." : ";
 			formulaire ("enreg_contact");
@@ -2799,7 +2830,7 @@ require_once 'include_crypt.php';
 			echo "<TR> <td> </td> <td><input type=\"submit\"  id=\"enreg_contact\" value=\"".traduire('Envoyer la demande')."\"/><br></td>";
 			echo "</form> </table>  <p> ".traduire('Nous vous contacterons dans les meilleurs délais.')." <br><br>";
 			fin_cadre();
-			pied_de_page("x");
+			pied_de_page();
 			}				
 	
 		if ($action=="maj_user")
@@ -3332,12 +3363,32 @@ require_once 'include_crypt.php';
 			pied_de_page("x");
 			}	
 
-
+		if ($action=="liste") 
+			{
+			aff_logo();
+			echo "<p>Liste des structures déployant 'doc-depot' : " ;
+			titre_organisme();
+			
+			$reponse =command("select * from  r_organisme where not (mail regexp 'fixeo' ) order by organisme asc");
+			while ($donnees = fetch_command($reponse) ) 
+				{
+				$adresse=stripcslashes($donnees["adresse"]);
+				$organisme=stripcslashes($donnees["organisme"]);		
+				$tel=$donnees["tel"];	
+				$mail=$donnees["mail"];	
+				$sigle=stripcslashes($donnees["sigle"]);	
+				echo "<tr><td> $organisme </td><td> $sigle </td><td> $adresse   </td><td> $tel </td><td> $mail</td>";
+				}
+			echo "</table></div>";				
+			pied_de_page("");
+			}	
+			
 	if ($action=="dx") 
 		{
 		if ( (isset ($_SESSION['pass'])) && ($_SESSION['pass']==TRUE)  ) 
 				ajout_log( $_SESSION['user_idx'], traduire('Déconnexion') );
 		$_SESSION['pass']=false;// et hop le mot de passe... poubelle !
+		$_SESSION['chgt_user']=false;
 		echo "<div id=\"msg_dx\">".traduire('Vous êtes déconnecté!')."</div><br>";
 		}
 
@@ -3384,6 +3435,7 @@ if (isset($_POST['pass']))
 			$_SESSION['droit']= $donnees["droit"];
 			$_SESSION['filtre']= "";
 			$_SESSION['ad']=false;	
+			$_SESSION['chgt_user']=false;
 			
 			if (($donnees["droit"]=="A") && ($ancien_droit!="A"))
 				envoi_mail( parametre('DD_mail_gestinonnaire') , "Connexion administrateur : ".$donnees["nom"]." ".$donnees["prenom"], "IP : $ip" );
@@ -3436,6 +3488,14 @@ if (isset($_POST['pass']))
 			}
 	}
 
+	if ( ($action=="chgt_user") && ($_SESSION['droit']=="E"))
+		{
+		$_SESSION['user']=variable_s('user');
+		unset($_SESSION['droit']);
+		$_SESSION['chgt_user']=true;
+		$action="";
+		}
+		
 	// ------------------------------------ on collecte les infos utiles du user connceté
 	if (isset($_SESSION['user']))
 		{
@@ -3513,7 +3573,7 @@ if (isset($_POST['pass']))
 	if (($user_droit=="R") || ($user_droit=="A")) 
 		$_SESSION['bene']="";
 	
-	
+		
 	if ($action=="recept_mail")
 		recept_mail($_SESSION['user_idx'],$date_jour);	
 	
@@ -3764,7 +3824,8 @@ if (isset($_POST['pass']))
 			echo "- ( <img src=\"images/inactif.png\"width=\"20\" height=\"20\"> ".traduire('Compte inactif')." ) ";
 		if($user_droit=="")
 			echo "- ( $user_anniv ) ";
-
+		if (isset ($_SESSION['chgt_user']) && ($_SESSION['chgt_user']==true) )
+			msg_ok("Lecture seule");
 		echo "</td></table></td>";
 		
 		echo "<tr><td><hr>";
@@ -3847,6 +3908,7 @@ if (isset($_POST['pass']))
 		echo "</td>";
 
 		
+			echo "<td><center> ";		
 		if ($user_droit!="")
 			{
 			$r1 =command("select * from  r_organisme where idx='$user_organisme' ");
@@ -3854,27 +3916,26 @@ if (isset($_POST['pass']))
 			$logo=$d1["logo"];
 			$_SESSION['logo']=$logo;
 			
-			echo "<td><center> ";
+
 				//* ----------------------------------FISSA
 			$reponse = command("SELECT * from  fct_fissa WHERE organisme='$user_organisme'"); 
 			if ($donnees = fetch_command($reponse))
 				{
 				$_SESSION['support']=$donnees["support"];
-				echo "<a href=\"fissa.php\"><img src=\"images/fissa.jpg\" width=\"150\" height=\"40\"></a> ";
+				echo "<a href=\"fissa.php\"><img src=\"images/fissa.jpg\" width=\"70\" height=\"50\"></a>";
 				}
 
 			//* ---------------------------------- Calendrier
 			$jfissa=0;
 			$reponse = command("SELECT * from  fct_calendrier WHERE organisme='$user_organisme'"); 
 			if ($donnees = fetch_command($reponse))
-				echo "<br> <a href=\"index.php?action=cc_activite\"><img src=\"images/calendrier.jpg\" width=\"100\" height=\"40\"> </a>";
-
-			//-----------------------------------*/ 		
-			echo "</center></td>";
-			
-			if ($logo!="")
-				echo "<td> <img src=\"images/$logo\" width=\"200\" height=\"100\"  > </td>";
+				echo "<a href=\"index.php?action=cc_activite\"><img src=\"images/calendrier.jpg\" width=\"70\" height=\"50\"></a>";
 			}
+			
+		echo "<a title=\"Alerte Grand Froid\" href=\"alerte.php\"><img src=\"images/logo-alerte.jpg\" width=\"70\" height=\"50\"></a> ";
+			
+		//-----------------------------------*/ 		
+		echo "</center></td>";			
 	
 		echo "</table>";
 
@@ -3904,9 +3965,12 @@ if (isset($_POST['pass']))
 		phpinfo();
 		pied_de_page();
 		}
-		
+
+	
 	if (($action=="archivage_php") &&  ($user_droit=="E")) 
 		{
+		ajout_log_tech( "Archivage PHP et SQL" , "P2");
+
 		archivage_php();
 		echo "<p> Sauvegarde Tables ";
 		backup_tables(false);
@@ -4073,6 +4137,7 @@ if (isset($_POST['pass']))
 
 			echo "<li><a href=\"index.php?action=phpinfo\"> Phpinfo </a></li>";
 			echo "<li><a href=\"index.php?action=archivage_php\"> Archivage Php+Sql </a></li>";
+			echo "<li><a href=\"index.php?action=cmd_sql\"> Commande Sql </a></li>";
 			echo "</ul></ul >";
 			echo "<td></table>";
 
@@ -4168,7 +4233,13 @@ if (isset($_POST['pass']))
 			pied_de_page("x");
 			}
 		}				
-	
+		
+	if (($action=="cmd_sql") && ( ($user_droit=="E")) )
+		{
+		include('command_sql.php');
+		pied_de_page();
+		}	
+		
 	// permet la reinitialisation d'un mot de passe paticilier d'un compte 
 	if (($action=="raz_mdp") &&  ($user_droit=="E"))
 		{
@@ -4189,19 +4260,19 @@ if (isset($_POST['pass']))
 	if ( ($action=="liste_compte") && ($user_droit=="E"))
 			{
 			echo "</table><div class=\"CSSTableGenerator\" > ";
-			echo "<table><tr><td > ".traduire('N°')."  </td><td> ".traduire('Création')."</td><td> ".traduire('Nom')."</td><td> ".traduire('Prénom')."</td><td> ".traduire('Mail')."</td><td> ".traduire('Tel')."</td><td> ".traduire('Droit')."</td>";
+			echo "<table><tr><td > ".traduire('N°')."  </td><td> ".traduire('Création')."</td><td> ".traduire('Identifiant')."</td><td> ".traduire('Nom')."</td><td> ".traduire('Prénom')."</td><td> ".traduire('Mail')."</td><td> ".traduire('Tel')."</td><td> ".traduire('Droit')."</td>";
 			$reponse =command("select * from  r_user order by idx desc");		
 			while ($donnees = fetch_command($reponse) ) 
 				{
 				$idx1=$donnees["idx"];	
 				$creation=$donnees["creation"];
+				$id=$donnees["id"];
 				$nom=$donnees["nom"];
 				$prenom=$donnees["prenom"];
 				$mail=$donnees["mail"];
 				$tel=$donnees["telephone"];
 				$droit=$donnees["droit"];
-				echo "<tr><td>  $idx1   </a></td><td> $creation </td><td> $nom </td><td> $prenom </td><td> $mail </td><td> $tel </td><td> $droit </td>";
-
+				echo "<tr><td>  $idx1 </td><td> $creation </td><td>  <a href=\"index.php?action=chgt_user&user=$idx1\"> $id </a></td><td> $nom </td><td> $prenom </td><td> $mail </td><td> $tel </td><td> $droit </td>";
 				lien_c ("images/illicite.png", "raz_mdp1", param("idx","$idx1" ) , traduire("Raz MdP"));
 				}
 			echo "</table></div>";
@@ -4291,6 +4362,19 @@ if (isset($_POST['pass']))
 			echo "</table></div>";
 			
 			echo "<p><div class=\"CSSTableGenerator\" ><table><tr><td > ".traduire('Support')."  </td><td > ".traduire('Libellé')."  </td><td> ".traduire('Libellé Acteur')." </td><td> ".traduire('Libellé Bénéficiaire')." </td><td> ".traduire('Mails complémentaires')." </td>";
+			
+			formulaire ("nouveau_fissa");
+			echo "<tr>";
+			echo "<td> <input type=\"texte\" name=\"support\"   size=\"20\" value=\"\"> </td>";
+			echo "<td> <input type=\"texte\" name=\"libelle\"   size=\"20\" value=\"\"> </td>";
+			echo "<td> <input type=\"texte\" name=\"acteur\"   size=\"10\" value=\"\"> </td>" ;
+			echo "<td> <input type=\"texte\" name=\"beneficiaire\"   size=\"25\" value=\"\"> </td>" ;
+			echo "<td> <input type=\"texte\" name=\"mails_rapports\" size=\"40\"  value=\"\"> </td> " ;
+
+			echo "<input type=\"hidden\" name=\"user\"  value=\"$idx\"> " ;
+			echo "<input type=\"hidden\" name=\"organisme\"  value=\"$organisme\"> " ;
+			echo "<td><input type=\"submit\" id=\"nouveau_fissa\" value=\"".traduire('Ajouter')."\" ></form> </td> ";			
+			
 			$reponse =command("select * from fct_fissa where organisme='$organisme' ");		
 			while ($donnees = fetch_command($reponse) ) 
 				{
@@ -4300,7 +4384,6 @@ if (isset($_POST['pass']))
 				$beneficiaire=$donnees["beneficiaire"];
 				$mails_rapports=$donnees["mails_rapports"];
 				echo "<tr><td>  $support </td><td>  '$libelle'  </td><td> '$acteur' </td><td> '$beneficiaire'</td><td> $mails_rapports </td>";
-
 				}			
 				
 			echo "</table></div>";			

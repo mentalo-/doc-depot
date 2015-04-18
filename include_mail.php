@@ -22,7 +22,7 @@
 		maj_compteur_envoi_mail();
 		
 		// si envoie depuis le pc de test , on ne fait que l'afficher
-		if (($_SERVER['REMOTE_ADDR']=="127.0.0.1"))
+		if (($_SERVER['REMOTE_ADDR']=="127.0.0.1") ||(isset ($_SESSION['chgt_user']) && ($_SESSION['chgt_user']==true) ) )
 			{
 			echo "<table border=\"2\"> <tr> <td>$to <hr>" ;
 			echo "$subject <hr>" ;
@@ -70,7 +70,7 @@
 					<font size=\"5\">'' ".traduire("Mon essentiel à l'abri en toute confiance")." ''</font> <p> $body";
 			}
 
-		if (($_SERVER['REMOTE_ADDR']=="127.0.0.1"))
+		if (($_SERVER['REMOTE_ADDR']=="127.0.0.1") ||(isset ($_SESSION['chgt_user']) && ($_SESSION['chgt_user']==true) ))
 			{
 			echo "<table border=\"2\"> <tr> <td>$to <hr>" ;
 			echo "$subject <hr>" ;
@@ -94,9 +94,9 @@
 		if (!$masque)
 			{
 			if ($CR_Mail === FALSE)
-					erreur( "Erreur envoi mail: $CR_Mail <br> \n");
+					erreur( "Erreur envoi mail: $CR_Mail");
 				else
-					echo traduire('Mail envoyé')."<br> \n";
+					msg_ok( traduire('Mail envoyé'));
 			}
 		}
 
@@ -106,7 +106,7 @@
 		maj_compteur_envoi_mail();
 		ecrit_parametre("TECH_nb_sms_envoyes",parametre("TECH_nb_sms_envoyes")+1) ;
 
-		if (($_SERVER['REMOTE_ADDR']=="127.0.0.1"))
+		if (($_SERVER['REMOTE_ADDR']=="127.0.0.1") ||(isset ($_SESSION['chgt_user']) && ($_SESSION['chgt_user']==true) ))
 			{
 			echo "<table border=\"2\"> <tr> <td> SMS </td><td>" ;
 			echo "$subject </td><td> " ;
@@ -130,6 +130,8 @@
 		
 	function alerte_SMS($body)		
 		{
+		$body = parametre("TECH_identite_environnement")." : ".$body;
+
 		if (parametre('DD_tel_alarme1')!="")
 			envoi_SMS(parametre('DD_tel_alarme1'),$body);	
 		if (parametre('DD_tel_alarme2')!="")
@@ -223,32 +225,65 @@ function TTT_mail($aff=true)
 				}
 			else
 				{
-				$cmd= "SELECT * from  r_user WHERE ((telephone='0$n') or (telephone='+33$n')  ) and droit='' ";
-				$reponse = command($cmd); 
-				if ($donnees = fetch_command($reponse)) 
+				$ligne = trim(imap_fetchbody($mBox, $i, 1));
+				$pos = strpos(strtolower($ligne), "alerte");	
+				
+				ajout_log_tech( "Reception SMS de $n : '$ligne' ($pos)");
+				if  (strtolower($ligne)=="stop" ) 
+					command("delete from `cc_alerte` where tel='+33$n' ");
+				else
+					{
+					// cas ALERTE SMS
+					$pos = strpos(strtolower($ligne), "alerte");
+					if ($pos == 0 )
 						{
-						$date_jour=date('Y-m-d')." ".$heure_jour=date("H\hi:s");
-						$idx=$donnees["idx"];
-						$ligne = imap_fetchbody($mBox, $i, 1);
-						
-						if ($donnees = fetch_command($reponse))
+						$dept = trim(substr(strtolower($ligne), 6) );
+						if (($dept>1) && ($dept<100) )
 							{
-							// cas où il y a 2 fois le même téléphone==> anormal
-							ajout_log_tech ("2 fois le même numéro $n pour un bénéficiaire ! ","P1");
+							$r1 = command("SELECT * FROM cc_alerte WHERE (tel='+33$n')  ");
+							$d1 = fetch_command($r1);
+							$format_date = "d/m/Y";
+							$date= date($format_date );
+							$t0=time();
+							$ip= $_SERVER["REMOTE_ADDR"];
+
+							if ($d1)
+								command("UPDATE `cc_alerte` SET dept='$dept' ,sueil='-5',stop='' ,modif='$t0', ip='$ip' where tel='+33$n'  ");
+							else
+								command("INSERT INTO `cc_alerte`  VALUES ( '$date', '+33$n', '$dept', '-5','','','','','$ip','$t0')");
 							}
 						else
+							envoi_sms("+33$n","Demande d'alerte SMS non pris en compte car pas d'indication de numéro de département");
+						}
+					else
+						{				
+						$cmd= "SELECT * from  r_user WHERE ((telephone='0$n') or (telephone='+33$n')  ) and droit='' ";
+						$reponse = command($cmd); 
+						if ($donnees = fetch_command($reponse)) 
 							{
-							if (!strstr(strtolower($ligne), "activation"))
+							$date_jour=date('Y-m-d')." ".$heure_jour=date("H\hi:s");
+							$idx=$donnees["idx"];
+							$ligne = imap_fetchbody($mBox, $i, 1);
+							
+							if ($donnees = fetch_command($reponse))
 								{
-								$cmd= "INSERT INTO r_sms VALUES ('$date_jour', '$idx', '$ligne' ) ";
-								$reponse = command($cmd); 
+								// cas où il y a 2 fois le même téléphone==> anormal
+								ajout_log_tech ("2 fois le même numéro $n pour un bénéficiaire ! ","P1");
 								}
 							else
-								recept_mail($idx,date('Y-m-d'));
+								{
+								if (!strstr(strtolower($ligne), "activation"))
+									{
+									$cmd= "INSERT INTO r_sms VALUES ('$date_jour', '$idx', '$ligne' ) ";
+									$reponse = command($cmd); 
+									}
+								else
+									recept_mail($idx,date('Y-m-d'));
+								}
 							}
-
 						}
 					}
+				}
 			}					
 		imap_delete($mBox, $i);
 		imap_expunge($mBox);
