@@ -7,8 +7,6 @@ session_start();
 
 error_reporting(E_ALL | E_STRICT);
 
-
-
 // { Début - Première partie
 if(!empty($_POST) OR !empty($_FILES))
 	{
