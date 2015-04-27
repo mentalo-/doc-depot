@@ -187,7 +187,15 @@ include 'bdd.php';
 						'caeeeeun                        ')
 			);
 		}
+	
+	Function mef_texte_a_afficher($nom)
+		{
+		$nom = str_replace ("<","&lsaquo;", $nom);
+		$nom = str_replace (">","&rsaquo;", $nom);
 		
+		return($nom);
+		}	
+	
 	Function mef_nom($nom)
 		{
 		$nom=strtolower($nom);
@@ -418,9 +426,14 @@ include 'bdd.php';
 		return "<input type=\"hidden\" name=\"$var\" value=\"$val\">";
 		}
 	
-	function lien($image, $action, $param, $title="", $size="20", $blank="", $sans_lien="")
+	function lien($image, $action, $param, $title="", $size="20", $blank="", $sans_lien="", $arrondi =false )
 		{
 		commentaire_html(" $image / $action / $blank");
+		
+		if ($arrondi)
+			$format_arrondi="class=\"arrondie\"";
+		else
+			$format_arrondi="";			
 		
 		if ($blank!="") 
 			$blank = "target=_blank";
@@ -433,18 +446,18 @@ include 'bdd.php';
 
 			echo "<form method=\"POST\" action=\"$source\" $blank >";
 			if ($size=="")
-				echo "<input type=\"image\" src=\"$image\" title=\"".traduire($title)."\">";
+				echo "<input type=\"image\" src=\"$image\" title=\"".traduire($title)."\" $format_arrondi>";
 			else
-				echo "<input type=\"image\" src=\"$image\" width=\"$size\" height=\"$size\" title=\"".traduire($title)."\">";
+				echo "<input type=\"image\" src=\"$image\" width=\"$size\" height=\"$size\" title=\"".traduire($title)."\" $format_arrondi>";
 			echo "<input type=\"hidden\" name=\"action\" value=\"$action\">";
 			echo "$param </form>";
 			}
 		else
 			{
 			if ($size=="")
-				echo "<input type=\"image\" src=\"$image\" title=\"".traduire($title)."\">";
+				echo "<input type=\"image\" src=\"$image\" title=\"".traduire($title)."\" $format_arrondi>";
 			else
-				echo "<input type=\"image\" src=\"$image\" width=\"$size\" height=\"$size\" title=\"".traduire($title)."\">";
+				echo "<input type=\"image\" src=\"$image\" width=\"$size\" height=\"$size\" title=\"".traduire($title)."\" $format_arrondi >";
 			}
 
 		}

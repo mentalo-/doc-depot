@@ -352,8 +352,6 @@ include 'general.php';
 				echo "<td width=\"20\" bgcolor=\"$color\"> $nb </td>";
 				}
 
-
-
 			$req_sql_activite="SELECT *,count(*) as TOTAL FROM $bdd where date<='$date_fin' and date>='$date_jour' and $crit_activite and pres_repas<>'Pour info' group by nom order by TOTAL DESC";
 			$num=0;
 			$r1 = command($req_sql_activite); 
@@ -389,12 +387,14 @@ include 'general.php';
 			while ($d1 = fetch_command($r1) )	
 				{
 				$nom=$d1["nom"];
+				$nb = $d1["TOTAL"];
 				$reponse = command("select distinct * from $bdd where date<'$date_jour' and date<>'0000-00-00'  and nom='$nom'  group by nom");
 				if (!fetch_command($reponse) )
 					{
-					echo "$nom, ";
+					echo "$nom ($nb), ";
 					$nb_nouveaux++;
 					}
+				
 				}
 			echo "<p>Total : $nb_nouveaux nouveaux";
 			echo "<p><a href=\"javascript:window.close();\">Fermer la fenêtre</a>"; 	

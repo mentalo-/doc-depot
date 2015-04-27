@@ -1,7 +1,7 @@
 <?php
 
 if ($_SESSION['pass']==true) 
-		{
+	{
 
 	if(!isset($_POST)) die("Bad behavior");
 
@@ -20,18 +20,22 @@ if ($_SESSION['pass']==true)
 			{
 			echo "<td>";
 			echo "<a href=\"?action=cmd_sql&query=select * from $table\">";
-
 			echo "$table </a></td><td>|</td>";
+			if ( ( strpos($q,$table) ) && ( strpos($q,"select ")===false ) )
+				backup_tables(false,$table);
+				
 			}
 		echo "</table>";
-		
+
+	
 	// SQL access
 	formulaire ("cmd_sql");
 	echo "<p><textarea name=\"query\" cols=\"80\" rows=\"4\">$q</textarea>
 	  <input type=\"submit\" name=\"Submit\" value=\"Submit\" /></p></form>";
-
+	echo "<a href=\"?action=cmd_sql_backup&query=\"> ==> Sauvegardes tables </a>";
 	if ($q!="select * from ")
 		{
+		ajout_log_tech( "Commande SQL : $q")	;	
 
 		$results = command($q)
 		or die("<br>$q<br>".mysql_error());
@@ -58,7 +62,7 @@ if ($_SESSION['pass']==true)
 				{
 				if(intval($k) != 0 || $k == '0') continue;
 				
-				if (strlen($v)>=12)
+				if ((strlen($v)>=12) && (strpos($v," ")===false) )
 					{
 					$decrp=decrypt($v);
 					if ($decrp!="")

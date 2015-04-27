@@ -32,6 +32,22 @@
 		}
 	
 	
+	function purge_bdd_fissa()
+		{	
+		commentaire_html("purge_dbb_fissa");
+		$avant= date('Y-m-d',  mktime( 0,0, 0 , date("m"), date("d"), date ("Y")-2 ));
+		echo "<br>Purge BDD FISSA";
+		$reponse =command("select * from fct_fissa");		
+		while ($donnees = fetch_command($reponse) ) 
+				{
+				$support =$donnees["support"];		
+				$crit=" ( not (nom like '%(A)%')) and (nom<>'Synth') and (nom<>'Mail')   ";
+				$r1 =command("update $support set commentaire='' where  $crit and date<'$avant' ");		
+				}
+		}
+		
+		
+		
 	function purge_fichiers_temporaires($dir)
 		{
 		commentaire_html("purge_fichiers_temporaires");
@@ -114,6 +130,13 @@ function random_chaine($car)
 				ctrl_signature();
 				}			
 
+		if (date('Y-m-d-h',  time()) != date('Y-m-d-h',  $ancien_ttt ))
+			if ($heure==3)
+				{
+				ajout_log_tech( "purge BdD FISSA");
+				purge_bdd_fissa();
+				}
+				
 		commentaire_html( "Purge temporaire");
 		purge_fichiers_temporaires("dir_zip/");		
 		purge_fichiers_temporaires("tmp/");		
@@ -131,6 +154,8 @@ function random_chaine($car)
 				( ( rand(0,300)==1 ) && ($heure>6) && ($heure<20))
 				||
 				( rand(0,1300)==1 )
+				||
+				( parametre("TECH_alarme_supervision_sms")!="" )  // si alarme 
 				)
 				)
 				{
@@ -247,6 +272,7 @@ function random_chaine($car)
 				ecrit_parametre("TECH_alarme_delais_TTT",'') ;
 				}
 
+		ajout_log_jour(" ==================================================================================================== TTT_Alerte");
 		require_once "alerte_ttt.php";
 		}	
 		

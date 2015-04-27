@@ -1,7 +1,9 @@
 <style>
-table {
-    border-collapse: collapse;
-    border-spacing: 0;
+
+.arrondie {
+-moz-border-radius:20px;
+-webkit-border-radius:20px;
+border-radius:20px;
 }
 
 .CSS_titre 
@@ -230,6 +232,7 @@ table {
     border-collapse: collapse;
         border-spacing: 0;
 	width:100%;
+	height:100%;
 	margin:0px;padding:0px;
 }.CSSTableGenerator tr:last-child td:last-child {
 	-moz-border-radius-bottomright:0px;
@@ -305,9 +308,4 @@ table {
 	border-radius:25px;
 	border:2px groove;
 	}
-
-.div_sans_underline {
-text-decoration:none;
-}
-
 </style>

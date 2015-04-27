@@ -3,16 +3,29 @@
 $temp_3j= array();
 $temp_3j_max= array();
 
-	ajout_log_jour(" ==================================================================================================== TTT_Alerte");
 
 	function calcul_moyenne($departement )
 		{
-		global $temp_3j,$temp_3j_max,$jour_3j,$pluie,$jour_pluie;
+		global $temp_3j,$temp_3j_max,$jour_3j,$pluie,$jour_pluie,$mode_test;
 		
 		$dept= array(
+				'01' => '3445',
+				'13' => '4330',
+				'14' => '4468',
+				'17' => '5947',
+				'31' => '11856',
+				'33' => '12363',
+				'35' => '13349',
+				'37' => '13946',
+				'38' => '14125',
+				'59' => '22464',
+				'51' => '18840',
+				'67' => '26852',
+				'69' => '27595',
 				'75' => '29591',
-				'92' => '34876',
 				'78' => '31031',
+				'91' => '34669',
+				'92' => '34876',
 				'93' => '34893',
 				'94' => '34941',
 				'95' => '35015'
@@ -53,8 +66,9 @@ $temp_3j_max= array();
 			
 			$d3= explode("/",$lignes[0]); 
 			
-			if ($d3[0][6]*10+$d3[0][7]!=date("d"))
-				return(false); // si ce ne sont pas les données du jour on arrête
+			if (!$mode_test)
+				if ($d3[0][6]*10+$d3[0][7]!=date("d"))
+					return(false); // si ce ne sont pas les données du jour on arrête
 				
 			$p=0;
 			$nbj=7;
@@ -64,7 +78,7 @@ $temp_3j_max= array();
 				$jour_pluie[$p]=date("d/m", mktime(0 ,0, 0 , date("m"), $d3[0][6]*10+$d3[0][7], date ("Y")))." ".$d3[0][8].$d3[0][9]."h ";
 				$pluie[$p++]=$d3[4];
 				if ($d3[4]!=0)
-					echo "<br>".$jour_pluie[$p-1]. " : ".$pluie[$p-1]. " mm "; 
+					echo "<br>".$jour_pluie[$p-1]. " . . . . . . . . . . . : ".$pluie[$p-1]. " mm "; 
 				
 				if ($d3[0][8]=='0')
 					if ($d3[0][9]!='9')
@@ -123,33 +137,33 @@ $temp_3j_max= array();
 		
 		$msg="";
 		$alarme=false;
-		$nbj=7;
-		$sueil=1; // mm
+		$nbj=3;
 		for ($n=0;$n<$nbj*8;$n++)
-			{
-			$m=$pluie[$n]+$pluie[$n+1]+$pluie[$n+2];
-		
-			if ( $alarme ) 
+			if (isset($pluie[$n+2]))
 				{
-				if ($m<$sueil)
-					{
-					if ($msg=="")
-						$msg.=" jusqu'au ".$jour_pluie[$n].", ";
-					else
-						$msg.=" au ".$jour_pluie[$n].", ";
-					$alarme=false;
-					}
-				}
-			else
-				{
-				if ($m>$sueil)
-					{
-					$msg.=" du ".$jour_pluie[$n];
+				$m=$pluie[$n]+$pluie[$n+1]+$pluie[$n+2];
 			
-					$alarme=true;
+				if ( $alarme ) 
+					{
+					if ($m<$sueil)
+						{
+						if ($msg=="")
+							$msg.=" jusqu'au ".$jour_pluie[$n].", ";
+						else
+							$msg.=" au ".$jour_pluie[$n].", ";
+						$alarme=false;
+						}
+					}
+				else
+					{
+					if ($m>$sueil)
+						{
+						$msg.=" du ".$jour_pluie[$n];
+				
+						$alarme=true;
+						}
 					}
 				}
-			}
 		if ($msg!="")
 			$msg="Risque de fortes pluies $msg";
 		return $msg;
@@ -209,16 +223,23 @@ require_once "connex_inc.php";
 require_once "general.php";
 require_once "include_mail.php";
 
+$mode_test = (($_SERVER['REMOTE_ADDR']=="127.0.0.1") || ( (isset($_SERVER['PHP_SELF'])) && ($_SERVER['PHP_SELF'] == '/alerte_ttt.php')) ) ;
+ 
+ if ($mode_test)
+	Echo "mode test alerte";
 	{
 	$dept= parametre("DD_alerte_dept");
 	
-	if  ($_SERVER['REMOTE_ADDR']=="127.0.0.1")	$dept=92;
+	if ($mode_test)
+		$dept=92;
 	
 	echo '<hr> Dept: '.$dept."<p>";
 	$hier = mktime(date("H"),date("i"), 0 , date("m"), date("d")-1, date ("Y"));
 	$maintenant = mktime(date("H"),date("i"), 0 , date("m"), date("d"), date ("Y"));
 	
-	if  ($_SERVER['REMOTE_ADDR']=="127.0.0.1")
+
+	
+	if ($mode_test)
 		$reponse = command("SELECT * FROM cc_alerte WHERE dept='$dept' ");	
 	else
 		{
@@ -239,27 +260,29 @@ require_once "include_mail.php";
 				break;
 			}
 		$telephone=$donnees["tel"];
-		$sueil=$donnees["sueil"];
 		
 		$msg = msg_alerte_min(-5);
 		
 		if ($msg=="")
 			$msg = msg_alerte_max(22);
 		
-		$msg_pluie= msg_alerte_pluie(5);
-		echo "<br> --> $msg_pluie";
+		$msg_pluie= msg_alerte_pluie(2);
 		
-		if (($msg !="") || ($msg_pluie !="")  )
-			{
-			command("UPDATE `cc_alerte` SET dernier_envoi='$maintenant'  where tel='$telephone'  ");
-			envoi_SMS($telephone,$msg);
-			ajout_log_tech( "Alerte SMS à $telephone : $msg");
-			}
+		if ($mode_test)
+			echo "<p> --> $msg_pluie";
+
+		if (!$mode_test)
+			if (($msg !="") || ($msg_pluie !="")  )
+				{
+				command("UPDATE `cc_alerte` SET dernier_envoi='$maintenant'  where tel='$telephone'  ");
+				envoi_SMS($telephone,$msg.$msg_pluie);
+				}
 		command("UPDATE `cc_alerte` SET dernier_ttt='$maintenant'  where tel='$telephone'  ");
 		}
 
 	if ($dept==99)
 		$dept=0;
+		
 	ecrit_parametre("DD_alerte_dept",$dept+1);	
 	}		
 ?>

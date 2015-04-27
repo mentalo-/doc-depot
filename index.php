@@ -530,19 +530,19 @@ function maj_mdp_fichier($idx, $pw )
 					if (($doc_autorise=="") || (stristr($doc_autorise, ";$type_org;") === FALSE) )
 						{
 						if ($flag_acces=="") 
-							lien("visu.php?action=visu_image_mini&nom=$num", "visu_image", param ("nom","$num"), "", "","B",$sans_lien);
+							lien("visu.php?action=visu_image_mini&nom=$num", "visu_image", param ("nom","$num"), "", "","B",$sans_lien, true);
 						else
-							lien("visu.php?action=visu_image_mini&nom=-$num", "visu_fichier", param ("num","$num").param ("code","$flag_acces"), traduire("Document protégé"), "","B",$sans_lien);
+							lien("visu.php?action=visu_image_mini&nom=-$num", "visu_fichier", param ("num","$num").param ("code","$flag_acces"), traduire("Document protégé"), "","B",$sans_lien, true);
 						echo " $type <br> $ident ";
 						}
 					else
 						{
-						lien("visu.php?action=visu_image_mini&nom=-$num", "visu_image", param ("nom","$num"), "", "","B",$sans_lien);
+						lien("visu.php?action=visu_image_mini&nom=-$num", "visu_image", param ("nom","$num"), "", "","B",$sans_lien, true);
 						echo " $type <br> $ident $num  ";
 						}
 					}
 				else
-					lien("visu.php?action=visu_image_mini&nom=$num", "visu_image", param ("nom","$num"), "", "","B",$sans_lien);
+					lien("visu.php?action=visu_image_mini&nom=$num", "visu_image", param ("nom","$num"), "", "","B",$sans_lien, true);
 
 				}
 			else
@@ -571,26 +571,26 @@ function maj_mdp_fichier($idx, $pw )
 						if (($doc_autorise=="") ||(stristr($doc_autorise, ";$type_org;") === FALSE) )
 							{
 							if ($flag_acces=="") 
-								lien("$icone_a_afficher", "visu_fichier", param ("num","$num"), "", "","B",$sans_lien);
+								lien("$icone_a_afficher", "visu_fichier", param ("num","$num"), "", "","B",$sans_lien, true);
 							else 
-								lien("$icone_a_afficher_cadenas", "visu_fichier", param ("num","$num").param ("code","$flag_acces"), "", "","B",$sans_lien);
+								lien("$icone_a_afficher_cadenas", "visu_fichier", param ("num","$num").param ("code","$flag_acces"), "", "","B",$sans_lien, true);
 							echo " $type <br> $ident $l_num ";}
 
 						else
 							{
-							lien("$icone_a_afficher", "visu_fichier", param ("num","$num"), "", "","B",$sans_lien);
+							lien("$icone_a_afficher", "visu_fichier", param ("num","$num"), "", "","B",$sans_lien, true);
 							echo " $type <br> $ident $l_num ";
 							}						
 						}
 					else
 						{
-						lien("$icone_a_afficher", "visu_fichier", param ("num","$num"), "", "","B",$sans_lien);
+						lien("$icone_a_afficher", "visu_fichier", param ("num","$num"), "", "","B",$sans_lien, true);
 						echo " $date : $l_num <br>$type <br> $ident ";
 						}				
 					}
 				else
 					{
-					lien("images/fichier.png", "visu_doc", param ("num","$num"), "", "","B",$sans_lien);
+					lien("images/fichier.png", "visu_doc", param ("num","$num"), "", "","B",$sans_lien, true);
 					echo " $date : $l_num <br>$type <br> $ident";
 					}	
 
@@ -1199,7 +1199,7 @@ function maj_mdp_fichier($idx, $pw )
 										$body= traduire("Bonjour").", $prenom $nom ";
 										$body.= "<p> $user_prenom $user_nom ".traduire("vous a créé un compte sur 'Doc-depot.com': ");
 										$body.= "<p> ".traduire("Pour accepter et finaliser la création de votre compte sur 'Doc-depot.com', merci de cliquer sur ce")." <a id=\"lien\" href=\"".serveur."index.php?action=finaliser_user&idx=".addslashes(encrypt($idx))."\">".traduire('lien')."</a> ". traduire("et compléter les informations manquantes.");
-										$body .= "<p> <hr> <center> Copyright ADILEOS 2014 </center>";
+										$body .= "<p> <hr> <center> Copyright ADILEOS </center>";
 										// Envoyer mail pour demander saisie pseudo et PW
 										envoi_mail($mail,traduire("Finaliser la création de votre compte"),$body);
 											
@@ -1221,7 +1221,6 @@ function maj_mdp_fichier($idx, $pw )
 							}
 						else
 							erreur (traduire("Identifiant déjà existant"));
-
 						}
 				}
 			}
@@ -1644,7 +1643,7 @@ function maj_mdp_fichier($idx, $pw )
 
 		echo "<input type=\"hidden\" name=\"code_lecture\" value=\"\"> " ;
 		echo "<input type=\"hidden\" name=\"recept_mail\"  value=\"\"> " ;
-		$_SESSION['img_number'] = ""; 
+		$_SESSION['img_number'] = "";  // A quoi ca sert ?????
 		echo "<input type=\"hidden\" name=\"num\" value=\"\"> " ;
 		echo "<tr><td> </td><td><input type=\"submit\"  id=\"nouveau_user\"  value=\"".traduire('Valider création')."\" > </td> ";
 		echo "</table> ".traduire('En validant cette création, vous confirmez avoir pris connaissance des')." <a href=\"conditions.html\">".traduire('Conditions d\'utilisation')." </a>. <p>";
@@ -1801,7 +1800,6 @@ function maj_mdp_fichier($idx, $pw )
 				}
 			}
 
-		
 		}
 		
 
@@ -2094,8 +2092,9 @@ function maj_mdp_fichier($idx, $pw )
 		$r1 =command("select * from  r_lien where organisme='$organisme' and user='$responsable' ");
 		if (!($d1 = fetch_command($r1)))
 			{
-			$cmd = "INSERT INTO `r_lien`  VALUES ('$date_jour','$organisme', '$responsable')";
-			$reponse = command($cmd);
+			command("INSERT INTO `r_lien`  VALUES ('$date_jour','$organisme', '$responsable')");
+			command("UPDATE r_user SET organisme='$organisme' where idx='$responsable' "); // T344
+			
 			ajout_log( $user_idx, traduire("Affectation")." : ".libelle_organisme($organisme)."($organisme)  <-> ".libelle_user($responsable)." ($responsable)" );
 			}
 		else
@@ -2530,8 +2529,8 @@ function affiche_membre($idx)
 				case "phpinfo":
 				case "archivage_php":
 				case "cmd_sql":
-				case "dde_chgt_cle":
-				case "chgt_cle":
+				case "cmd_sql_backup":
+				
 				case "supp_upload":
 				case "autorise_recup_mdp":
 				case "supp_recup_mdp":
@@ -3586,11 +3585,6 @@ if (isset($_POST['pass']))
 	if ( ($action=="user_actif") && ($user_droit=="R"))
 		maj_droit(variable("idx"),"S");
 			
-	if (($action=="dde_chgt_cle") && ($user_droit=="A"))
-		dde_chgt_cle();
-		
-	if (($action=="chgt_cle") && ($user_droit=="A"))
-		chgt_cle();
 		
 	if ($action=="supp_upload")
 		{
@@ -3826,6 +3820,32 @@ if (isset($_POST['pass']))
 			echo "- ( $user_anniv ) ";
 		if (isset ($_SESSION['chgt_user']) && ($_SESSION['chgt_user']==true) )
 			msg_ok("Lecture seule");
+		echo "<td> <ul id=\"menu-bar\">";
+		echo "<li><a href=\"index.php?action=dx\"  > ".traduire('Déconnexion')."</a>";
+		echo "<ul >";
+		echo "<li><a href=\"index.php?action=modif_mdp\"  >".traduire('Modification mot de passe')."</a></li>";
+		echo "<li><a href=\"index.php?action=histo\"  > ".traduire('Historique')." </a></li>";
+		if ($user_droit=="")
+			{
+			echo "<li><a href=\"index.php?action=supp_compte_a_confirmer\"> ".traduire('Suppression compte')." </a></li>";
+			echo "<li><a href=\"index.php?action=exporter_a_confirmer\"> ".traduire('Tout archiver')." </a></li>";
+			}		
+
+			
+		if ($user_droit=="")
+			echo " <li><a href=\"aide_b.html\" target=_blank > ".traduire('Aide')."</a></li>";
+		if ($user_droit=="S")
+			echo "<li><a href=\"aide_as.html\" target=_blank > ".traduire('Aide')."</a></li>";
+		if ($user_droit=="R")
+			echo "<li><a href=\"aide_r.html\" target=_blank > ".traduire('Aide')."</a></li>";	
+			
+//		echo "<ul >";
+//		echo "<li><a href=\"index.php?action=faq\"  > Questions fréquentes </a></li></ul>";
+		echo "</ul></li>";
+		if (isset($ligne_last_cx)) 
+			if ($ligne_last_cx!="")
+				echo "<br>$ligne_last_cx";
+
 		echo "</td></table></td>";
 		
 		echo "<tr><td><hr>";
@@ -3874,50 +3894,18 @@ if (isset($_POST['pass']))
 				}		
 			echo "</table> </td>";
 			}
-		
-		echo "<td> <ul id=\"menu-bar\">";
-		echo "<li><a href=\"index.php?action=dx\"  > ".traduire('Déconnexion')."</a>";
-		echo "<ul >";
-		echo "<li><a href=\"index.php?action=modif_mdp\"  >".traduire('Modification mot de passe')."</a></li>";
-		echo "<li><a href=\"index.php?action=histo\"  > ".traduire('Historique')." </a></li>";
-		if ($user_droit=="")
-			{
-			echo "<li><a href=\"index.php?action=supp_compte_a_confirmer\"> ".traduire('Suppression compte')." </a></li>";
-			echo "<li><a href=\"index.php?action=exporter_a_confirmer\"> ".traduire('Tout archiver')." </a></li>";
-			}		
 
-		if  ($user_droit=="A") 
-			{
-			echo "<li><a href=\"index.php?action=dde_chgt_cle\"> Changement clé (en dev) </a></li>";
-			}
-			
-		echo "</ul></li>";
-		if (isset($ligne_last_cx)) 
-			if ($ligne_last_cx!="")
-				echo "<br>$ligne_last_cx";
-	
-		echo "</td><td> </td>";
-		if ($user_droit=="")
-			echo "<td><ul id=\"menu-bar\"> <li><a href=\"aide_b.html\" target=_blank > ".traduire('Aide')."</a>";
-		if ($user_droit=="S")
-			echo "<td><ul id=\"menu-bar\"> <li><a href=\"aide_as.html\" target=_blank > ".traduire('Aide')."</a>";
-		if ($user_droit=="R")
-			echo "<td><ul id=\"menu-bar\"> <li><a href=\"aide_r.html\" target=_blank > ".traduire('Aide')."</a>";		
-//		echo "<ul >";
-//		echo "<li><a href=\"index.php?action=faq\"  > Questions fréquentes </a></li></ul>";
 		echo "</td>";
-
+		echo "<td><center> ";		
 		
-			echo "<td><center> ";		
 		if ($user_droit!="")
 			{
 			$r1 =command("select * from  r_organisme where idx='$user_organisme' ");
 			$d1 = fetch_command($r1);
 			$logo=$d1["logo"];
 			$_SESSION['logo']=$logo;
-			
-
-				//* ----------------------------------FISSA
+		
+			//* ----------------------------------FISSA
 			$reponse = command("SELECT * from  fct_fissa WHERE organisme='$user_organisme'"); 
 			if ($donnees = fetch_command($reponse))
 				{
@@ -3932,14 +3920,20 @@ if (isset($_POST['pass']))
 				echo "<a href=\"index.php?action=cc_activite\"><img src=\"images/calendrier.jpg\" width=\"70\" height=\"50\"></a>";
 			}
 			
-		echo "<a title=\"Alerte Grand Froid\" href=\"alerte.php\"><img src=\"images/logo-alerte.jpg\" width=\"70\" height=\"50\"></a> ";
+		echo "<a title=\"Alerte Grand Froid/Forte Pluie\" href=\"alerte.php\"><img src=\"images/logo-alerte.jpg\" width=\"70\" height=\"50\"></a> ";
+		echo "</center></td>";			
+		if (($user_droit!="") && (est_image($logo) ) )
+			echo "<td><a href=\"index.php\"> <img src=\"images/$logo\" width=\"200\" height=\"100\"  > </a> </td> ";
 			
 		//-----------------------------------*/ 		
-		echo "</center></td>";			
 	
 		echo "</table>";
 
-
+	if ($user_droit=="P")
+		{
+		echo "<hr><p><br><p><br><p><br><p><br><p><br><p><br><p><br><p><br><p><br><p><br><p><br><p><br><p><br>";
+		pied_de_page();
+		}			
 		
 		if ($user_droit=="")	 
 			// on n'affiche au bénéficiaire sa domiciliation que sur l'écran d'accueil 
@@ -4234,8 +4228,10 @@ if (isset($_POST['pass']))
 			}
 		}				
 		
-	if (($action=="cmd_sql") && ( ($user_droit=="E")) )
+	if ( (($action=="cmd_sql") || ($action=="cmd_sql_backup") ) && ( ($user_droit=="E")) )
 		{
+		if  ($action=="cmd_sql_backup") 
+			backup_tables(false);
 		include('command_sql.php');
 		pied_de_page();
 		}	
@@ -4398,7 +4394,7 @@ if (isset($_POST['pass']))
 			$body= traduire('Création de compte sur \'Doc-depot.com\':');
 			$body .= "<p>".traduire("Pour accepter et finaliser la création de votre compte sur 'Doc-depot.com', merci de cliquer sur ce")." <a  id=\"lien\"  href=\"".serveur."index.php?action=finaliser_user&idx=".addslashes(encrypt($idx))."\">".traduire('lien')." </a> ".traduire('et compléter les informations manquantes.');
 			$body .= "<p>".traduire('Message de la part de')." $user_prenom $user_nom";
-			$body .= "<p> <hr> <center> Copyright ADILEOS 2014 </center>";			// Envoyer mail pour demander saisie pseudo et PW
+			$body .= "<p> <hr> <center> Copyright ADILEOS </center>";			// Envoyer mail pour demander saisie pseudo et PW
 			envoi_mail($mail,traduire("Création compte"),$body);
 			ajout_log( $idx, traduire("Renvoi mail de finalisation de compte")." : $mail", $user_idx );
 			}
