@@ -234,8 +234,7 @@ function TTT_mail($aff=true)
 				else
 					{
 					// cas ALERTE SMS
-					$pos = strpos(strtolower($ligne), "alerte");
-					if ($pos == 0 )
+					if  ( ($pos == 0 ) && !($pos ===false)) 
 						{
 						$dept = trim(substr(strtolower($ligne), 6) );
 						if (($dept>1) && ($dept<100) )
