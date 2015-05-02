@@ -424,6 +424,7 @@ function maj_mdp_fichier($idx, $pw )
 
 	function liste_organisme( $val_init, $action=0 )
 		{
+
 		if ($action==0)
 			echo "<td> <SELECT name=\"organisme\" id=\"organisme\" onChange=\"javascript:afficheNouveauType();\" >";
 		else
@@ -1386,7 +1387,7 @@ function maj_mdp_fichier($idx, $pw )
 			if (($droit!="R")&&($droit!="F")&&($droit!="E"))
 				echo "<td> ".traduire('Anniv')." </td><td> ".traduire('Nationalité')."  </td><td> ".traduire('Ville natale')." </td><td> ".traduire('Adresse')." </td><td> ".traduire('Structure sociale')." </td>";
 			else
-				echo "<td> ".traduire('Structure sociale')." </td>";
+				echo "<td> ".traduire('Structure sociale')." </td><td> ".traduire('Droit')." </td>";
 	
 		}
 		
@@ -1443,10 +1444,23 @@ function maj_mdp_fichier($idx, $pw )
 				if ( ($droit!="R") && ($droit!="E") && ($droit!="F") )
 					echo "<td> $anniv </td><td> $nationalite   </td><td> $ville_nat </td><td> $adresse </td><td> $organisme </td><td> ".$donnees["droit"]." </td>";
 				else
+					{
 					echo "<td> $organisme </td>";
-		
+					if ( ($donnees["droit"]=="S") || ($donnees["droit"]=="s"))
+						echo "<td> DD+FISSA </td>";
+					else
+						echo "<td> FISSA </td>";
+					}
 			}
 		}
+
+	function liste_droit_as( )
+		{
+		echo "<td><SELECT name=\"droit\"  >";
+		affiche_un_choix($val_init,"S","DD+FISSA");
+		affiche_un_choix($val_init,"P","FISSA");
+		echo "</SELECT></td>";
+		}	
 		
 	function bouton_user($droit, $organisme, $filtre1="")
 		{
@@ -1511,7 +1525,7 @@ function maj_mdp_fichier($idx, $pw )
 			if ($droit=="R")
 				liste_organisme_du_responsable ($user_idx);
 			else
-				if ($droit!="A")
+				if ($droit=="A")
 					liste_organisme("");
 				else
 					echo "<td><input type=\"hidden\" name=\"organisme\"  value=\"\"> </td> ";
@@ -1521,9 +1535,12 @@ function maj_mdp_fichier($idx, $pw )
 				liste_type_user("R");
 			else
 				if ($droit=="R")
-					echo "<input type=\"hidden\" name=\"droit\"  value=\"S\"> " ;
+					{
+					liste_droit_as();
+					}
 				else
 					echo "<input type=\"hidden\" name=\"droit\"  value=\"\"> " ;
+				
 			echo "<td><input type=\"submit\" id=\"nouveau_user\" value=\"".traduire('Ajouter')."\" > </td> ";				
 			echo "<td><input type=\"hidden\" name=\"prenom_p\"  value=\"\"> </td> ";
 			echo "<input type=\"hidden\" name=\"prenom_p\"  value=\"???\"> " ;
@@ -1533,7 +1550,7 @@ function maj_mdp_fichier($idx, $pw )
 			}
 	
 		if ($droit=="R")			
-			$reponse =command("SELECT * FROM `r_lien`, `r_user` WHERE r_user.droit='S' and r_user.organisme=r_lien.organisme and r_lien.user='$user_idx' $filtre  ");
+			$reponse =command("SELECT * FROM `r_lien`, `r_user` WHERE (r_user.droit='S' or r_user.droit='P' ) and r_user.organisme=r_lien.organisme and r_lien.user='$user_idx' $filtre  ");
 		else
 			if ($droit=="A")			
 				$reponse =command("select * from  r_user where droit='R' or droit='E' or droit='F' $filtre  ");
@@ -2530,7 +2547,6 @@ function affiche_membre($idx)
 				case "archivage_php":
 				case "cmd_sql":
 				case "cmd_sql_backup":
-				
 				case "supp_upload":
 				case "autorise_recup_mdp":
 				case "supp_recup_mdp":
@@ -3407,7 +3423,7 @@ if (isset($_POST['pass']))
 	$_SESSION['bene']="";
 	// verifion si la variable = mot de passe...
 	if ( ( 
-		(encrypt($_POST['pass'])==$mot_de_passe) // on vérifie le mot de passe 
+		(encrypt(addslashes(addslashes($_POST['pass'])))==$mot_de_passe) // on vérifie le mot de passe 
 		||
 		// cas particulier en mode poste de développement on vérifie aussu un mot de passe en clair 
 		(($_POST['pass']==$mot_de_passe) && ($_SERVER['REMOTE_ADDR']=="127.0.0.1")	 )
@@ -3585,7 +3601,6 @@ if (isset($_POST['pass']))
 	if ( ($action=="user_actif") && ($user_droit=="R"))
 		maj_droit(variable("idx"),"S");
 			
-		
 	if ($action=="supp_upload")
 		{
 		$num=variable("num");
@@ -3830,7 +3845,6 @@ if (isset($_POST['pass']))
 			echo "<li><a href=\"index.php?action=supp_compte_a_confirmer\"> ".traduire('Suppression compte')." </a></li>";
 			echo "<li><a href=\"index.php?action=exporter_a_confirmer\"> ".traduire('Tout archiver')." </a></li>";
 			}		
-
 			
 		if ($user_droit=="")
 			echo " <li><a href=\"aide_b.html\" target=_blank > ".traduire('Aide')."</a></li>";
@@ -3905,7 +3919,8 @@ if (isset($_POST['pass']))
 			$logo=$d1["logo"];
 			$_SESSION['logo']=$logo;
 		
-			//* ----------------------------------FISSA
+
+				//* ----------------------------------FISSA
 			$reponse = command("SELECT * from  fct_fissa WHERE organisme='$user_organisme'"); 
 			if ($donnees = fetch_command($reponse))
 				{
@@ -3929,11 +3944,11 @@ if (isset($_POST['pass']))
 	
 		echo "</table>";
 
-	if ($user_droit=="P")
-		{
-		echo "<hr><p><br><p><br><p><br><p><br><p><br><p><br><p><br><p><br><p><br><p><br><p><br><p><br><p><br>";
-		pied_de_page();
-		}			
+		if ($user_droit=="P")
+			{
+			echo "<hr><p><br><p><br><p><br><p><br><p><br><p><br><p><br><p><br><p><br><p><br><p><br><p><br><p><br>";
+			pied_de_page();
+			}	
 		
 		if ($user_droit=="")	 
 			// on n'affiche au bénéficiaire sa domiciliation que sur l'écran d'accueil 

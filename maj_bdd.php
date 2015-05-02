@@ -378,7 +378,7 @@
 				
 				
 		$nelle_version="V1.06";
-		if ($version<=$nelle_version)
+		if ($version<$nelle_version)
 				{
 				//backup_tables(false);  // A utiliser si changement de structure ou de contenu de la base
 				
@@ -402,7 +402,7 @@
 				
 				
 		$nelle_version="V1.07";
-		if ($version<=$nelle_version)
+		if ($version<$nelle_version)
 				{
 				//backup_tables(false);  // A utiliser si changement de structure ou de contenu de la base
 				
@@ -416,7 +416,7 @@
 				}
 				
 		$nelle_version="V1.08";
-		if ($version<=$nelle_version)
+		if ($version<$nelle_version)
 				{
 				//backup_tables(false);  // A utiliser si changement de structure ou de contenu de la base
 				
@@ -430,7 +430,7 @@
 				}		
 		
 		$nelle_version="V1.09";
-		if ($version<=$nelle_version)
+		if ($version<$nelle_version)
 				{
 				//backup_tables(false);  // A utiliser si changement de structure ou de contenu de la base
 				
@@ -458,7 +458,7 @@
 				}
 				
 		$nelle_version="V1.10";
-		if ($version<=$nelle_version)
+		if ($version<$nelle_version)
 				{
 				backup_tables(false);  // A utiliser si changement de structure ou de contenu de la base
 				
@@ -478,7 +478,7 @@
 				}
 				
 		$nelle_version="V1.11";
-		if ($version<=$nelle_version)
+		if ($version<$nelle_version)
 				{
 				//backup_tables(false);  // A utiliser si changement de structure ou de contenu de la base
 				
@@ -489,5 +489,16 @@
 				// ------------------------------------------- Bloc générique
 				$version=maj_version($nelle_version);
 				}
+		$nelle_version="V1.12";
+		if ($version<$nelle_version)
+				{
+				//backup_tables(false);  // A utiliser si changement de structure ou de contenu de la base
+				
+				// ------------------------------------------- Bloc Spécifique à la montée de version
 
+				// ------------------------------------------- Fin bloc spécifique
+
+				// ------------------------------------------- Bloc générique
+				$version=maj_version($nelle_version);
+				}
 ?>

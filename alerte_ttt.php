@@ -3,7 +3,31 @@
 $temp_3j= array();
 $temp_3j_max= array();
 
-
+$mode_test = (($_SERVER['REMOTE_ADDR']=="127.0.0.1") || ( (isset($_SERVER['PHP_SELF'])) && ($_SERVER['PHP_SELF'] == '/alerte_ttt.php')) ) ;
+ 
+	function charge_liste_ville_csv()
+		{
+		$f= fopen("liste-villes.csv","r");
+		$i=0;
+		while (($ligne=fgets($f)) && ($i<100000))
+			{
+			$d3= explode("/",$ligne); 
+			if (strlen($d3[2])==4) 
+				$d3[2]="0".$d3[2];
+			$d3[1] = str_replace ("-"," ",$d3[1]);
+			
+			//if (strpos($d3[2],"000")==2)
+			//	echo "<br>". $d3[1]. " - ". $d3[2]. " - ". $d3[3];
+			
+			$i++;
+			}
+		echo "<br> $i villes";
+		fclose($f);
+		exit();
+		}
+		
+		
+ 
 	function calcul_moyenne($departement )
 		{
 		global $temp_3j,$temp_3j_max,$jour_3j,$pluie,$jour_pluie,$mode_test;
@@ -95,7 +119,10 @@ $temp_3j_max= array();
 						{
 						$jour_3j[$j] = date("d/m", mktime(0,0, 0 , date("m"), $d3[0][6]*10+$d3[0][7]-1, date ("Y")));
 					
-						if ( ($nb_moy_min!=0) && ($d3[0][6]*10+$d3[0][7]> date("d")) )
+//						if ( ($nb_moy_min!=0) && ($d3[0][6]*10+$d3[0][7]> date("d")) )
+						if ( ($nb_moy_min!=0) 
+							&& (
+							mktime(0,0, 0 ,$d3[0][4]*10+$d3[0][5] , $d3[0][6]*10+$d3[0][7], date ("Y"))>mktime(0,0, 0 , date("m"), date("d"), date ("Y"))) )
 							{
 							$temp_3j[$j++]= $moyenne_min/$nb_moy_min;
 							echo sprintf("<br> %s/%s : %1.1f°c ",$d3[0][6].$d3[0][7], $jour_3j[$j-1],$temp_3j[$j-1]);
@@ -113,7 +140,7 @@ $temp_3j_max= array();
 					{
 					$jour_3j[$j_max] = date("d/m", mktime(0,0, 0 , date("m"), $d3[0][6]*10+$d3[0][7], date ("Y")));
 				
-					if ( ($nb_moy_max!=0) && ($d3[0][6]*10+$d3[0][7]> date("d")) )
+					if ( ($nb_moy_max!=0) && ( mktime(0,0, 0 ,$d3[0][4]*10+$d3[0][5] , $d3[0][6]*10+$d3[0][7], date ("Y"))>mktime(0,0, 0 , date("m"), date("d"), date ("Y"))) )
 						{
 						$temp_3j_max[$j_max++]= $moyenne_max/$nb_moy_max;
 						echo sprintf("<br> %s/%s : %1.1f°C ",$d3[0][6].$d3[0][7], $jour_3j[$j_max-1] ,$temp_3j_max[$j_max-1]);
@@ -223,10 +250,10 @@ require_once "connex_inc.php";
 require_once "general.php";
 require_once "include_mail.php";
 
-$mode_test = (($_SERVER['REMOTE_ADDR']=="127.0.0.1") || ( (isset($_SERVER['PHP_SELF'])) && ($_SERVER['PHP_SELF'] == '/alerte_ttt.php')) ) ;
- 
+
  if ($mode_test)
 	Echo "mode test alerte";
+	
 	{
 	$dept= parametre("DD_alerte_dept");
 	
@@ -236,8 +263,6 @@ $mode_test = (($_SERVER['REMOTE_ADDR']=="127.0.0.1") || ( (isset($_SERVER['PHP_S
 	echo '<hr> Dept: '.$dept."<p>";
 	$hier = mktime(date("H"),date("i"), 0 , date("m"), date("d")-1, date ("Y"));
 	$maintenant = mktime(date("H"),date("i"), 0 , date("m"), date("d"), date ("Y"));
-	
-
 	
 	if ($mode_test)
 		$reponse = command("SELECT * FROM cc_alerte WHERE dept='$dept' ");	
@@ -256,20 +281,20 @@ $mode_test = (($_SERVER['REMOTE_ADDR']=="127.0.0.1") || ( (isset($_SERVER['PHP_S
 		if (!$calcul) 
 			{
 			$calcul=true;
-			if (!calcul_moyenne($dept ) )
-				break;
+			calcul_moyenne($dept );
+
+			$msg = msg_alerte_min(-5);
+			
+			if ($msg=="")
+				$msg = msg_alerte_max(22);
+			
+			$msg_pluie= msg_alerte_pluie(2);
+			
+			if ($mode_test)
+				echo "<p> ==> $msg_pluie";
 			}
+			
 		$telephone=$donnees["tel"];
-		
-		$msg = msg_alerte_min(-5);
-		
-		if ($msg=="")
-			$msg = msg_alerte_max(22);
-		
-		$msg_pluie= msg_alerte_pluie(2);
-		
-		if ($mode_test)
-			echo "<p> --> $msg_pluie";
 
 		if (!$mode_test)
 			if (($msg !="") || ($msg_pluie !="")  )

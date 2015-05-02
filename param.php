@@ -79,7 +79,6 @@ define('TAILLE_FICHIER_dropzone','8');
 			$filtre1=variable("filtre");
 			$nom_a_modifier=variable_get("nom");
 
-			if ($user_lang=="fr") $user_lang="gb";
 			echo "<table><tr> ";
 			echo "<td><a href=\"index.php?action=gb\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"anglais\" alt=\"anglais\" src=\"images/flag_gb.png\"/></a></td><td> | </td>";
 			echo "<td><a href=\"index.php?action=de\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"allemand\" alt=\"allemand\" src=\"images/flag_de.png\"/></a></td><td> | </td>";
@@ -123,10 +122,10 @@ define('TAILLE_FICHIER_dropzone','8');
 		function modif_trad($idx, $valeur)
 			{
 			global $user_lang;
-			
+
 			$valeur= addslashes($valeur);
 			if ($user_lang!="fr")
-				$reponse =command("update z_traduire SET $user_lang = '$valeur' where idx='$idx' ");
+				$reponse =command("update z_traduire SET $user_lang = '$valeur' where idx='$idx' ","x");
 
 			}
 ?>
