@@ -703,7 +703,7 @@ include 'bdd.php';
 						
 		echo "<td><a id=\"lien_conditions\" href=\"conditions.html\">".traduire('Conditions d\'utilisation')."</a>";
 		echo "- <a id=\"lien_contact\" href=\"index.php?action=contact\">".traduire('Nous contacter')."</a>";
-		echo "- Copyright <a href=\"http://adileos.doc-depot.com\">ADILEOS 2014</a> ";
+		echo "- Copyright <a href=\"http://adileos.doc-depot.com\">ADILEOS</a> ";
 		$version= parametre("DD_version_portail") ;
 		if ($_SERVER['REMOTE_ADDR']=="127.0.0.1")
 			echo "- <a href=\"version.htm\"target=_blank > $version </a>";	
