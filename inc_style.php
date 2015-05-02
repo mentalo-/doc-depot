@@ -1,5 +1,23 @@
 <style>
 
+.table_planning
+{
+border-collapse: collapse;
+}
+
+.deb_creneau {
+  border-radius: 7px 0px 0px 7px;
+}
+
+.fin_creneau {
+  border-radius: 0px 7px 7px 0px;
+}
+
+.div_sans_underline {
+text-decoration:none;
+}
+
+
 .arrondie {
 -moz-border-radius:20px;
 -webkit-border-radius:20px;

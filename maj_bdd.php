@@ -489,6 +489,7 @@
 				// ------------------------------------------- Bloc générique
 				$version=maj_version($nelle_version);
 				}
+				
 		$nelle_version="V1.12";
 		if ($version<$nelle_version)
 				{
@@ -496,6 +497,21 @@
 				
 				// ------------------------------------------- Bloc Spécifique à la montée de version
 
+				// ------------------------------------------- Fin bloc spécifique
+
+				// ------------------------------------------- Bloc générique
+				$version=maj_version($nelle_version);
+				}
+				
+		$nelle_version="V1.13";
+		if ($version<$nelle_version)
+				{
+				//backup_tables(false);  // A utiliser si changement de structure ou de contenu de la base
+				
+				// ------------------------------------------- Bloc Spécifique à la montée de version
+				command("ALTER TABLE effectif ADD activites TEXT not null ","1");
+				command("ALTER TABLE ZZ_SEC_CATH ADD activites TEXT not null ","1");
+				command("ALTER TABLE ZZ_assol ADD activites TEXT not null ","1");
 				// ------------------------------------------- Fin bloc spécifique
 
 				// ------------------------------------------- Bloc générique
