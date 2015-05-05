@@ -59,7 +59,7 @@ include 'inc_style.php';
 				{
 				$a=str_replace ('(A)','',$d3[$i]);
 				$ret.=$a;
-				$ret.="<a title=\"Suppresion $a\"  href=\"fissa.php?action=supp_activite&idx=$i&nom=$nom&date=$date\"> <img src=\"images/croixrouge.png\"width=\"15\" height=\"15\"><a>";
+				$ret.="<a title=\"Suppresion $a\"  href=\"fissa.php?action=supp_activite&idx=$i&nom=$nom&date_jour=$date\"> <img src=\"images/croixrouge.png\"width=\"15\" height=\"15\"><a>";
 				$ret.="; ";
 				}
 			
@@ -397,13 +397,14 @@ include 'inc_style.php';
 		// Entete
 		$headers  = "MIME-Version: 1.0 \n"; 
 		$headers .='Content-Type: text/html; charset="iso-8859-1"'."\n";
-        $headers .='Content-Transfer-Encoding: 8bit'."\n";			
-
+        $headers .='Content-Transfer-Encoding: 8bit'."\n";		
+		
+		$libelle = '=?iso-8859-1?B?'.base64_encode($libelle).'?='; // T354
 		$headers  .= "From: FISSA $libelle <$mail_struct>" . "\r\n"; 
 		
 		// mise en forme HTML
 		$contenu = "<html><body>$contenu</body></html>";	
-		$contenu = '=?iso-8859-1?B?'.base64_encode($contenu).'?=';
+		$titre = '=?iso-8859-1?B?'.base64_encode($titre).'?=';  // T354
 		
 		mail ( $dest , $titre, $contenu,$headers );
 		return(true);
@@ -553,11 +554,8 @@ include 'inc_style.php';
 			$date_jour=date($format_date );
 			nouveau($date_a_afficher,"Mail", "Mail","Envoyé le $date_a_afficher","");
 			}
-		else
-			{
-			echo "<hr>";
 
-			}
+		echo "<hr>";
 		echo $txt;
 		
 		if ( !$envoi_mail)		
@@ -834,7 +832,7 @@ include 'inc_style.php';
 				{
 				$nom=variable_s("nom");
 				$nom_slash= addslashes2($nom);
-				$date=variable_s("date");
+				$date= mise_en_forme_date_aaaammjj(variable_s("date_jour")); // T355
 				$idx=variable_s("idx");
 
 				$reponse = command("SELECT * FROM $bdd WHERE date='$date' and nom='$nom_slash' ");
@@ -1114,7 +1112,6 @@ include 'inc_style.php';
 				echo "</td></form> ";	
 				echo "<td bgcolor=\"#d4ffaa\"></td> ";
 				
-				$daaaammjj=mise_en_forme_date_aaaammjj( $date_jour);
 				echo "<tr> <td bgcolor=\"#3f7f00\"><font color=\"white\"> Prénom / Nom </td> <td bgcolor=\"#3f7f00\"> <font color=\"white\">Evénement </td>";
 				echo "<td bgcolor=\"#3f7f00\"> <font color=\"white\">Memo </td><td bgcolor=\"#3f7f00\"> <font color=\"white\">Commentaire </font></td><td bgcolor=\"#3f7f00\"> <font color=\"white\">Activités </font></td>";		
 				$ncolor=0;
@@ -1153,7 +1150,7 @@ include 'inc_style.php';
 						echo " </form> ";
 						echo "</td> <td bgcolor=\"$color\"> ";
 
-						$valeur=mef_activites( $activites[$i],$nom_charge[$i],$daaaammjj);
+						$valeur=mef_activites( $activites[$i],$nom_charge[$i],$date_jour); // T355
 						echo "$valeur </td>";
 
 						}
