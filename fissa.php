@@ -74,7 +74,7 @@ include 'inc_style.php';
 
 		$ret="";
 		
-		$reponse = command("SELECT * FROM $bdd WHERE date='$date' and (activites like '%$act%') "); 
+		$reponse = command("SELECT * FROM $bdd WHERE date='$date' and (activites like '%$act%') group by nom ASC "); 
 		while ($donnees = fetch_command($reponse) )
 			$ret.=stripcslashes($donnees["nom"]).", ";
 	
@@ -224,7 +224,7 @@ include 'inc_style.php';
 					if (strpos($activites, $pres2)===false)
 						{
 						$activites.="#-#".$pres2;
-						command("UPDATE $bdd SET activites='$activites' WHERE nom='$nom_slash' AND date='$d'");
+						command("UPDATE $bdd SET activites='$activites' WHERE nom='$nom_slash' AND date='$d' and pres_repas<>'Suivi'");
 						}
 					$pres=$pres_initial;
 					}
