@@ -102,7 +102,7 @@ define('TAILLE_FICHIER_dropzone','8');
 			while ($donnees = fetch_command($reponse) ) 
 				{
 				$nom=$donnees["fr"];	
-				$valeur=$donnees["$user_lang"];
+				$valeur=stripcslashes($donnees["$user_lang"]);
 				$idx=$donnees["idx"];	
 				echo "<tr><td id=\"$idx\" width=\"30%\"> $idx - $nom ";
 				
@@ -123,9 +123,9 @@ define('TAILLE_FICHIER_dropzone','8');
 			{
 			global $user_lang;
 
-			$valeur= addslashes($valeur);
+			//$valeur= addslashes($valeur); // T358
 			if ($user_lang!="fr")
-				$reponse =command("update z_traduire SET $user_lang = '$valeur' where idx='$idx' ","x");
+				$reponse =command("update z_traduire SET $user_lang = '$valeur' where idx='$idx' ");
 
 			}
 ?>

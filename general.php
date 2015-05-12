@@ -55,7 +55,7 @@ include 'bdd.php';
 		else
 			{
 			//echo 
-			$l=$d1[$user_lang];
+			$l=stripcslashes($d1[$user_lang]); // T358
 			if ($l!="")	
 				$ligne=$l;
 			}
