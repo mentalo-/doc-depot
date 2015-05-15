@@ -797,7 +797,7 @@ include 'inc_style.php';
 					$nom .= " (F)";
 				if ($type=="Bénévole")
 					$nom .= " (B)";
-				if ($type=="$acteur")
+				if ($type=="Salarié") // T362
 					$nom .= " (S)";
 				if ($type=="Activité")
 					$nom .= " (A)";		
