@@ -289,12 +289,54 @@ include 'general.php';
 				$ratio="-";
 			echo "<td width=\"20\">".$ratio."</td>";
 		
-		$date_jour_fr=  $date_jour;
+	
+			$date_jour_fr=  $date_jour;
+			$date_jour=mise_en_forme_date_aaaammjj( $date_jour);
+			$date_fin=mise_en_forme_date_aaaammjj( $date_fin);	
+			
+			$req_sql_activite="SELECT *,count(*) as TOTAL FROM $bdd where date<='$date_fin' and date>='$date_jour' and $crit_activite and pres_repas<>'Pour info' group by nom order by TOTAL DESC";
+			$num=0;
+			$r1 = command($req_sql_activite); 
+			while ($d1 = fetch_command($r1) )	
+				{
+				$num++;
+				}
+					
+			echo "<tr> <td><hr></td><td> <hr> </td><td> <hr> </td>";	
+			echo "<tr> <td> Nbres d'activités différentes: </td><td> $num </td>";
+			echo "<table border=\"0\" >";
+			$req_sql_activite="SELECT *,count(*) as TOTAL  FROM $bdd where date<='$date_fin' and date>='$date_jour' and $crit_activite and pres_repas<>'Pour info' group by nom order by TOTAL DESC";
+			echo "<tr> <td> Activité </td><td> Nbre ateliers </td><td> Nbre Bénéficiaires </td><td> Frequentation moyenne </td>";	
+			$ncolor=0;
+			$num=0;
+			$r1 = command($req_sql_activite); 
+			while ($d1 = fetch_command($r1) )	
+				{
+				$num++;
+				$nom=$d1["nom"];
+				if (($ncolor++ %2 )==0) $color="#ffffff" ; else $color="#d4ffaa" ; 
+				echo "<tr> <td bgcolor=\"$color\"> $num - <a href=\"fissa.php?action=suivi&nom=$nom&date_jour=$date_jour_fr\" target=_blank> <b>$nom  </b></td>";
+				$nb = $d1["TOTAL"];
+				echo "<td width=\"20\" bgcolor=\"$color\"> $nb </td>";
+				
+				if ($nb!=0)
+					{
+					$req_sql_activite="SELECT *,count(*) as TOTAL  FROM $bdd where date<='$date_fin' and date>='$date_jour' and ( activites like '%$nom%' ) and ( nom not like '%(B)%' ) and ( nom not like '%(S)%' )";
+					$r2 = command($req_sql_activite); 
+					while ($d2 = fetch_command($r2) )	
+						{
+						$freq = $d2["TOTAL"];
+						echo "<td width=\"20\" bgcolor=\"$color\"> $freq </td>";
+						echo "<td width=\"20\" bgcolor=\"$color\"> ".sprintf("%2.1f",$freq/$nb)." </td>";
+						}
+					}
+				else
+					echo "<td width=\"20\" bgcolor=\"$color\"> </td><td width=\"20\" bgcolor=\"$color\"> </td>";
+						
+				}
 		if (!$detail)
 			{
-			$date_jour=mise_en_forme_date_aaaammjj( $date_jour);
-			$date_fin=mise_en_forme_date_aaaammjj( $date_fin);
-			echo "<tr> <td> - - - - - - - - - - - - - - - - - -</td><td> - - - - - - - - - - - - </td>";
+			echo "<tr> <td><hr></td><td> <hr> </td><td> <hr> </td>";
 
 	// -------------------------------------------------------------			
 			$req_sql="SELECT *,count(*) as TOTAL FROM $bdd where date<='$date_fin' and date>='$date_jour'  and $crit_bene  group by nom order by TOTAL DESC";
@@ -328,6 +370,7 @@ include 'general.php';
 				// if ($nbr!=0) echo "<td width=\"20\" bgcolor=\"$color\">($nbr)</td>";
 				}
 				
+					
 			
 			$req_sql_AS="SELECT *,count(*) as TOTAL FROM $bdd where date<='$date_fin' and date>='$date_jour' and $crit_AS and pres_repas<>'Pour info' group by nom order by TOTAL DESC";
 			$num=0;
@@ -336,7 +379,7 @@ include 'general.php';
 				{
 				$num++;
 				}
-			echo "<tr> <td> - - - - - - - - - - - - - - - - - -</td><td> - - - - - - - - - - - - </td>";
+			echo "<tr> <td><hr></td><td> <hr> </td><td> <hr> </td>";
 			echo "<tr> <td> Nbres d'accueillants différents: </td><td> $num </td>";
 			$ncolor=0;
 			$num=0;
@@ -352,32 +395,8 @@ include 'general.php';
 				echo "<td width=\"20\" bgcolor=\"$color\"> $nb </td>";
 				}
 
-			$req_sql_activite="SELECT *,count(*) as TOTAL FROM $bdd where date<='$date_fin' and date>='$date_jour' and $crit_activite and pres_repas<>'Pour info' group by nom order by TOTAL DESC";
-			$num=0;
-			$r1 = command($req_sql_activite); 
-			while ($d1 = fetch_command($r1) )	
-				{
-				$num++;
-				}
-					
-			echo "<tr> <td> - - - - - - - - - - - - - - - - - -</td><td> - - - - - - - - - - - - </td>";	
-			echo "<tr> <td> Nbres d'activités différentes: </td><td> $num </td>";
-			$ncolor=0;
-			$num=0;
-			$r1 = command($req_sql_activite); 
-			while ($d1 = fetch_command($r1) )	
-				{
-				$num++;
-				$tot = $d1["TOTAL"];
-				$nom=$d1["nom"];
-				if (($ncolor++ %2 )==0) $color="#ffffff" ; else $color="#d4ffaa" ; 
-				echo "<tr> <td bgcolor=\"$color\"> $num - <a href=\"fissa.php?action=suivi&nom=$nom&date_jour=$date_jour_fr\" target=_blank> <b>$nom  </b></td><td bgcolor=\"$color\"> </td>";
-				$nb = $d1["TOTAL"];
-				echo "<td width=\"20\" bgcolor=\"$color\"> $nb </td>";
-				}
-			echo "<tr> <td> - - - - - - - - - - - - - - - - - -</td><td> - - - - - - - - - - - - </td>";	
+			echo "<tr> <td> <hr> </td><td> <hr> </td><td> <hr> </td>";	
 
-			
 			echo " </table>";
 			
 	// ----------------------------------------------------- Nouveaux
@@ -388,7 +407,7 @@ include 'general.php';
 				{
 				$nom=$d1["nom"];
 				$nb = $d1["TOTAL"];
-				$reponse = command("select distinct * from $bdd where date<'$date_jour' and date<>'0000-00-00'  and nom='$nom'  group by nom");
+				$reponse = command("select distinct * from $bdd where date<'$date_jour' and date<>'0000-00-00'  and nom='".addslashes($nom)."'  group by nom");
 				if (!fetch_command($reponse) )
 					{
 					echo "$nom ($nb), ";
@@ -400,6 +419,8 @@ include 'general.php';
 			echo "<p><a href=\"javascript:window.close();\">Fermer la fenêtre</a>"; 	
 			}
 
+
+			echo " </table>";
 		fermeture_bdd ();
 		}
 ?>
