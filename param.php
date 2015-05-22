@@ -98,21 +98,24 @@ define('TAILLE_FICHIER_dropzone','8');
 
 			echo "</table><div class=\"CSSTableGenerator\" > ";
 			echo "<table><tr><td > ".traduire('Nom')."  </td><td > ".traduire('Valeur')."  </td>";
+			$i=0;
 			$reponse =command("select * from  z_traduire $filtre order by fr ASC");		
 			while ($donnees = fetch_command($reponse) ) 
 				{
 				$nom=$donnees["fr"];	
 				$valeur=stripcslashes($donnees["$user_lang"]);
 				$idx=$donnees["idx"];	
-				echo "<tr><td id=\"$idx\" width=\"30%\"> $idx - $nom ";
+				echo "<tr><td id=\"$idx\" width=\"30%\"> $nom ";
 				
 				$cible_g=$user_lang;
 				if ($user_lang=="gb")
 					$cible_g="en";
+				
+				$idx2=$i-8;
+				echo "<a id=\"$i\" href=\"https://translate.google.com/?hl=fr#fr/$cible_g/$nom\"  target=_blank>$user_lang</a>";
 					
-				echo "<a id=\"E$idx\" href=\"https://translate.google.com/?hl=fr#fr/$cible_g/$nom\"  target=_blank>$user_lang</a>";
-					
-				echo "</td><td width=\"70%\"><form method=\"post\" action=\"index.php#$idx\"> <input  type=\"hidden\"  name=\"action\" value=\"modif_trad\"/> ".param('idx',"$idx").param('filtre',"$filtre1")."<input type=\"text\" name=\"valeur\" id=\"$idx\" value=\"$valeur\" size=\"100\" onChange=\"this.form.submit();\" >  </form> </td>";
+				echo "</td><td width=\"70%\"><form method=\"post\" action=\"index.php#$idx2\"> <input  type=\"hidden\"  name=\"action\" value=\"modif_trad\"/> ".param('idx',"$idx").param('filtre',"$filtre1")."<input type=\"text\" name=\"valeur\" id=\"$idx\" value=\"".htmlspecialchars($valeur)."\" size=\"100\" onChange=\"this.form.submit();\" >  </form> </td>";
+				$i++;
 				}
 			echo "</table></div>";
 			pied_de_page("x");

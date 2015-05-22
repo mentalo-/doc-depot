@@ -88,6 +88,38 @@ if ( isset($_SESSION['pass']) && ($_SESSION['pass']==true) )
 				ajout_log($_SESSION['user'], traduire("Export des fichiers et données du compte"),$_SESSION['user']);
 				}
 			break;
+		
+		// methode sans passer par un fichier intermédiaire
+		case "visu_fichier_sans_intermediaire":
+			// Connexion BdD
+			include "connex_inc.php";
+
+			$fichier=variable_s('num');
+
+			verification_acces( $fichier );
+
+			ajout_log_tech( "Visu_fichier $fichier - ".variable_s('code'));
+			header('Content-Type: application/pdf');
+			header('Content-Disposition: attachment; filename="downloaded.pdf"');
+			if (variable_s('code')!="")
+				{
+				if ( est_image($fichier))
+					readfile("upload_prot/$fichier.pdf");
+				else
+					readfile("upload_prot/$fichier");
+				}
+			else
+				readfile("upload/$fichier");
+
+			$bene= $_SESSION['bene'];
+			if ($bene=="") 
+				$bene=$_SESSION['user'];
+			
+			$fichier = substr($fichier,strpos($fichier,".")+1 );
+
+			ajout_log($bene, traduire("Acces au fichier")." $fichier ".traduire('en lecture'),$_SESSION['user']);
+
+			break;		
 			
 		case "visu_fichier":
 			// Connexion BdD
@@ -101,7 +133,6 @@ if ( isset($_SESSION['pass']) && ($_SESSION['pass']==true) )
 			ajout_log_tech( "Visu_fichier $fichier - ".variable_s('code'));
 			if (variable_s('code')!="")
 				{
-
 				if ( est_image($fichier))
 					copy("upload_prot/$fichier.pdf","upload_tmp/$id.pdf");
 				else
