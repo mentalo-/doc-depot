@@ -271,10 +271,17 @@ function random_chaine($car)
 				ecrit_parametre("TECH_alarme_delais_TTT",'') ;
 				}
 
+		}	
 		ajout_log_jour(" ==================================================================================================== TTT_Alerte");
 		require_once "alerte_ttt.php";
-		}	
 		
+	echo "<br>-";
+	if (isset ($_GET["ddr"]))
+		{  
+		$ddr = $_GET["ddr"];
+		ecrit_parametre("MONITOR_$ddr",time());
+		}
+	
 	echo "</body>";
 
 	

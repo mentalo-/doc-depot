@@ -516,5 +516,18 @@
 
 				// ------------------------------------------- Bloc générique
 				$version=maj_version($nelle_version);
+				}		
+		$nelle_version="V1.14";
+		if ($version<$nelle_version)
+				{
+				//backup_tables(false);  // A utiliser si changement de structure ou de contenu de la base
+				
+				// ------------------------------------------- Bloc Spécifique à la montée de version
+
+				
+				// ------------------------------------------- Fin bloc spécifique
+
+				// ------------------------------------------- Bloc générique
+				$version=maj_version($nelle_version);
 				}
 ?>

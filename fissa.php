@@ -163,7 +163,8 @@ include 'inc_style.php';
 		
 		$nom=str_replace("\"","",$nom);
 		$nom_slash= addslashes2($nom);	
-		
+		$pres2= addslashes2($pres2);	
+
 		if ($nom!="")
 			{
 			$d=mise_en_forme_date_aaaammjj( $date_jour);
@@ -204,15 +205,26 @@ include 'inc_style.php';
 				{
 				if (strpos($pres2,"(A)")===false)
 					{
+
 					$cmd = "UPDATE $bdd set commentaire='$memo' , user='$user' , modif='$modif' where nom='$nom' and date='0000-00-00' and pres_repas<>'pda' ";
 					$reponse = command($cmd);					
 
 					if ( $pres2!="Erreur saisie")
-						$cmd="UPDATE $bdd SET commentaire='$com', pres_repas='$pres2' , user='$user' , modif='$modif'  WHERE nom='$nom_slash' AND date='$d'" ;
+						$reponse = command("UPDATE $bdd SET commentaire='$com', pres_repas='$pres2' , user='$user' , modif='$modif'  WHERE nom='$nom_slash' AND date='$d'" );
 					else
-						$cmd="DELETE FROM $bdd  WHERE nom='$nom' AND date='$d'" ;
-								
-					$reponse = command($cmd);
+						{
+						if (strpos($nom,"(A)")!==false)
+							{
+							$reponse = command("select* from $bdd  WHERE activites like '%$nom%' AND date='$d'") ;
+							if ($donnees = fetch_command($reponse))
+								erreur ("Suppression impossible car il existe au moins une personne affectée à l'activité");
+							 else								
+								$reponse = command("DELETE FROM $bdd  WHERE nom='$nom' AND date='$d'") ;
+							}
+						else
+							$reponse = command("DELETE FROM $bdd  WHERE nom='$nom' AND date='$d'") ;
+
+						}	
 					}
 				else
 					{
@@ -221,6 +233,7 @@ include 'inc_style.php';
 					$donnees = fetch_command($reponse);
 					$activites=$donnees["activites"];
 					$pres_initial=$donnees["pres_repas"]; // on réinitialise correctement la présence
+					
 					if (strpos($activites, $pres2)===false)
 						{
 						$activites.="#-#".$pres2;

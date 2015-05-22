@@ -111,7 +111,7 @@ require_once "connex_inc.php";
 	// ===================================================================== Bloc IMAGE
 
 		debut_cadre("800");
-		echo "<tr><td><a href=\"alerte.php\" > <img id=\"logo\" src=\"images//logo-alerte.jpg\" width=\"240\" height=\"180\" ></a> </td>";
+		echo "<tr><td><a href=\"alerte.php\" > <img id=\"logo\" src=\"images/logo-alerte.jpg\" width=\"240\" height=\"180\" ></a> </td>";
 		echo "<td><center><h2>".traduire('Soyez alerté en cas de risque de grand-froid ou de forte pluie').".</h2>";
 		echo traduire("Vous possédez un téléphone portable, alors en remplissant le formulaire ci-dessous, vous recevrez gratuitement, pendant un an, un SMS s'il est prévu dans les 3 jours suivants :");
 		echo "<br>".traduire('précipitation importantes ou des températures ressenties très basses.');
@@ -170,7 +170,7 @@ require_once "connex_inc.php";
 		
 		echo "<center><table border=\"1\"><tr><td>";
 		debut_cadre("500");
-		echo "<tr><td><a href=\"index.php\" > <img id=\"logo\" src=\"images//logo.png\" width=\"140\" height=\"100\" ></a> </td>";
+		echo "<tr><td><a href=\"index.php\" > <img id=\"logo\" src=\"images/logo.png\" width=\"140\" height=\"100\" ></a> </td>";
 		echo "<td><center><h4>".traduire("La Consigne Numérique Solidaire")."</h4>";
 		echo "</center>".traduire("Si vous souhaitez sauvegarder une copie de vos documents, photos et informations essentielles, vous pouvez utiliser \"doc-depot\" gratuitement. Consultez la liste des structures permettant de vous créer un compte en cliquant")." <a href=\"index.php?action=liste\" >".traduire("ici")."<a></td>";
 		fin_cadre();	

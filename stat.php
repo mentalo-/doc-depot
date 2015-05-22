@@ -39,9 +39,11 @@ include 'general.php';
 		
 		echo "<tr> <td> </td><td>  </td>";
 		if ($detail)
+			{
 			for ($k=$s_org;$k<$s_fin;$k++)
 				echo "<td width=\"20\">S$k </td>";
-		echo "<td > Total</td>";	
+			echo "<td > Total</td>";	
+			}
 			
 		echo "<tr> <td> </td><td>  </td>";
 		for ($k=$s_org;$k<$s_fin;$k++)
@@ -179,19 +181,18 @@ include 'general.php';
 				echo " </form> ";		
 				echo "</td> <td> <a href=\"javascript:window.close();\">Fermer la fenêtre</a></td> "; 
 				echo " </form> </table>";	
-
-						
-						
+		
 			$crit_bene="  ( not (nom like '%(B)%')) and ( not (nom like '%(S)%')) and ( not (nom like '%(A)%')) and (nom<>'Synth') and (nom<>'Mail') and (pres_repas<>'Pour info')  ";
 			$crit_AS=" (nom like '%(B)%' or nom like '%(S)%' )";
 			$crit_activite="( nom like '%(A)%')";
 			$crit_mail="(nom='Mail')";
 			
-			echo "<table border=\"0\" >";
-
 			$s_fin=num_semaine($date_fin);
 			echelle_semaine($s_fin,$detail);
 			
+			echo "Statistiques du ". date_fr($jour_d[$s_org])." au ".date_fr($jour_f[$s_fin-1])."<p>" ;
+			
+			echo "<table border=\"0\" >";			
 			for ($j=$s_org;$j<$s_fin;$j++)
 				{
 				$jd=$jour_d[$j];

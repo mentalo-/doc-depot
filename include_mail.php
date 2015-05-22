@@ -123,9 +123,14 @@
 		
 	function envoi_SMS($subject,$body)		
 		{
-		ajout_log_tech( "Envoi SMS au $subject : '$body' ");
-		if ( ($body!=parametre('FORM_msg_rdv')) || ($subject!=parametre('FORM_tel_rdv'))) 
-			envoi_mail_brut(parametre('DD_mail_pour_gateway_sms'),$subject,$body);
+		if (VerifierPortable($subject))
+			{
+			ajout_log_tech( "Envoi SMS au $subject : '$body' ");
+			if ( ($body!=parametre('FORM_msg_rdv')) || ($subject!=parametre('FORM_tel_rdv'))) 
+				envoi_mail_brut(parametre('DD_mail_pour_gateway_sms'),$subject,$body);
+			}
+		else
+			ajout_log_tech( "PAS d'envoi SMS au $subject car numéro incorrect : '$body' ");
 		}	
 		
 	function alerte_SMS($body)		

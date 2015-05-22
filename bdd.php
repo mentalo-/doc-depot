@@ -4,9 +4,9 @@
 	// ========================================================== BDD ==========================================
 	function command($ligne, $flag="")
 		{
-		if ($flag!="")
+		if ( ($flag!="") && ($_SERVER['REMOTE_ADDR']=="127.0.0.1"))
 			echo "<p>$ligne ";
-			
+		
 		if (isset ($_SESSION['chgt_user']) && 	($_SESSION['chgt_user']==true) && (strpos( strtolower($ligne),"select" )===false) )
 			{
 			return(false);

@@ -187,13 +187,15 @@ $mode_test = ($_SERVER['REMOTE_ADDR']=="127.0.0.1") ;
 		
 	function msg_alerte_pluie($sueil)
 		{	
-		global $pluie,$jour_pluie,$heure_pluie;
+		global $pluie,$jour_pluie,$heure_pluie,	$mode_test;
 		
 		$max_pluie=0;
 		$msg="";
 		$alarme=false;
 		$jour_debut="";
-		$nbj=5;
+		$nbj=3;
+		if ($mode_test)
+			$nbj=6;
 		for ($n=0;$n<$nbj*8;$n++)
 			if (isset($pluie[$n+2]))
 				{
@@ -222,14 +224,14 @@ $mode_test = ($_SERVER['REMOTE_ADDR']=="127.0.0.1") ;
 						{
 						if ($jour_pluie[$n]!="aujourd'hui")
 							{
-							$msg.=" à partir du ".$jour_pluie[$n]." ".$heure_pluie[$n];
+							$msg.=" du ".$jour_pluie[$n]." ".$heure_pluie[$n];
 							$jour_debut=$jour_pluie[$n];
 							}
 						else
 							{
 							if ($heure_pluie[$n]<=date("h")."h")
 								{
-								$msg.=" à partir de ".$heure_pluie[$n];
+								$msg.=" de ".$heure_pluie[$n];
 								$jour_debut=$jour_pluie[$n];
 								}	
 							}								
@@ -243,6 +245,7 @@ $mode_test = ($_SERVER['REMOTE_ADDR']=="127.0.0.1") ;
 			$msg=str_replace ("au demain","à demain", $msg);
 			$msg=str_replace ("du demain","de demain", $msg);
 			$msg=str_replace ("du aujourd","d'aujourd", $msg);
+			$msg=str_replace ("au aujourd","à aujourd", $msg);
 			$msg=str_replace ("au minuit","à minuit", $msg);
 			
 			if ($max_pluie>5*$sueil)
