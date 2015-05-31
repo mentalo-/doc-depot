@@ -56,7 +56,12 @@ define('TAILLE_FICHIER_dropzone','8');
 				echo "<tr><td><a href=\"index.php?action=param_sys&nom=".encrypt($nom)."\"> $nom <a></td>";
 
 				if ( $nom_a_modifier!=$nom) 
-					echo "<td> $valeur </td>";
+					{
+					echo "<td> $valeur ";
+					if ((strlen($valeur)==10) && ($valeur[0]=='1') && (is_numeric($valeur))  )
+							echo " (".date ("d/m/Y H:i",$valeur)." )";
+					echo "</td>";
+					}
 				else
 					echo "<td><form method=\"post\" > <input  type=\"hidden\" name=\"action\" value=\"modif_valeur_param\"/> ".param('nom',"$nom")."<input type=\"text\" name=\"valeur\" value=\"$valeur\" onChange=\"this.form.submit();\" >  </form> </td>";
 				}
@@ -97,24 +102,39 @@ define('TAILLE_FICHIER_dropzone','8');
 				$filtre="";
 
 			echo "</table><div class=\"CSSTableGenerator\" > ";
-			echo "<table><tr><td > ".traduire('Nom')."  </td><td > ".traduire('Valeur')."  </td>";
+			echo "<table><tr><td >  </td><td > ".traduire('Nom')."  </td><td > ".traduire('Valeur')."  </td>";
 			$i=0;
-			$reponse =command("select * from  z_traduire $filtre order by fr ASC");		
+			$reponse =command("select * from  z_traduire $filtre order by commentaire ASC, fr ASC");		
 			while ($donnees = fetch_command($reponse) ) 
 				{
 				$nom=$donnees["fr"];	
 				$valeur=stripcslashes($donnees["$user_lang"]);
 				$idx=$donnees["idx"];	
-				echo "<tr><td id=\"$idx\" width=\"30%\"> $nom ";
+				$commentaire=$donnees["commentaire"];	
+				echo "<tr>";
+				$idx2=$i-8;
+				if ($commentaire=="technique")
+					$chk= " checked " ;
+				else
+					$chk= ""  ;
+				
+				echo "<td width=\"10\"><form method=\"post\" action=\"index.php#$idx2\"><input  type=\"hidden\"  name=\"action\" value=\"modif_trad_tech\"/><input  type=\"hidden\"  name=\"idx\" value=\"$idx\"/> <input type=\"checkbox\" name=\"valeur\" onChange=\"this.form.submit();\" $chk >  </form> </td> ";
+								
+				echo "<td id=\"$idx\" width=\"30%\"> $nom ";
 				
 				$cible_g=$user_lang;
 				if ($user_lang=="gb")
 					$cible_g="en";
 				
-				$idx2=$i-8;
-				echo "<a id=\"$i\" href=\"https://translate.google.com/?hl=fr#fr/$cible_g/$nom\"  target=_blank>$user_lang</a>";
-					
-				echo "</td><td width=\"70%\"><form method=\"post\" action=\"index.php#$idx2\"> <input  type=\"hidden\"  name=\"action\" value=\"modif_trad\"/> ".param('idx',"$idx").param('filtre',"$filtre1")."<input type=\"text\" name=\"valeur\" id=\"$idx\" value=\"".htmlspecialchars($valeur)."\" size=\"100\" onChange=\"this.form.submit();\" >  </form> </td>";
+
+				echo "<a id=\"$i\" href=\"https://translate.google.com/?hl=fr#fr/$cible_g/$nom\"  target=_blank>$user_lang</a></td>";
+				
+
+				if ($commentaire!="technique")
+					echo "<td width=\"70%\"><form method=\"post\" action=\"index.php#$idx2\"> <input  type=\"hidden\"  name=\"action\" value=\"modif_trad\"/> ".param('idx',"$idx").param('filtre',"$filtre1")."<input type=\"text\" name=\"valeur\" id=\"$idx\" value=\"".htmlspecialchars($valeur)."\" size=\"100\" onChange=\"this.form.submit();\" >  </form> </td>";
+				else 
+					echo "<td > </td>";
+
 				$i++;
 				}
 			echo "</table></div>";
@@ -129,6 +149,22 @@ define('TAILLE_FICHIER_dropzone','8');
 			//$valeur= addslashes($valeur); // T358
 			if ($user_lang!="fr")
 				$reponse =command("update z_traduire SET $user_lang = '$valeur' where idx='$idx' ");
+
+			}		
+		
+		function modif_trad_tech($idx, $valeur)
+			{
+			global $user_lang;
+
+			$reponse =command("select * from  z_traduire where idx='$idx'");		
+			if ($donnees = fetch_command($reponse) ) 
+				{
+				$commentaire=$donnees["commentaire"];	
+				if ($commentaire=="technique")
+					$reponse =command("update z_traduire SET commentaire = '' where idx='$idx' ");
+				else
+					$reponse =command("update z_traduire SET commentaire = 'technique' where idx='$idx' ");
+				}
 
 			}
 ?>

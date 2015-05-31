@@ -8,14 +8,15 @@ session_start();
 error_reporting(E_ALL | E_STRICT);
 
 include 'general.php';
-include 'inc_style.php';
+include 'inc_style_cal.php';
 
 	$to=TIME_OUT_BENE;
 
 	if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > $to )) 
-		$_SESSION['pass']=false;
+		$_SESSION['pass_ad']=false;
 		
 	$_SESSION['LAST_ACTIVITY'] = time(); // update last activity time stamp
+
 
 ?> 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
@@ -83,9 +84,9 @@ require_once 'include_crypt.php';
 
 	if ($action=="dx") 
 		{
-		if ( (isset ($_SESSION['pass'])) && ($_SESSION['pass']==TRUE)) 
+		if ( (isset ($_SESSION['pass_ad'])) && ($_SESSION['pass_ad']==TRUE)) 
 				ajout_log( $_SESSION['user'], traduire('Déconnexion') );
-		$_SESSION['pass']=false;// et hop le mot de passe... poubelle !
+		$_SESSION['pass_ad']=false;// et hop le mot de passe... poubelle !
 		echo "<div id=\"msg_dx\">".traduire('Vous êtes déconnecté!')."</div><br>";
 		}
 
@@ -98,7 +99,7 @@ if (isset($_POST['id']))
 	$organisme=variable('org');
 	$id=variable('id');
 	$reponse = command("SELECT * from  r_organisme WHERE  organisme='$organisme' "); 
-	$_SESSION['pass']=false;
+	$_SESSION['pass_ad']=false;
 
 	if ($donnees = fetch_command($reponse))
 		{
@@ -110,7 +111,7 @@ if (isset($_POST['id']))
 			$user_type=$donnees["type"];	
 			if ( !( $donnees = fetch_command($reponse) )  )
 				{			
-				$_SESSION['pass']=true;	 
+				$_SESSION['pass_ad']=true;	 
 				$_SESSION['user']=$idx_usager;	 
 				$_SESSION['ad']=true;	 
 				$_SESSION["mois"]=0;
@@ -126,7 +127,7 @@ if (isset($_POST['id']))
 
 	}
 
-	if ( !isset($_SESSION['pass']) ||($_SESSION['pass']==false) || !(isset($_SESSION['user'])) || ($_SESSION['user']=="") )
+	if ( !isset($_SESSION['pass_ad']) ||($_SESSION['pass_ad']==false) || !(isset($_SESSION['user'])) || ($_SESSION['user']=="") )
 		// si pas de valeur pass en session on affiche le formulaire...
 		{
 		echo "<div id=\"logo\"> <br><p><center><a href=\"ad.php\"><img src=\"images/calendrier.jpg\" width=\"200\" height=\"150\" ></a> </div>  <center>";	

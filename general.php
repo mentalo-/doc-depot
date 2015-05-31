@@ -35,6 +35,7 @@ include 'bdd.php';
 			affiche_un_choix($val_init,$autre);
 		echo "</SELECT></td>";
 		}			
+		
 	function traduire($ligne)
 		{
 		global $user_lang;
@@ -301,6 +302,12 @@ include 'bdd.php';
 			
 	function filtre_xss($var)
 		{
+		$var= str_replace("<","&lt;",$var);
+		$var= str_replace(">","&gt;",$var);
+		$var= str_replace("\"","&quot;",$var);
+//		$var= str_replace("\\","&#92;",$var);
+		$var= str_replace("'","&apos;",$var);
+
 		if ((stristr($var,"<script")===FALSE) 
 			&& (stristr($var,"<object")===FALSE)
 			&& (stristr($var,"<applet")===FALSE)
@@ -392,21 +399,47 @@ include 'bdd.php';
 
 		if (isset ($_GET[$libelle]))
 			if ($libelle=="action")
-				return(addslashes(mysql_real_escape_string(filtre_xss($_GET[$libelle]))));
+				return(mysql_real_escape_string(filtre_xss($_GET[$libelle])));
 
 		return("");
 		}
+
 		
+	function variable_cryptee($libelle)
+		{
+		if (isset ($_POST[$libelle]))
+//			return(addslashes(mysql_real_escape_string(decrypt(filtre_xss(strtr($_POST[$libelle] ' ',  '+'))))));
+			return(mysql_real_escape_string(decrypt(filtre_xss($_POST[$libelle]))));
+			
+		if (isset ($_GET[$libelle]))
+			return(mysql_real_escape_string(decrypt(filtre_xss(strtr($_GET[$libelle], ' ',  '+')))));
+			
+		return("");
+		}		
 		
 	function variable_get($libelle)
 		{
 		if (isset ($_GET[$libelle]))
 			{	
 			if ($libelle=="action")
-				return(addslashes(mysql_real_escape_string(filtre_xss($_GET[$libelle]))));
+				return(mysql_real_escape_string(filtre_xss($_GET[$libelle])));
 			else
 				{
-				return(addslashes(mysql_real_escape_string(decrypt(filtre_xss(strtr($_GET[$libelle], ' ',  '+'))))));
+				return(mysql_real_escape_string(decrypt(filtre_xss(strtr($_GET[$libelle], ' ',  '+')))));
+				}
+			}
+		return("");
+		}	
+	
+	function variable_get_ltd($libelle, $validite='' )
+		{
+		if (isset ($_GET[$libelle]))
+			{	
+			if ($libelle=="action")
+				return(mysql_real_escape_string(filtre_xss($_GET[$libelle])));
+			else
+				{
+				return(mysql_real_escape_string(decrypt_ltd(filtre_xss(strtr($_GET[$libelle], ' ',  '+')),$validite)));
 				}
 			}
 		return("");

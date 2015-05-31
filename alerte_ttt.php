@@ -355,11 +355,11 @@ require_once "include_mail.php";
 					$msg = msg_alerte_min(-5);
 					
 					if ($msg=="")
-						$msg = msg_alerte_max(27, 15);
+						$msg = msg_alerte_max(25, 8);
 					
-					$msg_pluie= msg_alerte_pluie(1);
-					$msg=$msg_pluie.$msg;			
-					$msg= addslashes($msg);
+					//$msg_pluie= msg_alerte_pluie(1);
+					//$msg=$msg_pluie.$msg;			
+					$msg= filtre_xss($msg);
 					command("INSERT INTO `cc_alerte`  VALUES ( '$auj', '', '$dept', '$msg','','','','','','')");
 					}
 				else
@@ -387,14 +387,12 @@ require_once "include_mail.php";
 			calcul_moyenne($dept );
 			$msg = msg_alerte_min(-5);
 			if ($msg=="")
-				$msg = msg_alerte_max(27, 15);
-			$msg_pluie= msg_alerte_pluie(1);
-			$msg=$msg_pluie.$msg;	
+				$msg = msg_alerte_max(25, 8);
+			//$msg_pluie= msg_alerte_pluie(1);
+			//$msg=$msg_pluie.$msg;	
 			echo "<p>$dept = $msg";
 			}
 			
-	if ($dept==99)
-		$dept=70;
 		
 	ecrit_parametre("DD_alerte_dept",$dept+1);	
 			

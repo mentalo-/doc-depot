@@ -5,8 +5,32 @@
 // Supported modes 	cbc cfb ctr ecb ncfb nofb ofb stream 	
 
 
-	$mode_cryptage= MCRYPT_RIJNDAEL_128;
+	$mode_cryptage= MCRYPT_RIJNDAEL_256;
 
+	function encrypt_ltd($data) 
+		{
+		$data=time()."-".$data;
+		return (encrypt($data));
+		}
+	
+
+	function decrypt_ltd($data, $to = '') 
+		{
+		$data=decrypt($data);
+		$data=substr($data,11); // récupération de la partie utile
+		
+		// on vérifie que la requette n'est pas périmée si une durée de validité a été communiquée 
+		//si c'est cas on retourne une chaine vide
+		if ($to!='')
+			{
+			$t=substr($data,0,10);
+			if ($t<time()-$to)
+				return('');
+			}
+			
+		return ($data);
+		}
+		
 	function encrypt($data) 
 		{
 		global  $ZZ_CLE, $mode_cryptage;
@@ -64,60 +88,5 @@
 			fclose($nouveau); 
 			}
 		}
-	
-	function dde_chgt_cle()
-		{
-		global $ZZ_CLE;
 		
-		echo "Demande de changement de clé de cryptage $ZZ_CLE";
-		echo "<TABLE><TR><td>";
-		formulaire ("chgt_cle");
-		echo "<TR> <td>Ancienne clé: </td><td><input class=\"center\" type=\"password\" name=\"ancien\" value=\"\"/></td>";
-		echo "<TR>  <td><input type=\"submit\"  id=\"chgt_cle\"  value=\"Modifier\"/></td>";
-		echo "</form> </table> ";		
-		pied_de_page("x");
-		}
-
-	function maj_cle_champ($idx, $champ)
-		{
-		global $ZZ_CLE_org,$ZZ_CLE_ancien,$ZZ_CLE;
-		
-		$ZZ_CLE=$ZZ_CLE_ancien;
-		$reponse =command("","select * from r_user where idx='$idx' ");		
-		$donnees = mysql_fetch_array($reponse) ;
-		$val_champ=$donnees["$champ"];	
-		//echo "<br>".$val_champ;
-		$val_champ = decrypt($val_champ);
-		if ($val_champ!="")
-			{
-			//echo " <br> ".$val_champ;
-			$ZZ_CLE=$ZZ_CLE_org;
-			$val_champ = encrypt($val_champ);
-			//echo " <br> ".$val_champ;
-			//$reponse =command("","upadte r_user set $champ='$val_champ' where idx='$idx' ");	
-			echo "MaJ Ok. ";
-			}
-		else
-			echo "KO (Clé incorrecte) ";
-		}
-		
-	function chgt_cle()
-		{
-		global $ZZ_CLE_org,$ZZ_CLE_ancien,$ZZ_CLE;
-		
-		$ZZ_CLE_org = $ZZ_CLE;
-		$ZZ_CLE_ancien=stripcslashes(stripcslashes(variable("ancien")));
-		
-		echo "Traitement changement de clé de cryptage $ZZ_CLE_ancien / $ZZ_CLE";
-
-		$reponse =command("","select * from r_user ");		
-		while ($donnees = mysql_fetch_array($reponse) ) 
-			{
-			$idx=$donnees["idx"];	
-			echo "<br> User  $idx : ";
-			maj_cle_champ($idx, "pw")	;		
-			}
-		pied_de_page("x");
-		}
-		
-	?>
+?>

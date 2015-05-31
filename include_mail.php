@@ -102,7 +102,12 @@
 
 	function envoi_mail_brut($to,$subject,$body)		
 		{
-
+		$var= str_replace("&lt;","<",$var);
+		$var= str_replace("&gt;",">",$var);
+		$var= str_replace("&quot;","\"",$var);
+//		$var= str_replace("&#92;","\\",$var);
+		$var= str_replace("&apos;","'",$var);
+		
 		maj_compteur_envoi_mail();
 		ecrit_parametre("TECH_nb_sms_envoyes",parametre("TECH_nb_sms_envoyes")+1) ;
 

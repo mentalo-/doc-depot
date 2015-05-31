@@ -121,8 +121,8 @@ include 'general.php';
 		return ($s_org-1);
 		}
 
-		
-		
+	$format_date = "d/m/Y";		
+	$aujourdhui=date($format_date,  mktime(0,0,0 , date("m"), date("d"), date ("Y")));		
 		
 	if ( !isset($_SESSION['pass']) ||($_SESSION['pass']==false) )
 		// si pas de valeur pass en session on affiche le formulaire...
@@ -133,7 +133,7 @@ include 'general.php';
 		
 			// ConnexiondD		
 		include "connex_inc.php";	
-		$format_date = "d/m/Y";
+
 		
 		$detail=isset ($_GET["detail"]);
 		
@@ -316,13 +316,14 @@ include 'general.php';
 				$num++;
 				$nom=$d1["nom"];
 				if (($ncolor++ %2 )==0) $color="#ffffff" ; else $color="#d4ffaa" ; 
-				echo "<tr> <td bgcolor=\"$color\"> $num - <a href=\"fissa.php?action=suivi&nom=$nom&date_jour=$date_jour_fr\" target=_blank> <b>$nom  </b></td>";
+
+				echo "<tr> <td bgcolor=\"$color\"> $num - <a href=\"fissa.php?action=suivi&nom=$nom&date_jour=$aujourdhui\" target=_blank> <b>$nom  </b></td>";
 				$nb = $d1["TOTAL"];
 				echo "<td width=\"20\" bgcolor=\"$color\"> $nb </td>";
 				
 				if ($nb!=0)
 					{
-					$req_sql_activite="SELECT *,count(*) as TOTAL  FROM $bdd where date<='$date_fin' and date>='$date_jour' and ( activites like '%$nom%' ) and ( nom not like '%(B)%' ) and ( nom not like '%(S)%' )";
+					$req_sql_activite="SELECT *,count(*) as TOTAL  FROM $bdd where date<='$date_fin' and date>='$date_jour' and ( activites like '%".addslashes($nom)."%' ) and ( nom not like '%(B)%' ) and ( nom not like '%(S)%' )";
 					$r2 = command($req_sql_activite); 
 					while ($d2 = fetch_command($r2) )	
 						{
@@ -365,7 +366,7 @@ include 'general.php';
 				$nom=$d1["nom"];
 				if (($ncolor++ %2 )==0) $color="#ffffff" ; else $color="#d4ffaa" ; 
 
-				echo "<tr> <td bgcolor=\"$color\"> $num - <a href=\"fissa.php?action=suivi&nom=$nom&date_jour=$date_jour_fr\" target=_blank> <b>$nom</b> </a></td><td bgcolor=\"$color\"> </td>";
+				echo "<tr> <td bgcolor=\"$color\"> $num - <a href=\"fissa.php?action=suivi&nom=$nom&date_jour=$aujourdhui\" target=_blank> <b>$nom</b> </a></td><td bgcolor=\"$color\"> </td>";
 				$nb = $d1["TOTAL"];
 				echo "<td width=\"20\" bgcolor=\"$color\"> $nb </td>";
 				// if ($nbr!=0) echo "<td width=\"20\" bgcolor=\"$color\">($nbr)</td>";
@@ -391,7 +392,7 @@ include 'general.php';
 				$tot = $d1["TOTAL"];
 				$nom=$d1["nom"];
 				if (($ncolor++ %2 )==0) $color="#ffffff" ; else $color="#d4ffaa" ; 
-				echo "<tr> <td bgcolor=\"$color\"> $num - <a href=\"fissa.php?action=suivi&nom=$nom&date_jour=$date_jour_fr\" target=_blank> <b>$nom  </b></td><td bgcolor=\"$color\"> </td>";
+				echo "<tr> <td bgcolor=\"$color\"> $num - <a href=\"fissa.php?action=suivi&nom=$nom&date_jour=$aujourdhui\" target=_blank> <b>$nom  </b></td><td bgcolor=\"$color\"> </td>";
 				$nb = $d1["TOTAL"];
 				echo "<td width=\"20\" bgcolor=\"$color\"> $nb </td>";
 				}

@@ -65,6 +65,26 @@
 				}
 		echo "</table></div><hr>";
 
+	$reponse = command("SELECT * FROM DD_param WHERE nom like 'MONITOR_%' ");
+	echo "<table><tr>";
+	while ($donnees = fetch_command($reponse) ) 
+		{
+		$nom=$donnees["nom"];
+		$h_old= $donnees["valeur"];
+		$h=date("d/m/Y H:i",$h_old);
+		echo "<tr><td>$nom :</td><td> $h </td>";
+		$delta = (time()-$h_old);
+		$c="";
+		if ($delta<30) 
+			$c =" gcolor=\"lightgreen\"  ";
+		if ($delta>6*60) 
+			$c =" gcolor=\"orange\"  ";
+		if ($delta>10*60) 
+			$c =" gcolor=\"red\"  ";
+			
+		echo "<td $c> ==> $delta sec</td>";	
+		}
+	echo "</table>";
 	echo "</body>";
 	
 	?> 

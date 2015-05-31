@@ -1,0 +1,41 @@
+<Files .htaccess>
+order allow,deny
+deny from all
+</Files>
+SetEnv REGISTER_GLOBALS 0
+#ErrorDocument 403 NOM_DU_FICHIER
+Options -Indexes
+DirectoryIndex index.php
+<Files ~ "^(index)\.(p?s?x?htm?|txt|aspx?|cfml?|cgi|pl|php[3-9]|jsp|xml)$">
+order allow,deny
+deny from all
+</Files>
+RewriteEngine On
+RewriteCond %{SERVER_PORT} 80
+RewriteCond %{REQUEST_URI} !^/robots.txt
+RewriteCond %{REQUEST_URI} !^/sitemap.xml
+RewriteCond %{REQUEST_URI} !^/paypal-ipn.php
+RewriteCond %{HTTP_USER_AGENT} ^-?$ [OR]
+RewriteCond %{HTTP_USER_AGENT} ^[bcdfghjklmnpqrstvwxz\ ]{8,}|^[0-9a-z]{15,}|^[0-9A-Za-z]{19,}|^[A-Za-z]{3,}\ [a-z]{4,}\ [a-z]{4,} [OR]
+RewriteCond %{HTTP_USER_AGENT} ^<sc|<\?|8484\ Boston\ Project|autoemailspider|@nonymouse|ADSARobot|Advanced\ Email\ Extractor|^adwords|ah-ha|aktuelles|amzn_assoc|Anarchie|anonymous|Art-Online|ASPSeek|ASSORT|ATHENS|Atomz|attach|autoemailspider|BackWeb|Bandit|BatchFTP|bdfetch|big.brother|BlackWidow|blogsearchbot-martin|bmclient|Boston\ Project|BravoBrian\ SpiderEngine\ MarcoPolo|Bullseye|bumblebee|capture|CherryPicker|ChinaClaw|CICC|clipping|compatible\ \;|Crescent|Crescent\ Internet|Custo|cyberalert|Deweb|diagem|Digger|Digimarc|DIIbot|DirectUpdate|disco|DISCoFinder|Downloader|Download\ Accelerator|Download\ Demon|Download\ Wonder|Drip|DSurf15a|DTS.Agent|EasyDL|eCatch|echo\ extense|ecollector|efp@gmx\.net|EirGrabber|EmailCollector|EmailSiphon|Email\ Siphon|EmailWolf|Email\ Extractor|Express\ WebPictures|ExtractorPro [NC,OR]
+RewriteCond %{HTTP_USER_AGENT} EyeNetIE|fastlwspider|FavOrg|Favorites\ Sweeper|^Fetch|FEZhead|FileHound|flashget|FlashGet\ WebWasher|FlickBot|fluffy|frontpage|GalaxyBot|Generic|Getleft|GetRight|GetSmart|GetWeb!|GetWebPage|gigabaz|Girafabot|Go!Zilla|go-ahead-got-it|GornKer|Grabber|GrabNet|Grafula|Green\ Research|grub-client|grub\ crawler|hanzoweb|Harvest|hhjhj@yahoo|hloader|HMView|HomePageSearch|HTTPConnect|httpdown|httplib|HttpProxy|HTTP\ agent|http\ generic|HTTrack|ia_archive|IBM_Planetwide|IDBot|id-search|imagefetch|Image\ Stripper|Image\ Sucker|IncyWincy|Indy\ Library|informant|Ingelin|InterGET|InternetLinkAgent|InternetSeer\.com|^Internet\ Explorer|Internet\ Ninja|IPiumBot|Iria|Irvine|Jakarta\ Commons|JBH*Agent [NC,OR]
+RewriteCond %{HTTP_USER_AGENT} JetCar|JOC|JOC\ Web\ Spider|JustView|Kapere|KWebGet|Lachesis|larbin|LeechFTP|LexiBot|lftp|likse|Link*Sleuth|LINKS\ ARoMATIZED|LinkWalker|Mac\ Finder|Mag-Net|Magnet|Mass\ Downloader|MCspider|Microsoft\ URL|Microsoft\ Data|MIDown\ tool|minibot\(NaverRobot\)|Mirror|Missigua|Mister\ PiX|MJ12bot|MMMtoCrawl\/UrlDispatcherLLL|Movable\ Type|Moozilla|^Mozilla$|^MSIE|Murzillo|MSProxy|multithreaddb|nationaldirectory|Navroad|NearSite|NetAnts|NetCarta|NetMechanic|netprospector|NetResearchServer|NetSpider|NetZIP|NetZippy|NetZip\ Downloader|Net\ Vampire|NEWT|nicerspro|NICErsPRO|NPBot|Nutch|Nutscrape/|Octopus|Offline\ Explorer|Offline\ Navigator|OmniExplorer|OpaL|Openfind|OpenTextSiteCrawler [NC,OR]
+RewriteCond %{HTTP_USER_AGENT} OrangeBot|PackRat|PageGrabber|Papa\ Foto|pavuk|pcBrowser|PersonaPilot|PingALink|Pockey|Program\ Shareware|Proxy|psbot|PSurf|psycheclone|^puf|Pump|PushSite|PussyCat|PycURL|python|QRVA|QuepasaCreep|RealDownload|Reaper|Recorder|ReGet|replacer|RepoMonkey|almaden|Robozilla|Rover|RPT-HTTPClient|Rsync|SearchExpress|searchhippo|searchterms\.it|Second\ Street\ Research|Seeker|Shai|sitecheck|SiteMapper|SiteSnagger|SlySearch|SmartDownload|snagger|SpaceBison|Spegla|SpiderBot|SqWorm|Star\ Downloader|Stripper|sucker|SuperBot|SuperHTTP|Surfbot|SurfWalker|SurveyBot|Szukacz|tAkeOut|tarspider|Teleport\ Pro|Telesoft|Templeton|TrackBack|TrueRobot|Turing|TurnitinBot [NC,OR]
+RewriteCond %{HTTP_USER_AGENT} TV33_Mercator|UIowaCrawler|URL_Spider_Pro|^user|^User\ Agent:\ |^User-Agent:\ |UtilMind|Vacuum|vagabondo|vayala|visibilitygap|vobsub|VoidEYE|vspider|w3mir|WebaltBot|WebAuto|webbandit|WebCapture|Webclipping|webcollage|webcollector|WebCopier|webcraft@bea|WebDAV|webdevil|webdownloader|Webdup|WebEmailExtractor|WebFetch|WebGo\ IS|WebHook|Webinator|WebLeacher|WEBMASTERS|WebMiner|WebMirror|webmole|WebReaper|WebSauger|WEBsaver|Website\ eXtractor|Website\ Quester|WebSnake|Webster|WebStripper|websucker|webvac|webwalk|webweasel|WebWhacker|WebZIP|Web\ Data\ Extractor|Web\ Downloader|Web\ Image\ Collector|Web\ Sucker|web\.by\.mail|whizbang|WhosTalking|Widow|Widows|WISEbot|WISEnutbot|WUMPUS|Wweb|WWWOFFLE|Wysigot|x-Tractor|Xaldon\ WebSpider|XGET|Yandex|Zeus|Zeus.*Webster [NC]
+RewriteCond %{HTTP_USER_AGENT} ^curl|^Fetch\ API\ Request|GT\:\:WWW|^HTTP\:\:Lite|httplib|^Java/1.|^Java\ 1.|^LWP|libWeb|libwww|^PEAR|PECL\:\:HTTP|PHPCrawl|^Program\ Shareware|python|Rsync|Snoopy|^URI\:\:Fetch|WebDAV|^Wget [NC]
+RewriteRule (.*) - [F]
+RedirectMatch gone ^/_vti.*
+RedirectMatch gone ^/MSOffice.*
+RedirectMatch gone ^[-_a-z0-9/\.]*//.*
+RedirectMatch gone ^.*/etc/passwd.*
+RewriteCond %{REQUEST_METHOD} (GET|POST) [NC]
+RewriteCond %{QUERY_STRING} ^(.*)(%3C|<)/?script(.*)$ [NC,OR]
+RewriteCond %{QUERY_STRING} ^(.*)(%3D|=)?javascript(%3A|:)(.*)$ [NC,OR]
+RewriteCond %{QUERY_STRING} ^(.*)document\.location\.href(.*)$ [OR]
+RewriteCond %{QUERY_STRING} ^(.*)(%3D|=)http(%3A|:)(/|%2F){2}(.*)$ [NC,OR]
+RewriteCond %{QUERY_STRING} ^(.*)base64_encode(.*)$ [OR]
+RewriteCond %{QUERY_STRING} ^(.*)GLOBALS(=|[|%[0-9A-Z]{0,2})(.*)$ [OR]
+RewriteCond %{QUERY_STRING} ^(.*)_REQUEST(=|[|%[0-9A-Z]{0,2})(.*)$ [OR]
+RewriteCond %{QUERY_STRING} ^(.*)(SELECT(%20|\+)|UNION(%20|\+)ALL|INSERT(%20|\+)|DELETE(%20|\+)|CHAR\(|UPDATE(%20|\+)|REPLACE(%20|\+)|LIMIT(%20|\+))(.*)$ [NC,OR]
+RewriteCond %{QUERY_STRING} \=PHP[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12} [NC]
+RewriteRule (.*) - [F]

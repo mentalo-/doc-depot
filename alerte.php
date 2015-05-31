@@ -166,7 +166,7 @@ require_once "connex_inc.php";
 		echo "</form></table> ";
 		fin_cadre();
 		
-		echo "<p>".traduire("Autre méthode: envoyez un SMS au 06.98.47.43.12 (numéro non surtaxé) contenant 'alerte' suivi du numéro de département où vous êtes.<br>(Par exemple \"alerte 75\" si vous êtes sur Paris)");
+		echo "<p>".traduire("Autre méthode: depuis le téléphone devant recevoir les alertes, envoyez un SMS au 06.98.47.43.12 (numéro non surtaxé) contenant 'alerte' suivi du numéro de département où vous êtes.<br>(Par exemple \"alerte 75\" si vous êtes sur Paris)");
 		
 		echo "<center><table border=\"1\"><tr><td>";
 		debut_cadre("500");

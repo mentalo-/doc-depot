@@ -354,7 +354,6 @@ require_once "connex_inc.php";
 		$message .= "<p>Description : $descript";
 		envoi_mail(parametre('DD_mail_fonctionnel'),"Demande 'Nous contacter' ",$message, true);
 		ajout_log( "", traduire("Demandeur")." : $qui / $coordo ", "");
-		
 		}
 // ---------------------------------------------------------------------------------------
 
@@ -891,7 +890,7 @@ function maj_mdp_fichier($idx, $pw )
 			echo " . ";
 			
 			if ((($action=="ajout_admin") &&  (substr($ref,0,1)=="A"))|| ( ($action=="ajout_photo")&&  (substr($ref,0,1)=="P")) ) 
-				lien ("images/illicite.png", "illicite", param("num","$num" ). param("retour","$action" ),"Signaler comme illicte" );
+				lien ("images/illicite.png", "illicite", param("num","$num" ). param("retour","$action" ),"Signaler comme illicite" );
 			echo " </table> ";
 
 			echo "</td>";
@@ -905,16 +904,19 @@ function maj_mdp_fichier($idx, $pw )
 		
 	function supp_attachement ($num)
 		{
-		supp_fichier("upload/$num");
-		supp_fichier("upload/org.$num");
-		supp_fichier("upload_chi/$num.chi");
-		supp_fichier("upload_mini/$num");
-		supp_fichier("upload_mini/-$num");
-		supp_fichier("upload_pdf/$num.pdf");
-		supp_fichier("upload_pdf/$num");
-		supp_fichier("upload_prot/$num.pdf");
-		supp_fichier("upload_prot/$num");
-		command("delete from r_attachement where num='$num' ");
+		if ( !isset ($_SESSION['chgt_user']) || ($_SESSION['chgt_user']==false)  )
+			{
+			supp_fichier("upload/$num");
+			supp_fichier("upload/org.$num");
+			supp_fichier("upload_chi/$num.chi");
+			supp_fichier("upload_mini/$num");
+			supp_fichier("upload_mini/-$num");
+			supp_fichier("upload_pdf/$num.pdf");
+			supp_fichier("upload_pdf/$num");
+			supp_fichier("upload_prot/$num.pdf");
+			supp_fichier("upload_prot/$num");
+			command("delete from r_attachement where num='$num' ");
+			}
 		}
 		
 	function supp_tous_fichiers($idx)
@@ -959,7 +961,6 @@ function maj_mdp_fichier($idx, $pw )
 					{
 					$idx=inc_index("referent");
 					$reponse = command("INSERT INTO `r_referent`  VALUES ( '$idx', '$user', '$organisme', '$nom','$prenom', '$tel','$mail','$adresse')");
-
 					if (is_numeric($nom))
 						$nom=libelle_user($nom);
 
@@ -1001,12 +1002,12 @@ function maj_mdp_fichier($idx, $pw )
 
 		if ($organisme=="")
 			{
-			$nom=$donnees["nom"];
-			$prenom=$donnees["prenom"];
-			$tel=$donnees["tel"];	
-			$mail=$donnees["mail"];	
-			$adresse=stripcslashes($donnees["adresse"]);	
-			$mail= formate_mail($mail);
+			$nom=($donnees["nom"]);
+			$prenom=($donnees["prenom"]);
+			$tel=($donnees["tel"]);	
+			$mail=($donnees["mail"]);	
+			$adresse=(stripcslashes($donnees["adresse"]));	
+			$mail= (formate_mail($mail));
 
 			echo "<tr><td> $organisme </td><td> $nom   </td><td> $prenom   </td><td> $tel </td><td> $mail</td><td> $adresse</td>";
 			}
@@ -1033,11 +1034,11 @@ function maj_mdp_fichier($idx, $pw )
 		{
 		$r1 =command("select * from  r_user where idx='$idx' ");
 		$d1 = fetch_command($r1);
-		$nom=$d1["nom"];
+		$nom=($d1["nom"]);
 		$idx2=$d1["idx"];
-		$prenom=$d1["prenom"];
-		$tel=$d1["telephone"];	
-		$mail=$d1["mail"];	
+		$prenom=($d1["prenom"]);
+		$tel=($d1["telephone"]);	
+		$mail=($d1["mail"]);	
 		$droit=$d1["droit"];
 		$organisme=libelle_organisme($d1["organisme"]);
 		$adresse=adresse_organisme($d1["organisme"]);
@@ -1189,10 +1190,13 @@ function maj_mdp_fichier($idx, $pw )
 										{
 										$idx=inc_index("user");
 										
-										$plus="";
-										if ($telephone[0]=='+')
-											$plus='+';
-										$telephone = $plus.preg_replace('`[^0-9]`', '', $telephone);
+										if ($telephone!="") // T353
+											{
+											$plus="";
+											if ($telephone[0]=='+')
+												$plus='+';
+											$telephone = $plus.preg_replace('`[^0-9]`', '', $telephone);
+											}
 										
 										command("INSERT INTO `r_user`  VALUES (  '$idx', '$id', '$pw','$droit','$mail','$organisme','$nom','$prenom','$anniv','$telephone','$nationalite','$ville_nat','$adresse','$recept_mail' ,'$prenom_p','$prenom_m','$date_jour','$code_lecture','','' ,'' ,'','$type_user','fr')");
 										ajout_log( $idx, traduire("Création utilisateur")."  $idx / $droit / $nom/ $prenom",	 $user_idx );
@@ -1332,6 +1336,7 @@ function maj_mdp_fichier($idx, $pw )
 			$d1 = fetch_command($r1);
 			$adresse=$d1["adresse"];
 			}
+		$adresse=stripcslashes($adresse);
 		$reponse = command("UPDATE `r_user` SET organisme='$organisme', adresse='$adresse'  where idx='$idx'  ");
 		ajout_log( $idx, traduire("Modification Domiciliation") );
 		}
@@ -1525,12 +1530,12 @@ function maj_mdp_fichier($idx, $pw )
 			if ($droit=="R")
 				liste_organisme_du_responsable ($user_idx);
 			else
-				if ($droit=="A")
+				if ($droit=="A") // T350
 					liste_organisme("");
 				else
 					echo "<td><input type=\"hidden\" name=\"organisme\"  value=\"\"> </td> ";
 
-			if ($droit=="A")
+			if ($droit=="A") 
 				//echo "<input type=\"hidden\" name=\"droit\"  value=\"R\"> " ;
 				liste_type_user("R");
 			else
@@ -1553,7 +1558,7 @@ function maj_mdp_fichier($idx, $pw )
 			$reponse =command("SELECT * FROM `r_lien`, `r_user` WHERE (r_user.droit='S' or r_user.droit='P' ) and r_user.organisme=r_lien.organisme and r_lien.user='$user_idx' $filtre  ");
 		else
 			if ($droit=="A")			
-				$reponse =command("select * from  r_user where droit='R' or droit='E' or droit='F' $filtre  ");
+				$reponse =command("select * from  r_user where droit='R' or droit='E' or droit='F' or droit='t' or droit='T' or droit='A' $filtre  "); // T352
 			else
 				$reponse =command("select * from  r_user where droit='' $filtre ");		
 				
@@ -1847,7 +1852,7 @@ function maj_mdp_fichier($idx, $pw )
 		
 		$l=libelle_organisme($id);
 		$reponse = command("UPDATE `r_organisme` SET mail='$mail', tel='$telephone' , adresse='$adresse' , sigle='$sigle', doc_autorise='$doc'  where idx='$id'  ");
-		ajout_log( $user_idx, traduire("Modification organisme")." $l : $mail / $telephone / $adresse / $sigle/ $doc" );
+		ajout_log( $user_idx, traduire("Modification structure")." $l : $mail / $telephone / $adresse / $sigle/ $doc" );
 		}	
 		
 	FUNCTION supp_organisme($idx)
@@ -2007,89 +2012,6 @@ function maj_mdp_fichier($idx, $pw )
 		return($ligne);
 		}	
 	
-
-//================================================================================== Offres =====
-		
-	function titre_offres()
-		{
-		global $user_droit;
-
-		echo "<div class=\"CSSTableGenerator\" ><table><tr><td> ".traduire('Structure sociale')." </td><td> ".traduire('Offre')." </td><td> ".traduire('Début')." </td><td> ".traduire('fin')." </td><td> ".traduire('Etat')." </td><td> ".traduire('Param1')." </td><td> ".traduire('Param2')." </td>" ;
-		}
-
-	function liste_offres( $val_init="" )
-		{
-		echo "<td> <SELECT name=\"offres\" id=\"offres\"  >";
-		affiche_un_choix($val_init,"FISSA");
-		affiche_un_choix($val_init,"Planning Usagers");
-		affiche_un_choix($val_init,"Planning Accueillants");			
-		echo "</SELECT></td>";
-		}
-		
-	FUNCTION supp_offre()
-		{
-		$idx_offre=variable("idx_offre");
-		$reponse =command("DELETE FROM `DD_offres`  where idx='$idx_offre' ");
-		}	
-		
-	FUNCTION nouvelle_offre ()
-		{
-		$organisme=variable("organisme");
-		$offre=variable("offre");
-		$debut=variable("debut");
-		$fin=variable("fin");
-		$etat=variable("etat");
-		$param1=variable("param1");
-		$param2=variable("param2");		
-		$idx=inc_index("offre");
-		$reponse = command( "INSERT INTO `DD_offres`  VALUES ('$idx','$organisme', '$offre', '$debut', '$fin', '$etat', '$param1', '$param2')");
-		}		
-		
-	function gestion_offres()
-		{
-		global $action, $user_droit;
-
-		echo "<table><tr><td width> <ul id=\"menu-bar\">";
-		echo "<li><a href=\"index.php?action=ajout_offre\"  > + ".traduire('Offres')." </a></li>";
-		echo "</ul></td></table>";
-
-		titre_offres();
-		if ($action=="ajout_offre") 
-				{
-				formulaire ("nouvelle_offre");
-				echo "<tr> " ;
-				liste_organisme( "" );
-				liste_offres( );
-				echo "<td>  <input type=\"texte\" name=\"debut\" class=\"calendrier\"   size=\"10\" value=\"\"> </td>" ;
-				echo "<td>  <input type=\"texte\" name=\"fin\"  class=\"calendrier\"  size=\"10\" value=\"\"> </td>" ;
-				echo "<td>  <input type=\"texte\" name=\"etat\"   size=\"10\" value=\"\"> </td>" ;
-				echo "<td>  <input type=\"texte\" name=\"param1\"   size=\"10\" value=\"\"> </td>" ;
-				echo "<td>  <input type=\"texte\" name=\"param2\"   size=\"10\" value=\"\"> </td>" ;
-				echo "<td><input type=\"submit\"   id=\"nouvelle_offre\"  value=\"".traduire('Valider')."\" > </form></td> ";
-				}
-
-		$reponse =command("select * from  DD_offres order by organisme asc");
-
-		while ($donnees = fetch_command($reponse) ) 
-				{
-				$idx_offre=$donnees["idx"];
-				$orga=$donnees["organisme"];
-				$organisme=libelle_organisme($orga);		
-				$offre=$donnees["offre"];
-				$debut=$donnees["debut"];
-				$fin=$donnees["fin"];
-				$etat=$donnees["etat"];
-				$p1=$donnees["param1"];
-				$p2=$donnees["param2"];
-				echo "<tr><td> $organisme </td><td> $offre</td><td> $debut</td><td> $fin</td><td> $etat</td><td> $p1</td><td> $p2</td>";
-				if ($action=="ajout_offre")  
-					lien_c ("images/croixrouge.png", "supp_offre", param("idx_offre","$orga" ),traduire("Supprimer") );
-				}
-			echo "</table></div>";				
-		if ($action=="ajout_offre") 
-			pied_de_page("x");
-		}
-
 
 //================================================================================== affectation =====
 	
@@ -2293,7 +2215,6 @@ function visitor_country()
     elseif(filter_var($forward, FILTER_VALIDATE_IP))
         $ip = $forward;
     else
-
         $ip = $remote;
 
     $ip_data = @json_decode(file_get_contents("http://www.geoplugin.net/json.gp?ip=".$ip));
@@ -2593,6 +2514,7 @@ function affiche_membre($idx)
 				case "modif_champ_bug":
 				case "modif_bug":
 				case "modif_trad":
+				case "modif_trad_tech":
 				case "param_sys":
 				case "modif_valeur_param":
 				case "illicite":
@@ -2627,10 +2549,6 @@ function affiche_membre($idx)
 				case "mail_envoi" :
 				
 				// liste des actions nécessitant des droits de administrateur	
-				case "nouvelle_offre" :				
-				case "offres" :				
-				case "ajout_offre" :				
-				case "supp_offre" :				
 				case "nouveau_fissa" :				
 
 				// liste des actions nécessitant des droits de Fonctionnel	
@@ -2650,7 +2568,7 @@ function affiche_membre($idx)
 				
 				// liste des actions nécessitant des droits de Formateur			
 				case "init_formation": 
-				case "raz_mdp_formation":				
+				case "modif_mdp_formation":				
 				
 				// liste des actions nécessitant des droits d'AS uniquement
 				case "collegues" :
@@ -2764,12 +2682,11 @@ require_once 'include_crypt.php';
 			
 		if ($action=="enreg_bug")
 			{
-			aff_logo();
 			$ip= $_SERVER["REMOTE_ADDR"];
 			tempo_cx ($ip);
 			$n=enreg_bug(variable("titre"),variable("descript"),variable("type"),variable("impact"),variable("qui"));
 			msg_ok( traduire("Bug enregistré")." ($n).");
-			pied_de_page("x");
+			$action="bug";
 			}	
 			
 		if ($action=="alerte_admin")
@@ -3199,7 +3116,7 @@ require_once 'include_crypt.php';
 			echo "<tr><td> ".traduire('Prénom de votre mére').": </td><td><input  type=\"text\" size=\"20\" name=\"prenom_m\" value=\"".variable("prenom_m")."\"/></td>";
 			echo "<tr><td> ".traduire('Prénom de votre pére').": </td><td><input  type=\"text\" size=\"20\" name=\"prenom_p\" value=\"".variable("prenom_p")."\"/></td>";
 			echo "<tr><td> ".traduire('Code déverrouillage').": </td><td><input  type=\"password\" id=\"pwd1\" size=\"10\" name=\"code\" value=\"".variable("code")."\"/></td>";
-			echo "<td><input type=\"checkbox\" onchange=\"document.getElementById('pwd').type = this.checked ? 'text' : 'password' ; document.getElementById('pwd1').type = this.checked ? 'text' : 'password' \"> Voir saisies<td>";
+			echo "<td><input type=\"checkbox\" onchange=\"document.getElementById('pwd').type = this.checked ? 'text' : 'password' ; document.getElementById('pwd1').type = this.checked ? 'text' : 'password' \"> ".traduire('Voir saisie')."<td>";
 			echo "<tr><td> ".traduire('Nouveau mot de passe').":</td><td><input  type=\"password\" id=\"pwd\" size=\"12\" name=\"pwd\" value=\"".variable("pwd")."\"/></td>";
 			echo "<td>".traduire('Au minimum 8 caractères, au moins <br>une majuscule,une minuscule et un chiffre <br>(caractères spéciaux possible)')." </td>";
 			echo "<tr> <td></td><td><input type=\"submit\"  id=\"valider_dde_mdp_avec_code\"  value=\"".traduire('Valider la demande')."\"><p></td>";
@@ -3278,7 +3195,7 @@ require_once 'include_crypt.php';
 								$user_lang=$sauve_lang;
 								echo "<p><br><p>".traduire("Un mail contenant un lien, valable uniquement aujourd'hui,<p> permettant de réinitialiser votre mot de passe a été envoyé à")." $mail. ";
 								envoi_mail( $dest , traduire ("Information pour")." $id", "$synth" );		
-								ajout_log( $id, traduire("Lien pour reinitialisation mail envoyé à l'adresse")." $mail" );
+								ajout_log( $id, traduire("Mail pour reinitialisation envoyé à l'adresse")." $mail" );
 								}
 							else
 								erreur(traduire("Désolé compte protégé"));
@@ -3423,7 +3340,7 @@ if (isset($_POST['pass']))
 	$_SESSION['bene']="";
 	// verifion si la variable = mot de passe...
 	if ( ( 
-		(encrypt(addslashes(addslashes($_POST['pass'])))==$mot_de_passe) // on vérifie le mot de passe 
+		(encrypt(addslashes($_POST['pass']))==$mot_de_passe) // on vérifie le mot de passe 
 		||
 		// cas particulier en mode poste de développement on vérifie aussu un mot de passe en clair 
 		(($_POST['pass']==$mot_de_passe) && ($_SERVER['REMOTE_ADDR']=="127.0.0.1")	 )
@@ -3497,7 +3414,7 @@ if (isset($_POST['pass']))
 			tempo_cx ($ip);	
 			erreur(traduire("Mot de passe incorrect")." !!"). 
 			$_SESSION['pass']=false;
-			ajout_log( $id,traduire("Echec Connexion")."  $id / $mot_de_passe /".$_POST['pass']);
+			ajout_log( $id,traduire("Echec Connexion")."  $id / $mot_de_passe / ".$_POST['pass']);
 			ajout_echec_cx ($_POST['id']);
 			ajout_echec_cx ($ip);
 			}
@@ -3508,6 +3425,11 @@ if (isset($_POST['pass']))
 		$_SESSION['user']=variable_s('user');
 		unset($_SESSION['droit']);
 		$_SESSION['chgt_user']=true;
+		
+		$idx=$_SESSION['user'];
+		$reponse = command("SELECT * from  r_user WHERE idx='$idx'"); 
+		$donnees = fetch_command($reponse);
+		$_SESSION['droit']=$donnees["droit"];
 		$action="";
 		}
 		
@@ -3743,7 +3665,7 @@ if (isset($_POST['pass']))
 			echo "<TR> <td>".traduire('Ancien').": </td><td><input class=\"center\" id=\"pwd1\" type=\"password\" name=\"ancien\" value=\"\"/></td>";
 			}
 		echo "<TR> <td>".traduire('Nouveau').":</td><td><input class=\"center\" id=\"pwd2\" type=\"password\" name=\"n1\" value=\"\"/></td>";
-		echo "<td><input type=\"checkbox\" onchange=\"document.getElementById('pwd').type = this.checked ? 'text' : 'password' ; document.getElementById('pwd1').type = this.checked ? 'text' : 'password' ; ; document.getElementById('pwd2').type = this.checked ? 'text' : 'password'\"> Voir saisies<td>";
+		echo "<td><input type=\"checkbox\" onchange=\"document.getElementById('pwd').type = this.checked ? 'text' : 'password' ; document.getElementById('pwd1').type = this.checked ? 'text' : 'password' ; ; document.getElementById('pwd2').type = this.checked ? 'text' : 'password'\"> ".traduire('Voir saisie')."<td>";
 
 		echo "<TR> <td>".traduire('Confirmation').":</td><td><input class=\"center\" id=\"pwd\" type=\"password\" name=\"n2\" value=\"\"/></td>";
 		echo "<TR>  <td></td><td><input type=\"submit\"  id=\"changer_mdp\"  value=\"".traduire('Modifier')."\"/><br><p></td>";
@@ -3769,11 +3691,15 @@ if (isset($_POST['pass']))
 			command("delete from log where user='$idx' or  acteur='$idx'  ");
 			supp_tous_fichiers($idx);
 			command("delete from r_user where idx='$idx'  ");
-			command("trunc table log ");
-			command("trunc table z_log_t  ");
-			
+
 			echo "<br>User $idx  Ok.";
 			}
+		
+		command("trunc table log ");
+		command("trunc table z_log_t  ");
+		command("trunc table zz_form  ");		
+		echo "<br>Purge tables Ok.";
+		
 		echo "<p>ok.";
 		exit();
 		}
@@ -3871,8 +3797,10 @@ if (isset($_POST['pass']))
 			{
 			if (modif_tel(variable("idx"), variable("telephone"),variable("telephone2")) )
 				{
-				$user_telephone=variable("telephone");
-				$user_mail=variable("telephone2");	
+				$reponse = command("SELECT * from  r_user WHERE idx='$idx'"); 
+				$donnees = fetch_command($reponse);
+				$user_telephone=$donnees["telephone"];
+				$user_mail=$donnees["mail"];
 				}
 			}
 		
@@ -3925,7 +3853,7 @@ if (isset($_POST['pass']))
 			if ($donnees = fetch_command($reponse))
 				{
 				$_SESSION['support']=$donnees["support"];
-				echo "<a href=\"fissa.php\"><img src=\"images/fissa.jpg\" width=\"70\" height=\"50\"></a>";
+				echo "<a id=\"fissa\" href=\"fissa.php\"><img src=\"images/fissa.jpg\" width=\"70\" height=\"50\"></a>";
 				}
 
 			//* ---------------------------------- Calendrier
@@ -3957,8 +3885,10 @@ if (isset($_POST['pass']))
 				echo "<table><tr><td> <img src=\"images/maison.png\" width=\"25\" height=\"25\" >  ".traduire('Domiciliation postale')." : </td>";
 				formulaire ("modif_domicile");
 				liste_organisme($user_organisme,"1");
+				
+				$user_adresse=($user_adresse);
 				if($user_droit=="")
-					echo "<tr><td> <img src=\"images/enveloppe.png\" width=\"25\" height=\"25\" >  ".traduire('Adresse postale').":</td><td> <input type=\"texte\" name=\"adresse\" id=\"ReversBE\" onfocus=\"javascript:if(this.value=='ReversBE')this.value='';\"   size=\"80\" value=\"$user_adresse\" onChange=\"this.form.submit();\"> " ;
+					echo "<tr><td> <img src=\"images/enveloppe.png\" width=\"25\" height=\"25\" >  ".traduire('Adresse postale')." :</td><td> <input type=\"texte\" name=\"adresse\" id=\"ReversBE\" onfocus=\"javascript:if(this.value=='ReversBE')this.value='';\"   size=\"80\" value=\"$user_adresse\" onChange=\"this.form.submit();\"> " ;
 				else
 					echo "<input type=\"hidden\" name=\"adresse\"  value=\"\" > " ;
 				echo "<input type=\"hidden\" name=\"idx\" value=\"$idx\"> " ;
@@ -3999,8 +3929,8 @@ if (isset($_POST['pass']))
 			
 	if (($action=="sms_envoi") &&  ($user_droit!=""))
 		{
-		$msg= stripcslashes(stripcslashes(variable("msg")));		
-		$org = stripcslashes(stripcslashes(variable("origine")));
+		$msg= stripcslashes(variable("msg"));		
+		$org = stripcslashes(variable("origine"));
 		$tel= variable("tel");		
 		if (strlen($msg)>10)
 			{
@@ -4021,7 +3951,7 @@ if (isset($_POST['pass']))
 	if (($action=="sms_test") &&  ($user_droit!=""))
 		{
 		$tel= variable("tel");
-		$msg= stripcslashes(stripcslashes(variable("msg")));
+		$msg= stripcslashes(variable("msg"));
 		
 			echo "<center><p>".traduire('Envoi d\'un SMS')." : ";
 		
@@ -4035,7 +3965,7 @@ if (isset($_POST['pass']))
 				echo "<td> $tel </td>".param("tel",$tel);
 			echo param("origine",$user_nom." ".$user_prenom);
 			echo "<TR> <td>".traduire('Texte').": </td><td><TEXTAREA rows=\"5\" cols=\"40\" onblur=\"calculeLongueur();\" onfocus=\"calculeLongueur();\" onkeydown=\"calculeLongueur();\" onkeyup=\"calculeLongueur();\"  id=\"msg\" name=\"msg\" >$msg</TEXTAREA></td>";
-			echo "<TR> <td></td><td><div id=\"indic\">220&nbsp;caract&egrave;res&nbsp;disponibles</div></td>";
+			echo "<TR> <td></td><td><div id=\"indic\">".traduire('220&nbsp;caract&egrave;res&nbsp;disponibles')."</div></td>";
 		
 			echo "<TR> <td> </td><td><input type=\"submit\"  id=\"envoi\"  value=\"".traduire('Envoyer sms signé de ')." $user_nom $user_prenom \"/></td> ";
 			echo "</form> </table> ";
@@ -4049,9 +3979,9 @@ if (isset($_POST['pass']))
 	if (($action=="mail_envoi") )
 		{
 		$mail = variable("mail");
-		$titre = stripcslashes(stripcslashes(variable("titre")));
-		$msg = stripcslashes(stripcslashes(variable("msg")));
-		$org = stripcslashes(stripcslashes(variable("origine")));
+		$titre = stripcslashes(variable("titre"));
+		$msg = stripcslashes(variable("msg"));
+		$org = stripcslashes(variable("origine"));
 		$mail_org = variable("mail_org");
 		if ( VerifierAdresseMail($mail))
 			{
@@ -4158,7 +4088,6 @@ if (isset($_POST['pass']))
 			echo "<table><tr><td width=\"400\">";
 			echo " <ul id=\"menu-bar\">";
 			echo "<li><a href=\"index.php?action=init_formation\"> Init comptes </a></li>";			
-			echo "<li><a href=\"index.php?action=raz_mdp_formation\"> Init Mots de passe</a></li>";
 			echo "</ul>";
 			echo "<td></table>";
 			}	
@@ -4350,11 +4279,44 @@ if (isset($_POST['pass']))
 		
 	if ($action=="histo")
 		histo_beneficiaire($user_idx, $id);
-		
+
+	if ( ($action=="nouveau_fissa") && ( ($user_droit=="A")  ) )
+			{
+			$organisme=variable("organisme");
+			$support=variable("support");
+			$libelle=variable("libelle");
+			$acteur=variable("acteur");
+			if ($acteur=="") 
+				$acteur="Acteur";
+			
+			$beneficiaire=variable("beneficiaire");
+			if ($beneficiaire=="") 
+				$beneficiaire="Bénéficiaire";
+				
+			if ( ($organisme!="") && ($support!="") && ($libelle!="") )
+				{
+				$reponse =command("select * from fct_fissa where support='$support'");		
+				if ($donnees = fetch_command($reponse) ) 
+					erreur("Support déjà existant");
+				else
+					{
+					command("INSERT INTO fct_fissa VALUES ('$organisme', '$support','$libelle','$acteur', '$beneficiaire', '', '' ) ");
+					$reponse =command("select * from fct_fissa ");		
+					if ($donnees = fetch_command($reponse) ) 
+						{
+						$support_org=$donnees["support"];				
+						command("CREATE TABLE $support AS SELECT * FROM $support_org WHERE 1 = 0");
+						}
+					}
+				}
+			$action="membres_organisme";
+			}				
 
 	if ( ($action=="membres_organisme") && ( ($user_droit=="A") || ($user_droit=="S") ) )
 			{
 			$organisme=variable_get("organisme");
+			if ($organisme=="")
+				$organisme=variable("organisme");
 			echo libelle_organisme ($organisme); 
 			echo "<div class=\"CSSTableGenerator\" ><table><tr><td > ".traduire('Droit')."  </td><td > ".traduire('Identifiant')."  </td><td> ".traduire('Nom')." </td><td> ".traduire('Prénom')." </td><td> ".traduire('Téléphone')." </td><td> ".traduire('Mail')." </td>";
 			$reponse =command("select * from r_lien where organisme='$organisme' ");		
@@ -4372,32 +4334,32 @@ if (isset($_POST['pass']))
 				}
 			echo "</table></div>";
 			
-			echo "<p><div class=\"CSSTableGenerator\" ><table><tr><td > ".traduire('Support')."  </td><td > ".traduire('Libellé')."  </td><td> ".traduire('Libellé Acteur')." </td><td> ".traduire('Libellé Bénéficiaire')." </td><td> ".traduire('Mails complémentaires')." </td>";
-			
-			formulaire ("nouveau_fissa");
-			echo "<tr>";
-			echo "<td> <input type=\"texte\" name=\"support\"   size=\"20\" value=\"\"> </td>";
-			echo "<td> <input type=\"texte\" name=\"libelle\"   size=\"20\" value=\"\"> </td>";
-			echo "<td> <input type=\"texte\" name=\"acteur\"   size=\"10\" value=\"\"> </td>" ;
-			echo "<td> <input type=\"texte\" name=\"beneficiaire\"   size=\"25\" value=\"\"> </td>" ;
-			echo "<td> <input type=\"texte\" name=\"mails_rapports\" size=\"40\"  value=\"\"> </td> " ;
-
-			echo "<input type=\"hidden\" name=\"user\"  value=\"$idx\"> " ;
-			echo "<input type=\"hidden\" name=\"organisme\"  value=\"$organisme\"> " ;
-			echo "<td><input type=\"submit\" id=\"nouveau_fissa\" value=\"".traduire('Ajouter')."\" ></form> </td> ";			
-			
-			$reponse =command("select * from fct_fissa where organisme='$organisme' ");		
-			while ($donnees = fetch_command($reponse) ) 
+			if ($user_droit=="A") 
 				{
-				$support=$donnees["support"];	
-				$libelle=$donnees["libelle"];	
-				$acteur=$donnees["acteur"];
-				$beneficiaire=$donnees["beneficiaire"];
-				$mails_rapports=$donnees["mails_rapports"];
-				echo "<tr><td>  $support </td><td>  '$libelle'  </td><td> '$acteur' </td><td> '$beneficiaire'</td><td> $mails_rapports </td>";
-				}			
+				echo "<p><div class=\"CSSTableGenerator\" ><table><tr><td > ".traduire('Support')."  </td><td > ".traduire('Libellé')."  </td><td> ".traduire('Libellé Acteur')." </td><td> ".traduire('Libellé Bénéficiaire')." </td>";
 				
-			echo "</table></div>";			
+				formulaire ("nouveau_fissa");
+				echo "<tr>";
+				echo "<td> <input type=\"texte\" name=\"support\"   size=\"20\" value=\"\"> </td>";
+				echo "<td> <input type=\"texte\" name=\"libelle\"   size=\"20\" value=\"\"> </td>";
+				echo "<td> <input type=\"texte\" name=\"acteur\"   size=\"10\" value=\"\"> </td>" ;
+				echo "<td> <input type=\"texte\" name=\"beneficiaire\"   size=\"25\" value=\"\"> </td>" ;
+				echo "<input type=\"hidden\" name=\"organisme\"  value=\"$organisme\"> " ;
+				echo "<td><input type=\"submit\" id=\"nouveau_fissa\" value=\"".traduire('Ajouter')."\" ></form> </td> ";			
+				
+				$reponse =command("select * from fct_fissa where organisme='$organisme' ");		
+				while ($donnees = fetch_command($reponse) ) 
+					{
+					$support=$donnees["support"];	
+					$libelle=$donnees["libelle"];	
+					$acteur=$donnees["acteur"];
+					$beneficiaire=$donnees["beneficiaire"];
+					$mails_rapports=$donnees["mails_rapports"];
+					echo "<tr><td>  $support </td><td>  '$libelle'  </td><td> '$acteur' </td><td> '$beneficiaire'</td><td> $mails_rapports </td>";
+					}			
+					
+				echo "</table></div>";
+				}
 			
 			pied_de_page("x");
 			}	
@@ -4681,6 +4643,10 @@ if (isset($_POST['pass']))
 	if (($action=="modif_bug") && ($user_droit=="F") )
 		modif_bug(variable_get('idx'));	
 
+		
+	if ( ($action=="modif_trad_tech") && ($user_droit=="t") )
+		modif_trad_tech(variable('idx'),variable('valeur'));
+		
 	if ( ($action=="modif_trad") && ($user_droit=="t") )
 		modif_trad(variable('idx'),variable('valeur'));
 
@@ -4695,10 +4661,27 @@ if (isset($_POST['pass']))
 		modif_valeur_param(variable('nom'),variable('valeur'));
 		param_sys();
 		}
+		
 	
-	if ( ($action=="") && ($user_droit=="T") )
-		echo "Mot de passe par défaut : '".parametre("Formation_mdp")."'<br>";
+	if ( ($action=="modif_mdp_formation") && ($user_droit=="T") )
+		{	
+		ecrit_parametre("Formation_mdp", variable("mdp") );
+		ajout_log( $user_idx, traduire("Initialisation MdP comptes de formation avec")." ".parametre("Formation_mdp") );		
+		ajout_log_tech(	"Initialisation MdP comptes de formation avec ".parametre("Formation_mdp"). " par ".$user_nom."  ".$user_prenom);	
 
+		$mdp=encrypt (parametre("Formation_mdp")) ;
+		$reponse = command("UPDATE r_user set pw='$mdp' where (id REGEXP 'FORM_R') or (id REGEXP 'FORM_B') or (id REGEXP 'FORM_A')");
+		msg_ok(traduire("Mot de passe des comptes de formation initialisé")." ('".parametre("Formation_mdp")."')");
+		$action="";
+		}	
+
+	if ( ($action=="") && ($user_droit=="T") )
+		{
+		$mdp=parametre("Formation_mdp");
+		formulaire ("modif_mdp_formation");
+		echo traduire("Mot de passe par défaut comptes de formation").": <input type=\"texte\" name=\"mdp\"   size=\"20\" value=\"$mdp\"> ";			
+		echo "</form>";		
+		}
 	
 	// intialisation des comptes de formation
 	if ( ($action=="init_formation") && ($user_droit=="T") )
@@ -4781,15 +4764,6 @@ if (isset($_POST['pass']))
 		}					
 
 
-	if ( ($action=="raz_mdp_formation") && ($user_droit=="T") )
-		{	
-		ajout_log( $user_idx, traduire("Initialisation MdP comptes de formation avec")." ".parametre("Formation_mdp") );		
-		ajout_log_tech(	"Initialisation MdP comptes de formation avec ".parametre("Formation_mdp"). " par ".$user_nom."  ".$user_prenom);	
-
-		$mdp=encrypt (parametre("Formation_mdp")) ;
-		$reponse = command("UPDATE r_user set pw='$mdp' where (id REGEXP 'FORM_R') or (id REGEXP 'FORM_B') or (id REGEXP 'FORM_A')");
-		msg_ok(traduire("Mot de passe des comptes de formation initialisé")." ('".parametre("Formation_mdp")."')");
-		}	
 
 		
 	// -------------------------------------------------------------------------------------------------------
@@ -5020,7 +4994,7 @@ include 'planning.php';
 
 				}
 		if ( ($user_droit=="") && ($action==""))
-			echo "<div class=\"CSS_perso\"  ><br><center> Les documents et informations dans cette zone ne sont jamais visibles des référents de confiance. </center> ";
+			echo "<div class=\"CSS_perso\"  ><br><center> ".traduire('Les documents et informations dans cette zone ne sont jamais visibles des référents de confiance.')." </center> ";
 		
 		// justificatif pour les acteurs sociaux et listage des collègues
 		if (($user_droit!="A") && ($filtre==""))
@@ -5061,14 +5035,6 @@ include 'planning.php';
 			if ($user_droit=="A")
 				bouton_affectation();	
 
-		if ($action=="nouvelle_offre") 
-			nouvelle_offre();
-
-		if ($action=="supp_offre") 
-			supp_offre();
-
-		if ($user_droit=="A")
-				gestion_offres();	
 				
 		if ($user_droit!="")	
 			if (($action!="ajout_affectation") &&($action!="ajout_admin") && ($action!="rdv") && ($action!="ajout_photo")&& ($action!="ajout_referent") && ($action!="ajout_user") )
