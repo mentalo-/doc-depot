@@ -416,6 +416,7 @@ include 'inc_style.php';
 		$headers  .= "From: FISSA $libelle <$mail_struct>" . "\r\n"; 
 		
 		// mise en forme HTML
+		$contenu = supprime_html($contenu);
 		$contenu = "<html><body>$contenu</body></html>";	
 		$titre = '=?iso-8859-1?B?'.base64_encode($titre).'?=';  // T354
 		
@@ -547,7 +548,7 @@ include 'inc_style.php';
 					$txt .= "<BR>- $valeur : $valeur2 ; ";
 				}
 
-		$txt = $txt. "<center><a href=\"https://doc-depot.com\">
+		$txt = $txt. "<hr><center><a href=\"https://doc-depot.com\">
 								<img src=\"http://doc-depot.com/images/logo.png\" width=\"75\" height=\"50\" ></a>\"".traduire('La Consigne Numérique Solidaire').'"';		
 
 		$txt = $txt. "<a href=\"https://doc-depot.com\"><img src=\"http://doc-depot.com/images/fissa.jpg\" width=\"75\" height=\"50\" ></a>".traduire("Suivi Simplifié d'Activité");						

@@ -49,6 +49,9 @@ if ($_SESSION['pass']==true)
 		{
 		ajout_log_tech( "Commande SQL : $q")	;	
 		echo  "<p>Commande SQL : $q";
+		
+		$q= supprime_html($q);
+		
 		$results = command($q)
 		or die("<br>$q<br>".mysql_error());
 
@@ -87,7 +90,7 @@ if ($_SESSION['pass']==true)
 						{
 						if(intval($k) != 0 || $k == '0') continue;
 						
-						if ((strlen($v)>32) && (strpos($v," ")===false) )
+						if (((strlen($v)>32) || (strpos($v,"==")>12)) && (strpos($v," ")===false) )
 							{
 							$decrp=decrypt($v);
 							if ($decrp!="")

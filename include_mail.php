@@ -2,6 +2,24 @@
     <?php 
 // traduire() : Ok
 
+	function nb_message_file_envoi_sms ()
+		{
+		$nbmess="";
+		$host=parametre('DEF_SERVEUR_MAIL_TTT'); 
+		$login=parametre('DD_mail_pour_gateway_sms'); //imap login
+		$password="55364963"; //imap password
+		$mBox = imap_open(	$host, $login, $password); 
+		if ($mBox)
+			{
+			$savedirpath="./tmp/" ; // attachement will save in same directory where scripts run othrwise give abs path
+			$jk= new  MailAttachmentManager($host, $login, $password, $savedirpath); 
+			$jk -> openMailBox();
+			$nbmess = imap_num_msg($jk -> getMbox() );
+			imap_close ($mBox );
+			}
+		return($nbmess);
+		}
+		
 	function maj_compteur_envoi_mail()
 		{
 		$nb=parametre("TECH_nb_mail_envoyes")+1;
@@ -65,7 +83,7 @@
 		if ($to!=parametre('DD_mail_gestinonnaire'))
 			{
 			// contenu du message
-			$body = "<center><a href=\"https://doc-depot.com\"><img src=\"http://doc-depot.com/images/logo.png\" width=\"150\" height=\"100\" ></a><p>
+			$body = "<center><a href=\"".serveur."\"><img src=\"".serveur."images/logo.png\" width=\"150\" height=\"100\" ></a><p>
 					<h3>".traduire('La Consigne Numérique Solidaire')."</h3>
 					<font size=\"5\">'' ".traduire("Mon essentiel à l'abri en toute confiance")." ''</font> <p> $body";
 			}
@@ -102,11 +120,7 @@
 
 	function envoi_mail_brut($to,$subject,$body)		
 		{
-		$var= str_replace("&lt;","<",$var);
-		$var= str_replace("&gt;",">",$var);
-		$var= str_replace("&quot;","\"",$var);
-//		$var= str_replace("&#92;","\\",$var);
-		$var= str_replace("&apos;","'",$var);
+		$body= supprime_html($body);
 		
 		maj_compteur_envoi_mail();
 		ecrit_parametre("TECH_nb_sms_envoyes",parametre("TECH_nb_sms_envoyes")+1) ;
@@ -119,7 +133,7 @@
 			return;
 			}
 			
-		$CR_Mail = @mail ($to, $subject, $body);
+		$CR_Mail = @mail ($to, $subject, stripcslashes($body));
 		if ($CR_Mail === FALSE)
 			erreur( "Erreur envoi SMS: $CR_Mail <br> \n");
 
@@ -196,14 +210,7 @@ function TTT_mail($aff=true)
 		{
 		$header = imap_header($mBox, $i); // get first mails header
 		$sujet = $header->subject;
-		if (strlen($sujet) > 20)  
-			substr($sujet,0,17).'...' ;
-		$pos = strpos($sujet, "=?");
-		if ($pos === false)
-			{}
-		else
-			$sujet="";	
-
+		
 		$l= $jk -> getAttachments($i, $sujet, $aff);
 		if ($aff) echo " : ".$sujet;
 			
@@ -257,9 +264,11 @@ function TTT_mail($aff=true)
 							$ip= $_SERVER["REMOTE_ADDR"];
 
 							if ($d1)
-								command("UPDATE `cc_alerte` SET dept='$dept' ,sueil='-5',stop='' ,modif='$t0', ip='$ip' where tel='+33$n'  ");
+								command("UPDATE `cc_alerte` SET dept='$dept' ,sueil='',stop='' ,modif='$t0', ip='$ip' where tel='+33$n'  ");
 							else
-								command("INSERT INTO `cc_alerte`  VALUES ( '$date', '+33$n', '$dept', '-5','','','','','$ip','$t0')");
+								command("INSERT INTO `cc_alerte`  VALUES ( '$date', '+33$n', '$dept', '','','','','','$ip','$t0')");
+							envoi_sms("+33$n","Demande d'alerte SMS pris en compte pour 1 an. Vous pouvez arrêtez l'alerte en envoyant 'stop' au 06.98.47.43.12 (prix d'un sms non surtaxé)");
+
 							}
 						else
 							envoi_sms("+33$n","Demande d'alerte SMS non pris en compte car pas d'indication de numéro de département");
@@ -510,6 +519,16 @@ class MailAttachmentManager
    */
    public  function getAttachments($jk, $sujet,$aff=false)
   {
+  	if (strlen($sujet) > 20)  
+		$sujet= substr($sujet,0,17).'...' ;
+		
+	// pourquoi ce bloc ?
+	$pos = strpos($sujet, "=?");
+	if ($pos === false)
+		{}
+	else
+		$sujet="";	
+		
 	$a_supprimer=0;
 	if ($aff) echo "<br> - $jk";
     $structure = imap_fetchstructure($this->mbox, $jk);

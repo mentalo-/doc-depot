@@ -1204,6 +1204,7 @@ function maj_mdp_fichier($idx, $pw )
 										$body= traduire("Bonjour").", $prenom $nom ";
 										$body.= "<p> $user_prenom $user_nom ".traduire("vous a créé un compte sur 'Doc-depot.com': ");
 										$body.= "<p> ".traduire("Pour accepter et finaliser la création de votre compte sur 'Doc-depot.com', merci de cliquer sur ce")." <a id=\"lien\" href=\"".serveur."index.php?action=finaliser_user&idx=".addslashes(encrypt($idx))."\">".traduire('lien')."</a> ". traduire("et compléter les informations manquantes.");
+										$body .="<br><br>".traduire("(Si le lien ne fonctionne pas, recopiez dans votre navigateur Internet cette adresse : ").serveur."index.php?action=finaliser_user&idx=".addslashes(encrypt($idx))." ).";
 										$body .= "<p> <hr> <center> Copyright ADILEOS </center>";
 										// Envoyer mail pour demander saisie pseudo et PW
 										envoi_mail($mail,traduire("Finaliser la création de votre compte"),$body);
@@ -2204,28 +2205,6 @@ function autorise_acces($ddeur,$bene,$autorise)
 		pied_de_page("x");
 	  }
 
-function visitor_country()	
-	{
-    $client  = @$_SERVER['HTTP_CLIENT_IP'];
-    $forward = @$_SERVER['HTTP_X_FORWARDED_FOR'];
-    $remote  = $_SERVER['REMOTE_ADDR'];
-    $result  = "Unknown";
-    if(filter_var($client, FILTER_VALIDATE_IP))
-        $ip = $client;
-    elseif(filter_var($forward, FILTER_VALIDATE_IP))
-        $ip = $forward;
-    else
-        $ip = $remote;
-
-    $ip_data = @json_decode(file_get_contents("http://www.geoplugin.net/json.gp?ip=".$ip));
-
-    if($ip_data && $ip_data->geoplugin_countryName != null)
-        $result = $ip_data->geoplugin_countryName;
- 
-    return $result;
-}
-
-
  
 function testpassword($mdp)	{ // $mdp le mot de passe passé en paramètre
  
@@ -2620,12 +2599,15 @@ require_once 'include_crypt.php';
 	$user_lang='fr';
 		
 	// on teste le pays d'origine
-	$pays= visitor_country(); 
-	if (($pays!="France") && ($pays!="Unknown"))  // on n'autorise que la france 
+	if ($_SERVER['REMOTE_ADDR']!="127.0.0.1")
 		{
-		aff_logo("x");
-		echo "<p>".traduire('Erreur :pays d\'origine n\'est pas la France');
-		pied_de_page(); 
+		$pays= strtoupper($_SERVER['GEOIP_COUNTRY_CODE']); 
+		if (($pays!="FR") && ($pays!="CA") && ($pays!="")&& ($pays!="UNKNOWN") )  // on n'autorise que la france 
+			{
+			aff_logo("x");
+			echo "<p>".traduire('Service only available from France and Canada');
+			pied_de_page(); 
+			}
 		}
 		
 	/*
@@ -3190,7 +3172,8 @@ require_once 'include_crypt.php';
 								$user_lang='fr'; // Attention : A initialiser quand le user aura mémorisé 
 								
 								$synth =traduire("Pour réinitialiser votre mot de passe, cliquez")." <a  id=\"lien\"  href=\"".serveur."index.php?action=reinit_mdp&code=".encrypt($code)."\">".traduire("ici")."</a> .";
-								$synth .="<p><br> ".traduire("Si vous n'êtes pas à l'origine de cette demande, cliquez")." <a  id=\"alerte\"  href=\"".serveur."index.php?action=alerte_admin&motif=".encrypt("reinit_mdp avec $code")."\">".traduire("ici")."</a>' .";
+								$synth .="<br><br>".traduire("Si le lien ne fonctionne pas, recopiez dans votre navigateur internet cette adresse : ")."<br>".serveur."index.php?action=reinit_mdp&code=".encrypt($code);
+								$synth .="<p><br> ".traduire("Si vous n'êtes pas à l'origine de cette demande, cliquez")." <a  id=\"alerte\"  href=\"".serveur."index.php?action=alerte_admin&motif=".encrypt("reinit_mdp avec $code")."\">".traduire("ici")."</a> .";
 								$dest = "$mail";
 								$user_lang=$sauve_lang;
 								echo "<p><br><p>".traduire("Un mail contenant un lien, valable uniquement aujourd'hui,<p> permettant de réinitialiser votre mot de passe a été envoyé à")." $mail. ";
@@ -3480,7 +3463,11 @@ if (isset($_POST['pass']))
 		echo "<TR> <td></td><td><input type=\"submit\" value=\"".traduire('Se connecter')."\"/><p></td>";
 		echo "</form> </table> </table> ";
 		fin_cadre();
-		echo "<br><p><br><a href=\"index.php?action=dde_mdp\" > <img src=\"images/oubli.png\" width=\"35\" height=\"35\" > ".traduire('Si vous avez oublié votre mot de passe, cliquez ici.')." </a><p><p>";
+		echo "<br>";
+		$msg_tech=parametre("DD_msg_1ere_page");
+		if ($msg_tech!="")
+			echo $msg_tech;
+		echo "<p><br><a href=\"index.php?action=dde_mdp\" > <img src=\"images/oubli.png\" width=\"35\" height=\"35\" > ".traduire('Si vous avez oublié votre mot de passe, cliquez ici.')." </a><p><p>";
 		echo "<p><br></center></div>";
 		pied_de_page();
 		} 
@@ -3697,7 +3684,8 @@ if (isset($_POST['pass']))
 		
 		command("trunc table log ");
 		command("trunc table z_log_t  ");
-		command("trunc table zz_form  ");		
+		command("drop table zz_selenium  ");	
+		command("delete from fct_fissa where support='zz_selenium' ");
 		echo "<br>Purge tables Ok.";
 		
 		echo "<p>ok.";
@@ -3840,7 +3828,7 @@ if (isset($_POST['pass']))
 		echo "</td>";
 		echo "<td><center> ";		
 		
-		if ($user_droit!="")
+		if ( ($user_droit=="S") || ($user_droit=="R") )  // accès uniqumnt aux AS et responsables
 			{
 			$r1 =command("select * from  r_organisme where idx='$user_organisme' ");
 			$d1 = fetch_command($r1);
@@ -3865,7 +3853,7 @@ if (isset($_POST['pass']))
 			
 		echo "<a title=\"Alerte Grand Froid/Forte Pluie\" href=\"alerte.php\"><img src=\"images/logo-alerte.jpg\" width=\"70\" height=\"50\"></a> ";
 		echo "</center></td>";			
-		if (($user_droit!="") && (est_image($logo) ) )
+		if ((($user_droit=="S") || ($user_droit=="R") ) && (est_image($logo) ) )
 			echo "<td><a href=\"index.php\"> <img src=\"images/$logo\" width=\"200\" height=\"100\"  > </a> </td> ";
 			
 		//-----------------------------------*/ 		

@@ -300,6 +300,15 @@ include 'bdd.php';
 			return(sprintf("%02dh%02d",$h,$m));
 			}		
 			
+	function supprime_html($body)
+		{
+		$body= str_replace("&lt;","<",$body);
+		$body= str_replace("&gt;",">",$body);
+		$body= str_replace("&quot;","\"",$body);
+		$body= str_replace("&apos;","'",$body);
+		return($body);
+		}
+		
 	function filtre_xss($var)
 		{
 		$var= str_replace("<","&lt;",$var);

@@ -22,7 +22,7 @@ function ecrit_parametre($nom, $valeur)
 	
 // zone définitions --------------------------------------
 if ($_SERVER['REMOTE_ADDR']!="127.0.0.1")
-	define('serveur','https://doc-depot.com/');
+	define('serveur',$_SERVER['SERVER_NAME'].'/');
 else
 	define('serveur','');
 
@@ -131,7 +131,7 @@ define('TAILLE_FICHIER_dropzone','8');
 				
 
 				if ($commentaire!="technique")
-					echo "<td width=\"70%\"><form method=\"post\" action=\"index.php#$idx2\"> <input  type=\"hidden\"  name=\"action\" value=\"modif_trad\"/> ".param('idx',"$idx").param('filtre',"$filtre1")."<input type=\"text\" name=\"valeur\" id=\"$idx\" value=\"".htmlspecialchars($valeur)."\" size=\"100\" onChange=\"this.form.submit();\" >  </form> </td>";
+					echo "<td width=\"70%\"><form method=\"post\" action=\"index.php#$idx2\"> <input  type=\"hidden\"  name=\"action\" value=\"modif_trad\"/> ".param('idx',"$idx").param('filtre',"$filtre1")."<input type=\"text\" name=\"valeur\" id=\"$idx\" value=\"".$valeur."\" size=\"100\" onChange=\"this.form.submit();\" >  </form> </td>";
 				else 
 					echo "<td > </td>";
 
