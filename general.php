@@ -26,11 +26,11 @@ include 'bdd.php';
 	function liste_avant( $val_init , $mode="", $autre="")
 		{
 		echo "<td><SELECT name=\"avant\" $mode >";
-		affiche_un_choix($val_init,"15min");
+		affiche_un_choix($val_init,"Aucun", traduire("Aucun"));
 		affiche_un_choix($val_init,"1H");
-		affiche_un_choix($val_init,"4H");
+//		affiche_un_choix($val_init,"4H");
 		affiche_un_choix($val_init,"La veille", traduire("La veille soir"));
-		affiche_un_choix($val_init,"24H");
+//		affiche_un_choix($val_init,"24H");
 		if ($autre!="")
 			affiche_un_choix($val_init,$autre);
 		echo "</SELECT></td>";
@@ -131,15 +131,12 @@ include 'bdd.php';
 
 	function VerifierAdresseMail($adresse)  
 	{  
-	   $Syntaxe='#^[\w.-]+@[\w.-]+\.[a-zA-Z]{2,6}$#';  
-	   if(preg_match($Syntaxe,$adresse))  
-		  return true;  
-	   else  
-		 return false;  
+	return (filter_var(trim($adresse), FILTER_VALIDATE_EMAIL));  
 	}
 	
 	function VerifierTelephone($telephone)  
-	{  
+	{ 
+	$telephone=trim($telephone);
 		if ( ($telephone[0]!='0')  && ($telephone[0]!='+'))
  		 return false;  
 		 
@@ -159,6 +156,8 @@ include 'bdd.php';
 
 	function VerifierPortable($telephone)  
 		{  
+		$telephone=trim($telephone);
+
 		if (
 			( (strlen(strstr($telephone,"06"))!=10) && (strlen(strstr($telephone,"07"))!=10) )
 		&&
@@ -506,21 +505,58 @@ include 'bdd.php';
 
 	function aff_logo($titre="")
 		{
-		echo "<div id=\"logo\"> <center><a href=\"index.php\"><img src=\"images/logo.png\" width=\"200\" height=\"150\" ></a> </div>  <center>";	
-		if ($titre!="")
+		
+		if (strpos($_SERVER['PHP_SELF'],'suivi')!==false)
 			{
-			echo "<h3>".traduire('La Consigne Numérique Solidaire')."</h3>";
-			echo "<p><i><b><font size=\"5\">'' ".traduire('Mon essentiel à l\'abri en toute confiance')." '' .</b></i></font>";
-			echo "<p>".traduire('Sauvegardez gratuitement de façon sécurisée vos documents, photos et informations essentielles .');
+			echo "<div id=\"logo\"> <center><a href=\"suivi.php\"><img src=\"images/suivi.jpg\" width=\"200\" height=\"150\" ></a> </div>  <center>";	
+			if ($titre!="")
+				{
+				echo "<h3>".traduire("Enrichissez le suivi des bénéficiaires ")."</h3>";
+				echo "<p><i><b><p>";
+				}
+			}		
+		else		
+		if (strpos($_SERVER['PHP_SELF'],'rdv')!==false)
+			{
+			echo "<div id=\"logo\"> <center><a href=\"rdv.php\"><img src=\"images/rdv.jpg\" width=\"200\" height=\"150\" ></a> </div>  <center>";	
+			if ($titre!="")
+				{
+				echo "<h3>".traduire("Rappel de rendez-vous par SMS")."</h3>";
+				echo "<p><i><b>".traduire("Augmentez l'efficacité de vos rendez-vous auprès des bénéficiaires")."<p>";
+				}
+			}		
+		else
+		if (strpos($_SERVER['PHP_SELF'],'fissa')!==false)
+			{
+			echo "<div id=\"logo\"> <center><a href=\"fissa.php\"><img src=\"images/fissa.jpg\" width=\"200\" height=\"150\" ></a> </div>  <center>";	
+			if ($titre!="")
+				{
+				echo "<h3>".traduire('Simplifiez le suivi des activités et des bénéficiaires')."</h3>";
+				echo "<p><i><b><p>";
+				}
+			}		
+		else
+			{
+			echo "<div id=\"logo\"> <center><a href=\"index.php\"><img src=\"images/logo.png\" width=\"200\" height=\"150\" ></a> </div>  <center>";	
+			if ($titre!="")
+				{
+				echo "<h3>".traduire('La Consigne Numérique Solidaire')."</h3>";
+				echo "<p><i><b><font size=\"5\">'' ".traduire('Mon essentiel à l\'abri en toute confiance')." '' .</b></i></font>";
+				echo "<p>".traduire('Sauvegardez gratuitement de façon sécurisée vos documents, photos et informations essentielles .');
+				}
 			}
 		}	
 	
 	function aff_logo_multiple()
 		{
 		echo "<div id=\"logo\"> <center>";
-		echo "<a href=\"index.php\"><img src=\"images/logo.png\" width=\"200\" height=\"150\" ></a>";
-		echo "<a href=\"index.php\"><img src=\"images/fissa.jpg\" width=\"200\" height=\"150\" ></a>";
-		echo "<a href=\"alerte.php\"><img src=\"images/logo-alerte.jpg\" width=\"200\" height=\"150\" ></a>";
+		echo "<a href=\"http://adileos.jimdo.com/\"><img src=\"images/adileos.jpg\" width=\"700\" height=\"90\" >"; 	
+		echo "<br>";
+		echo "<a href=\"index.php\"><img src=\"images/logo.png\" width=\"150\" height=\"100\" ></a>";
+		echo "<a href=\"fissa.php\"><img src=\"images/fissa.jpg\" width=\"150\" height=\"100\" ></a>";
+		echo "<a href=\"rdv.php\"><img src=\"images/rdv.jpg\" width=\"150\" height=\"100\" ></a>";
+		echo "<a href=\"suivi.php\"><img src=\"images/suivi.jpg\" width=\"150\" height=\"100\" ></a>";
+		echo "<a href=\"alerte.php\"><img src=\"images/logo-alerte.jpg\" width=\"150\" height=\"100\" ></a>";
 		echo "</div>  <center>";	
 		}	
 		

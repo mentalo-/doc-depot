@@ -1057,7 +1057,7 @@ function maj_mdp_fichier($idx, $pw )
 			$mail="";
 			
 		$mail= formate_mail($mail);
-			if ($droit=="s")
+		if (($donnees["droit"]=="s") || ($donnees["droit"]=="p") )
 			echo "<tr><td> $organisme </td><td> <img src=\"images/inactif.png\" title=\"Inactif\" width=\"15\" height=\"15\"> $nom   </td><td> $prenom   </td><td> $tel </td><td> $mail</td><td> $adresse</td>";
 		else
 			echo "<tr><td> $organisme </td><td> $nom   </td><td> $prenom   </td><td> $tel </td><td> $mail</td><td> $adresse</td>";
@@ -1184,6 +1184,7 @@ function maj_mdp_fichier($idx, $pw )
 
 							if ($droit!="")
 								{
+								$mail = trim($mail);
 								if (($mail!="") || ( VerifierAdresseMail($mail)) )
 									{
 									if ( ($organisme!="") || ($droit=="R") || ($droit=="E") || ($droit=="F"))
@@ -1192,6 +1193,8 @@ function maj_mdp_fichier($idx, $pw )
 										
 										if ($telephone!="") // T353
 											{
+											$telephone = trim($telephone);
+
 											$plus="";
 											if ($telephone[0]=='+')
 												$plus='+';
@@ -1294,6 +1297,9 @@ function maj_mdp_fichier($idx, $pw )
 			
 	FUNCTION modif_tel($idx,$telephone, $mail)
 		{
+		$mail=trim($mail);
+		$telephone=trim($telephone);
+		
 		$plus="";
 		if (isset ($telephone[0]) && ($telephone[0]=='+') )
 			$plus='+';
@@ -1319,6 +1325,8 @@ function maj_mdp_fichier($idx, $pw )
 		{
 		global $user_idx;
 		
+		$mail=trim($mail);
+		$telephone=trim($telephone);
 		$reponse = command("UPDATE `r_user` SET mail='$mail', telephone='$telephone', nom='$nom', prenom='$prenom', droit='$droit'  where idx='$idx'  ");
 		ajout_log( $idx, traduire("Modification nom/prenom/tel/mail"), $user_idx );
 		}		
@@ -1425,9 +1433,9 @@ function maj_mdp_fichier($idx, $pw )
 			if ( ($user_droit=="S") || ($user_droit=="s") || ($user_droit=="A") || ($user_droit=="R"))
 				{
 				// !!!
-				if ($donnees["droit"]=="S")
+				if (($donnees["droit"]=="S") || ($donnees["droit"]=="P") )
 					$nom=  "<img src=\"images/actif.png\"width=\"20\" height=\"20\"> $nom ";
-				if ($donnees["droit"]=="s")
+				if (($donnees["droit"]=="s") || ($donnees["droit"]=="p") )
 					$nom=  "<img src=\"images/inactif.png\"width=\"20\" height=\"20\"> $nom  ";
 				}
 
@@ -1573,11 +1581,15 @@ function maj_mdp_fichier($idx, $pw )
 				{
 				lien_c("images/croixrouge.png", "supp_user_a_confirmer", param("idx","$idx" ), traduire("Supprimer"));
 				lien_c ("images/modifier.jpg", "modifier_user", param("idx","$idx" ), traduire("Modifier") );
-				if ($donnees["droit"]=="S")
+				if ($donnees["droit"]=="S") 
 					lien_c("images/inactif.png", "user_inactif", param("idx","$idx" ), traduire("Rendre Inactif") );
-				if ($donnees["droit"]=="s")
+				if  ($donnees["droit"]=="P") 
+					lien_c("images/inactif.png", "user_inactif_P", param("idx","$idx" ), traduire("Rendre Inactif") );
+				if ($donnees["droit"]=="s") 
 					lien_c("images/actif.png", "user_actif", param("idx","$idx" ), traduire("Rendre actif") );
-				}
+				if  ($donnees["droit"]=="p") 
+					lien_c("images/actif.png", "user_actif_P", param("idx","$idx" ), traduire("Rendre actif") );
+					}
 			}
 		echo "</table></div>";
 		}
@@ -2386,9 +2398,11 @@ function affiche_membre($idx)
 			$heure=$d3[1];
 			$avant=$donnees["avant"];	
 			$etat=$donnees["etat"];	
+			if ($avant=="Aucun")
+				$etat="";
 			$idx=$donnees["idx"];	
 			$ligne=stripcslashes($donnees["ligne"]);
-			$auteur=libelle_user($donnees["user"]);
+			$auteur=libelle_user($donnees["auteur"]);
 			echo "<tr><td> $date </td><td> $heure </td><td> $ligne </td><td> $avant </td><td> $etat </td><td> $auteur </td>";
 			if ( ($action=="rdv") && ($etat=="A envoyer")) 
 				lien_c ("images/croixrouge.png", "rdv", param("idx","$idx" ) , traduire("Supprimer"));
@@ -2443,6 +2457,8 @@ function affiche_membre($idx)
 				case "supp_recept_mail":
 				case "user_inactif":
 				case "user_actif":
+				case "user_inactif_P":
+				case "user_actif_P":
 				case "phpinfo":
 				case "archivage_php":
 				case "cmd_sql":
@@ -2731,7 +2747,7 @@ require_once 'include_crypt.php';
 			$date_jour=date('Y-m-d');
 			aff_logo_multiple();
 			debut_cadre("700");
-			echo "<p><br> ".traduire('Pour faire une demande auprès du support de Doc-depot.com, merci de remplir le formulaire suivant')." : ";
+			echo "<p><br> ".traduire('Pour faire une demande, merci de remplir le formulaire suivant')." : ";
 			formulaire ("enreg_contact");
 			echo "<TABLE><TR><td> ".traduire('Vos nom et prénom')." : </td> ";
 			if (isset($_SESSION['user']))
@@ -3297,6 +3313,14 @@ require_once 'include_crypt.php';
 			echo "</table></div>";				
 			pied_de_page("");
 			}	
+
+// ------------------------------------------------------------------------------ FIN des actions sans identification (pas de mot de passe)		
+
+$_SESSION['ad']=false;	
+
+
+require_once 'cx.php';
+/*
 			
 	if ($action=="dx") 
 		{
@@ -3307,9 +3331,6 @@ require_once 'include_crypt.php';
 		echo "<div id=\"msg_dx\">".traduire('Vous êtes déconnecté!')."</div><br>";
 		}
 
-// ------------------------------------------------------------------------------ FIN des actions sans identification (pas de mot de passe)		
-
-$_SESSION['ad']=false;	
 // ---------------------------------------on récupére les information de la personne connectée
 if (isset($_POST['pass']))
 	{
@@ -3472,6 +3493,8 @@ if (isset($_POST['pass']))
 		pied_de_page();
 		} 
 	
+*/	
+	
 	$user=variable("user"); 
 	if ($user=="")
 		if (isset ($_SESSION['user']))	$user=$_SESSION['user']; else $user="";
@@ -3506,8 +3529,14 @@ if (isset($_POST['pass']))
 		
 	if (($action=="user_inactif") && ($user_droit=="R"))
 		maj_droit(variable("idx"),"s");
+		
+	if (($action=="user_inactif_P") && ($user_droit=="R"))
+		maj_droit(variable("idx"),"p");
 			
 	if ( ($action=="user_actif") && ($user_droit=="R"))
+		maj_droit(variable("idx"),"S");
+
+	if ( ($action=="user_actif_P") && ($user_droit=="R"))
 		maj_droit(variable("idx"),"S");
 			
 	if ($action=="supp_upload")
@@ -3743,7 +3772,7 @@ if (isset($_POST['pass']))
 			}
 		echo "<td>";
 
-		if ($user_droit=="s")
+		if (($donnees["droit"]=="s") || ($donnees["droit"]=="p") )
 			echo "- ( <img src=\"images/inactif.png\"width=\"20\" height=\"20\"> ".traduire('Compte inactif')." ) ";
 		if($user_droit=="")
 			echo "- ( $user_anniv ) ";
@@ -3828,7 +3857,7 @@ if (isset($_POST['pass']))
 		echo "</td>";
 		echo "<td><center> ";		
 		
-		if ( ($user_droit=="S") || ($user_droit=="R") )  // accès uniqumnt aux AS et responsables
+		if ( ($user_droit=="S") || ($user_droit=="R") || ($user_droit=="P") )  // accès uniqumnt aux AS et responsables
 			{
 			$r1 =command("select * from  r_organisme where idx='$user_organisme' ");
 			$d1 = fetch_command($r1);
@@ -3842,6 +3871,8 @@ if (isset($_POST['pass']))
 				{
 				$_SESSION['support']=$donnees["support"];
 				echo "<a id=\"fissa\" href=\"fissa.php\"><img src=\"images/fissa.jpg\" width=\"70\" height=\"50\"></a>";
+				echo "<a href=\"suivi.php\"><img src=\"images/suivi.jpg\" width=\"70\" height=\"50\"><a>";			
+				echo "<a href=\"rdv.php\"><img src=\"images/rdv.jpg\" width=\"70\" height=\"50\"><a>";			
 				}
 
 			//* ---------------------------------- Calendrier

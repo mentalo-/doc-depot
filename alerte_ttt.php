@@ -61,7 +61,8 @@ $mode_test = ($_SERVER['REMOTE_ADDR']=="127.0.0.1") ;
 				
 		$ville= $dept[$departement];
 		$url = "http://your-meteo.fr/prog/recup_data.php?id=$ville";
-
+		echo "$url";
+		
 		$curl = curl_init($url);
 		curl_setopt($curl, CURLOPT_NOBODY, true);
 		$result = curl_exec($curl);
@@ -90,11 +91,11 @@ $mode_test = ($_SERVER['REMOTE_ADDR']=="127.0.0.1") ;
 			$nb_moy_max=0;
 			$j=0;
 			$j_max=0;
-			$lignes= explode("<br>",$output); 
+			$lignes= explode("<br>",$output);  // on recupére ligne par ligne
 			
-			$d3= explode("/",$lignes[0]); 
+			$d3= explode("/",$lignes[0]);  // on recupére champ par champ
 			
-			if (!isset($d3[0][9]))
+			if (!isset($d3[0][9])) // on vérifie que la ligne n'est pas vide
 				{
 				echo "-".$url;
 				return(false);
@@ -102,24 +103,18 @@ $mode_test = ($_SERVER['REMOTE_ADDR']=="127.0.0.1") ;
 				
 			if (!$mode_test)
 				if ($d3[0][6]*10+$d3[0][7]!=date("d"))
-					return(false); // si ce ne sont pas les données du jour on arrête
+					return(false); // si ce ne sont pas les données du jour on arrête (sauf en mode test)
 				
 			$p=0;
 			$nbj=7;
 			for ($n=0;$n<$nbj*8;$n++)
 				{
 				$d3= explode("/",$lignes[$n]); 
+				$mois3=$d3[0][4]*10+$d3[0][5];
+				$jour3=$d3[0][6]*10+$d3[0][7];
 				
 				$heure_pluie[$p]=$d3[0][8].$d3[0][9]."h";
-			
-				if ($d3[0][6]*10+$d3[0][7]==date("d",mktime(0 ,0, 0 , date("m"), date("d")+1, date ("Y"))))
-					$jour_pluie[$p]="demain";
-				else
-					if ($d3[0][6]*10+$d3[0][7]==date("d"))
-						$jour_pluie[$p]="aujourd'hui";
-					else
-						$jour_pluie[$p]=date("d/m", mktime(0 ,0, 0 , date("m"), $d3[0][6]*10+$d3[0][7], date ("Y")));
-
+				$jour_pluie[$p]=date("d/m", mktime(0 ,0, 0 , $mois3, $jour3, date ("Y")));
 
 				if ($heure_pluie[$p]=="00h")
 					{
@@ -131,6 +126,7 @@ $mode_test = ($_SERVER['REMOTE_ADDR']=="127.0.0.1") ;
 				if ($d3[4]!=0)
 					echo "<br>".$jour_pluie[$p-1]." ".$heure_pluie[$p-1]. " . . . . . . . . . . . : ".$pluie[$p-1]. " mm "; 
 				
+				// mesure grand froid
 				if ($d3[0][8]=='0')
 					if ($d3[0][9]!='9')
 						{
@@ -144,19 +140,20 @@ $mode_test = ($_SERVER['REMOTE_ADDR']=="127.0.0.1") ;
 						}
 					else
 						{
-						$jour_3j[$j] = date("d/m", mktime(0,0, 0 , date("m"), $d3[0][6]*10+$d3[0][7]-1, date ("Y")));
+						$jour_3j[$j] = date("d/m", mktime(0,0, 0 , $mois3, $jour3-1, date ("Y")));
 					
-//						if ( ($nb_moy_min!=0) && ($d3[0][6]*10+$d3[0][7]> date("d")) )
 						if ( ($nb_moy_min!=0) 
 							&& (
-							mktime(0,0, 0 ,$d3[0][4]*10+$d3[0][5] , $d3[0][6]*10+$d3[0][7], date ("Y"))>mktime(0,0, 0 , date("m"), date("d"), date ("Y"))) )
+							mktime(0,0, 0 ,$mois3 , $jour3, date ("Y"))>mktime(0,0, 0 , date("m"), date("d"), date ("Y"))) )
 							{
 							$temp_3j[$j++]= $moyenne_min/$nb_moy_min;
-							echo sprintf("<br> %s/%s : %1.1f°c ",$d3[0][6].$d3[0][7], $jour_3j[$j-1],$temp_3j[$j-1]);
+							echo sprintf("<br> %s : min %1.1f°c ",$jour_3j[$j-1],$temp_3j[$j-1]);
 							}
 						$moyenne_min=0;
 						$nb_moy_min=0;
 						}
+						
+				// Canicule
 				if ($d3[0][8]=='1')
 					{
 					$t=$d3[3];
@@ -165,12 +162,12 @@ $mode_test = ($_SERVER['REMOTE_ADDR']=="127.0.0.1") ;
 					}
 				if ($d3[0][8]=='2')
 					{
-					$jour_3j[$j_max] = date("d/m", mktime(0,0, 0 , date("m"), $d3[0][6]*10+$d3[0][7], date ("Y")));
+					$jour_3j[$j_max] = date("d/m", mktime(0,0, 0 , $mois3, $jour3, date ("Y")));
 				
-					if ( ($nb_moy_max!=0) && ( mktime(0,0, 0 ,$d3[0][4]*10+$d3[0][5] , $d3[0][6]*10+$d3[0][7], date ("Y"))>mktime(0,0, 0 , date("m"), date("d"), date ("Y"))) )
+					if ( ($nb_moy_max!=0) && ( mktime(0,0, 0 ,$mois3 , $jour3, date ("Y"))>mktime(0,0, 0 , date("m"), date("d"), date ("Y"))) )
 						{
 						$temp_3j_max[$j_max++]= $moyenne_max/$nb_moy_max;
-						echo sprintf("<br> %s/%s : %1.1f°C ",$d3[0][6].$d3[0][7], $jour_3j[$j_max-1] ,$temp_3j_max[$j_max-1]);
+						echo sprintf("<br> %s : - - - - - - - Max %1.1f°C ", $jour_3j[$j_max-1] ,$temp_3j_max[$j_max-1]);
 						}
 					$moyenne_max=0;
 					$nb_moy_max=0;
@@ -193,7 +190,7 @@ $mode_test = ($_SERVER['REMOTE_ADDR']=="127.0.0.1") ;
 		$msg="";
 		$alarme=false;
 		$jour_debut="";
-		$nbj=3;
+		$nbj=2;
 		if ($mode_test)
 			$nbj=6;
 		for ($n=0;$n<$nbj*8;$n++)
@@ -242,13 +239,9 @@ $mode_test = ($_SERVER['REMOTE_ADDR']=="127.0.0.1") ;
 		
 		if ($msg!="")
 			{
-			$msg=str_replace ("au demain","à demain", $msg);
-			$msg=str_replace ("du demain","de demain", $msg);
-			$msg=str_replace ("du aujourd","d'aujourd", $msg);
-			$msg=str_replace ("au aujourd","à aujourd", $msg);
-			$msg=str_replace ("au minuit","à minuit", $msg);
-			
-			if ($max_pluie>5*$sueil)
+			if ($alarme)
+				$msg = " à partir ".$msg;
+			if ($max_pluie>2*$sueil)
 				$msg="Risque de fortes pluies $msg";
 			else
 				$msg="Risque de pluies $msg";
@@ -290,7 +283,7 @@ $mode_test = ($_SERVER['REMOTE_ADDR']=="127.0.0.1") ;
 		global $temp_3j_max,$jour_3j,$temp_3j,$jour_3j;
 		
 		$msg="";
-		for ($j=0;$j<3;$j++)
+		for ($j=0;$j<2;$j++)
 			{
 			if ( ($temp_3j_max[$j]>$sueil) && ($temp_3j[$j]>$sueil_min))
 				{
@@ -308,45 +301,75 @@ $mode_test = ($_SERVER['REMOTE_ADDR']=="127.0.0.1") ;
 	
 		return ($msg);
 		}
+
+		function reformule_msg($msg)
+			{
+			$libelle_jour= array( 1 => "Lundi" , 2  => "Mardi" ,3  => "Mercredi" , 4  => "Jeudi" , 5  => "Vendredi" , 6  => "Samedi" , 7  => "Dimanche");
+			
+			$apres_demain= date("d/m",mktime(0 ,0, 0 , date("m"), date("d")+2, date ("Y")));
+			$demain= date("d/m",mktime(0 ,0, 0 , date("m"), date("d")+1, date ("Y")));
+			$aujoudhui= date("d/m",mktime(0 ,0, 0 , date("m"), date("d"), date ("Y")));
+			
+			$js_aujourdhui=$libelle_jour[date("N",mktime(0 ,0, 0 , date("m"), date("d"), date ("Y")))];
+			$js_demain=$libelle_jour[date("N",mktime(0 ,0, 0 , date("m"), date("d")+1, date ("Y")))];
+			$js_apres_demain= $libelle_jour[date("N",mktime(0 ,0, 0 , date("m"), date("d")+2, date ("Y")))];
+			
+			$msg=str_replace ($apres_demain,"après-demain $js_apres_demain", $msg);
+			$msg=str_replace ($demain,"demain $js_demain", $msg);
+			$msg=str_replace ($aujoudhui,"aujourd'hui $js_aujourdhui", $msg);
+		
+			$msg=str_replace ("le demain","demain", $msg);
+			$msg=str_replace ("le aujourd","aujourd", $msg);
+			$msg=str_replace ("le après-","après-", $msg);
+			
+			$msg=str_replace ("au demain","à demain", $msg);
+			$msg=str_replace ("du demain","de demain", $msg);
+			$msg=str_replace ("du après-","d'après-", $msg);
+			$msg=str_replace ("du aujourd","d'aujourd", $msg);
+			$msg=str_replace ("au aujourd","à aujourd", $msg);
+			$msg=str_replace ("au minuit","à minuit", $msg);	
+			
+			return($msg);
+			}
 			
 			
 require_once "connex_inc.php";
 require_once "general.php";
+require_once "param.php";
 require_once "include_mail.php";
 
-
- if ($mode_test)
-	Echo "mode test alerte";
-	
-	$dept= parametre("DD_alerte_dept");
-	
-	if ($mode_test)
-		$dept=92;
-	
-	echo '<hr> Dept: '.$dept."<p>";
-	$hier = mktime(date("H"),date("i")+30, 0 , date("m"), date("d")-1, date ("Y"));
+	 if ($mode_test)
+		Echo "mode test alerte";
+		
+	$hier = mktime(date("H")-12,date("i"), 0 , date("m"), date("d"), date ("Y"));
 	$maintenant = mktime(date("H"),date("i"), 0 , date("m"), date("d"), date ("Y"));
-	
-	if ($mode_test)
-		$reponse = command("SELECT * FROM cc_alerte WHERE dept='$dept' and tel<>''  ");	
-	else
-		{
-		if ((date("H")<22) && (date("H")>8) )
-			$reponse = command("SELECT * FROM cc_alerte WHERE dept='$dept' and ( dernier_envoi <='$hier' or dernier_envoi='' ) and tel<>''  ");
-		else
-			$reponse = command("SELECT * FROM cc_alerte WHERE dept='$dept' and dernier_ttt='' and tel<>'' ");
-		}
+	echo "<br>TTT alerte: $maintenant / $hier";	
 
-	$calcul=false;
-	$result=true;
-	while ($donnees = fetch_command($reponse) ) 
-		{
-		if (!$calcul) 
+		if ($mode_test)
+			$reponse = command("SELECT * FROM cc_alerte WHERE tel<>''  ");	
+		else
 			{
-			$auj=date("Y-m-d");
+			if ((date("H")<21) && (date("H")>8) )
+				$reponse = command("SELECT * FROM cc_alerte WHERE ( dernier_ttt <='$hier' or dernier_envoi='' ) and tel<>'' limit 1 ");
+			else
+				$reponse = command("SELECT * FROM cc_alerte WHERE dernier_ttt='' and tel<>''  limit 1 ");
+			}
+
+		$auj=date("Y-m-d");
+		while ($donnees = fetch_command($reponse) ) 
+			{
+			$telephone=$donnees["tel"];	
+			$dept=$donnees["dept"];	
+			echo "<p> $telephone ($dept) ==> ";
+
 			$r1 = command("SELECT * FROM cc_alerte WHERE dept='$dept' and tel='' and creation='$auj' ");
-			if (($d1 = fetch_command($r1)) && (!$mode_test))
+			
+			$result = false;
+			if ( ($d1 = fetch_command($r1) ) && (!$mode_test) ) 
+				{
 				$msg=stripcslashes($d1["sueil"]);
+				$result = true;
+				}
 			else
 				{
 				$result = calcul_moyenne($dept );
@@ -355,46 +378,33 @@ require_once "include_mail.php";
 					$msg = msg_alerte_min(-5);
 					
 					if ($msg=="")
-						$msg = msg_alerte_max(25, 8);
-					
-					//$msg_pluie= msg_alerte_pluie(1);
-					//$msg=$msg_pluie.$msg;			
+						$msg = msg_alerte_max(28, 8);
+					// if ($mode_test)
+						{
+						$msg_pluie= msg_alerte_pluie(5);
+						$msg=$msg_pluie.$msg;	
+						}				
+					$msg= reformule_msg($msg);
 					$msg= filtre_xss($msg);
 					command("INSERT INTO `cc_alerte`  VALUES ( '$auj', '', '$dept', '$msg','','','','','','')");
 					}
 				else
 					$msg="Pb accès info météo";
 				}
-			echo "<p> ==> ".stripcslashes ($msg);
-			$calcul=true;
-			}
-		
-		$telephone=$donnees["tel"];
-		if ($result)
-			{
-			if ($msg !="") 
+			echo "<br> --> ".stripcslashes ($msg);
+
+			if ($result)
 				{
-				command("UPDATE `cc_alerte` SET dernier_envoi='$maintenant'  where tel='$telephone'  ");
-				if (!$mode_test)
-					envoi_SMS($telephone,"Bonjour, ".stripcslashes($msg));
+				if ($msg !="") 
+					{
+					command("UPDATE `cc_alerte` SET dernier_envoi='$maintenant'  where tel='$telephone'  ");
+					if (!$mode_test)
+						envoi_SMS($telephone,"Bonjour, ".stripcslashes($msg));
+					}
+				command("UPDATE `cc_alerte` SET dernier_ttt='$maintenant'  where tel='$telephone'  ");
 				}
-			command("UPDATE `cc_alerte` SET dernier_ttt='$maintenant'  where tel='$telephone'  ");
 			}
-		}
-		
-		if ($mode_test)
-			{
-			calcul_moyenne($dept );
-			$msg = msg_alerte_min(-5);
-			if ($msg=="")
-				$msg = msg_alerte_max(25, 8);
-			//$msg_pluie= msg_alerte_pluie(1);
-			//$msg=$msg_pluie.$msg;	
-			echo "<p>$dept = $msg";
-			}
-			
-		
-	ecrit_parametre("DD_alerte_dept",$dept+1);	
+	
 			
 ?>
 

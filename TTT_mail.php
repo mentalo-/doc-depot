@@ -17,21 +17,11 @@
 		commentaire_html("purge_rdv");
 
 		echo "<br>Purge Rdv";
-		$reponse =command("select * from  DD_rdv where etat='Envoyé' ");		
-		while ($donnees = fetch_command($reponse) ) 
-				{
-				$date =$donnees["date"];	
-				$ilyaunmois =date('Y-m-d H\hi',  mktime(0,0,0 , date("m")-1, date("d"), date ("Y")));
-				// test de la date 
-				if ( $ilyaunmois > $date  )
-					{
-					$user =$donnees["user"];	
-					command("delete from DD_rdv where user='$user' and date='$date' ");
-					}
-				}
+		$ilyaunmois =date('Y-m-d H\hi',  mktime(0,0,0 , date("m")-1, date("d"), date ("Y")));		
+		command("delete from DD_rdv where etat='Envoyé' and date<'$ilyaunmois' ");
 		}
 	
-	
+	// supprime les commentaire de plus de 2 ans 
 	function purge_bdd_fissa()
 		{	
 		commentaire_html("purge_dbb_fissa");
@@ -46,8 +36,16 @@
 				}
 		}
 		
+	// supprime les message de plus de 7j
+	function purge_bdd_alerte()
+		{	
+		commentaire_html("purge_dbb_alerte");
+		$avant= date('Y-m-d',  mktime( 0,0, 0 , date("m"), date("d")-7, date ("Y") ));
+		echo "<br>Purge BDD Alerte";
+		$reponse =command("delete from cc_alerte where tel='' and date<'$avant' ");		
+		}	
 		
-		
+	// supprime tous les fichiers temporaires de plus de 2 minutes
 	function purge_fichiers_temporaires($dir)
 		{
 		commentaire_html("purge_fichiers_temporaires");
@@ -63,7 +61,8 @@
 				}
 			}
 		}
-	
+		
+// Génére une chine aléatoire pour le message de supervision
 function random_chaine($car) 
 	{
 	$string = "";
@@ -82,6 +81,7 @@ function random_chaine($car)
 	
 	commentaire_html("Affiche Alarme");
 	affiche_alarme();
+	
 
 	$ancien_ttt=parametre("TECH_date_dernier_ttt");
 	$delta= (time()-$ancien_ttt);
@@ -107,7 +107,7 @@ function random_chaine($car)
 				purge_backup_tables();
 
 				supp_fichier('tmp/hier.txt');
-				rename('tmp/log.txt','tmp/hier.txt');
+				rename('/tmp/log.txt','/tmp/hier.txt');
 
 				ajout_log_tech( "Mails envoyés:".parametre("TECH_nb_mail_envoyes")." / ".parametre("DD_nbre_mail_jour_max"));
 				ajout_log_tech( "SMS envoyés:".parametre("TECH_nb_sms_envoyes"));
@@ -134,6 +134,12 @@ function random_chaine($car)
 				{
 				ajout_log_tech( "purge BdD FISSA");
 				purge_bdd_fissa();
+				}
+		if (date('Y-m-d-h',  time()) != date('Y-m-d-h',  $ancien_ttt ))
+			if ($heure==4)
+				{
+				ajout_log_tech( "purge Alerte");
+				purge_bdd_alerte();
 				}
 				
 		commentaire_html( "Purge temporaire");
@@ -173,6 +179,11 @@ function random_chaine($car)
 						envoi_mail(parametre('DD_mail_gestinonnaire'),"Début alarme délais supervision gateway sms","");
 						ajout_log_tech( "Dépassement délais supervision gateway SMS ","P0");
 						ecrit_parametre("TECH_alarme_supervision_sms",time()) ;
+						
+						$nbmess=nb_message_file_envoi_sms (); // on récupére le nombre de message dasn la file SMS
+						if (($nbmess!="") && ($nbmess!=0) ) // Si file d'envoi est vide alors envoi SMS aux exploitants
+							envoi_sms( parametre('DD_tel_alarme1') , parametre('TECH_identite_environnement')." : Alarme supervision SMS");
+
 						}
 					ecrit_parametre('TECH_dernier_envoi_supervision', '' );
 					}
@@ -191,7 +202,7 @@ function random_chaine($car)
 		// ----------------------------------------------------------------------- traitement des RDV				
 			Echo "<p>TTT rdv ";
 			
-			$reponse =command("select * from  DD_rdv where etat='A envoyer' ");		
+			$reponse =command("select * from  DD_rdv where (etat='A envoyer' and avant<>'Aucun') ");		
 			while ($donnees = fetch_command($reponse) ) 
 				{
 				$date=$donnees["date"];	
@@ -213,23 +224,47 @@ function random_chaine($car)
 								break;
 					}
 				
+				echo $time_corrige.":".$date;
+				
 				// test de l'heure d'envoi
 				if ( $time_corrige > $date  )
 					{
 					$ligne=stripcslashes($donnees["ligne"]);
 					$user_idx=$donnees["user"];
-					$r1 =command("SELECT * from  r_user WHERE idx='$user_idx' ");
-					if ($d1 = fetch_command($r1) ) 
+					$date=$donnees["date"];					
+				
+					$telephone_user="";
+					if (!is_numeric($user_idx)) // le nom est en mode texte ==> origine FISSA
 						{
-						$telephone_user=$d1["telephone"];
-						
-						$date=$donnees["date"];
-						if ( VerifierPortable($telephone_user) 	) 	// vérification au dernier momentdu le format du n° de téléphone avant envoi
+						$auteur=$donnees["auteur"]; // on récupére l'auteur 
+						$r1 =command("SELECT * from  r_user WHERE idx='$auteur' "); 
+						if ($d1 = fetch_command($r1) ) 
+							{
+							$organisme=$d1["organisme"]; // on deduit de l'auteur l'organisme d'appartenance
+							$r1 =command("SELECT * from  fct_fissa WHERE organisme='$organisme' ");
+							if ($d1 = fetch_command($r1) ) 
 								{
-								envoi_SMS( $telephone_user  , $ligne );
-								ajout_log( $user_idx,"RDV - Envoi SMS au $telephone_user : '$ligne' ",$auteur);
+								$support=$d1["support"]; // on déduit le support de l'organisme
+								$r1 =command("SELECT * from  $support WHERE nom='$user_idx' and pres_repas='Téléphone'");
+								if ($d1 = fetch_command($r1) )
+									$telephone_user=$d1["commentaire"];	
 								}
-
+							}
+						}
+					else // l'index est numrique ==> origine Doc-depot 
+						{
+						$r1 =command("SELECT * from  r_user WHERE idx='$user_idx' ");
+						if ($d1 = fetch_command($r1) ) 
+							$telephone_user=$d1["telephone"];
+						}	
+						
+					if ($telephone_user!="") // si on a trouvé un numéro de téléphone 
+						{
+						if ( VerifierPortable($telephone_user) 	) 	// vérification au dernier momentdu le format du n° de téléphone avant envoi
+							{
+							envoi_SMS( $telephone_user  , $ligne );
+							ajout_log( $user_idx,"RDV - Envoi SMS au $telephone_user : '$ligne' ",$auteur);
+							}
 						command("UPDATE DD_rdv set etat='Envoyé' where user='$user_idx' and date='$date' ");
 						}
 					else
@@ -271,16 +306,19 @@ function random_chaine($car)
 				ecrit_parametre("TECH_alarme_delais_TTT",'') ;
 				}
 
-		}	
 		ajout_log_jour(" ==================================================================================================== TTT_Alerte");
 		require_once "alerte_ttt.php";
+		}		
 		
+	// memorise dans la table des paramétres avec le préfice MONITOR_ les appels fait avec la variable ddr
+	// cela permet de vérifier si un superviseur ne fonctionne plus depuis longtemps
 	echo "<br>-";
 	if (isset ($_GET["ddr"]))
 		{  
 		$ddr = $_GET["ddr"];
 		ecrit_parametre("MONITOR_$ddr",time());
 		}
+	
 	
 	echo "</body>";
 

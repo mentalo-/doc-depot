@@ -20,7 +20,7 @@
 		
 		$version = $_GET["version"] ;
 		
-		if (file_exists ("LIV$version" )
+		if (file_exists ("LIV$version" ))
 			{
 			echo "<p> ------------------------------------------------------------- Installation sources LIV$version<p>";
 			
@@ -41,7 +41,7 @@
 			backup_tables(false);
 				
 			include 'maj_bdd.php';
-			echo "<p> ====> <a href=\"http://adileos.jimdo.com/documentations/technique/\" Mettre à jour le Journal technique </a> ";
+			echo "<p> ====> <a href=\"http://adileos.jimdo.com/documentations/technique/\"> Mettre à jour le Journal technique </a> ";
 			}
 		
 		}

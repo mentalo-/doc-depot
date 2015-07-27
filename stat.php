@@ -188,11 +188,12 @@ include 'general.php';
 			$crit_mail="(nom='Mail')";
 			
 			$s_fin=num_semaine($date_fin);
+			echo "<table border=\"0\" >";	
 			echelle_semaine($s_fin,$detail);
-			
+	
 			echo "Statistiques du ". date_fr($jour_d[$s_org])." au ".date_fr($jour_f[$s_fin-1])."<p>" ;
 			
-			echo "<table border=\"0\" >";			
+		
 			for ($j=$s_org;$j<$s_fin;$j++)
 				{
 				$jd=$jour_d[$j];

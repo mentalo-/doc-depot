@@ -17,21 +17,27 @@ box-shadow: 15px 10px 10px 0 #A6A6A6;
 		}
 	</style>
 	<body>
-<center>
-<a href="http://adileos.jimdo.com/"><img src="images/adileos.jpg" width="700" height="100" > </a> 
-<br>
-Association de Développement et d’Intégration de Logiciels Economiques Orientés Social
+<?php	
+	define('serveur','');
+?>
 
 <center>
+<a href="http://adileos.jimdo.com/"><img src="images/adileos.jpg" width="700" height="90" > </a> 
+<br>
+Association de Développement et d’Intégration de Logiciels Economiques Orientés Social
+<center>
 <TABLE>
-<TR> <td  width="700"> <br></td>
+<TR> <td  width="700"> </td>
 
 <TR> <td  width="700"> <center>
 <div class=\"CSS_titre\"  >
 
 	<TABLE>
 	<TR> 
-	<td> <a href="http://doc-depot.com/alerte.php"><img src="images/logo-alerte.jpg" width="150" height="100" > </a> </td>
+	<td> 
+	<?php echo "<a href=\"".serveur."alerte.php\"> "; ?>
+	
+	<img src="images/logo-alerte.jpg" width="150" height="100" > </a> </td>
 	<td width="500" class="ombre"> 
 	<center>
 	<b><font size="4">Alerte SMS Météo</b></font>
@@ -40,40 +46,70 @@ Association de Développement et d’Intégration de Logiciels Economiques Orientés 
 
 	</td>
 	</TABLE>
-<p>
+<br>
 	<TABLE>
 	<TR> 
-	<td> <a href="https://doc-depot.com/"><img src="images/logo.png" width="150" height="100" > </a> </td>
+	<td> 
+	<?php echo "<a href=\"".serveur."index.php\"> "; ?>
+
+	<img src="images/logo.png" width="150" height="100" > </a> </td>
 	<td width="500" class="ombre"> <center>
 	<b><font size="4">DOC-DEPOT : La Consigne Numérique Solidaire </b></font>
 <br><br>
 	Sauvegardez gratuitement de façon sécurisée vos documents, photos et informations essentielles .
-
 	</td>
 	</TABLE>
-<p>
-	<TABLE>
-	<TR> 
-	<td> <a href="http://doc-depot.com/ad.php"><img src="images/calendrier.jpg" width="150" height="100" > </a> </td>
-	<td width="500" class="ombre">  
-		<center>
-	<b><font size="4">Agenda Partagé</b></font>
-<br><br>
-	Si votre acteur social vous a inscrit, prennez rendez-vous.
-	</td>	
-	</TABLE>
+
+	
+
 
 <p>
 
 	<TABLE>
 	<TR> 
-	<td  > <a href="http://doc-depot.com"><img src="images/logo_as.jpg" width="150" height="100" > </a> </td>
-	<td bgcolor="lightgreen"  width="500" class="arrondie">  
-		<center><b>Espace dédié aux Acteurs sociaux</b><p></center>
-	<b><font size="3">- DOC-DEPOT </b>: créer des comptes et partager les documents</b></font> <br>
-	<b><font size="3">- FISSA </b>: Simplifiez et enrichissez le suivi des activités et des bénéficiaires  </font> <br>
-	<b><font size="3">- Agenda Partagé</b>: </font> <br>
 
+	<td bgcolor="lightgreen"  width="700" class="arrondie">  
+		<center><b>Espace dédié aux Acteurs sociaux</b></center>
+		
+		<TABLE>
+		<TR> 
+			<td width="200" > 
+			<center>
+			<?php echo "<a href=\"".serveur."index.php\"> "; ?>
+			<img src="images/logo.png" width="101" height="75" > 
+			</a>
+			</td > <td > 
+		<b><font size="3">DOC-DEPOT </b>: créer des comptes et partager les documents</b></font> <br>
+</td>
+		 <TR> 
+<td > <center>
+	<?php echo "<a href=\"".serveur."fissa.php\"> "; ?>
+		<img src="images/fissa.jpg" width="101" height="75" > 
+		</a>
+					</td > <td > 
+
+		<b><font size="3">FISSA </b>: Simplifiez le suivi des activités et des bénéficiaires  </font> <br>
+</td>
+		 <TR> 
+<td > <center>
+	<?php echo "<a href=\"".serveur."rdv.php\"> "; ?>
+		<img src="images/rdv.jpg" width="101" height="75" > 
+		</a>
+					</td > <td > 
+
+		<b><font size="3">Rendez-vous SMS</b>: Rappel de rendez-vous par SMS </font> <br>
+</td>
+		<TR> 
+<td > <center>
+<?php echo "<a href=\"".serveur."suivi.php\"> "; ?>
+		<img src="images/suivi.jpg" width="101" height="75" > 
+	</a>
+				</td > <td > 
+
+		<b><font size="3">Suivi </b>: Enrichissez le suivi des bénéficiaires   </font> <br>
+</td>
+		</TABLE>
+		
 	</td>	
 	</TABLE>
 
@@ -86,4 +122,6 @@ Association de Développement et d’Intégration de Logiciels Economiques Orientés 
 
 
 </TABLE>
+
+
 	</body>

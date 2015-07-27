@@ -144,9 +144,10 @@
 		{
 		if (VerifierPortable($subject))
 			{
+			$body= supprime_html($body);
 			ajout_log_tech( "Envoi SMS au $subject : '$body' ");
 			if ( ($body!=parametre('FORM_msg_rdv')) || ($subject!=parametre('FORM_tel_rdv'))) 
-				envoi_mail_brut(parametre('DD_mail_pour_gateway_sms'),$subject,$body);
+				envoi_mail_brut(parametre('DD_mail_pour_gateway_sms'),trim($subject),$body);
 			}
 		else
 			ajout_log_tech( "PAS d'envoi SMS au $subject car numéro incorrect : '$body' ");
@@ -246,7 +247,7 @@ function TTT_mail($aff=true)
 				$pos = strpos(strtolower($ligne), "alerte");	
 				
 				ajout_log_tech( "Reception SMS de $n : '$ligne' ($pos)");
-				if  (strtolower($ligne)=="stop" ) 
+				if  (strtolower($ligne)=="stop" )
 					command("delete from `cc_alerte` where tel='+33$n' ");
 				else
 					{
@@ -268,7 +269,7 @@ function TTT_mail($aff=true)
 							else
 								command("INSERT INTO `cc_alerte`  VALUES ( '$date', '+33$n', '$dept', '','','','','','$ip','$t0')");
 							envoi_sms("+33$n","Demande d'alerte SMS pris en compte pour 1 an. Vous pouvez arrêtez l'alerte en envoyant 'stop' au 06.98.47.43.12 (prix d'un sms non surtaxé)");
-
+							ajout_log( "", "Enregistrement Alerte SMS par +33$n ($dept) ");
 							}
 						else
 							envoi_sms("+33$n","Demande d'alerte SMS non pris en compte car pas d'indication de numéro de département");
