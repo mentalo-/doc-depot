@@ -321,7 +321,7 @@ include 'inc_style.php';
 		$date_jour2=  mise_en_forme_date_aaaammjj($date_jour);
 		$nu=0;
 		if ($profil=="")
-			$l= date('Y-m-d',  mktime(0,0,0 , date("m")-2, date("d"), date ("Y")));
+			$l= date('Y-m-d',  mktime(0,0,0 , date("m")-1, date("d"), date ("Y")));
 		else
 			$l= date('Y-m-d',  mktime(0,0,0 , date("m")-4, date("d"), date ("Y")));
 
@@ -1031,7 +1031,10 @@ else
 						echo "<input type=\"hidden\" name=\"nom\" size=\"20\" value=\"$nom1\">";
 						echo "<a href=\"suivi.php?nom=$nom1\"> <b>$nom1</b> </a></td>";
 						$valeur=$pres_repas[$i];
-						liste_presence($valeur, $nom_charge[$i], $color);
+						if ($nom1!= "Mail")
+							liste_presence($valeur, $nom_charge[$i], $color);
+						else
+							echo "</td> <input type=\"hidden\" name=\"presence\" value=\"$valeur\"> <td bgcolor=\"$color\">";
 						echo "</td> <td bgcolor=\"$color\">";
 						$nom_slash1= addslashes2($nom1);	
 
@@ -1040,8 +1043,9 @@ else
 							$n=mef_texte_a_afficher( stripcslashes($donnees["commentaire"]));	
 						else
 						  $n="";
-						  
-						echo "<TEXTAREA rows=\"1\" cols=\"20\" name=\"memo\" onChange=\"this.form.submit();\">$n</TEXTAREA>";
+						 
+						if ($nom1!= "Mail")
+							echo "<TEXTAREA rows=\"1\" cols=\"20\" name=\"memo\" onChange=\"this.form.submit();\">$n</TEXTAREA>";
 						echo "</td> <td bgcolor=\"$color\"> ";
 
 						$valeur=mef_activites( $activites[$i],$nom_charge[$i],$date_jour); // T355
