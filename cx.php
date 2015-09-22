@@ -33,7 +33,7 @@ if (isset($_POST['pass']))
 		// cas particulier en mode poste de développement on vérifie aussu un mot de passe en clair 
 		(($_POST['pass']==$mot_de_passe) && ($_SERVER['REMOTE_ADDR']=="127.0.0.1")	 )
 		) && ( !strstr($donnees["droit"] ,"-" ) )  // ceux qui sont désactivé ne peuvent pas accéder
-			&& ( ( ($droit!="")  && ($droit!="A") && ($droit!="E") ) || ( $_SERVER['PHP_SELF']=="/doc-depot/index.php")  )  // ceux qui sont désactivé ne peuvent pas accéder
+			&& ( ( ($droit!="")  && ($droit!="A") && ($droit!="E") ) || strpos( $_SERVER['PHP_SELF'],"index.php")>0  )  // ceux qui sont désactivé ne peuvent pas accéder
 			)
 			{
 			supp_echec_cx ($_POST['id']);
@@ -139,7 +139,7 @@ if (isset($_POST['pass']))
 		$user_droit_org=$donnees["droit"];
 	
 		if 	( ( ($user_droit_org=="") || ($user_droit_org=="A") || ($user_droit_org=="F") || ($user_droit_org=="E")| ($user_droit_org=="T")| ($user_droit_org=="t") )  
-			&& ( $_SERVER['PHP_SELF']!="/doc-depot/index.php")  )
+			&& strpos( $_SERVER['PHP_SELF'],"index.php")===FALSE   )
 			{
 			$_SESSION['pass']=false;// et hop le mot de passe... poubelle !
 			$_SESSION['chgt_user']=false;
