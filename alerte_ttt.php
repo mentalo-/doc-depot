@@ -292,12 +292,12 @@ $mode_test = ($_SERVER['REMOTE_ADDR']=="127.0.0.1") ;
 						else
 					$msg.=" et ";
 		
-				$msg.=" le ".$jour_3j[$j]. " (".sprintf("%2.1f",$temp_3j_max[$j])."°C) ";
+				$msg.=" le ".$jour_3j[$j]. " (".sprintf("%2.0f",$temp_3j_max[$j])."°C) ";
 				}
 			}
 			
 		if ($msg !="")
-			$msg.= " Pensez à vous mettre à l'abri et à vous hydrater réguliérement.";
+			$msg.= ". Pensez à vous hydrater régulièrement.";
 	
 		return ($msg);
 		}
@@ -341,9 +341,17 @@ require_once "include_mail.php";
 	 if ($mode_test)
 		Echo "mode test alerte";
 		
+	$ilya5minutes = mktime(date("H"),date("i")-5, 0 , date("m"), date("d"), date ("Y"));
 	$hier = mktime(date("H")-12,date("i"), 0 , date("m"), date("d"), date ("Y"));
 	$maintenant = mktime(date("H"),date("i"), 0 , date("m"), date("d"), date ("Y"));
-	echo "<br>TTT alerte: $maintenant / $hier";	
+	echo "<br>TTT alerte: ";	
+
+
+	$reponse = command("SELECT * FROM cc_alerte WHERE dernier_envoi>'$ilya5minutes' ");
+	if ($donnees = fetch_command($reponse))
+		Echo "<BR> Pas de traitment car envoi récent ";
+	else
+		{
 
 		if ($mode_test)
 			$reponse = command("SELECT * FROM cc_alerte WHERE tel<>''  ");	
@@ -391,20 +399,22 @@ require_once "include_mail.php";
 				else
 					$msg="Pb accès info météo";
 				}
-			echo "<br> --> ".stripcslashes ($msg);
+			echo "<br> --> ".stripcslashes ($msg)." (".strlen($msg).")";
 
 			if ($result)
 				{
 				if ($msg !="") 
 					{
+					$msg=str_replace ("  ", " ", $msg);
+					$msg=str_replace (" .", ".", $msg);
 					command("UPDATE `cc_alerte` SET dernier_envoi='$maintenant'  where tel='$telephone'  ");
 					if (!$mode_test)
-						envoi_SMS($telephone,"Bonjour, ".stripcslashes($msg));
+						envoi_SMS($telephone,stripcslashes($msg));
 					}
 				command("UPDATE `cc_alerte` SET dernier_ttt='$maintenant'  where tel='$telephone'  ");
 				}
 			}
-	
+		}
 			
 ?>
 

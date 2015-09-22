@@ -219,7 +219,7 @@ if (isset($_POST['id']))
 			$action="cc_activite";
 
 
-		include 'planning.php';			
+		include 'planning2.php';			
 				
 		pied_de_page("x");
 	

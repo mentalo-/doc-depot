@@ -1057,7 +1057,7 @@ function maj_mdp_fichier($idx, $pw )
 			$mail="";
 			
 		$mail= formate_mail($mail);
-		if (($donnees["droit"]=="s") || ($donnees["droit"]=="p") )
+		if (($droit=="s") || ($droit=="p") )
 			echo "<tr><td> $organisme </td><td> <img src=\"images/inactif.png\" title=\"Inactif\" width=\"15\" height=\"15\"> $nom   </td><td> $prenom   </td><td> $tel </td><td> $mail</td><td> $adresse</td>";
 		else
 			echo "<tr><td> $organisme </td><td> $nom   </td><td> $prenom   </td><td> $tel </td><td> $mail</td><td> $adresse</td>";
@@ -4790,7 +4790,7 @@ if (isset($_POST['pass']))
 	if ( ($user_droit=="E") || ($user_droit=="F")|| ($user_droit=="T")|| ($user_droit=="t"))
 		pied_de_page("x");
 		
-include 'planning.php';
+//include 'planning.php';
 		
 	if ( ($user_droit=="S") && ($action=="collegues") )
 		{

@@ -19,17 +19,22 @@ if (isset($_POST['pass']))
 	$reponse = command("SELECT * from  r_user WHERE id='$id' "); 
 	$donnees = fetch_command($reponse);
 	$mot_de_passe=$donnees["pw"];	
+	$droit=$donnees["droit"];	
 	$id=$donnees["id"];
 	$date_log=date('Y-m-d');	
 	$heure_jour=date("H\hi.s");	
 	$_SESSION['bene']="";
+
+
 	// verifion si la variable = mot de passe...
 	if ( ( 
 		(encrypt(addslashes($_POST['pass']))==$mot_de_passe) // on vérifie le mot de passe 
 		||
 		// cas particulier en mode poste de développement on vérifie aussu un mot de passe en clair 
 		(($_POST['pass']==$mot_de_passe) && ($_SERVER['REMOTE_ADDR']=="127.0.0.1")	 )
-		) && ( !strstr($donnees["droit"] ,"-" ) ) ) // ceux qui sont désactivé ne peuvent pas accéder
+		) && ( !strstr($donnees["droit"] ,"-" ) )  // ceux qui sont désactivé ne peuvent pas accéder
+			&& ( ( ($droit!="")  && ($droit!="A") && ($droit!="E") ) || ( $_SERVER['PHP_SELF']=="/doc-depot/index.php")  )  // ceux qui sont désactivé ne peuvent pas accéder
+			)
 			{
 			supp_echec_cx ($_POST['id']);
 			$ip= $_SERVER["REMOTE_ADDR"];
@@ -132,32 +137,42 @@ if (isset($_POST['pass']))
 		$user_nom=$donnees["nom"];
 		$user_prenom=$donnees["prenom"];
 		$user_droit_org=$donnees["droit"];
-		
-		if (!isset($_SESSION['droit']))
-			$user_droit=$donnees["droit"];
-		else
-			$user_droit=$_SESSION['droit'];
-		$user_type_user=$donnees["type_user"];
-		$user_anniv=$donnees["anniv"];
-		$user_telephone=$donnees["telephone"];
-		$user_mail=$donnees["mail"];
-		$user_lecture=$donnees["lecture"];
-		$user_nationalite=$donnees["nationalite"];
-		$user_ville_nat=$donnees["ville_nat"];
-		$user_adresse=stripcslashes($donnees["adresse"]);
-		$user_organisme=stripcslashes($donnees["organisme"]);
-		$user_lang=$donnees["langue"];
-		$reponse = command("SELECT * from  fct_fissa WHERE organisme='$user_organisme'"); 
-		if ($donnees = fetch_command($reponse))
+	
+		if 	( ( ($user_droit_org=="") || ($user_droit_org=="A") || ($user_droit_org=="F") || ($user_droit_org=="E")| ($user_droit_org=="T")| ($user_droit_org=="t") )  
+			&& ( $_SERVER['PHP_SELF']!="/doc-depot/index.php")  )
 			{
-			$_SESSION['support']=$donnees["support"];
-			$bdd=$_SESSION['support'];
+			$_SESSION['pass']=false;// et hop le mot de passe... poubelle !
+			$_SESSION['chgt_user']=false;
 			}
-		$r1 =command("select * from  r_organisme where idx='$user_organisme' ");
-		$d1 = fetch_command($r1);
-		$logo=$d1["logo"];
-		$_SESSION['logo']=$logo;
+		else
+			{
+			if (!isset($_SESSION['droit']))
+				$user_droit=$donnees["droit"];
+			else
+				$user_droit=$_SESSION['droit'];
+			$user_type_user=$donnees["type_user"];
+			$user_anniv=$donnees["anniv"];
+			$user_telephone=$donnees["telephone"];
+			$user_mail=$donnees["mail"];
+			$user_lecture=$donnees["lecture"];
+			$user_nationalite=$donnees["nationalite"];
+			$user_ville_nat=$donnees["ville_nat"];
+			$user_adresse=stripcslashes($donnees["adresse"]);
+			$user_organisme=stripcslashes($donnees["organisme"]);
+			$user_lang=$donnees["langue"];
+			$reponse = command("SELECT * from  fct_fissa WHERE organisme='$user_organisme'"); 
+			if ($donnees = fetch_command($reponse))
+				{
+				$_SESSION['support']=$donnees["support"];
+				$bdd=$_SESSION['support'];
+				}
+			$r1 =command("select * from  r_organisme where idx='$user_organisme' ");
+			$d1 = fetch_command($r1);
+			$logo=$d1["logo"];
+			$_SESSION['logo']=$logo;
+			}
 		}
+		
 
 	if ( !isset($_SESSION['pass']) ||($_SESSION['pass']==false) || !(isset($_SESSION['user'])) || ($_SESSION['user']=="") )
 		// si pas de valeur pass en session on affiche le formulaire...

@@ -23,6 +23,8 @@ include 'inc_style.php';
 	
 	 function ajout_rdv()
 			{
+			global $user_organisme;
+			
 			$user_idx=$_SESSION['user_idx'];
 			$ligne=variable ('ligne');
 			$date=mef_date_BdD(variable ('date'));
@@ -30,6 +32,8 @@ include 'inc_style.php';
 						
 			$avant=variable ('avant');
 			$user1=variable ('user');
+			
+			$ligne .= "; De ".libelle_user($user_idx)." (".libelle_organisme($user_organisme).")";;
 			if ( ($ligne!="") && ($date!="") && ($heure!=""))
 				{
 				$date_jour=date('Y-m-d');
@@ -70,9 +74,10 @@ include 'inc_style.php';
 		$format_date = "d/m/Y";	
 		$aujourdhui=date($format_date,  mktime(0,0,0 , date("m"), date("d"), date ("Y")));
 		echo "<p>";
+		
 		$filtre1=variable("filtre");
 		formulaire ("");
-		echo "<table><tr><td>Filtre :</a></td>";
+		echo "<table><tr><td><b> Rendez-vous déjà enregistrés</td><td> - Filtre :</a></td>";
 		echo " <td> <input type=\"text\" name=\"filtre\" size=\"20\" value=\"$filtre1\" onChange=\"this.form.submit();\"> ";
 		echo "</form> </td> <td><img src=\"images/loupe.png\"width=\"20\" height=\"20\">  </td> ";
 		if ($filtre1!="")
@@ -228,9 +233,18 @@ include 'inc_style.php';
 			echo "<li><a href=\"\" >Rendez-vous de <b> $nom </b> </a></li>";
 			echo "</ul> </td>";	
 			echo " <td>Vers le suivi de <a href=\"suivi.php?nom=$nom\" > $nom </a> </td></table>";
+			
+			$reponse = command("SELECT * FROM $bdd WHERE nom='$nom' and pres_repas='Téléphone' "); 
+			if ($donnees = fetch_command($reponse))
+				$tel=$donnees["commentaire"];
+			else 
+				$tel="";				
+			if (!VerifierPortable($tel)) 
+				echo " <img src=\"images/illicite.png\" width=\"30\" height=\"30\"> Attention: numéro de portable de $nom non valide, si vous souhaitez qu'il recoive le SMS merci de renseigner un numéro valide <a href=\"suivi.php?nom=$nom\" > ici </a><p> ";
 			}
 
 		// ---------------------------------------------------------------- Ajout de RDV
+		echo "<b>Nouveau Rendez-vous </b> ";
 		titre_rdv();
 		formulaire ("ajout_rdv");
 		echo "<tr>";
@@ -239,11 +253,11 @@ include 'inc_style.php';
 			
 		echo "<td> <SELECT name=user>";
 		echo "<OPTION  VALUE=\"\">  </OPTION>";
-		$reponse = command("SELECT * FROM $bdd WHERE nom<>'Mail' group by nom "); 			
+		$reponse = command("SELECT * FROM $bdd WHERE nom<>'Mail' and nom<>'Synth' group by nom "); 			
 		while ($donnees = fetch_command($reponse) ) 
 			{
 			$sel=$donnees["nom"];				
-			if ( ($sel!= "Mail") && (strpos($sel,"(A)")===false) )
+			if ( (strpos($sel,"(A)")===false)  )
 				{
 				if ($sel==$nom)
 					echo "<OPTION  VALUE=\"$sel\" selected> $sel </OPTION>";

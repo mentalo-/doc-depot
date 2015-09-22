@@ -63,11 +63,15 @@ include 'bdd.php';
 		return($ligne);
 		}	
 
-	function libelle_user($idx	)
+	function libelle_user($idx)
 		{
-		$r1 =command("select * from  r_user where idx='$idx' ");
-		$d1 = fetch_command($r1);
-		return($d1["nom"]." ".$d1["prenom"]);
+		if (is_numeric($idx))
+			{
+			$r1 =command("select * from  r_user where idx='$idx' ");
+			$d1 = fetch_command($r1);
+			return($d1["nom"]." ".$d1["prenom"]);
+			}
+		else return($idx);
 		}	
 
 				

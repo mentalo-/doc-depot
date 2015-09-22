@@ -125,7 +125,7 @@
 		maj_compteur_envoi_mail();
 		ecrit_parametre("TECH_nb_sms_envoyes",parametre("TECH_nb_sms_envoyes")+1) ;
 
-		if (($_SERVER['REMOTE_ADDR']=="127.0.0.1") ||(isset ($_SESSION['chgt_user']) && ($_SESSION['chgt_user']==true) ))
+		if (($_SERVER['REMOTE_ADDR']=="127.0.0.1") || (isset ($_SESSION['chgt_user']) && ($_SESSION['chgt_user']==true) ))
 			{
 			echo "<table border=\"2\"> <tr> <td> SMS </td><td>" ;
 			echo "$subject </td><td> " ;
@@ -134,8 +134,12 @@
 			}
 			
 		$CR_Mail = @mail ($to, $subject, stripcslashes($body));
+		
 		if ($CR_Mail === FALSE)
+			{
 			erreur( "Erreur envoi SMS: $CR_Mail <br> \n");
+			ajout_log_tech( "Erreur envoi SMS ($to / $subject / $body) : $CR_Mail  ");
+			}
 
 		}
 

@@ -649,7 +649,7 @@ include 'inc_style.php';
 		
 		$date_jour=date($format_date );
 		$i=0; 
-		$reponse = command("SELECT * FROM $bdd WHERE commentaire<>'' and date='0000-00-00' and pres_repas<>'pda' and pres_repas<>'Age' and pres_repas<>'Mail' and pres_repas<>'Téléphone' order by nom DESC "); 
+		$reponse = command("SELECT * FROM $bdd WHERE commentaire<>'' and date='0000-00-00' and pres_repas<>'pda' and pres_repas<>'Age' and pres_repas<>'Mail' and pres_repas<>'Téléphone' and pres_repas<>'nationalie' and pres_repas<>'PE' order by nom DESC "); 
 		while (($donnees = fetch_command($reponse) ) && ($i<10000))
 				{
 				if ($i==0)
