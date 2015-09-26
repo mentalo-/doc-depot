@@ -100,7 +100,7 @@ include 'inc_style.php';
 		$select_activites="";
 		
 		$d=mise_en_forme_date_aaaammjj( $date_jour);
-		$reponse = command("SELECT DISTINCT * FROM $bdd WHERE date='$d' and pres_repas!='Suivi' "); 
+		$reponse = command("SELECT DISTINCT * FROM $bdd WHERE date='$d' and pres_repas!='Suivi' and pres_repas!='reponse' and pres_repas!='partenaire' "); 
 		while (($donnees = fetch_command($reponse) ) && ($i<10000))
 			if ($donnees["nom"]!="Synth")
 				{
@@ -268,12 +268,12 @@ include 'inc_style.php';
 		
 	function liste_type($val_init ="" )
 		{
-		echo "<SELECT name=\"type\"  onChange=\"this.form.submit();\">";
+		echo "<SELECT name=\"type\"  >";
 		affiche_un_choix($val_init,"Bénéficiaire");
 		affiche_un_choix($val_init,"Bénéficiaire femme");
 		affiche_un_choix($val_init,"Bénévole");
 		affiche_un_choix($val_init,"Salarié");
-		affiche_un_choix($val_init,"Activité");
+//		affiche_un_choix($val_init,"Activité");
 		echo "</SELECT>";
 		}
 
@@ -984,7 +984,7 @@ else
 				echo "<input type=\"hidden\" name=\"presence\" value=\"Visite\"> " ;	
 				echo "<input type=\"hidden\" name=\"date_jour\"  value=\"$date_jour\">";
 				echo "<tr> <td bgcolor=\"#d4ffaa\"> ";
-				echo "<SELECT name=nom>";
+				echo "<SELECT name=nom onChange=\"this.form.submit();\">";
 				echo "<OPTION  VALUE=\"\">  </OPTION>";
 				for ($j=0;$j<$jmax;$j++)
 					{
@@ -993,7 +993,7 @@ else
 						echo "<OPTION  VALUE=\"$sel\"> $sel </OPTION>";
 					}
 				echo "</SELECT>";
-				echo "</td> <td bgcolor=\"#d4ffaa\">"; 
+				echo "</td> <td bgcolor=\"#d4ffaa\"> "; 
 				echo "<input type=\"submit\" value=\"Ajouter\" >  ";
 				echo "</td>";
 
@@ -1076,7 +1076,7 @@ else
 				echo "<input type=\"hidden\" name=\"presence\" value=\"Visite\"> " ;	
 				echo "<input type=\"hidden\" name=\"date_jour\"  value=\"$date_jour\">";
 				echo "<tr> <td bgcolor=\"#d4ffaa\"> ";
-				echo "<SELECT name=nom>";
+				echo "<SELECT name=nom >";
 				echo "<OPTION  VALUE=\"\">  </OPTION>";
 				for ($j=0;$j<$jmax;$j++)
 					{
@@ -1085,7 +1085,7 @@ else
 						echo "<OPTION  VALUE=\"$sel\"> $sel </OPTION>";
 					}
 				echo "</SELECT>";
-				echo "</td> <td bgcolor=\"#d4ffaa\">"; 
+				echo "</td> <td bgcolor=\"#d4ffaa\"> "; 
 				echo "<input type=\"submit\" value=\"Ajouter\" >  ";
 				echo "</td>";
 
@@ -1099,6 +1099,7 @@ else
 				echo "<input type=\"text\" name=\"nom\" size=\"30\" value=\"\">";	
 				echo "<input type=\"hidden\" name=\"commentaire\" value=\"\"> " ;	
 				echo "<input type=\"hidden\" name=\"presence\" value=\"Atelier\"> " ;
+				echo "<input type=\"hidden\" name=\"type\" value=\"Activité\"> " ;
 				echo "<input type=\"submit\" value=\"Créer nouvelle activité\" >  ";
 				echo "</td></form> ";	
 
