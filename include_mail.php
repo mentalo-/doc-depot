@@ -83,7 +83,7 @@
 		if ($to!=parametre('DD_mail_gestinonnaire'))
 			{
 			// contenu du message
-			$body = "<center><a href=\"".serveur."\"><img src=\"".serveur."images/logo.png\" width=\"150\" height=\"100\" ></a><p>
+			$body = "<center><a href=\"".serveur."\"><img src=\"http://".serveur."images/logo.png\" width=\"150\" height=\"100\" ></a><p>
 					<h3>".traduire('La Consigne Numérique Solidaire')."</h3>
 					<font size=\"5\">'' ".traduire("Mon essentiel à l'abri en toute confiance")." ''</font> <p> $body";
 			}
@@ -284,10 +284,10 @@ function TTT_mail($aff=true)
 						$reponse = command($cmd); 
 						if ($donnees = fetch_command($reponse)) 
 							{
+							$id=$donnees["id"];
 							$date_jour=date('Y-m-d')." ".$heure_jour=date("H\hi:s");
 							$idx=$donnees["idx"];
 							$ligne = imap_fetchbody($mBox, $i, 1);
-							
 							if ($donnees = fetch_command($reponse))
 								{
 								// cas où il y a 2 fois le même téléphone==> anormal
@@ -297,11 +297,15 @@ function TTT_mail($aff=true)
 								{
 								if (!strstr(strtolower($ligne), "activation"))
 									{
-									$cmd= "INSERT INTO r_sms VALUES ('$date_jour', '$idx', '$ligne' ) ";
+									$num_seq=inc_index("notes");
+									$cmd= "INSERT INTO r_sms VALUES ('$date_jour', '$idx', '$ligne', '$num_seq' ) ";
 									$reponse = command($cmd); 
 									}
 								else
+									{
 									recept_mail($idx,date('Y-m-d'));
+									envoi_sms ("0$n","Réception de documents par mail autorisée pour la journée à $id@fixeo.com ou 0$n@fixeo.com");
+									}
 								}
 							}
 						}
@@ -591,13 +595,14 @@ class MailAttachmentManager
 							// vérifiction si cela ne vient pas d'un référent de confiance
 							$vient_de_RC=false;
 							
-							$r1 = command("SELECT * FROM r_user WHERE mail='$from')"); 
+							$r1 = command("SELECT * FROM r_user WHERE mail='$from' and (droit='S' or droit='R' )"); 
 							if ($d1 = fetch_command($r1))  // on a trouver un utilisateur
-								if ($d1["droit"]=='S') // c'est bien un Acteur Social
 									{
+									/*
 									$rc_idx=$d1["idx"];
 									$r2 = command( "SELECT * FROM r_referent WHERE user='$user' and nom='$rc_idx' and organisme='' "); 
 									if ($d2 = fetch_command($r2))  
+									*/
 										$vient_de_RC=true;
 									}
 							

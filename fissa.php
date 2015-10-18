@@ -100,7 +100,7 @@ include 'inc_style.php';
 		$select_activites="";
 		
 		$d=mise_en_forme_date_aaaammjj( $date_jour);
-		$reponse = command("SELECT DISTINCT * FROM $bdd WHERE date='$d' and pres_repas!='Suivi' and pres_repas!='reponse' and pres_repas!='partenaire' "); 
+		$reponse = command("SELECT DISTINCT * FROM $bdd WHERE date='$d' and pres_repas!='Suivi' and pres_repas!='reponse' and pres_repas!='partenaire' and pres_repas!='Age'  and pres_repas!='Telephone' and pres_repas!='Mail'  "); 
 		while (($donnees = fetch_command($reponse) ) && ($i<10000))
 			if ($donnees["nom"]!="Synth")
 				{
@@ -195,11 +195,11 @@ include 'inc_style.php';
 				if (strpos($pres2,"(A)")===false)
 					{
 
-					$cmd = "UPDATE $bdd set commentaire='$memo' , user='$user' , modif='$modif' where nom='$nom' and date='0000-00-00' and pres_repas<>'pda' ";
+					$cmd = "UPDATE $bdd set commentaire='$memo' , user='$user' , modif='$modif' where nom='$nom' and date='0000-00-00' and pres_repas<>'pda' and pres_repas<>'Mail'  and pres_repas<>'Telephone'  and pres_repas<>'Age' ";
 					$reponse = command($cmd);					
 
 					if ( $pres2!="Erreur saisie")
-						$reponse = command("UPDATE $bdd SET commentaire='$com', pres_repas='$pres2' , user='$user' , modif='$modif'  WHERE nom='$nom_slash' AND date='$d'" );
+						$reponse = command("UPDATE $bdd SET commentaire='$com', pres_repas='$pres2' , user='$user' , modif='$modif'  WHERE nom='$nom_slash' AND date='$d' and pres_repas!='reponse' and pres_repas!='partenaire' and pres_repas!='Suivi'  " );
 					else
 						{
 						if (strpos($nom,"(A)")!==false)
@@ -226,7 +226,7 @@ include 'inc_style.php';
 					if (strpos($activites, $pres2)===false)
 						{
 						$activites.="#-#".$pres2;
-						command("UPDATE $bdd SET activites='$activites' WHERE nom='$nom_slash' AND date='$d' and pres_repas<>'Suivi'");
+						command("UPDATE $bdd SET activites='$activites' WHERE nom='$nom_slash' AND date='$d' and pres_repas<>'Suivi' and pres_repas!='reponse' and pres_repas!='partenaire' ");
 						}
 					$pres=$pres_initial;
 					}
@@ -840,7 +840,7 @@ else
 				$user= $_SESSION['user_idx'];
 				$modif=time();
 				$nom_slash= addslashes2($nom);	
-				command("UPDATE $bdd set commentaire='', user='$user' , modif='$modif' where nom='$nom_slash' and date='0000-00-00' and pres_repas<>'Age' and pres_repas<>'Téléphone' ") ;
+				command("UPDATE $bdd set commentaire='', user='$user' , modif='$modif' where nom='$nom_slash' and date='0000-00-00' and pres_repas<>'Age' and pres_repas<>'Téléphone' and pres_repas<>'pda' ") ;
 				}
 				
 			if ($action=="supp_activite")

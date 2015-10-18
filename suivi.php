@@ -96,7 +96,7 @@ include 'inc_style.php';
 		if ($detail=="")
 			$reponse = command("SELECT * FROM $bdd WHERE nom='$nom_slash' and date>'2000-00-00' and pres_repas<>'pda' and pres_repas<>'reponse' and pres_repas<>'partenaire' order by date DESC "); 
 		else
-			$reponse = command("SELECT * FROM $bdd WHERE nom='$nom_slash' and date>'2000-00-00' and pres_repas='Suivi' and pres_repas<>'partenaire' order by date DESC "); 
+			$reponse = command("SELECT * FROM $bdd WHERE nom='$nom_slash' and date>'2000-00-00' and pres_repas='Suivi' order by date DESC "); 
 
 		$ncolor=0;
 		while (($donnees = fetch_command($reponse) ) && ($i<10000))
@@ -120,11 +120,30 @@ include 'inc_style.php';
 					$user="";
 					if ($donnees["user"]!="")
 						$user=libelle_user($donnees["user"]);
-					echo "<tr><td bgcolor=\"$color\"><b><a href=\"suivi.php?action=accompagnement&nom=$nom&date_jour=$d\" > $d </a> </td><td bgcolor=\"$color\">$p </td><td bgcolor=\"$color\">$act </td><td bgcolor=\"$color\">$c </b><td bgcolor=\"$color\">$user </b>"; 
+						
+					$r1 = command("SELECT * FROM $bdd WHERE nom='$nom_slash' and date='$date_jour' and pres_repas='reponse' "); 
+					if ($d1 = fetch_command($r1) ) 
+						$rep="Réponse :  <b>".$d1["activites"]."</b>";
+					else
+						$rep="";
+
+					$r1 = command("SELECT * FROM $bdd WHERE nom='$nom_slash' and date='$date_jour' and pres_repas='partenaire' "); 
+					if ($d1 = fetch_command($r1) ) 
+						{
+						$act=$d1["activites"];
+						if($act!="---")
+							$partenaire=" (Partenaire:  <b>".$d1["activites"]."</b>)";
+						else
+							$partenaire="";
+						}
+					else
+						$partenaire="";
+						
+					echo "<tr><td bgcolor=\"$color\"><b><a href=\"suivi.php?action=accompagnement&nom=$nom&date_jour=$d\" > $d </a> </td><td bgcolor=\"$color\">$p </td><td bgcolor=\"$color\"> <b>$act</b> </td><td bgcolor=\"$color\">$rep $partenaire <br>$c <td bgcolor=\"$color\">$user </b>"; 
 
 					}
 				else
-					echo "<tr><td bgcolor=\"$color\"><b> $d </td><td bgcolor=\"$color\"></td><td bgcolor=\"$color\">$p </td><td bgcolor=\"$color\"> $c </td> ";
+					echo "<tr><td bgcolor=\"$color\"> $d </td><td bgcolor=\"$color\"></td><td bgcolor=\"$color\">$p </td><td bgcolor=\"$color\"> $c </td> ";
 				
 				// ++++ si activité ajouter liste des participants
 				if (strpos($nom_slash,"(A)")>0)
@@ -228,16 +247,16 @@ include 'inc_style.php';
 		echo "<input type=\"hidden\" name=\"action\" value=\"activites\"> " ;
 		echo "<input type=\"hidden\" name=\"nom\"  value=\"$nom\">";
 		echo "<input type=\"hidden\" name=\"date_jour\"  value=\"$date_jour\">";
-
 		echo "<td><SELECT name=\"activites\"  onChange=\"this.form.submit();\">";		
-		affiche_un_choix($act,"---");
 
 		$reponse = command("SELECT * FROM $bdd WHERE  date>'2000-00-00' and pres_repas='Suivi'  group by activites "); 		
 		while ($donnees = fetch_command($reponse) ) 
 			{
 			$a= $donnees["activites"];
-//			echo $a;
-			affiche_un_choix($act,$a);
+			if ($a!="")
+				affiche_un_choix($act,$a);
+			else
+				affiche_un_choix($act,"---");			
 			}
 			echo "</SELECT></td>";		
 		echo "</form> ";
@@ -245,9 +264,9 @@ include 'inc_style.php';
 		
 	function choix_reponse_suivi()
 		{
-		global $bdd,$nom,$nom_slash,$date_jour;
+		global $bdd,$nom,$nom_slash,$date_jour,$date_jour_gb;
 
-		$reponse = command("SELECT * FROM $bdd WHERE  date>'2000-00-00' and pres_repas='Reponse' and nom='$nom_slash' "); 	
+		$reponse = command("SELECT * FROM $bdd WHERE  date='$date_jour_gb' and pres_repas='Reponse' and nom='$nom_slash' "); 	
 		if ($donnees = fetch_command($reponse))
 		$act=$donnees["activites"];
 			else 
@@ -294,9 +313,9 @@ include 'inc_style.php';
 	
 	function choix_partenaire_suivi()
 		{
-		global $bdd,$nom,$nom_slash,$date_jour;
+		global $bdd,$nom,$nom_slash,$date_jour,$date_jour_gb;
 
-		$reponse = command("SELECT * FROM $bdd WHERE  date>'2000-00-00' and pres_repas='partenaire' and nom='$nom_slash' "); 	
+		$reponse = command("SELECT * FROM $bdd WHERE date='$date_jour_gb' and pres_repas='partenaire' and nom='$nom_slash' "); 	
 		if ($donnees = fetch_command($reponse))
 		$act=$donnees["activites"];
 			else 
@@ -375,7 +394,7 @@ include 'inc_style.php';
 		echo "<form method=\"GET\" action=\"suivi.php\" >";
 		echo "<input type=\"hidden\" name=\"action\" value=\"nationalite\"> " ;
 		echo "<input type=\"hidden\" name=\"nom\"  value=\"$nom\">";
-		echo "<SELECT name=\"partenaire\"  onChange=\"this.form.submit();\">";	
+		echo "<SELECT name=\"nationalite\"  onChange=\"this.form.submit();\">";	
 
 if ($nat=="") $nat= "Inconnu";
 affiche_un_choix($nat,"Inconnu");
@@ -785,7 +804,7 @@ affiche_un_choix($nat,"Zimbabwe");
 				if ($donnees = fetch_command($reponse))
 					$reponse = command("UPDATE $bdd set activites='$activites' , modif='$modif' where date='$date_jour_gb' and nom='$nom_slash' and pres_repas='Suivi' ");
 				else
-					$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom_slash', '1111-11-11', 'Suivi','','$user','$modif','$activites')");					
+					$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom_slash',  '$date_jour_gb', 'Suivi','','$user','$modif','$activites')");					
 				$action="suivi";
 				}	
 				
@@ -815,6 +834,20 @@ affiche_un_choix($nat,"Zimbabwe");
 						else
 							$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom_slash', '1111-11-11', 'PE','$PE','$user','$modif','')");					
 						$action="suivi";
+						}			
+						
+				if ($action=="adresse")
+						{
+						$adresse=variable_s("adresse");
+
+						$reponse = command("SELECT * FROM $bdd WHERE nom='$nom_slash' and pres_repas='adresse' "); 
+						$user= $_SESSION['user_idx'];
+						$modif=time();
+						if ($donnees = fetch_command($reponse))
+							$reponse = command("UPDATE $bdd set commentaire='$adresse' , modif='$modif' where nom='$nom_slash' and pres_repas='adresse' ");
+						else
+							$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom_slash', '1111-11-11', 'adresse','$adresse','$user','$modif','')");					
+						$action="suivi";
 						}
 				if ($action=="nationalite")
 						{
@@ -829,7 +862,7 @@ affiche_un_choix($nat,"Zimbabwe");
 							$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom_slash', '1111-11-11', 'nationalite','$nationalite','$user','$modif','')");					
 						$action="suivi";
 						}				
-			if ($action=="telephone")
+				if ($action=="telephone")
 						{
 						$telephone=variable_s("telephone");
 
@@ -885,11 +918,20 @@ affiche_un_choix($nat,"Zimbabwe");
 						$action="suivi";
 						}	
 						
-						
-						
-						
-	
-						
+			if ($action=="echeance")
+						{
+						$echeance=variable_s("echeance");
+
+						$reponse = command("SELECT * FROM $bdd WHERE nom='$nom_slash' and pres_repas='pda' "); 
+						$user= $_SESSION['user_idx'];
+						$modif=time();
+						if ($donnees = fetch_command($reponse))
+							$reponse = command("UPDATE $bdd set activites='$echeance' , modif='$modif' , user='$user' where nom='$nom_slash' and pres_repas='pda' ");
+						else
+							$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom_slash', '', 'pda','$echeance','$user','$modif','')");					
+						$action="suivi";
+						}	
+					
 					if ($com=="") 
 						{
 						$date_jour_gb=mise_en_forme_date_aaaammjj( $date_jour);
@@ -908,7 +950,7 @@ affiche_un_choix($nat,"Zimbabwe");
 						$user= $_SESSION['user_idx'];
 						$modif=time();
 						if ($donnees = fetch_command($reponse))
-							$reponse = command("UPDATE $bdd set commentaire='$com' , user='$user' , modif='$modif' , activites='$act' where nom='$nom_slash' and date='$date_jour_gb' and pres_repas='Suivi' ");
+							$reponse = command("UPDATE $bdd set commentaire='$com' , user='$user' , modif='$modif' where nom='$nom_slash' and date='$date_jour_gb' and pres_repas='Suivi' ");
 						else
 							$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom_slash', '$date_jour_gb', 'Suivi','$com','$user','$modif','$act')");					
 						//$commentaire=$com;
@@ -1010,6 +1052,18 @@ affiche_un_choix($nat,"Zimbabwe");
 							echo "</td></table>";
 							
 							echo "<table>";
+							$reponse = command("SELECT * FROM $bdd WHERE nom='$nom_slash' and pres_repas='adresse' "); 
+							if ($donnees = fetch_command($reponse))
+								$adresse=$donnees["commentaire"];
+							else 
+								$adresse="";
+							echo "<tr><td> <b> Adresse </b> : </td><td>";
+							echo "<form method=\"GET\" action=\"suivi.php\">";
+							echo "<input type=\"hidden\" name=\"action\" value=\"adresse\"> " ;
+							echo "<input type=\"hidden\" name=\"nom\"  value=\"$nom\">";
+							echo "<input type=\"text\" name=\"adresse\" size=\"80\"  value=\"$adresse\"  onChange=\"this.form.submit();\">";
+							echo "</form> </td>";														
+							
 							$reponse = command("SELECT * FROM $bdd WHERE nom='$nom_slash' and pres_repas='PE' "); 
 							if ($donnees = fetch_command($reponse))
 								$PE=$donnees["commentaire"];
@@ -1020,28 +1074,34 @@ affiche_un_choix($nat,"Zimbabwe");
 							echo "<input type=\"hidden\" name=\"action\" value=\"PE\"> " ;
 							echo "<input type=\"hidden\" name=\"nom\"  value=\"$nom\">";
 							echo "<input type=\"text\" name=\"PE\" size=\"80\"  value=\"$PE\"  onChange=\"this.form.submit();\">";
-							echo "</form> </td></table>";
+							echo "</form> </td>";
+							
+
+							echo "</table>";
 							}
 							
 							fin_cadre();
-							
-					echo "<table><tr> <td >";
-					echo "<ul id=\"menu-bar\">";					
-					echo "<li><a href=\"suivi.php?action=suivi&nom=$nom\" >Suivi du <b> $date_jour  </b> </a></li>";
-					echo "</ul> </td>";
-					echo "</table> ";								
-							
-						$reponse = command("SELECT * FROM $bdd WHERE nom='$nom_slash' and pres_repas='Suivi' "); 
-						if ($donnees = fetch_command($reponse))
-							$act=$donnees["activites"];
-						else 
-							$act="";
 
+							
+						// ============================================================================== SUIVI
+						echo "<table><tr> <td >";
+						echo "<ul id=\"menu-bar\">";					
+						echo "<li><a href=\"suivi.php?action=suivi&nom=$nom\" >Suivi du <b> $date_jour  </b> </a></li>";
+						echo "</ul> </td>";
+						echo "</table> ";	
+						
+						
 						echo "<TABLE><TR><td > <div class=\"CSS_titre\"  >";
 
 						echo " <table border=\"0\" >";
 						echo "<tr> <td> <table border=\"0\" ><tr> <td> <b> Suivi </b> : </td>";
 						echo "<form method=\"GET\" action=\"suivi.php\">";
+						
+						$reponse = command("SELECT * FROM $bdd WHERE date='$date_jour_gb' and  nom='$nom_slash' and pres_repas='Suivi' "); 
+						if ($donnees = fetch_command($reponse))
+							$act=$donnees["activites"];
+						else 
+							$act="";
 						choix_action_suivi($act);
 						choix_reponse_suivi($act);
 						choix_partenaire_suivi($act);
@@ -1054,18 +1114,37 @@ affiche_un_choix($nat,"Zimbabwe");
 						echo "<TEXTAREA rows=\"4\" cols=\"110\" name=\"com\" onChange=\"this.form.submit();\">$com</TEXTAREA>";
 						echo "</td> ";
 						echo "</form> ";
-						echo "<tr> <td> <b> Plan d'action </b> :  $derniere_maj_pda ";
+						fin_cadre();	
+						
+						// ============================================================================== Plan d'action
+						
+						$reponse = command("SELECT * FROM $bdd WHERE nom='$nom_slash' and pres_repas='pda' "); 
+						if ($donnees = fetch_command($reponse))
+							$echeance=$donnees["activites"];
+						else
+							$echeance="";
+						echo "<tr> <td> ";
+						echo "<table> <tr><td> <b> Plan d'action en cours </b> </td> <td> - Echéance  : </td><td>";
 						echo "<form method=\"GET\" action=\"suivi.php\">";
+						echo "<input type=\"hidden\" name=\"action\" value=\"echeance\"> " ;
+						echo "<input type=\"hidden\" name=\"nom\"  value=\"$nom\">";
+						echo "<input type=\"text\" name=\"echeance\" size=\"10\"  value=\"$echeance\"  onChange=\"this.form.submit();\"  >";
+						echo "</form></td>  <td>  $derniere_maj_pda </td> ";
+						
+						echo "</table></td> ";
+						
+						echo "<tr> <td><form method=\"GET\" action=\"suivi.php\">";
 						echo "<input type=\"hidden\" name=\"action\" value=\"pda\"> " ;
 						echo "<input type=\"hidden\" name=\"nom\"  value=\"$nom\">";
 						echo "<TEXTAREA rows=\"4\" cols=\"110\" name=\"pda\" onChange=\"this.form.submit();\">$pda</TEXTAREA>";
 						echo "</td> ";
 						echo "</form> ";
-					
+						
 						echo "</table>  ";
 						
-						echo "</td></table>  ";
-						fin_cadre();	
+						echo "</td>";
+						echo "</table>  ";
+						
 
 					if  (($action=="suivi") || ($action=="pda"))
 						affiche_rdv($nom);		
@@ -1086,7 +1165,24 @@ affiche_un_choix($nat,"Zimbabwe");
 			}
 		else 
 			{
-			echo "<p><br><p><br><p><br><p><br><p><br><p><br><p><br><p><br><p><br><p><br>";
+			$i=0;
+			// liste des plans d'action ouvert
+			$reponse = command("SELECT * FROM $bdd WHERE pres_repas='pda' and (activites<>''  and !(activites like 'terminé'))  order by activites "); 
+			while ($donnees = fetch_command($reponse) ) 
+				{
+				if ($i++==0)
+					echo "<P> <table border=\"0\" ><tr> <td>Qui </td><td>Echéance </td><td>Plan d'action </td>";
+				
+				$nom=$donnees["nom"];
+				$echeance=$donnees["activites"];
+				$pda=$donnees["commentaire"];
+				echo "<tr> <td><a href=\"suivi.php?action=suivi&nom=$nom\" >$nom </td><td>$echeance </td><td>$pda</td>";
+				}
+				
+			if ($i!=0)
+				echo "</table><p><br><p><br>";
+			else
+				echo "<p><br><p><br><p><br><p><br><p><br><p><br><p><br><p><br>";
 		
 			// =====================================================================loc NOUVEAU
 			echo "<table><tr><td bgcolor=\"#d4ffaa\">Création nouveau :</td><td bgcolor=\"#d4ffaa\"><form method=\"GET\" action=\"suivi.php\">";

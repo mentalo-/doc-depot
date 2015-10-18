@@ -722,8 +722,13 @@ function maj_mdp_fichier($idx, $pw )
 		echo " : ".traduire('Ok').". <p> ";
 				
 		if ($code_lecture!="")
+			{
 			echo traduire('Cliquez ')." <a href=\"tmp/$ref.pdf\"target=_blank > ".traduire('ici')." <img src=\"images/-fichier.jpg\"  title=\"".traduire('Document protégé')."\" width=\"100\"  > </a>".traduire("pour ouvrir le fichier avec code de lecture (recommandé) ");
-		echo " ".traduire('ou cliquez ')."<a href=\"tmp/_$ref.pdf\"target=_blank > ".traduire('ici')." <img src=\"images/-fichier.jpg\"  title=\"".traduire('Document NON protégé')."\" width=\"40\" height=\"40\" ></a>".traduire("pour accèder au fichier SANS code de lecture (non- recommandé). ");
+			echo " ".traduire('ou cliquez ')."<a href=\"tmp/_$ref.pdf\"target=_blank > ".traduire('ici')." <img src=\"images/fichier.jpg\"  title=\"".traduire('Document NON protégé')."\" width=\"40\" height=\"40\" ></a>".traduire("pour accèder au fichier SANS code de lecture (non- recommandé). ");
+			}
+		else
+			echo " ".traduire('Cliquez ')."<a href=\"tmp/_$ref.pdf\"target=_blank > ".traduire('ici')." <img src=\"images/fichier.jpg\"  title=\"".traduire('Document NON protégé')."\" width=\"40\" height=\"40\" ></a>".traduire("pour accèder au fichier (sans code de lecture). ");
+		
 		echo " <p><BR><p>".traduire("Attention, le fichier ne sera plus accessible dès que vous aurez quitté cette page: ");
 		echo " <BR> - ".traduire("Soit vous consultez maintenant le document : cliquez sur le lien et saisissez le code de lecture;");
 		echo " <BR> - ".traduire("Soit vous imprimez maintenant le document : ouvrir le fichier en cliquant sur le lien, saisissez le code de lecture et faire 'Imprimer';");
@@ -1759,7 +1764,7 @@ function maj_mdp_fichier($idx, $pw )
 		global $user_idx;
 		
 		if ($filtre1!="")
-			$filtre2="and (nom REGEXP '$filtre' or prenom REGEXP '$filtre' or telephone REGEXP '$filtre' or mail REGEXP '$filtre' or anniv REGEXP '$filtre' or adresse REGEXP '$filtre'or nationalite REGEXP '$filtre' ) ";
+			$filtre2="and (nom REGEXP '$filtre1' or prenom REGEXP '$filtre1' or telephone REGEXP '$filtre1' or mail REGEXP '$filtre1' or anniv REGEXP '$filtre1' or adresse REGEXP '$filtre1'or nationalite REGEXP '$filtre1' ) ";
 		else
 			$filtre2="";
 		

@@ -389,7 +389,7 @@ require_once "include_mail.php";
 						$msg = msg_alerte_max(28, 8);
 					// if ($mode_test)
 						{
-						$msg_pluie= msg_alerte_pluie(5);
+						$msg_pluie= msg_alerte_pluie(2);
 						$msg=$msg_pluie.$msg;	
 						}				
 					$msg= reformule_msg($msg);

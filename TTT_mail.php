@@ -8,6 +8,16 @@
 	include 'general.php';
  	include 'include_crypt.php';
 	include 'include_charge_image.php';	
+	// doublon avec INDEX.HTML
+	
+	function recept_mail($id,$date)
+		{
+		global $user_idx;
+		
+		$reponse = command("UPDATE `r_user` SET  recept_mail='$date' where idx='$id'  ");
+		ajout_log( $id, traduire("Autorisation reception par mail"), 	 $user_idx );
+		}
+		
 	include 'include_mail.php';
 	include 'exploit.php';
 	
@@ -205,6 +215,7 @@ function random_chaine($car)
 			$reponse =command("select * from  DD_rdv where (etat='A envoyer' and avant<>'Aucun') ");		
 			while ($donnees = fetch_command($reponse) ) 
 				{
+				$idx_rdv=$donnees["idx"];	
 				$date=$donnees["date"];	
 				$avant=$donnees["avant"];	
 				$auteur=$donnees["auteur"];	
@@ -216,15 +227,20 @@ function random_chaine($car)
 								break;
 					case "4H": $time_corrige = date('Y-m-d H\hi',  mktime(date("H")+4 ,date("i"), 0  , date("m"), date("d"), date ("Y")) );
 								break;
-					case "La veille": $time_corrige = date('Y-m-d H\hi',  mktime(20 ,rand(0,59), 0  , date("m"), date("d"), date ("Y")) );
+					case "La veille": 
+								if ( ($heure>18) and rand(0,60)==1)
+									$time_corrige = date('Y-m-d H\hi',  mktime(23 ,59, 0  , date("m"), date("d")+1, date ("Y")) );
+								else
+									$time_corrige=$date;
 								break;
 					case "24H": $time_corrige = date('Y-m-d H\hi',  mktime(date("H") ,date("i"), 0  , date("m"), date("d")+1, date ("Y")) );
 								break;
 					case "15min": $time_corrige = date('Y-m-d H\hi',  mktime(date("H") ,date("i")+15, 0  , date("m"), date("d"), date ("Y")) );
 								break;
+					default : $time_corrige=$date; break;
 					}
 				
-				echo $time_corrige.":".$date;
+				echo "<br> $time_corrige : $date";
 				
 				// test de l'heure d'envoi
 				if ( $time_corrige > $date  )
@@ -268,7 +284,10 @@ function random_chaine($car)
 						command("UPDATE DD_rdv set etat='Envoyé' where user='$user_idx' and date='$date' ");
 						}
 					else
-						echo "User inconnu $user_idx ";
+						{
+						// echo "User inconnu $user_idx ";
+						command("UPDATE DD_rdv set etat='' where user='$user_idx' and date='$date' ");
+						}
 					}
 				}
 			echo "<p>";
