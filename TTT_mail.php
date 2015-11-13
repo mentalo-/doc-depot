@@ -35,7 +35,7 @@
 	function purge_bdd_fissa()
 		{	
 		commentaire_html("purge_dbb_fissa");
-		$avant= date('Y-m-d',  mktime( 0,0, 0 , date("m"), date("d"), date ("Y")-2 ));
+		$avant= date('Y-m-d',  mktime( 0,0, 0 , date("m"), date("d"), date ("Y")-3 ));
 		echo "<br>Purge BDD FISSA";
 		$reponse =command("select * from fct_fissa");		
 		while ($donnees = fetch_command($reponse) ) 
@@ -52,7 +52,7 @@
 		commentaire_html("purge_dbb_alerte");
 		$avant= date('Y-m-d',  mktime( 0,0, 0 , date("m"), date("d")-7, date ("Y") ));
 		echo "<br>Purge BDD Alerte";
-		$reponse =command("delete from cc_alerte where tel='' and date<'$avant' ");		
+		$reponse =command("delete from cc_alerte where tel='' and creation<'$avant' ");		
 		}	
 		
 	// supprime tous les fichiers temporaires de plus de 2 minutes

@@ -162,7 +162,7 @@ include 'inc_style.php';
 			$r2=nbre_enreg($r1); 
 			if ($r2[0]==0)
 				{
-				$user= $_SESSION['user_idx'];
+				$user= $_SESSION['user'];
 				$modif=time();
 				$cmd = "INSERT INTO `$bdd`  VALUES ( '$nom', '', '','','$user','$modif','')";
 				$reponse = command($cmd);
@@ -174,7 +174,7 @@ include 'inc_style.php';
 			$com= addslashes2($com);
 			$nom= addslashes2($nom);
 			$memo= addslashes2($memo);
-			$user= $_SESSION['user_idx'];
+			$user= $_SESSION['user'];
 			$modif=time();
 			if ($r==0)
 				{
@@ -325,6 +325,24 @@ include 'inc_style.php';
 		else
 			$l= date('Y-m-d',  mktime(0,0,0 , date("m")-4, date("d"), date ("Y")));
 
+		$reponse = command("SELECT count(*) as TOTAL FROM $bdd where date>'$l' and nom<>'Synth' and nom<>'Mail' $exclus group by nom order by nom  "); 
+		$donnees = fetch_command($reponse) ;
+		$n=$donnees["TOTAL"];		
+		if ( $n<25 )
+			{
+			if ($profil=="")
+				$l= date('Y-m-d',  mktime(0,0,0 , date("m")-2, date("d"), date ("Y")));
+			else
+				$l= date('Y-m-d',  mktime(0,0,0 , date("m")-8, date("d"), date ("Y")));
+			}
+
+		if ( $n>55 )
+			{
+			if ($profil=="")
+				$l= date('Y-m-d',  mktime(0,0,0 , date("m"), date("d")-15, date ("Y")));
+			else
+				$l= date('Y-m-d',  mktime(0,0,0 , date("m")-2, date("d"), date ("Y")));
+			}			
 		$reponse = command("SELECT *,count(*) as TOTAL FROM $bdd where date>'$l' and nom<>'Synth' and nom<>'Mail' $exclus group by nom order by nom  "); 
 		while ($donnees = fetch_command($reponse) ) 
 				{
@@ -344,7 +362,6 @@ include 'inc_style.php';
 								echo "<a href=\"fissa.php?action=nouveau&date_jour=$date_jour&nom=$n&memo=&presence=Acteur+Social&commentaire=\">$n_court</a>; " ;
 							if ( (strpos($n,"(A)")!==FALSE))
 								echo "<a href=\"fissa.php?action=nouveau&date_jour=$date_jour&nom=$n&memo=&presence=Activité&commentaire=\">$n_court</a>; " ;
-
 							}
 						}
 					else
@@ -837,7 +854,7 @@ else
 			if ($action=="supp_memo")
 				{
 				$nom=variable_s("nom");
-				$user= $_SESSION['user_idx'];
+				$user= $_SESSION['user'];
 				$modif=time();
 				$nom_slash= addslashes2($nom);	
 				command("UPDATE $bdd set commentaire='', user='$user' , modif='$modif' where nom='$nom_slash' and date='0000-00-00' and pres_repas<>'Age' and pres_repas<>'Téléphone' and pres_repas<>'pda' ") ;
@@ -863,7 +880,7 @@ else
 					$i++;
 					}
 		
-				$user= $_SESSION['user_idx'];
+				$user= $_SESSION['user'];
 				$modif=time();
 				command("UPDATE $bdd set  activites='$act' ,user='$user' , modif='$modif' where nom='$nom_slash' and date='$date' ") ;
 				}

@@ -186,6 +186,8 @@ $mode_test = ($_SERVER['REMOTE_ADDR']=="127.0.0.1") ;
 		{	
 		global $pluie,$jour_pluie,$heure_pluie,	$mode_test;
 		
+		echo "<p> msg pluie"; 
+		
 		$max_pluie=0;
 		$msg="";
 		$alarme=false;
@@ -193,7 +195,7 @@ $mode_test = ($_SERVER['REMOTE_ADDR']=="127.0.0.1") ;
 		$nbj=2;
 		if ($mode_test)
 			$nbj=6;
-		for ($n=0;$n<$nbj*8;$n++)
+		for ($n=0;$n<$nbj*8;$n++) // T396  on commence l'analyse à 9h du jour en cours
 			if (isset($pluie[$n+2]))
 				{
 				$m2=0;
@@ -219,19 +221,19 @@ $mode_test = ($_SERVER['REMOTE_ADDR']=="127.0.0.1") ;
 					{
 					if (($m>$sueil) || ( ($m1>$sueil) && ($pluie[$n]>$sueil/2) ) ||  ( ($m2>$sueil)  && ($pluie[$n]>$sueil/2) ) )
 						{
-						if ($jour_pluie[$n]!="aujourd'hui")
+//						if ($jour_pluie[$n]!=$jour_pluie[3]) // si  le jour de pluie n'est pasaujourd'hui
 							{
 							$msg.=" du ".$jour_pluie[$n]." ".$heure_pluie[$n];
 							$jour_debut=$jour_pluie[$n];
 							}
-						else
-							{
-							if ($heure_pluie[$n]<=date("h")."h")
-								{
-								$msg.=" de ".$heure_pluie[$n];
-								$jour_debut=$jour_pluie[$n];
-								}	
-							}								
+//						else
+//							{
+//							if ($heure_pluie[$n]<=date("h")."h")  //  on ne traite de debut avant l'heure courante
+//								{
+//								$msg.=" de ".$heure_pluie[$n];
+//								$jour_debut=$jour_pluie[$n];
+//								}	
+//							}								
 						$alarme=true;
 						}
 					}
@@ -322,6 +324,8 @@ $mode_test = ($_SERVER['REMOTE_ADDR']=="127.0.0.1") ;
 			$msg=str_replace ("le aujourd","aujourd", $msg);
 			$msg=str_replace ("le après-","après-", $msg);
 			
+			
+			// Spécifique pluie 			
 			$msg=str_replace ("au demain","à demain", $msg);
 			$msg=str_replace ("du demain","de demain", $msg);
 			$msg=str_replace ("du après-","d'après-", $msg);
@@ -329,6 +333,22 @@ $mode_test = ($_SERVER['REMOTE_ADDR']=="127.0.0.1") ;
 			$msg=str_replace ("au aujourd","à aujourd", $msg);
 			$msg=str_replace ("au minuit","à minuit", $msg);	
 			
+			$msg=str_replace ("12h", "midi", $msg);
+			$msg=str_replace ("18h", "en fin d'après-midi", $msg);
+			$msg=str_replace ("15h", "après-midi", $msg);
+			$msg=str_replace ("21h", "soir", $msg);
+			$msg=str_replace ("00h", "minuit", $msg);
+			$msg=str_replace ("09H", "matin", $msg);
+			$msg=str_replace ("03h", "dans la nuit", $msg);
+			$msg=str_replace ("06h", "à l'aube", $msg);		
+			
+			$msg=str_replace ("jusqu'à à", "jusqu'à", $msg);		
+			$msg=str_replace ("jusqu'à soir", "jusqu'au soir", $msg);		
+			$msg=str_replace ("jusqu'à en", "jusqu'en", $msg);		
+			$msg=str_replace ("jusqu'à après", "jusque l'après", $msg);		
+			$msg=str_replace ("jusqu'à matin", "jusqu'au matin", $msg);		
+			$msg=str_replace ("jusqu'à dans", "jusque dans", $msg);		
+					
 			return($msg);
 			}
 			
@@ -348,7 +368,7 @@ require_once "include_mail.php";
 
 
 	$reponse = command("SELECT * FROM cc_alerte WHERE dernier_envoi>'$ilya5minutes' ");
-	if ($donnees = fetch_command($reponse))
+	if ( ($donnees = fetch_command($reponse)) && (!$mode_test) )
 		Echo "<BR> Pas de traitment car envoi récent ";
 	else
 		{
@@ -389,7 +409,11 @@ require_once "include_mail.php";
 						$msg = msg_alerte_max(28, 8);
 					// if ($mode_test)
 						{
-						$msg_pluie= msg_alerte_pluie(2);
+						if ($mode_test)
+							$msg_pluie= msg_alerte_pluie(0.5);
+						else
+							$msg_pluie= msg_alerte_pluie(2);
+
 						$msg=$msg_pluie.$msg;	
 						}				
 					$msg= reformule_msg($msg);
@@ -405,7 +429,8 @@ require_once "include_mail.php";
 				{
 				if ($msg !="") 
 					{
-					$msg=str_replace ("  ", " ", $msg);
+
+					
 					$msg=str_replace (" .", ".", $msg);
 					command("UPDATE `cc_alerte` SET dernier_envoi='$maintenant'  where tel='$telephone'  ");
 					if (!$mode_test)

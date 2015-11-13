@@ -37,6 +37,9 @@
 		traite ("r_referent");
 		traite ("r_organisme");
 		//	traite ("cc_user");
+		
+		// traite_fissa("nom_ bdd");
+		
 		Echo "terminé";
 
 		Echo "<p>- Diffusion Fissa : ";

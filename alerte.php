@@ -74,7 +74,7 @@ require_once "connex_inc.php";
 
     echo "<head>";
 	echo "<link rel=\"icon\" type=\"image/png\" href=\"images/identification.png\" />";
-	echo "<title>Doc-Depot.com </title>";
+	echo "<title>Alerte SMS météo </title>";
     echo "<meta http-equiv=\\\"Content-Type\\\" content=\\\"text/html; charset=iso-8859-1\\\" />";
 	echo "</head><body>";
 
@@ -166,7 +166,9 @@ require_once "connex_inc.php";
 		echo "</form></table> ";
 		fin_cadre();
 		
-		echo "<p>".traduire("Autre méthode: depuis le téléphone devant recevoir les alertes, envoyez un SMS au 06.98.47.43.12 (numéro non surtaxé) contenant 'alerte' suivi du numéro de département où vous êtes.<br>(Par exemple \"alerte 75\" si vous êtes sur Paris)");
+		echo "<p>".traduire("Autre méthode: depuis le téléphone devant recevoir les alertes, envoyez un SMS au 06.98.47.43.12 (numéro non surtaxé) contenant 'alerte' suivi du numéro de département où vous êtes(Par exemple \"alerte 75\" si vous êtes sur Paris)");
+		
+		echo "<h2><a id=\"historique\" href=\"alerte_histo.php\"> Consulter les alertes en cours </a></h2>";
 		
 		echo "<center><table border=\"1\"><tr><td>";
 		debut_cadre("500");
@@ -183,7 +185,7 @@ require_once "connex_inc.php";
 		echo "<table> <tr> <td align=\"right\" valign=\"bottom\" ></td>";
 		echo "<td><a id=\"lien_conditions\" href=\"conditions_alerte.html\">".traduire('Conditions d\'utilisation')."</a>";
 		echo "- <a id=\"lien_contact\" href=\"index.php?action=contact\">".traduire('Nous contacter')."</a>";
-		echo "- Copyright <a href=\"http://adileos.doc-depot.com\">ADILEOS 2014</a> ";
+		echo "- Copyright <a href=\"http://adileos.doc-depot.com\">ADILEOS 2015</a> ";
 		$version= parametre("DD_version_portail") ;
 		echo "- $version ";	
 		fermeture_bdd() ;

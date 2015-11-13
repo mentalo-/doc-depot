@@ -1,7 +1,69 @@
-<?php 
+<?php session_start(); ?> 
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0trict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">
+
+    <head>
+	 <?php
+include 'calendrier.php';
+include 'general.php';
+include 'inc_style.php';	 
+
+		echo "<title> Planning </title>";
+		
+		if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > TIME_OUT)) 
+			$_SESSION['pass']=false;
+		$_SESSION['LAST_ACTIVITY'] = time();
+		
+		$refr=TIME_OUT+10;
+
+		echo "<META HTTP-EQUIV=\"refresh\" CONTENT=\"$refr\">";		
+		echo "<meta http-equiv=\\\"Content-Type\\\" content=\\\"text/html; charset=iso-8859-1\\\" />";
+		echo "</head><body>";	
+		
+
+
+		// ConnexiondD
+	include "connex_inc.php";
+	
+	$action=variable_s("action");	
+	if ($action=="") 
+		$action="cc_activite";
+	require_once 'cx.php';
+	
+	$reponse = command("SELECT * FROM fct_fissa WHERE support='$bdd' "); 
+	if ((!($donnees = fetch_command($reponse))) || (!$_SESSION['pass']) )
+		{
+		echo "<a href=\"https://doc-depot.com\">retour sur page d'accueil doc-depot.com</a>";
+		}
+	
+		// =====================================================================loc IMAGE
+		echo "<table border=\"0\" >";	
+		echo "<tr> <td> <a href=\"planning.php\"> <img src=\"images/calendrier.jpg\" width=\"140\" height=\"100\"  ></a></td> ";		
+
+		
+		// =====================================================================loc Histo
+		echo "<td>Planning </td>";
+		
+		// =====================================================================loc RAPPORT
+		echo "<td width=\"150\"><center>";
+		echo "<ul id=\"menu-bar\">";
+		echo "<li><a href=\"index.php?action=dx\">Deconnexion</a>";
+		echo "</ul> ";
+		
+		echo "</td>";
+		echo "<td><a href=\"index.php\"><img src=\"images/logo.png\" width=\"70\" height=\"50\"><a></td>";			
+		echo "<td><a href=\"fissa.php\"><img src=\"images/fissa.jpg\" width=\"70\" height=\"50\"><a></td>";			
+		echo "<td><a href=\"suivi.php\"><img src=\"images/suivi.jpg\" width=\"70\" height=\"50\"><a></td>";			
+		echo "<td><a href=\"rdv.php\"><img src=\"images/rdv.jpg\" width=\"70\" height=\"50\"><a></td>";			
+		echo "<td><a title=\"Alerte Grand Froid/Forte Pluie\" href=\"alerte.php\"><img src=\"images/logo-alerte.jpg\" width=\"70\" height=\"50\"></a> ";
+		if ($logo!="")
+			echo "<td> <a href=\"fissa.php\"> <img src=\"images/$logo\" width=\"200\" height=\"100\"  > </a> </td>";
+		echo "</center></td>";	
+		echo "</table> ";				
+		echo"<hr>";	
 
 	$restriction_ad =  $_SESSION['ad'] || ( (($user_droit=="S") || ($user_droit=="R"))  )  ;
-
+		
 	if ( (($user_droit=="S") || ($user_droit=="R")) && ($action=="cc_usager") )
 		{
 		$action="cc_usagers";

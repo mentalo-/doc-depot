@@ -44,7 +44,7 @@ include 'bdd.php';
 			$user_lang="fr";
 			
 		$l=addslashes($ligne);
-		$r1 =command("select * from  z_traduire where fr='$l' ");
+		$r1 =command("select * from  z_traduire where original='$l' ");
 		if (!($d1=fetch_command($r1))) 
 			{
 			if ($l!="")
@@ -771,21 +771,25 @@ include 'bdd.php';
 		echo "<hr><center> ";
 
 		echo "<table> <tr> <td align=\"right\" valign=\"bottom\" ></td>";
-		
-		if ($user_lang!="fr")
-			echo "<td><a href=\"index.php?action=fr\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"français\" alt=\"français\" src=\"images/flag_fr.png\"/></a></td><td> | </td>";
-		if ($user_lang!="gb")
-			echo "<td><a href=\"index.php?action=gb\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"english\" alt=\"anglais\" src=\"images/flag_gb.png\"/></a></td><td> | </td>";
-		if ($user_lang!="de")
-				echo "<td><a href=\"index.php?action=de\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"allemand\" alt=\"allemand\" src=\"images/flag_de.png\"/></a></td><td> | </td>";
-		if ($user_lang!="es")
-				echo "<td><a href=\"index.php?action=es\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"espagnol\" alt=\"espagnol\" src=\"images/flag_es.png\"/></a></td><td> | </td>";
-		if ($user_lang!="ru")
-				echo "<td><a href=\"index.php?action=ru\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"russe\" alt=\"russe\" src=\"images/flag_ru.png\"/></a></td><td> | </td>";
-						
-		echo "<td><a id=\"lien_conditions\" href=\"conditions.html\">".traduire('Conditions d\'utilisation')."</a>";
+		if ( ($_SERVER["SCRIPT_NAME"]=="/doc-depot/index.php")	 || ($_SERVER["SCRIPT_NAME"]=="/index.php")	)
+			{
+			if ($user_lang!="fr")
+				echo "<td><a href=\"index.php?action=fr\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"français\" alt=\"français\" src=\"images/flag_fr.png\"/></a></td><td> | </td>";
+			if ($user_lang!="gb")
+				echo "<td><a href=\"index.php?action=gb\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"english\" alt=\"anglais\" src=\"images/flag_gb.png\"/></a></td><td> | </td>";
+			if ($user_lang!="de")
+					echo "<td><a href=\"index.php?action=de\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"allemand\" alt=\"allemand\" src=\"images/flag_de.png\"/></a></td><td> | </td>";
+			if ($user_lang!="es")
+					echo "<td><a href=\"index.php?action=es\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"espagnol\" alt=\"espagnol\" src=\"images/flag_es.png\"/></a></td><td> | </td>";
+			if ($user_lang!="ru")
+					echo "<td><a href=\"index.php?action=ru\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"russe\" alt=\"russe\" src=\"images/flag_ru.png\"/></a></td><td> | </td>";
+			echo "<td><a id=\"lien_conditions\" href=\"conditions.html\">".traduire('Conditions d\'utilisation')."</a>";
+			}
+		else
+			echo "<td><a id=\"lien_conditions\" href=\"conditions_frs.html\">".traduire('Conditions d\'utilisation')."</a>";
+
 		echo "- <a id=\"lien_contact\" href=\"index.php?action=contact\">".traduire('Nous contacter')."</a>";
-		echo "- Copyright <a href=\"http://adileos.doc-depot.com\">ADILEOS</a> ";
+		echo "- Copyright <a href=\"http://adileos.doc-depot.com\"  target=_blank >ADILEOS</a> ";
 		$version= parametre("DD_version_portail") ;
 		if ($_SERVER['REMOTE_ADDR']=="127.0.0.1")
 			echo "- <a href=\"version.htm\"target=_blank > $version </a>";	

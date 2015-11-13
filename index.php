@@ -176,7 +176,8 @@ require_once "connex_inc.php";
 	function affiche_liste_bug( $cmd)
 		{
 			echo "</table><div class=\"CSSTableGenerator\" > ";
-		
+			echo "Urgent <1j; Prio + <1mois; Prio <3 mois; Normal+ <6mois; Normal <1 an; Nice to have > 1 an";
+	
 			echo "<table><tr>	<td> N°  </td>
 								<td>".traduire('Création')."  </td>
 								<td>".traduire('Titre')."</td>
@@ -1669,7 +1670,7 @@ function maj_mdp_fichier($idx, $pw )
 		echo "<input type=\"hidden\" name=\"droit\"  value=\"\"> " ;
 		echo "<tr><td> ".traduire('Nom')." :  </td> <td><input type=\"texte\" name=\"nom\"   size=\"20\" value=\"".variable("nom")."\"> </td>" ;
 		echo "<tr><td> ".traduire('Prénom').":</td> <td><input type=\"texte\" name=\"prenom\"   size=\"20\" value=\"".variable("prenom")."\"> </td>" ;
-		echo "<tr><td> ".traduire('Date de naissance').": </td><td><input type=\"texte\" name=\"anniv\"   size=\"10\" value=\"".variable("anniv")."\"> </td><td> jj/mm/aaaa</td>" ;
+		echo "<tr><td> ".traduire('Date de naissance').": </td><td><input type=\"texte\" name=\"anniv\"   size=\"10\" value=\"".variable("anniv")."\"> </td><td>".traduire('jj/mm/aaaa')."</td>" ;
 		echo "<tr><td> ".traduire('Ville natale').": </td><td>  <input type=\"texte\" name=\"ville_nat\"   size=\"20\" value=\"".variable("ville_nat")."\"> </td>" ;
 		echo "<tr><td> ".traduire('Nationalité').":  </td><td><input type=\"texte\" name=\"nationalite\"   size=\"20\" value=\"".variable("nationalite")."\"> </td>" ;
 		echo "<input type=\"hidden\" name=\"recept_mail\"  value=\"\"> " ;
@@ -1678,8 +1679,8 @@ function maj_mdp_fichier($idx, $pw )
 		echo "<input type=\"hidden\" name=\"organisme\"  value=\"\"> " ;
 		echo "<input type=\"hidden\" name=\"adresse\"  value=\"\"> " ;
 		echo "<input type=\"hidden\" name=\"type_user\"  value=\"$user_type_user\"> " ;
-		echo "<tr><td> ".traduire('Prénom du pére').":</td> <td><input type=\"texte\" name=\"prenom_p\"   size=\"20\" value=\"".variable("prenom_p")."\"> </td>" ;
-		echo "<tr><td> ".traduire('Prénom de la mére').":</td> <td><input type=\"texte\" name=\"prenom_m\"   size=\"20\" value=\"".variable("prenom_m")."\"> </td>" ;
+		echo "<tr><td> ".traduire('Prénom du pére')." (*):</td> <td><input type=\"texte\" name=\"prenom_p\"   size=\"20\" value=\"".variable("prenom_p")."\"> </td><td> (*) ".traduire('Indiquer AUCUN si non connu')."</td> " ;
+		echo "<tr><td> ".traduire('Prénom de la mére')." (*) :</td> <td><input type=\"texte\" name=\"prenom_m\"   size=\"20\" value=\"".variable("prenom_m")."\"> </td>" ;
 
 		echo "<input type=\"hidden\" name=\"code_lecture\" value=\"\"> " ;
 		echo "<input type=\"hidden\" name=\"recept_mail\"  value=\"\"> " ;
@@ -1699,7 +1700,7 @@ function maj_mdp_fichier($idx, $pw )
 		formulaire ("verif_user");
 		echo "<tr><td> ".traduire('Nom').":  </td> <td><input type=\"texte\" name=\"nom\"   size=\"20\" value=\"".variable("nom")."\"> </td>" ;
 		echo "<tr><td> ".traduire('Prénom').":</td> <td><input type=\"texte\" name=\"prenom\"   size=\"20\" value=\"".variable("prenom")."\"> </td>" ;
-		echo "<tr> <td> ".traduire('Date de naissance').": </td><td><input type=\"texte\" name=\"anniv\"   size=\"10\" value=\"".variable("anniv")."\"> </td><td> jj/mm/aaaa</td>" ;
+		echo "<tr> <td> ".traduire('Date de naissance').": </td><td><input type=\"texte\" name=\"anniv\"   size=\"10\" value=\"".variable("anniv")."\"> </td><td> ".traduire('jj/mm/aaaa')."</td>" ;
 		echo "<tr><td> </td><td><input type=\"submit\"  id=\"verif_user\"  value=\"".traduire('Vérifier')."\" > </td> ";
 		echo "</table><p>";
 		fin_cadre();
@@ -2968,7 +2969,7 @@ require_once 'include_crypt.php';
 			formulaire ("traite_dde_identifiant");
 			echo "<tr><td> ".traduire('Nom').":</td><td><input ctype=\"text\" size=\"20\" name=\"nom\" value=\"".variable("nom")."\"/></td>";
 			echo "<tr><td> ".traduire('Prénom').": </td><td><input  type=\"text\" size=\"20\" name=\"prenom\" value=\"".variable("prenom")."\"/></td>";
-			echo "<tr><td> ".traduire('Date de naissance')." :  </td><td><input  type=\"text\" size=\"20\" name=\"anniv\" value=\"".variable("anniv")."\"/></td><td>jj/mm/aaaa</td>";
+			echo "<tr><td> ".traduire('Date de naissance')." :  </td><td><input  type=\"text\" size=\"20\" name=\"anniv\" value=\"".variable("anniv")."\"/></td><td>".traduire('jj/mm/aaaa')."</td>";
 			echo "<tr><td> ".traduire('Ville natale').":   </td><td><input  type=\"text\" size=\"20\" name=\"ville_natale\" value=\"".variable("ville_natale")."\"/></td>";
 			echo "<tr><td> ".traduire('Prénom de votre mére').": </td><td><input  type=\"text\" size=\"20\" name=\"prenom_m\" value=\"".variable("prenom_m")."\"/></td>";
 			echo "<tr><td> ".traduire('Prénom de votre pére').": </td><td><input  type=\"text\" size=\"20\" name=\"prenom_p\" value=\"".variable("prenom_p")."\"/></td>";
@@ -3114,7 +3115,7 @@ require_once 'include_crypt.php';
 			formulaire ("valider_dde_mdp_avec_code");
 			echo "<tr><td> ".traduire('Nom').":</td><td><input ctype=\"text\" size=\"20\" name=\"nom\" value=\"".variable("nom")."\"/></td>";
 			echo "<tr><td> ".traduire('Prénom').":  </td><td><input  type=\"text\" size=\"20\" name=\"prenom\" value=\"".variable("prenom")."\"/></td>";
-			echo "<tr><td> ".traduire('Date de naissance')." : </td><td><input  type=\"text\" size=\"20\" name=\"anniv\" value=\"".variable("anniv")."\"/></td><td>jj/mm/aaaa</td>";
+			echo "<tr><td> ".traduire('Date de naissance')." : </td><td><input  type=\"text\" size=\"20\" name=\"anniv\" value=\"".variable("anniv")."\"/></td><td>".traduire('jj/mm/aaaa')."</td>";
 			echo "<tr><td> ".traduire('Ville natale').":  </td><td><input  type=\"text\" size=\"20\" name=\"ville_natale\" value=\"".variable("ville_natale")."\"/></td>";
 			echo "<tr><td> ".traduire('Prénom de votre mére').": </td><td><input  type=\"text\" size=\"20\" name=\"prenom_m\" value=\"".variable("prenom_m")."\"/></td>";
 			echo "<tr><td> ".traduire('Prénom de votre pére').": </td><td><input  type=\"text\" size=\"20\" name=\"prenom_p\" value=\"".variable("prenom_p")."\"/></td>";
@@ -3556,9 +3557,9 @@ if (isset($_POST['pass']))
 				supp_attachement ($num);
 				$num = substr($num,strpos($num,".")+1 );
 				if ($type=="A")
-					ajout_log( $user_idx, traduire("Suppression du fichier")." '$num' (".traduire('Espace partagé').")" );	
+					ajout_log( $user_idx, traduire("Suppression du fichier")." '$num' (".traduire('Espace partagé').")" ,$_SESSION['user']);	
 				else
-					ajout_log( $user_idx, traduire("Suppression du fichier")." '$num' (".traduire('Espace personnel').")" );	
+					ajout_log( $user_idx, traduire("Suppression du fichier")." '$num' (".traduire('Espace personnel').")" ,$_SESSION['user']);	
 				$action=variable("retour");
 				}
 		}
@@ -3975,6 +3976,9 @@ if (isset($_POST['pass']))
 	if (($action=="sms_test") &&  ($user_droit!=""))
 		{
 		$tel= variable("tel");
+		if ($tel=="")
+			$tel= variable_s("tel");
+
 		$msg= stripcslashes(variable("msg"));
 		
 			echo "<center><p>".traduire('Envoi d\'un SMS')." : ";
@@ -4033,6 +4037,9 @@ if (isset($_POST['pass']))
 	if (($action=="mail_test") )
 		{
 		$mail= variable("mail");
+		if ($mail=="")
+			$mail= variable_s("mail");
+
 		$msg= variable("msg");
 		$titre= variable("titre");
 		
@@ -4046,7 +4053,7 @@ if (isset($_POST['pass']))
 			else
 				echo "<td> $mail</td>".param("mail",$mail);
 				
-			//echo param("origine",$user_nom." ".$user_prenom);
+			echo param("origine",$user_nom." ".$user_prenom);
 			param("mail_org",$user_mail);
 			echo "<TR> <td>".traduire('Titre').": </td><td><input type=\"text\" name=\"titre\" size=\"70\" value=\"$titre\"/></td>";
 			echo "<TR> <td>".traduire('Texte').": </td><td><TEXTAREA rows=\"5\" cols=\"70\" name=\"msg\" >$msg</TEXTAREA></td>";
@@ -4974,6 +4981,8 @@ if (isset($_POST['pass']))
 				$idx=inc_index("rdv");
 				if ($date_jour<=$date)
 					{
+					$ligne .= "; De ".libelle_user($user_idx)." (".libelle_organisme($user_organisme).")";;
+				
 					command("INSERT INTO DD_rdv VALUES ('$idx', '$user1','$user_idx','$date $heure', '$ligne', '$avant', 'A envoyer' ) ");
 					ajout_log( $idx, traduire("Ajout RDV le")." $date $heure : $ligne ", $user1 );				
 					}

@@ -22,7 +22,7 @@ box-shadow: 15px 10px 10px 0 #A6A6A6;
 ?>
 
 <center>
-<a href="http://adileos.jimdo.com/"><img src="images/adileos.jpg" width="700" height="90" > </a> 
+<a href="http://adileos.jimdo.com/"  target=_blank ><img src="images/adileos.jpg" width="700" height="90" > </a> 
 <br>
 Association de Développement et d’Intégration de Logiciels Economiques Orientés Social
 <center>

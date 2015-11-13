@@ -25,7 +25,7 @@ include 'inc_style.php';
 			{
 			global $user_organisme;
 			
-			$user_idx=$_SESSION['user_idx'];
+			$user_idx=$_SESSION['user'];
 			$ligne=variable ('ligne');
 			$date=mef_date_BdD(variable ('date'));
 			$heure=mef_heure_BdD(variable ('heure')	);
@@ -81,21 +81,21 @@ include 'inc_style.php';
 		echo " <td> <input type=\"text\" name=\"filtre\" size=\"20\" value=\"$filtre1\" onChange=\"this.form.submit();\"> ";
 		echo "</form> </td> <td><img src=\"images/loupe.png\"width=\"20\" height=\"20\">  </td> ";
 		if ($filtre1!="")
-						{
-						echo "<td><form method=\"POST\" action=\"rdv.php\"  >";
-						echo "<input type=\"image\" src=\"images/croixrouge.png\" width=\"20\" height=\"20\" title=\"".traduire("Supprimer filtre")."\" >";
-						echo "<input type=\"hidden\" name=\"action\" value=\"supp_filtre\">";
-						echo  "</form></td>";
-						}
+			{
+			echo "<td><form method=\"POST\" action=\"rdv.php\"  >";
+			echo "<input type=\"image\" src=\"images/croixrouge.png\" width=\"20\" height=\"20\" title=\"".traduire("Supprimer filtre")."\" >";
+			echo "<input type=\"hidden\" name=\"action\" value=\"supp_filtre\">";
+			echo  "</form></td>";
+			}
 		echo "</table>";
 
-		titre_rdv();
+
 		if ($nom=="")
 			{
 			if ($filtre1=="")
 				$reponse = command("SELECT *, DD_rdv.idx as idx_msg FROM r_user,DD_rdv WHERE r_user.organisme='$organisme' and r_user.idx=DD_rdv.auteur order by DD_rdv.date asc  "); 
 			else
-				$reponse = command("SELECT *, DD_rdv.idx as idx_msg FROM r_user,DD_rdv WHERE r_user.organisme='$organisme' and r_user.idx=DD_rdv.auteur and ( nom  REGEXP '$filtre1' or ligne REGEXP '$filtre1' ) order by DD_rdv.date asc  "); 
+				$reponse = command("SELECT *, DD_rdv.idx as idx_msg FROM r_user,DD_rdv WHERE r_user.organisme='$organisme' and r_user.idx=DD_rdv.auteur and ( DD_rdv.user  REGEXP '$filtre1' or ligne REGEXP '$filtre1' ) order by DD_rdv.date asc  "); 
 			}
 		else
 			{
@@ -104,7 +104,8 @@ include 'inc_style.php';
 			else
 				$reponse = command("SELECT *, DD_rdv.idx as idx_msg FROM r_user,DD_rdv WHERE r_user.organisme='$organisme' and r_user.idx=DD_rdv.auteur and DD_rdv='$nom' and ( nom  REGEXP '$filtre1' or ligne REGEXP '$filtre1' ) order by DD_rdv.date asc  "); 
 			}		
-			
+		titre_rdv();
+		echo "<td> ".traduire('Etat')." </td><td> </td>";		
 		while ($donnees = fetch_command($reponse) ) 
 				{
 				$date=$donnees["date"];	
@@ -124,17 +125,33 @@ include 'inc_style.php';
 					$auteur=libelle_user($donnees["auteur"]);
 					
 					// Ajouter ici filtrage sur autre champs
-					
-					echo "<tr><td> $date </td><td> $heure </td><td> <a href=\"suivi.php?nom=$user\" > $user</a></td><td> $ligne </td><td> $avant </td><td> $auteur </td>";
-					if (  ($etat=="A envoyer") || ($avant=="Aucun")) 
+					if ( ($filtre1=="")
+						||
+						((stripos($user,$filtre1)!==false)  || (stripos($ligne,$filtre1)!==false)  || (stripos($date,$filtre1)!==false)  || (stripos($heure,$filtre1)!==false) || (stripos($auteur,$filtre1)!==false)  )
+						)
 						{
-						echo "<td><form method=\"POST\" action=\"rdv.php\"  >";
-						echo "<input type=\"image\" src=\"images/croixrouge.png\" width=\"20\" height=\"20\" title=\"".traduire("Supprimer")."\" >";
-						echo "<input type=\"hidden\" name=\"action\" value=\"supp_rdv\">";
-						echo  param("idx","$idx" )."</form></td>";
+						$r1 = command("SELECT * FROM $bdd WHERE nom='$user' and pres_repas='Téléphone' "); 
+						if (!($d1 = fetch_command($r1)))
+							$avant="";
+						else
+							if ( !VerifierPortable($d1["commentaire"] )  )
+							$avant="";
+
+								
+						echo "<tr><td> $date </td><td> $heure </td><td> <a href=\"suivi.php?nom=$user\" > $user</a></td><td> $ligne </td><td> $avant </td><td> $auteur </td>";
+						if (  ($etat=="A envoyer") || ($avant=="Aucun")) 
+							{
+							echo "<td><form method=\"POST\" action=\"rdv.php\"  >";
+							echo "<input type=\"image\" src=\"images/croixrouge.png\" width=\"20\" height=\"20\" title=\"".traduire("Supprimer")."\" >";
+							echo "<input type=\"hidden\" name=\"action\" value=\"supp_rdv\">";
+							echo  param("idx","$idx" )."</form></td>";
+							if ($avant=="")
+								echo "<td><input type=\"image\" src=\"images/illicite.png\" width=\"20\" height=\"20\" title=\"".traduire("Pas de portable enregistré")."\" ></td>";
+
+							}
+						else
+						 echo "<td>(Déjà envoyé)</td>";
 						}
-					else
-					 echo "<td>(Déjà envoyé)</td>";
 					}
 				}
 

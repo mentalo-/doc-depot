@@ -104,10 +104,10 @@ define('TAILLE_FICHIER_dropzone','8');
 			echo "</table><div class=\"CSSTableGenerator\" > ";
 			echo "<table><tr><td >  </td><td > ".traduire('Nom')."  </td><td > ".traduire('Valeur')."  </td>";
 			$i=0;
-			$reponse =command("select * from  z_traduire $filtre order by commentaire ASC, fr ASC");		
+			$reponse =command("select * from  z_traduire $filtre order by commentaire ASC, original ASC");		
 			while ($donnees = fetch_command($reponse) ) 
 				{
-				$nom=$donnees["fr"];	
+				$nom=$donnees["original"];	
 				$valeur=stripcslashes($donnees["$user_lang"]);
 				$idx=$donnees["idx"];	
 				$commentaire=$donnees["commentaire"];	
@@ -147,7 +147,7 @@ define('TAILLE_FICHIER_dropzone','8');
 			global $user_lang;
 
 			//$valeur= addslashes($valeur); // T358
-			if ($user_lang!="fr")
+			//if ($user_lang!="fr")
 				$reponse =command("update z_traduire SET $user_lang = '$valeur' where idx='$idx' ");
 
 			}		
