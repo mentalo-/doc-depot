@@ -30,20 +30,25 @@ require_once "connex_inc.php";
 		$date= date("Y-m-d");
 		$r1 = command("SELECT * FROM cc_alerte WHERE  tel='' and creation='$date' order by dept asc ");
 		echo "</table></div>";
-		echo "<div class=\"CSSTableGenerator\" > ";		
 		debut_cadre("800");
-
-		echo "<tr><td width=\"10%\"> Département </td><td> Message </td>";
+		$ordre=0;
+		$c="#d4ffaa"; 
+		echo "<tr><td bgcolor=\"$c\" width=\"10%\"> Département </td><td bgcolor=\"$c\"> Message </td>";
 		while ($d1 = fetch_command($r1))
 			{
+			if ($ordre%2)
+				$c="#d4ffaa"; 
+			else
+				$c="";
+				
 			$dept=$d1["dept"];
 			$sueil=$d1["sueil"];
 			if ($sueil=="") 
 				$sueil="Pas d'alerte";
-			echo "<tr><td>$dept</td><td>$sueil </td>";
-
+			echo "<tr><td bgcolor=\"$c\" >$dept</td><td bgcolor=\"$c\" >$sueil </td>";
+			$ordre++;
 			}
-		echo "</table></div>";
+		echo "</table>";
 		
 
 		echo "<hr><center> ";

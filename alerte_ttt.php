@@ -124,7 +124,7 @@ $mode_test = ($_SERVER['REMOTE_ADDR']=="127.0.0.1") ;
 				$pluie[$p++]=$d3[4];
 
 				if ($d3[4]!=0)
-					echo "<br>".$jour_pluie[$p-1]." ".$heure_pluie[$p-1]. " . . . . . . . . . . . : ".$pluie[$p-1]. " mm "; 
+					echo "<br>[$p] - ".$jour_pluie[$p-1]." ".$heure_pluie[$p-1]. " . . . . . . . . . . . : ".$pluie[$p-1]. " mm "; 
 				
 				// mesure grand froid
 				if ($d3[0][8]=='0')
@@ -198,6 +198,7 @@ $mode_test = ($_SERVER['REMOTE_ADDR']=="127.0.0.1") ;
 		for ($n=0;$n<$nbj*8;$n++) // T396  on commence l'analyse à 9h du jour en cours
 			if (isset($pluie[$n+2]))
 				{
+//				$msg.=" ($n) ";
 				$m2=0;
 				if ($n>0)
 				$m2=$pluie[$n]+$pluie[$n-1]+$pluie[$n+1];
@@ -338,7 +339,7 @@ $mode_test = ($_SERVER['REMOTE_ADDR']=="127.0.0.1") ;
 			$msg=str_replace ("15h", "après-midi", $msg);
 			$msg=str_replace ("21h", "soir", $msg);
 			$msg=str_replace ("00h", "minuit", $msg);
-			$msg=str_replace ("09H", "matin", $msg);
+			$msg=str_replace ("09h", "matin", $msg);
 			$msg=str_replace ("03h", "dans la nuit", $msg);
 			$msg=str_replace ("06h", "à l'aube", $msg);		
 			
@@ -348,7 +349,13 @@ $mode_test = ($_SERVER['REMOTE_ADDR']=="127.0.0.1") ;
 			$msg=str_replace ("jusqu'à après", "jusque l'après", $msg);		
 			$msg=str_replace ("jusqu'à matin", "jusqu'au matin", $msg);		
 			$msg=str_replace ("jusqu'à dans", "jusque dans", $msg);		
-					
+			$msg=str_replace ("jusqu'au après", "jusqu'après", $msg);		
+
+
+			$msg=str_replace ("dans la nuit jusqu'au soir", "toute la journée", $msg);		
+			$msg=str_replace ("matin jusqu'au soir", "toute la journée", $msg);		
+			$msg=str_replace ("à l'aube jusqu'au soir", "toute la journée", $msg);		
+			
 			return($msg);
 			}
 			

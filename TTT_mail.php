@@ -191,7 +191,7 @@ function random_chaine($car)
 						ecrit_parametre("TECH_alarme_supervision_sms",time()) ;
 						
 						$nbmess=nb_message_file_envoi_sms (); // on récupére le nombre de message dasn la file SMS
-						if (($nbmess!="") && ($nbmess!=0) ) // Si file d'envoi est vide alors envoi SMS aux exploitants
+						if (($nbmess=="") || ($nbmess==0) ) // Si file d'envoi est vide alors envoi SMS aux exploitants
 							envoi_sms( parametre('DD_tel_alarme1') , parametre('TECH_identite_environnement')." : Alarme supervision SMS");
 
 						}
