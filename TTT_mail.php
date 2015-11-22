@@ -117,7 +117,7 @@ function random_chaine($car)
 				purge_backup_tables();
 
 				supp_fichier('tmp/hier.txt');
-				rename('/tmp/log.txt','/tmp/hier.txt');
+				rename('tmp/log.txt','tmp/hier.txt');
 
 				ajout_log_tech( "Mails envoyés:".parametre("TECH_nb_mail_envoyes")." / ".parametre("DD_nbre_mail_jour_max"));
 				ajout_log_tech( "SMS envoyés:".parametre("TECH_nb_sms_envoyes"));

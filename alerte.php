@@ -154,6 +154,8 @@ require_once "connex_inc.php";
 					else
 						command("INSERT INTO `cc_alerte`  VALUES ( '$date', '$telephone', '$dept', '$sueil','','','','','$ip','$t0')");
 					msg_ok(traduire("Mise à jour réalisée."));
+					ajout_log( "", "Inscription Alerte météo $telephone ($dept) via web ");
+
 					}
 				}
 			}
