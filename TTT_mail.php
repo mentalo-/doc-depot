@@ -154,7 +154,7 @@ function random_chaine($car)
 				
 		commentaire_html( "Purge temporaire");
 		purge_fichiers_temporaires("dir_zip/");		
-		purge_fichiers_temporaires("tmp/");		
+//		purge_fichiers_temporaires("tmp/");		
 		purge_fichiers_temporaires("upload_tmp/");		
 		
 		$td_envoi=parametre('TECH_dernier_envoi_supervision');

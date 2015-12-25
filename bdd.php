@@ -14,10 +14,26 @@
 		else
 			{
 			ajout_log_jour($ligne);
+			if (
+				(!stristr($ligne,"z_traduire"))
+				&&
+				(!stristr($ligne," DD_param "))	
+				&&
+				( !isset($_SESSION['pass']) || ($_SESSION['pass']==false) || !(isset($_SESSION['user'])) || ($_SESSION['user']=="") )
+					)
+					{
+					$date_log=date('Y-m-d');	
+					$heure_jour=date("H\hi.s");	
+				
+					$f_log = fopen('tmp/sql.txt', 'a+');		
+					fputs($f_log, $date_log." ".$heure_jour." : ".addslashes($ligne)."\r\n"); 
+					fclose($f_log);					
+					}
 			return( mysql_query($ligne) );	
 			}
 		}
 	
+
 	function fetch_command ($reponse)
 		{
 		return(  mysql_fetch_array($reponse) );

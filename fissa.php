@@ -328,7 +328,7 @@ include 'inc_style.php';
 		$reponse = command("SELECT count(*) as TOTAL FROM $bdd where date>'$l' and nom<>'Synth' and nom<>'Mail' $exclus group by nom order by nom  "); 
 		$donnees = fetch_command($reponse) ;
 		$n=$donnees["TOTAL"];		
-		if ( $n<25 )
+		if ( $n<20 )
 			{
 			if ($profil=="")
 				$l= date('Y-m-d',  mktime(0,0,0 , date("m")-2, date("d"), date ("Y")));
@@ -336,7 +336,7 @@ include 'inc_style.php';
 				$l= date('Y-m-d',  mktime(0,0,0 , date("m")-8, date("d"), date ("Y")));
 			}
 
-		if ( $n>55 )
+		if ( $n>40 )
 			{
 			if ($profil=="")
 				$l= date('Y-m-d',  mktime(0,0,0 , date("m"), date("d")-15, date ("Y")));
@@ -934,6 +934,14 @@ else
 				echo "<li><a href=\"fissa.php?date_jour=$date_jour&action=rapport\" target=_blank>Rapport du $date_jour </a></li>";
 				echo "<li><a href=\"stat.php\" target=_blank>Statistiques</a>";
 				echo "<li><a href=\"index.php?action=dx\">Deconnexion</a>";
+				if ( ($_SESSION['droit']=='R') || ($_SESSION['droit']=='S') )
+					{
+					echo "<ul ><li><a href=\"fissa.php?action=redacteur&date_jour=$date_jour\"  target=_blank >Visualisation des rédacteurs</a>";
+					if ($_SESSION['droit']=='R') 
+						echo "<li><a href=\"export_fissa.php\" target=_blank>Export des données</a>";
+					echo "</ul> ";
+
+					}
 				echo "</ul> ";
 				
 				echo " <table> <tr> <td><b>$libelle</b> : </td>";
@@ -1221,9 +1229,8 @@ else
 				echo "</SELECT>";
 				echo "</form>  </td>";
 				echo "</table>  ";
-				
-				if ( ($_SESSION['droit']=='R') || ($_SESSION['droit']=='S') )
-					echo "<br><a href=\"fissa.php?action=redacteur&date_jour=$date_jour\"  target=_blank >Visualisation des rédacteurs</a>";
+
+
 				
 				break;
 		}

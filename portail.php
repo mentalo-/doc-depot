@@ -106,7 +106,7 @@ Association de Développement et d’Intégration de Logiciels Economiques Orientés 
 	</a>
 				</td > <td > 
 
-		<b><font size="3">Suivi </b>: Enrichissez le suivi des bénéficiaires   </font> <br>
+		<b><font size="3">Suivi personnalisé </b>: Enrichissez le suivi des bénéficiaires   </font> <br>
 </td>
 		</TABLE>
 		

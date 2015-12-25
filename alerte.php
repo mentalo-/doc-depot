@@ -152,7 +152,7 @@ require_once "connex_inc.php";
 					if ($d1)
 						command("UPDATE `cc_alerte` SET dept='$dept' ,sueil='',stop='' ,modif='$t0', ip='$ip' where tel='$telephone'  ");
 					else
-						command("INSERT INTO `cc_alerte`  VALUES ( '$date', '$telephone', '$dept', '$sueil','','','','','$ip','$t0')");
+						command("INSERT INTO `cc_alerte`  VALUES ( '$date', '$telephone', '$dept', '','','','','','$ip','$t0')");
 					msg_ok(traduire("Mise à jour réalisée."));
 					ajout_log( "", "Inscription Alerte météo $telephone ($dept) via web ");
 

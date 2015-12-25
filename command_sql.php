@@ -23,18 +23,33 @@ if ($_SESSION['pass']==true)
 				$tables[] = $row[0];
 
 		//cycle through
+	
 		echo "<table><tr>";
 		foreach($tables as $table)
-			{
-			$cmd=encrypt_ltd("select * from $table");
-			echo "<td>";
-			echo "<a href=\"?action=cmd_sql&query=$cmd\">";
-			echo "$table </a></td><td>|</td>";
-			
-			if ( ( strpos($q,$table) ) && ( strpos($q,"select ")===false ) )
-				backup_tables(false,$table);
+			if(stripos($table, "z") === FALSE)
+				{
+				$cmd=encrypt_ltd("select * from $table");
+				echo "<td>";
+				echo "<a href=\"?action=cmd_sql&query=$cmd\">";
+				echo "$table </a></td><td>|</td>";
 				
-			}
+				if ( ( strpos($q,$table) ) && ( strpos($q,"select ")===false ) )
+					backup_tables(false,$table);
+					
+				}
+		echo "<tr>";
+		foreach($tables as $table)
+			if(stripos($table, "z") !== FALSE)
+				{
+				$cmd=encrypt_ltd("select * from $table");
+				echo "<td>";
+				echo "<a href=\"?action=cmd_sql&query=$cmd\">";
+				echo "$table </a></td><td>|</td>";
+				
+				if ( ( strpos($q,$table) ) && ( strpos($q,"select ")===false ) )
+					backup_tables(false,$table);
+					
+				}			
 		echo "</table>";
 
 	

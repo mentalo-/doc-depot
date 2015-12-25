@@ -2563,6 +2563,7 @@ function affiche_membre($idx)
 				case "active_sms2mail":
 				case "liste_compte":
 				case "chgt_user":
+				case "mini_pdf":
 				
 				case "afflog":
 				case "afflog_t":
@@ -4102,6 +4103,7 @@ if (isset($_POST['pass']))
 
 			echo "<li><a href=\"index.php?action=en_trop\"> Fichiers en trop </a></li>";
 			echo "<li><a href=\"index.php?action=authenticite \"> Aunthenticité </a></li>";
+			echo "<li><a href=\"index.php?action=mini_pdf\"> Miniature PDF </a></li>";
 			echo "<li><a href=\"index.php?action=integrite \"> Intégrité BdD </a></li>";
 			echo "</ul><li> <a href=\"index.php?action=param_sys\">Paramètrage</a><ul>";			
 
@@ -4152,6 +4154,13 @@ if (isset($_POST['pass']))
 		{
 		echo "Controle Aunthenticité des fichiers";
 		ctrl_signature(true);
+		pied_de_page("x");
+		}		
+		
+	if (($action=="mini_pdf") &&  ($user_droit=="E"))
+		{
+		echo "Controle existante miniature PDF";
+		ctrl_mini_pdf();
 		pied_de_page("x");
 		}	
 
@@ -4324,21 +4333,22 @@ if (isset($_POST['pass']))
 			if ($beneficiaire=="") 
 				$beneficiaire="Bénéficiaire";
 				
-			if ( ($organisme!="") && ($support!="") && ($libelle!="") )
+			if ( ($organisme!="") && ($support!="") )
 				{
 				$reponse =command("select * from fct_fissa where support='$support'");		
 				if ($donnees = fetch_command($reponse) ) 
 					erreur("Support déjà existant");
-				else
-					{
-					command("INSERT INTO fct_fissa VALUES ('$organisme', '$support','$libelle','$acteur', '$beneficiaire', '', '' ) ");
-					$reponse =command("select * from fct_fissa ");		
-					if ($donnees = fetch_command($reponse) ) 
+					else
 						{
-						$support_org=$donnees["support"];				
-						command("CREATE TABLE $support AS SELECT * FROM $support_org WHERE 1 = 0");
+						command("INSERT INTO fct_fissa VALUES ('$organisme', '$support','$libelle','$acteur', '$beneficiaire', '', '' ) ");
+						$reponse =command("select * from fct_fissa ");		
+						if ($donnees = fetch_command($reponse) ) 
+							{
+							$support_org=$donnees["support"];				
+							command("CREATE TABLE $support like $support_org ");
+							}
 						}
-					}
+					
 				}
 			$action="membres_organisme";
 			}				
