@@ -110,11 +110,12 @@ $mode_test = ($_SERVER['REMOTE_ADDR']=="127.0.0.1") ;
 			for ($n=0;$n<$nbj*8;$n++)
 				{
 				$d3= explode("/",$lignes[$n]); 
+				$an3=2000+$d3[0][2]*10+$d3[0][3];
 				$mois3=$d3[0][4]*10+$d3[0][5];
 				$jour3=$d3[0][6]*10+$d3[0][7];
 				
 				$heure_pluie[$p]=$d3[0][8].$d3[0][9]."h";
-				$jour_pluie[$p]=date("d/m", mktime(0 ,0, 0 , $mois3, $jour3, date ("Y")));
+				$jour_pluie[$p]=date("d/m", mktime(0 ,0, 0 , $mois3, $jour3, $an3));
 
 				if ($heure_pluie[$p]=="00h")
 					{
@@ -140,11 +141,11 @@ $mode_test = ($_SERVER['REMOTE_ADDR']=="127.0.0.1") ;
 						}
 					else
 						{
-						$jour_3j[$j] = date("d/m", mktime(0,0, 0 , $mois3, $jour3-1, date ("Y")));
+						$jour_3j[$j] = date("d/m", mktime(0,0, 0 , $mois3, $jour3-1,  $an3));
 					
 						if ( ($nb_moy_min!=0) 
 							&& (
-							mktime(0,0, 0 ,$mois3 , $jour3, date ("Y"))>mktime(0,0, 0 , date("m"), date("d"), date ("Y"))) )
+							mktime(0,0, 0 ,$mois3 , $jour3,  $an3)>mktime(0,0, 0 , date("m"), date("d"), date ("Y"))) )
 							{
 							$temp_3j[$j++]= $moyenne_min/$nb_moy_min;
 							echo sprintf("<br> %s : min %1.1f°c ",$jour_3j[$j-1],$temp_3j[$j-1]);
@@ -162,9 +163,9 @@ $mode_test = ($_SERVER['REMOTE_ADDR']=="127.0.0.1") ;
 					}
 				if ($d3[0][8]=='2')
 					{
-					$jour_3j[$j_max] = date("d/m", mktime(0,0, 0 , $mois3, $jour3, date ("Y")));
+					$jour_3j[$j_max] = date("d/m", mktime(0,0, 0 , $mois3, $jour3,  $an3));
 				
-					if ( ($nb_moy_max!=0) && ( mktime(0,0, 0 ,$mois3 , $jour3, date ("Y"))>mktime(0,0, 0 , date("m"), date("d"), date ("Y"))) )
+					if ( ($nb_moy_max!=0) && ( mktime(0,0, 0 ,$mois3 , $jour3,  $an3)>mktime(0,0, 0 , date("m"), date("d"), date ("Y"))) )
 						{
 						$temp_3j_max[$j_max++]= $moyenne_max/$nb_moy_max;
 						echo sprintf("<br> %s : - - - - - - - Max %1.1f°C ", $jour_3j[$j_max-1] ,$temp_3j_max[$j_max-1]);
