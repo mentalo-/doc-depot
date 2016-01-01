@@ -199,7 +199,6 @@ $mode_test = ($_SERVER['REMOTE_ADDR']=="127.0.0.1") ;
 		for ($n=0;$n<$nbj*8;$n++) // T396  on commence l'analyse à 9h du jour en cours
 			if (isset($pluie[$n+2]))
 				{
-//				$msg.=" ($n) ";
 				$m2=0;
 				if ($n>0)
 				$m2=$pluie[$n]+$pluie[$n-1]+$pluie[$n+1];
@@ -223,19 +222,9 @@ $mode_test = ($_SERVER['REMOTE_ADDR']=="127.0.0.1") ;
 					{
 					if (($m>$sueil) || ( ($m1>$sueil) && ($pluie[$n]>$sueil/2) ) ||  ( ($m2>$sueil)  && ($pluie[$n]>$sueil/2) ) )
 						{
-//						if ($jour_pluie[$n]!=$jour_pluie[3]) // si  le jour de pluie n'est pasaujourd'hui
-							{
-							$msg.=" du ".$jour_pluie[$n]." ".$heure_pluie[$n];
+							$msg.=" à partir du ".$jour_pluie[$n]." ".$heure_pluie[$n];
 							$jour_debut=$jour_pluie[$n];
-							}
-//						else
-//							{
-//							if ($heure_pluie[$n]<=date("h")."h")  //  on ne traite de debut avant l'heure courante
-//								{
-//								$msg.=" de ".$heure_pluie[$n];
-//								$jour_debut=$jour_pluie[$n];
-//								}	
-//							}								
+						
 						$alarme=true;
 						}
 					}
@@ -243,8 +232,6 @@ $mode_test = ($_SERVER['REMOTE_ADDR']=="127.0.0.1") ;
 		
 		if ($msg!="")
 			{
-			if ($alarme)
-				$msg = " à partir ".$msg;
 			if ($max_pluie>2*$sueil)
 				$msg="Risque de fortes pluies $msg";
 			else
@@ -356,7 +343,9 @@ $mode_test = ($_SERVER['REMOTE_ADDR']=="127.0.0.1") ;
 			$msg=str_replace ("dans la nuit jusqu'au soir", "toute la journée", $msg);		
 			$msg=str_replace ("matin jusqu'au soir", "toute la journée", $msg);		
 			$msg=str_replace ("à l'aube jusqu'au soir", "toute la journée", $msg);		
-			
+	
+			$msg=str_replace ("  ", " ", $msg);		 // suppression des double espaces
+
 			return($msg);
 			}
 			
