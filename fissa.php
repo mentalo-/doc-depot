@@ -158,7 +158,7 @@ include 'inc_style.php';
 			{
 			$d=mise_en_forme_date_aaaammjj( $date_jour);
 			
-			$r1 = command("SELECT DISTINCT count(*) FROM $bdd WHERE date='0000-00-00' and nom='$nom_slash' ");
+			$r1 = command("SELECT DISTINCT count(*) FROM $bdd WHERE date='0000-00-00' and nom='$nom_slash'  ");
 			$r2=nbre_enreg($r1); 
 			if ($r2[0]==0)
 				{
@@ -168,7 +168,7 @@ include 'inc_style.php';
 				$reponse = command($cmd);
 				}
 				
-			$r1 = command("SELECT  count(*) FROM $bdd WHERE date='$d' and nom='$nom_slash' ");
+			$r1 = command("SELECT  count(*) FROM $bdd WHERE date='$d' and nom='$nom_slash' and pres_repas<>'Suivi' and pres_repas<>'pda' and pres_repas<>'reponse' and pres_repas<>'partenaire' ");
 			$r2=nbre_enreg($r1); 
 			$r=$r2[0];	
 			$com= addslashes2($com);
@@ -194,7 +194,6 @@ include 'inc_style.php';
 				{
 				if (strpos($pres2,"(A)")===false)
 					{
-
 					$cmd = "UPDATE $bdd set commentaire='$memo' , user='$user' , modif='$modif' where nom='$nom' and date='0000-00-00' and pres_repas<>'pda' and pres_repas<>'Mail'  and pres_repas<>'Telephone'  and pres_repas<>'Age' ";
 					$reponse = command($cmd);					
 
@@ -208,10 +207,10 @@ include 'inc_style.php';
 							if ($donnees = fetch_command($reponse))
 								erreur ("Suppression impossible car il existe au moins une personne affectée à l'activité");
 							 else								
-								$reponse = command("DELETE FROM $bdd  WHERE nom='$nom' AND date='$d'") ;
+								$reponse = command("DELETE FROM $bdd  WHERE nom='$nom' AND date='$d' and pres_repas<>'Suivi' and pres_repas<>'pda' and pres_repas<>'reponse' and pres_repas<>'partenaire' ") ;
 							}
 						else
-							$reponse = command("DELETE FROM $bdd  WHERE nom='$nom' AND date='$d'") ;
+							$reponse = command("DELETE FROM $bdd  WHERE nom='$nom' AND date='$d' and pres_repas<>'Suivi' and pres_repas<>'pda' and pres_repas<>'reponse' and pres_repas<>'partenaire' ") ;
 
 						}	
 					}
@@ -1117,16 +1116,21 @@ else
 				echo " </form> ";	
 				
 				// =====================================================================loc NOUVEAU
-				echo "<td bgcolor=\"#d4ffaa\"></td> <td bgcolor=\"#d4ffaa\"><form method=\"GET\" action=\"fissa.php\">";
-				echo "<input type=\"hidden\" name=\"action\" value=\"nouveau\"> " ;
-				echo "<input type=\"hidden\" name=\"date_jour\"  value=\"$date_jour\">";
-				echo "<input type=\"hidden\" name=\"memo\" value=\"\"> " ;	
-				echo "<input type=\"text\" name=\"nom\" size=\"30\" value=\"\">";	
-				echo "<input type=\"hidden\" name=\"commentaire\" value=\"\"> " ;	
-				echo "<input type=\"hidden\" name=\"presence\" value=\"Atelier\"> " ;
-				echo "<input type=\"hidden\" name=\"type\" value=\"Activité\"> " ;
-				echo "<input type=\"submit\" value=\"Créer nouvelle activité\" >  ";
-				echo "</td></form> ";	
+				if  ($_SESSION['droit']=='R') 
+					{
+					echo "<td bgcolor=\"#d4ffaa\"></td> <td bgcolor=\"#d4ffaa\"><form method=\"GET\" action=\"fissa.php\">";
+					echo "<input type=\"hidden\" name=\"action\" value=\"nouveau\"> " ;
+					echo "<input type=\"hidden\" name=\"date_jour\"  value=\"$date_jour\">";
+					echo "<input type=\"hidden\" name=\"memo\" value=\"\"> " ;	
+					echo "<input type=\"text\" name=\"nom\" size=\"30\" value=\"\">";	
+					echo "<input type=\"hidden\" name=\"commentaire\" value=\"\"> " ;	
+					echo "<input type=\"hidden\" name=\"presence\" value=\"Atelier\"> " ;
+					echo "<input type=\"hidden\" name=\"type\" value=\"Activité\"> " ;
+					echo "<input type=\"submit\" value=\"Créer nouvelle activité\" >  ";
+					echo "</td></form> ";	
+					}
+				else
+					echo "<td bgcolor=\"#d4ffaa\"></td> <td bgcolor=\"#d4ffaa\"></td>";
 
 				
 				echo "<tr> <td bgcolor=\"#3f7f00\"><font color=\"white\"> Activité </td> <td bgcolor=\"#3f7f00\"> <font color=\"white\">Evénement </td>";

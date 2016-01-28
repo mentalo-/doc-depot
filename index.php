@@ -4410,7 +4410,11 @@ if (isset($_POST['pass']))
 			$idx=variable_get('idx');
 			$mail=mail_user($idx);
 			$body= traduire('Création de compte sur \'Doc-depot.com\':');
-			$body .= "<p>".traduire("Pour accepter et finaliser la création de votre compte sur 'Doc-depot.com', merci de cliquer sur ce")." <a  id=\"lien\"  href=\"".serveur."index.php?action=finaliser_user&idx=".addslashes(encrypt($idx))."\">".traduire('lien')." </a> ".traduire('et compléter les informations manquantes.');
+			$body .= "<p>".traduire("Pour accepter et finaliser la création de votre compte sur 'Doc-depot.com', merci de cliquer sur ce")." <a  id=\"lien\"  href=\"".serveur."index.php?action=finaliser_user&idx=".addslashes(encrypt($idx))."\">".traduire('lien')." </a> ".traduire('et compléter les informations manquantes.');            
+			
+			$body .="<br><br>".traduire("Si le lien ne fonctionne pas, recopiez dans votre navigateur internet cette adresse : ")."<br>".serveur."index.php?action=finaliser_user&idx=".addslashes(encrypt($idx));
+
+			
 			$body .= "<p>".traduire('Message de la part de')." $user_prenom $user_nom";
 			$body .= "<p> <hr> <center> Copyright ADILEOS </center>";			// Envoyer mail pour demander saisie pseudo et PW
 			envoi_mail($mail,traduire("Création compte"),$body);
