@@ -5084,8 +5084,8 @@ if (isset($_POST['pass']))
 
 				
 		if ($user_droit!="")	
-			if (($action!="ajout_affectation") &&($action!="ajout_admin") && ($action!="rdv") && ($action!="ajout_photo")&& ($action!="ajout_referent") && ($action!="ajout_user") )
-				if ( (( ($user_droit=="S") ) && ($action!="detail_user") ) || ($user_droit=="A"))
+			if (($action!="ajout_affectation") &&($action!="ajout_admin") && ($action!="ajout_user") )
+				if ( ($user_droit=="R") || ($user_droit=="A"))
 					bouton_organisme();	
 				
 		pied_de_page("x");
