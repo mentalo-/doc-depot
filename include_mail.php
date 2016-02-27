@@ -144,14 +144,65 @@
 		}
 
 		
+	function envoi_SMS_operateur($subject,$body)		
+		{
+		if (VerifierPortable($subject))
+			{
+			maj_compteur_envoi_mail();
+			ecrit_parametre("TECH_nb_sms_envoyes_operateur",parametre("TECH_nb_sms_envoyes_operateur")+1) ;	
+			
+			$body= supprime_html($body);
+			ajout_log_tech( "Envoi SMS au $subject : '$body' ");
+			//envoi_mail_brut(parametre('DD_mail_pour_gateway_sms'),$subject,$body);
+			if ( ($body!=parametre('FORM_msg_rdv')) || ($subject!=parametre('FORM_tel_rdv'))) 
+				{
+				if ( (strlen(strstr($subject,"06"))==10) || (strlen(strstr($subject,"07"))==10) )
+					$subject="0033".substr($subject, 1);		
+				else
+					$subject="0".$subject;		
+				
+				$url= "https://www.ovh.com/cgi-bin/sms/http2sms.cgi?smsAccount=sms-cj277894-1&login=fredgont&password=fredgont&from=ADILEOS&to=".trim($subject)."&contentType=text/xml&message=".urlencode($body);
+				
+				$soap_do = curl_init();
+				curl_setopt($soap_do, CURLOPT_URL,            $url );
+				curl_setopt($soap_do, CURLOPT_CONNECTTIMEOUT, 10);
+				curl_setopt($soap_do, CURLOPT_TIMEOUT,        10);
+				curl_setopt($soap_do, CURLOPT_RETURNTRANSFER, true );
+				curl_setopt($soap_do, CURLOPT_SSL_VERIFYPEER, false);
+				curl_setopt($soap_do, CURLOPT_SSL_VERIFYHOST, false);
+				curl_setopt($soap_do, CURLOPT_POST,           false );  							
+				curl_setopt($soap_do, CURLOPT_HTTPHEADER,     array('Content-Type: text/xml; charset=utf-8' ));
+
+				if(!($output=curl_exec($soap_do)))
+					{                
+					$err = 'Curl error: ' . curl_error($soap_do);
+					ajout_log_tech( "Echec envoi SMS au $subject : '$body' ; Motif $err ");
+					curl_close($soap_do);
+					return(false);
+					}
+				else
+					{
+					$statusCode = curl_getinfo($soap_do,CURLINFO_HTTP_CODE);
+					curl_close($soap_do);
+					return(true);
+					}
+				}
+				
+			}
+		else
+			ajout_log_tech( "PAS d'envoi SMS au $subject car numéro incorrect : '$body' ");
+		}
+		
 	function envoi_SMS($subject,$body)		
 		{
 		if (VerifierPortable($subject))
 			{
+			maj_compteur_envoi_mail();
+			ecrit_parametre("TECH_nb_sms_envoyes",parametre("TECH_nb_sms_envoyes")+1) ;	
+			
 			$body= supprime_html($body);
 			ajout_log_tech( "Envoi SMS au $subject : '$body' ");
-			if ( ($body!=parametre('FORM_msg_rdv')) || ($subject!=parametre('FORM_tel_rdv'))) 
-				envoi_mail_brut(parametre('DD_mail_pour_gateway_sms'),trim($subject),$body);
+			envoi_mail_brut(parametre('DD_mail_pour_gateway_sms'),$subject,$body);
 			}
 		else
 			ajout_log_tech( "PAS d'envoi SMS au $subject car numéro incorrect : '$body' ");
@@ -597,16 +648,13 @@ class MailAttachmentManager
 							
 							$r1 = command("SELECT * FROM r_user WHERE mail='$from' and (droit='S' or droit='R' )"); 
 							if ($d1 = fetch_command($r1))  // on a trouver un utilisateur
-									{
-									/*
-									$rc_idx=$d1["idx"];
-									$r2 = command( "SELECT * FROM r_referent WHERE user='$user' and nom='$rc_idx' and organisme='' "); 
-									if ($d2 = fetch_command($r2))  
-									*/
-										$vient_de_RC=true;
-									}
-							
-							if (($recept_mail>=$date_jour) || $vient_de_RC || $flag_MMS )
+									$vient_de_RC=true;
+									
+							$r1 = command("SELECT * FROM r_user WHERE mail='$from' and user='$user'  "); 
+							if ($d1 = fetch_command($r1))  // le mail vient du bénéficiaire lui meme
+								$vient_du_beneficiaire=true;		
+									
+							if (($recept_mail>=$date_jour) || $vient_de_RC || $flag_MMS || $vient_du_beneficiaire)
 								{
 								if ($aff) echo " - Bénéficiaire $id OK!";
 								$attachments[] = array('type' => $part->type, 'filename' => $filename, 'pos' => $fpos);

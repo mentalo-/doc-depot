@@ -19,6 +19,7 @@
 	commentaire_html("X: Affiche Indicateurs");
 	echo "<p> Nbre de mails envoyés : ". parametre("TECH_nb_mail_envoyes");
 	echo "<p> Nbre de SMS envoyés : ". parametre("TECH_nb_sms_envoyes");
+	echo "<p> Nbre de SMS envoyés OVH : ". parametre("TECH_nb_sms_envoyes_operateur");
 	
 	echo "<hr>";
 
@@ -33,25 +34,35 @@
 	
 	echo "</table><hr>";
 
-		
+	$d="";
 	echo "<div class=\"CSSTableGenerator\" ><table><tr><td > Date  </td><td> Prio </td><td> Evénement </td><td> Ip </td>";
-	$reponse =command("select * from  z_log_t  order by date desc limit 0,15");		
+	$reponse =command("select * from  z_log_t  order by date desc limit 0,19");		
 	while ($donnees = fetch_command($reponse) ) 
 			{
 			$date=$donnees["date"];	
+			$d3= explode(" ",$date);
+			if(( $d!="") && ($d!=$d3[0]))
+				echo "<tr><td> - - -  </td><td> - - </td><td> - - - - - -  </td><td> - - -  </td>";
+			$d=$d3[0];
 			$ligne=$donnees["ligne"];
 			$ip=$donnees["ip"];
 			$prio=$donnees["prio"];
 			echo "<tr><td>  $date   </a></td><td> $prio </td><td> $ligne </td><td> $ip </td>";
+
 			}
 	echo "</table></div><hr>";
 
 	
+		$d="";
 		echo "<div class=\"CSSTableGenerator\" ><table><tr><td > Date </td><td> IP</td><td> Action </td><td> Compte </td><td> Acteur </td>";
-		$reponse =command("select * from  log  order by date desc limit 0,10");		
+		$reponse =command("select * from  log  order by date desc limit 0,15");		
 		while ($donnees = fetch_command($reponse) ) 
 				{
 				$date=$donnees["date"];	
+				$d3= explode(" ",$date);
+				if(( $d!="") && ($d!=$d3[0]))
+				echo "<tr><td> - - - </td><td> - - </td><td> - - - - - - -  </td><td> - - - </td><td> - - - </td>";
+				$d=$d3[0];
 				$ligne=$donnees["ligne"];
 				$user=$donnees["user"];
 				if (is_numeric($donnees["user"]))
@@ -62,6 +73,7 @@
 				$ip=$donnees["ip"];
 
 				echo "<tr><td>  $date   </a></td><td> $ip </td><td> $ligne </td><td> $user </td><td> $acteur </td>";
+
 				}
 		echo "</table></div><hr>";
 

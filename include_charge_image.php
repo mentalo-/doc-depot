@@ -43,6 +43,8 @@
 		{
 		if ($_SERVER['REMOTE_ADDR']!="127.0.0.1")
 			{
+		//	$im = new Imagick("upload/$source");
+		//	$im->writeImage("upload/$source.jpg");
 			exec ( "/usr/bin/convert -density 100 upload/$source upload/$source.jpg" ) ;
 			$hauteur=250;
 			imagethumb("upload/$source.jpg","upload_mini/$source",$hauteur);

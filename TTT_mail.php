@@ -20,7 +20,19 @@
 		
 	include 'include_mail.php';
 	include 'exploit.php';
-	
+		
+		
+	function purge_bdd_log()
+		{
+		commentaire_html("purge_log");
+
+		echo "<br>Purge Log";
+		$ilyaunmois =date('Y-m-d H\hi.00',  mktime(0,0,0 , date("m")-1, date("d"), date ("Y")));		
+		command("delete from z_log_t  where ligne like '%Traitement mail hors delais%' and date<'$ilyaunmois' ");
+		command("delete from z_log_t  where ligne like '%Reception supervision gatewaysms%' and date<'$ilyaunmois' ");
+		command("delete from z_log_t  where ligne like '%Envoi SMS au ".parametre("DD_numero_tel_sms")."%' and date<'$ilyaunmois' ");
+		}
+		
 	// supprime les rdv envoyé ayant plus d'un mois d'ancieneté
 	function purge_rdv()
 		{
@@ -42,7 +54,7 @@
 				{
 				$support =$donnees["support"];		
 				$crit=" ( not (nom like '%(A)%')) and (nom<>'Synth') and (nom<>'Mail')   ";
-				$r1 =command("update $support set commentaire='' where  $crit and date<'$avant' ");		
+				$r1 =command("update $support set commentaire='' where  $crit and date<'$avant' and date>'2000-01-01' ");		
 				}
 		}
 		
@@ -56,13 +68,13 @@
 		}	
 		
 	// supprime tous les fichiers temporaires de plus de 2 minutes
-	function purge_fichiers_temporaires($dir)
+	function purge_fichiers_temporaires($dir, $file ='*.*' )
 		{
 		commentaire_html("purge_fichiers_temporaires");
 		
 		// suppression des fichiers temporaire
 		$l= date('Y-m-d H:i',  mktime(date ("H"),date ("i")-2, date ("s") , date("m"), date("d"), date ("Y") ));
-		foreach(glob($dir.'*.*') as $v)
+		foreach(glob($dir.$file) as $v)
 			{
 			if (date ("Y-m-d H:i:s", filemtime($v))<$l)
 				{
@@ -115,7 +127,10 @@ function random_chaine($car)
 				purge_log();
 				purge_dde_acces(); 					
 				purge_backup_tables();
-
+				
+				supp_fichier('tmp/av-hier.txt');
+				rename('tmp/hier.txt','tmp/av-hier.txt');
+				
 				supp_fichier('tmp/hier.txt');
 				rename('tmp/log.txt','tmp/hier.txt');
 
@@ -150,11 +165,18 @@ function random_chaine($car)
 				{
 				ajout_log_tech( "purge Alerte");
 				purge_bdd_alerte();
+				}		
+				
+		if (date('Y-m-d-h',  time()) != date('Y-m-d-h',  $ancien_ttt ))
+			if ($heure==5)
+				{
+				ajout_log_tech( "purge Log");
+				purge_bdd_log();
 				}
 				
 		commentaire_html( "Purge temporaire");
 		purge_fichiers_temporaires("dir_zip/");		
-//		purge_fichiers_temporaires("tmp/");		
+		purge_fichiers_temporaires("tmp/","*.pdf");		
 		purge_fichiers_temporaires("upload_tmp/");		
 		
 		$td_envoi=parametre('TECH_dernier_envoi_supervision');
