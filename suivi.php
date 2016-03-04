@@ -248,8 +248,65 @@ include 'inc_style.php';
 		echo "<input type=\"hidden\" name=\"nom\"  value=\"$nom\">";
 		echo "<input type=\"hidden\" name=\"date_jour\"  value=\"$date_jour\">";
 		echo "<td><SELECT name=\"activites\"  onChange=\"this.form.submit();\">";		
+		affiche_un_choix($act,"---");		
+		
+		affiche_un_choix($act,"Accompagnement/bilan");			
+		
+		affiche_un_choix($act,"Administratif");
+		affiche_un_choix($act,"Administratif : Passeport ");
+		affiche_un_choix($act,"Administratif : CI  ");
+		affiche_un_choix($act,"Administratif : Etat civil  ");
+		affiche_un_choix($act,"Administratif : Acte de naissance  ");
+		affiche_un_choix($act,"Administratif : Régularisation  ");
+		affiche_un_choix($act,"Administratif : Demande d’asile ");
+		affiche_un_choix($act,"Administratif : Impôts ");
+		affiche_un_choix($act,"Administratif : Transports ");
+		affiche_un_choix($act,"Administratif : Amendes  ");
+		affiche_un_choix($act,"Administratif : Justice ");
 
-		affiche_un_choix($act,"---");			
+		affiche_un_choix($act,"Alimentaire");		
+		
+		affiche_un_choix($act,"Domiciliation");
+		affiche_un_choix($act,"Domiciliation : Instruction dossier");
+		affiche_un_choix($act,"Domiciliation : Orientation");
+		affiche_un_choix($act,"Domiciliation : Recours");
+		
+		affiche_un_choix($act,"Emploi et insertion professionnelle");
+		affiche_un_choix($act,"Emploi et insertion professionnelle : CV");
+		affiche_un_choix($act,"Emploi et insertion professionnelle : lettre de motivation");
+		affiche_un_choix($act,"Emploi et insertion professionnelle : pôle emploi");
+
+		affiche_un_choix($act,"Finance");			
+
+		affiche_un_choix($act,"Juridique");			
+		
+		affiche_un_choix($act,"Logement et hébergement");
+		affiche_un_choix($act,"Logement et hébergement : HLM");
+		affiche_un_choix($act,"Logement et hébergement : SIAO");
+		affiche_un_choix($act,"Logement et hébergement : DALO");
+		affiche_un_choix($act,"Logement et hébergement : DAHO ");
+
+		affiche_un_choix($act,"Matériel");			
+		
+		affiche_un_choix($act,"Prestations sociales");
+		affiche_un_choix($act,"Prestations sociales : CAF");
+		affiche_un_choix($act,"Prestations sociales : RSA");
+		affiche_un_choix($act,"Prestations sociales : MDPH");
+		
+		affiche_un_choix($act,"Santé");
+		affiche_un_choix($act,"Santé : AME");
+		affiche_un_choix($act,"Santé : PUMA");
+		affiche_un_choix($act,"Santé : PASS");
+		affiche_un_choix($act,"Santé : réseau de santé");
+		affiche_un_choix($act,"Santé : pharmacie");
+		
+
+		
+
+
+//		affiche_un_choix($act,"Hygiène et soins personnels");
+
+		/*
 		affiche_un_choix($act,"Absences");			
 		affiche_un_choix($act,"Accompagnement/bilan");			
 		affiche_un_choix($act,"Administratif");			
@@ -265,7 +322,9 @@ include 'inc_style.php';
 		affiche_un_choix($act,"Juridique");			
 		affiche_un_choix($act,"Matériel");			
 		affiche_un_choix($act,"Médical");			
-		affiche_un_choix($act,"Prise RV");			
+		affiche_un_choix($act,"Prise RV");	
+		*/
+		
 		echo "</SELECT></td>";		
 		echo "</form> ";
 		}	
@@ -289,6 +348,10 @@ include 'inc_style.php';
 		echo "<td><SELECT name=\"reponse\"  onChange=\"this.form.submit();\">";		
 
 		affiche_un_choix($act,"---");
+
+		
+
+		
 		affiche_un_choix($act,"Accompagnement/bilan");
 		affiche_un_choix($act,"Accompagnement administratif");
 		affiche_un_choix($act,"Attestation présence");
@@ -315,6 +378,7 @@ include 'inc_style.php';
 		affiche_un_choix($act,"Prise de RV");
 		affiche_un_choix($act,"Prise de contact");
 		affiche_un_choix($act,"Suivi demande en cours");
+		
 		echo "</SELECT></td>";		
 		echo "</form> ";
 		}
@@ -742,6 +806,16 @@ affiche_un_choix($nat,"Zimbabwe");
 		echo "<a href=\"https://doc-depot.com\">retour sur page d'accueil doc-depot.com</a>";
 		}
 	else
+		if (($_SESSION['droit']=="s") || ($_SESSION['droit']=="p") )
+		{
+		echo "Compte Inactif: merci de contacter votre responsable pour réactiver votre compte";
+		}
+		else
+		if (($_SESSION['droit']=="P") )
+		{
+		echo "Vous n'avez pas les droits pour accèder à ce module.";
+		}
+		else
 		{
 		
 		$organisme =$donnees["organisme"];
