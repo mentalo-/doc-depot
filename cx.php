@@ -106,7 +106,7 @@ if (isset($_POST['pass']))
 			erreur(traduire("Mot de passe incorrect")." !!"). 
 			$_SESSION['pass']=false;
 			ajout_log( $id,traduire("Echec Connexion")."  $id ");
-			ajout_log_tech( $id,traduire("Echec Connexion")."  $id / $mot_de_passe / ".$_POST['pass']);
+			ajout_log_tech( traduire("Echec Connexion")."  $id / $mot_de_passe / ".$_POST['pass']);
 			ajout_echec_cx ($_POST['id']);
 			ajout_echec_cx ($ip);
 			}
