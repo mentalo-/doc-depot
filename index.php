@@ -1377,7 +1377,11 @@ function maj_mdp_fichier($idx, $pw )
 		global $user_idx;
 		
 		$reponse = command("UPDATE `r_user` SET  droit='$droit' where idx='$id'  ");
-		ajout_log( $id, traduire("Mise à jour droit")." ==> $droit",	$user_idx );
+		if (ctype_upper($droit))
+			ajout_log( $id, traduire("Mise à jour droit")." ==> ".traduire("Actif"), $user_idx );
+		else
+			ajout_log( $id, traduire("Mise à jour droit")." ==> ".traduire("Inactif"),	$user_idx );
+
 		}
 		
 	FUNCTION supp_user($idx)
@@ -3878,8 +3882,11 @@ if (isset($_POST['pass']))
 				{
 				$_SESSION['support']=$donnees["support"];
 				echo "<a id=\"fissa\" href=\"fissa.php\"><img src=\"images/fissa.jpg\" width=\"70\" height=\"50\"></a>";
-				echo "<a href=\"suivi.php\"><img src=\"images/suivi.jpg\" width=\"70\" height=\"50\"><a>";			
-				echo "<a href=\"rdv.php\"><img src=\"images/rdv.jpg\" width=\"70\" height=\"50\"><a>";			
+				echo "<a href=\"suivi.php\"><img src=\"images/suivi.jpg\" width=\"70\" height=\"50\"><a>";					
+				if ($user_droit!="P") 
+					{
+					echo "<a href=\"rdv.php\"><img src=\"images/rdv.jpg\" width=\"70\" height=\"50\"><a>";		
+					}					
 				}
 
 			//* ---------------------------------- Calendrier

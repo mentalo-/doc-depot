@@ -1,5 +1,33 @@
 <?php
+	
+	function nouveau2( $date_jour, $nom, $age, $nationalite)
+		{
+		global $bdd;
 
+		$nom=str_replace("\"","",$nom);
+		$nom_slash= addslashes2($nom);	
+		$user= $_SESSION['user'];
+		$modif=time();
+		if ($nom!="") // le nom ne doit pas être vide
+			{
+			$d=mise_en_forme_date_aaaammjj( $date_jour);
+			$r1 = command("SELECT DISTINCT count(*) FROM $bdd WHERE nom='$nom_slash'  ");
+			$r2=nbre_enreg($r1); 
+			if ($r2[0]==0) // il ne doit pas déjaà exister 
+					{
+					$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom_slash', '', '','','$user','$modif','','')");
+					$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom_slash', '$d', 'Visite','','$user','$modif','','1')");
+					if ($age!="")
+						$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom_slash', '1111-11-11', 'Age','$age','$user','$modif','','')");
+					if ($nationalite!="Inconnu")
+						$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom_slash', '1111-11-11', 'nationalite','$nationalite','$user','$modif','','')");					
+					}
+				else
+					erreur("Ce nom existe déjà");
+			}
+		else
+			erreur("Le champ nom ne doit pas être vide");
+		}
 		
 	function choix_action_suivi($act)
 		{
@@ -222,13 +250,13 @@
 		}
 
 
-	function choix_pays($nom, $nat)
+		
+	function select_pays($auto="", $nat="")
 		{		
-		echo "<td> <b> Pays d'origine </b> : </td><td>";
-		echo "<form method=\"GET\" action=\"suivi.php\" >";
-		echo "<input type=\"hidden\" name=\"action\" value=\"nationalite\"> " ;
-		echo "<input type=\"hidden\" name=\"nom\"  value=\"$nom\">";
-		echo "<SELECT name=\"nationalite\"  onChange=\"this.form.submit();\">";	
+		if ($auto!="")
+			echo "<SELECT name=\"nationalite\"  onChange=\"this.form.submit();\">";	
+		else
+			echo "<SELECT name=\"nationalite\">";	
 
 if ($nat=="") $nat= "Inconnu";
 affiche_un_choix($nat,"Inconnu");
@@ -500,7 +528,18 @@ affiche_un_choix($nat,"Yougoslavie");
 affiche_un_choix($nat,"Zambie");
 affiche_un_choix($nat,"Zimbabwe");
 
-		echo "</SELECT></td>";		
+		echo "</SELECT>";		
+		}
+		
+	function choix_pays($nom, $nat)
+		{		
+		echo "<td> <b> Pays d'origine </b> : </td><td>";
+		echo "<form method=\"GET\" action=\"suivi.php\" >";
+		echo "<input type=\"hidden\" name=\"action\" value=\"nationalite\"> " ;
+		echo "<input type=\"hidden\" name=\"nom\"  value=\"$nom\">";
+		select_pays("auto_submit",$nat);
+
+		echo "</td>";		
 		echo "</form> ";
 		}
 

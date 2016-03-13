@@ -53,7 +53,7 @@ include 'inc_style.php';
 				{
 				$user= $_SESSION['user'];
 				$modif=time();
-				$cmd = "INSERT INTO `$bdd`  VALUES ( '$nom', '', '','','$user','$modif','')";
+				$cmd = "INSERT INTO `$bdd`  VALUES ( '$nom', '', '','','$user','$modif','','')";
 				$reponse = command($cmd);
 				}
 			}
@@ -85,6 +85,8 @@ include 'inc_style.php';
 		$nom_slash= addslashes2($nom);	
 
 		echo "<table>";		
+		echo "<tr><td  bgcolor=\"#3f7f00\"> <font color=\"white\">Date </td> <td  bgcolor=\"#3f7f00\"></td><td  bgcolor=\"#3f7f00\"></td><td  bgcolor=\"#3f7f00\"></td> <td bgcolor=\"#3f7f00\" > <font color=\"white\">Auteur</td> ";
+
 		$reponse = command("SELECT * FROM $bdd WHERE nom='$nom_slash' and commentaire<>'' and date='0000-00-00' and pres_repas<>'pda' and pres_repas<>'Age' and pres_repas<>'Mail' and pres_repas<>'Téléphone' and pres_repas<>'nationalie' and pres_repas<>'PE' order by nom DESC "); 
 		if ($donnees = fetch_command($reponse) ) 
 			{
@@ -93,10 +95,17 @@ include 'inc_style.php';
 			}
 		
 		$i=0; 
-		if ($detail=="")
-			$reponse = command("SELECT * FROM $bdd WHERE nom='$nom_slash' and date>'2000-00-00' and pres_repas<>'pda' and pres_repas<>'reponse' and pres_repas<>'partenaire' order by date DESC "); 
+		if ( $_SESSION['droit']=="R")
+			$date_deb="0000-00-00";
 		else
-			$reponse = command("SELECT * FROM $bdd WHERE nom='$nom_slash' and date>'2000-00-00' and pres_repas='Suivi' order by date DESC "); 
+			$date_deb="2000-00-00";
+		if ($detail=="")
+			$reponse = command("SELECT * FROM $bdd WHERE nom='$nom_slash' and date>'$date_deb' and pres_repas<>'pda' and pres_repas<>'reponse' and pres_repas<>'partenaire' order by date DESC "); 
+		else
+			if ($detail=="Visites")
+				$reponse = command("SELECT * FROM $bdd WHERE nom='$nom_slash' and date>'$date_deb' and pres_repas<>'suivi' and pres_repas<>'pda' and pres_repas<>'reponse' and pres_repas<>'partenaire' order by date DESC "); 
+			else
+				$reponse = command("SELECT * FROM $bdd WHERE nom='$nom_slash' and date>'$date_deb' and pres_repas='Suivi' order by date DESC "); 
 
 		$ncolor=0;
 		while (($donnees = fetch_command($reponse) ) && ($i<10000))
@@ -114,13 +123,12 @@ include 'inc_style.php';
 				$act=str_replace('#-#','; ',$act);
 				$p=$donnees["pres_repas"];
 				$c=nl2br ($c);
-				
+				$user="";
+				if ($donnees["user"]!="")
+					$user=libelle_user($donnees["user"]);				
+			
 				if ($p=="Suivi")  
 					{
-					$user="";
-					if ($donnees["user"]!="")
-						$user=libelle_user($donnees["user"]);
-						
 					$r1 = command("SELECT * FROM $bdd WHERE nom='$nom_slash' and date='$date_jour' and pres_repas='reponse' "); 
 					if ($d1 = fetch_command($r1) ) 
 						$rep="Réponse :  <b>".$d1["activites"]."</b>";
@@ -139,11 +147,11 @@ include 'inc_style.php';
 					else
 						$partenaire="";
 						
-					echo "<tr><td bgcolor=\"$color\"><b><a href=\"suivi.php?action=accompagnement&nom=$nom&date_jour=$d\" > $d </a> </td><td bgcolor=\"$color\">$p </td><td bgcolor=\"$color\"> <b>$act</b> </td><td bgcolor=\"$color\">$rep $partenaire <br>$c <td bgcolor=\"$color\">$user </b>"; 
+					echo "<tr><td bgcolor=\"$color\"><b><a href=\"suivi.php?action=accompagnement&nom=$nom&date_jour=$d\" > $d </a> </td><td bgcolor=\"$color\">$p </td><td bgcolor=\"$color\"> <b>$act</b> </td><td bgcolor=\"$color\">$rep $partenaire <br>$c </td><td bgcolor=\"$color\">$user "; 
 
 					}
 				else
-					echo "<tr><td bgcolor=\"$color\"> $d </td><td bgcolor=\"$color\"></td><td bgcolor=\"$color\">$p </td><td bgcolor=\"$color\"> $c </td> ";
+					echo "<tr><td bgcolor=\"$color\"> $d </td><td bgcolor=\"$color\"></td><td bgcolor=\"$color\">$p </td><td bgcolor=\"$color\"> $c </td> <td bgcolor=\"$color\">$user </td>";
 				
 				// ++++ si activité ajouter liste des participants
 				if (strpos($nom_slash,"(A)")>0)
@@ -237,9 +245,9 @@ include 'inc_style.php';
 			}
 		}
 		
+		
 	include 'suivi_liste.php';	
-	
-	
+
 	function proposition_suivi( $titre="")
 		{
 		global  $date_jour, $bdd, $acteur;
@@ -311,11 +319,6 @@ include 'inc_style.php';
 		echo "Compte Inactif: merci de contacter votre responsable pour réactiver votre compte";
 		}
 		else
-		if (($_SESSION['droit']=="P") )
-		{
-		echo "Vous n'avez pas les droits pour accèder à ce module.";
-		}
-		else
 		{
 		
 		$organisme =$donnees["organisme"];
@@ -345,14 +348,8 @@ include 'inc_style.php';
 			$nom=$nouveau;
 			$action="suivi";
 			}
-		if ($action=="nouveau")
-			{
-			$type=variable_s("type");
-			if ($type=="Bénéficiaire femme")
-				$nom .= " (F)";
-			nouveau($nom);
-			}	
-			
+
+
 		if (!isset ($_GET["date_jour"]))
 			$date_jour=date('d/m/Y');
 		else 
@@ -365,7 +362,14 @@ include 'inc_style.php';
 				$date_jour=date('d/m/Y');
 				}
 			}
-
+			
+		if ($action=="nouveau2")
+			{
+			if (variable_s("type")=="Bénéficiaire femme")
+				$nom .= " (F)";
+			nouveau2($date_jour,$nom, variable_s("age"),variable_s("nationalite"));
+			}
+			
 		// =====================================================================loc IMAGE
 		echo "<table border=\"0\" >";	
 		echo "<tr> <td> <a href=\"suivi.php\"> <img src=\"images/suivi.jpg\" width=\"140\" height=\"100\"  ></a></td> ";		
@@ -413,6 +417,8 @@ include 'inc_style.php';
 		$nom_slash= addslashes2($nom);	
 		if ($nom!="")
 			{
+
+				
 			if ($action=="activites")
 				{
 				$activites=variable_s("activites");
@@ -420,9 +426,9 @@ include 'inc_style.php';
 				$user= $_SESSION['user'];
 				$modif=time();
 				if ($donnees = fetch_command($reponse))
-					$reponse = command("UPDATE $bdd set activites='$activites' , modif='$modif' where date='$date_jour_gb' and nom='$nom_slash' and pres_repas='Suivi' ");
+					$reponse = command("UPDATE $bdd set activites='$activites' , modif='$modif', user='$user' where date='$date_jour_gb' and nom='$nom_slash' and pres_repas='Suivi' ");
 				else
-					$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom_slash',  '$date_jour_gb', 'Suivi','','$user','$modif','$activites')");					
+					$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom_slash',  '$date_jour_gb', 'Suivi','','$user','$modif','$activites','')");					
 				$action="suivi";
 				}	
 				
@@ -434,9 +440,9 @@ include 'inc_style.php';
 				$user= $_SESSION['user'];
 				$modif=time();
 				if ($donnees = fetch_command($reponse))
-					$reponse = command("UPDATE $bdd set activites='$activites' , modif='$modif' where date='$date_jour_gb' and nom='$nom_slash' and pres_repas='$action' ");
+					$reponse = command("UPDATE $bdd set activites='$activites' , modif='$modif' , user='$user' where date='$date_jour_gb' and nom='$nom_slash' and pres_repas='$action' ");
 				else
-					$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom_slash', '$date_jour_gb', '$action','','$user','$modif','$activites')");					
+					$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom_slash', '$date_jour_gb', '$action','','$user','$modif','$activites','')");					
 				$action="suivi";
 				}			
 				
@@ -448,9 +454,9 @@ include 'inc_style.php';
 						$user= $_SESSION['user'];
 						$modif=time();
 						if ($donnees = fetch_command($reponse))
-							$reponse = command("UPDATE $bdd set commentaire='$PE' ,date='1111-11-11', modif='$modif' where nom='$nom_slash' and pres_repas='PE' ");
+							$reponse = command("UPDATE $bdd set commentaire='$PE' ,date='1111-11-11', modif='$modif' , user='$user' where nom='$nom_slash' and pres_repas='PE' ");
 						else
-							$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom_slash', '1111-11-11', 'PE','$PE','$user','$modif','')");					
+							$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom_slash', '1111-11-11', 'PE','$PE','$user','$modif','','')");					
 						$action="suivi";
 						}			
 						
@@ -462,9 +468,9 @@ include 'inc_style.php';
 						$user= $_SESSION['user'];
 						$modif=time();
 						if ($donnees = fetch_command($reponse))
-							$reponse = command("UPDATE $bdd set commentaire='$adresse' , date='1111-11-11', modif='$modif' where nom='$nom_slash' and pres_repas='adresse' ");
+							$reponse = command("UPDATE $bdd set commentaire='$adresse' , date='1111-11-11', modif='$modif' , user='$user' where nom='$nom_slash' and pres_repas='adresse' ");
 						else
-							$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom_slash', '1111-11-11', 'adresse','$adresse','$user','$modif','')");					
+							$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom_slash', '1111-11-11', 'adresse','$adresse','$user','$modif','','')");					
 						$action="suivi";
 						}
 				if ($action=="nationalite")
@@ -475,9 +481,9 @@ include 'inc_style.php';
 						$user= $_SESSION['user'];
 						$modif=time();
 						if ($donnees = fetch_command($reponse))
-							$reponse = command("UPDATE $bdd set commentaire='$nationalite' , date='1111-11-11', modif='$modif' where nom='$nom_slash' and pres_repas='nationalite' ");
+							$reponse = command("UPDATE $bdd set commentaire='$nationalite' , date='1111-11-11', modif='$modif' , user='$user' where nom='$nom_slash' and pres_repas='nationalite' ");
 						else
-							$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom_slash', '1111-11-11', 'nationalite','$nationalite','$user','$modif','')");					
+							$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom_slash', '1111-11-11', 'nationalite','$nationalite','$user','$modif','','')");					
 						$action="suivi";
 						}				
 				if ($action=="telephone")
@@ -488,9 +494,9 @@ include 'inc_style.php';
 						$user= $_SESSION['user'];
 						$modif=time();
 						if ($donnees = fetch_command($reponse))
-							$reponse = command("UPDATE $bdd set commentaire='$telephone' , date='1111-11-11', modif='$modif' where nom='$nom_slash' and pres_repas='Téléphone' ");
+							$reponse = command("UPDATE $bdd set commentaire='$telephone' , date='1111-11-11', modif='$modif', user='$user' where nom='$nom_slash' and pres_repas='Téléphone' ");
 						else
-							$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom_slash', '1111-11-11', 'Téléphone','$telephone','$user','$modif','')");					
+							$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom_slash', '1111-11-11', 'Téléphone','$telephone','$user','$modif','','')");					
 						$action="suivi";
 						}	 
 		
@@ -502,9 +508,9 @@ include 'inc_style.php';
 						$user= $_SESSION['user'];
 						$modif=time();
 						if ($donnees = fetch_command($reponse))
-							$reponse = command("UPDATE $bdd set commentaire='$mail' , modif='$modif', date='1111-11-11' where nom='$nom_slash' and pres_repas='Mail' ");
+							$reponse = command("UPDATE $bdd set commentaire='$mail' , modif='$modif', date='1111-11-11', user='$user' where nom='$nom_slash' and pres_repas='Mail' ");
 						else
-							$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom_slash', '1111-11-11', 'Mail','$mail','$user','$modif','')");					
+							$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom_slash', '1111-11-11', 'Mail','$mail','$user','$modif','','')");					
 						$action="suivi";
 						}
 					
@@ -526,7 +532,7 @@ include 'inc_style.php';
 						if ($donnees = fetch_command($reponse))
 							$reponse = command("UPDATE $bdd set commentaire='$age' , modif='$modif' where nom='$nom_slash' and pres_repas='Age' ");
 						else
-							$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom_slash', '1111-11-11', 'Age','$age','$user','$modif','')");					
+							$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom_slash', '1111-11-11', 'Age','$age','$user','$modif','','')");					
 						$action="suivi";
 						}	
 						
@@ -540,7 +546,7 @@ include 'inc_style.php';
 						if ($donnees = fetch_command($reponse))
 							$reponse = command("UPDATE $bdd set activites='$echeance' , modif='$modif' , user='$user' where nom='$nom_slash' and pres_repas='pda' ");
 						else
-							$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom_slash', '', 'pda','$echeance','$user','$modif','')");					
+							$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom_slash', '', 'pda','$echeance','$user','$modif','','')");					
 						$action="suivi";
 						}	
 					
@@ -564,7 +570,7 @@ include 'inc_style.php';
 						if ($donnees = fetch_command($reponse))
 							$reponse = command("UPDATE $bdd set commentaire='$com' , user='$user' , modif='$modif' where nom='$nom_slash' and date='$date_jour_gb' and pres_repas='Suivi' ");
 						else
-							$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom_slash', '$date_jour_gb', 'Suivi','$com','$user','$modif','$act')");					
+							$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom_slash', '$date_jour_gb', 'Suivi','$com','$user','$modif','$act','')");					
 						//$commentaire=$com;
 						}
 					
@@ -599,7 +605,7 @@ include 'inc_style.php';
 						if ($donnees = fetch_command($reponse))
 							$reponse = command("UPDATE $bdd set commentaire='$pda' , user='$user' , modif='$modif' where nom='$nom_slash' and pres_repas='pda' ");
 						else
-							$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom_slash', '', 'pda','$pda','$user','$modif','')");					
+							$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom_slash', '', 'pda','$pda','$user','$modif','','')");					
 						$pda=stripcslashes($pda);
 						}					
 					
@@ -701,7 +707,8 @@ include 'inc_style.php';
 							
 							fin_cadre();
 
-							
+					if (($_SESSION['droit']!="P") )
+						{		
 						// ============================================================================== SUIVI
 						echo "<table><tr> <td >";
 						echo "<ul id=\"menu-bar\">";					
@@ -771,21 +778,25 @@ include 'inc_style.php';
 						echo "</table>  ";
 						
 
-					if  (($action=="suivi") || ($action=="pda"))
-						affiche_rdv($nom);		
-						
-						if ($action!="accompagnement")
-								echo "<a href=\"suivi.php?action=accompagnement&nom=$nom&date_jour=$date_jour\" > ( N'afficher que l'accompagnement )</a>";
-							else
-								echo "<a href=\"suivi.php?action=suivi&nom=$nom&date_jour=$date_jour\" > ( Afficher tout l'historique )</a>";
+						if  (($action=="suivi") || ($action=="pda"))
+							affiche_rdv($nom);		
+							
+							if ($action!="accompagnement")
+									echo "<a href=\"suivi.php?action=accompagnement&nom=$nom&date_jour=$date_jour\" > ( N'afficher que l'accompagnement )</a>";
+								else
+									echo "<a href=\"suivi.php?action=suivi&nom=$nom&date_jour=$date_jour\" > ( Afficher tout l'historique )</a>";
 						}						
+					}
 
-
-						
+				if (($_SESSION['droit']!="P") )
+					{						
 					if  (($action=="suivi") || ($action=="pda"))
 						histo($nom,"");
 					else
 						histo($nom,"accompagnement");
+					}
+				else
+					histo($nom,"Visites");
 
 			}
 		else 
@@ -793,13 +804,30 @@ include 'inc_style.php';
 			proposition_suivi ("Accès rapide");
 			
 			// =====================================================================loc NOUVEAU
+		/*
 			echo "<table><tr><td bgcolor=\"#d4ffaa\">Création nouveau :</td><td bgcolor=\"#d4ffaa\"><form method=\"GET\" action=\"suivi.php\">";
 			echo "<input type=\"hidden\" name=\"action\" value=\"nouveau\"> " ;
 			echo "<input type=\"text\" name=\"nom\" size=\"30\" value=\"\">";	
 			liste_type();
 			echo "<input type=\"submit\" value=\"Créer Nouveau\" >  ";
 			echo "</td></form> ";	
-			echo " </table>";			
+			echo " </table>";	
+		*/
+
+				echo "<table id=\"dujour\"  border=\"2\" >";
+				// =====================================================================loc NOUVEAU
+				$age=variable_s("age");
+				echo "<tr><td bgcolor=\"#d4ffaa\"><table><tr><td><form method=\"GET\" action=\"suivi.php\">Prénom / Nom : ";
+				echo "<input type=\"hidden\" name=\"action\" value=\"nouveau2\"> " ;
+				echo "<input type=\"hidden\" name=\"date_jour\"  value=\"$date_jour\">";
+				echo "<input type=\"text\" name=\"nom\" size=\"30\" value=\"$nom\"></td>";	
+				echo " </td> <td> Date naissance : <input type=\"text\" name=\"age\" size=\"12\" value=\"$age\"> </td> <td> Origine : ";	
+				select_pays( "", variable_s("nationalite") );
+				echo "</td> <td> ";
+				liste_type();
+				echo "</td><td></table></td><td bgcolor=\"#d4ffaa\"><input type=\"submit\" value=\"Nouveau\" >  ";
+				echo "</form></td> ";
+				echo "</table>";			
 			$i=0;
 			
 			// liste des plans d'action ouvert

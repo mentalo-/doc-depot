@@ -640,6 +640,28 @@
 
 				// ------------------------------------------- Bloc générique
 				$version=maj_version($nelle_version);
-				}				
+				}	
 				
+		$nelle_version="V1.23";
+		if ($version<$nelle_version)
+				{
+				backup_tables(false);  // A utiliser si changement de structure ou de contenu de la base
+				
+				// ------------------------------------------- Bloc Spécifique à la montée de version
+				$reponse =command("select * from fct_fissa  ");
+				while ($donnees = mysql_fetch_array($reponse) )
+						{
+						$support=$donnees["support"];
+						command("ALTER TABLE $support ADD qte TEXT not null ","1");
+						command("UPDATE `$support`  SET `qte`='1' WHERE date>'2000-01-01'","1");
+						}	
+				// ------------------------------------------- Fin bloc spécifique
+
+				// ------------------------------------------- Bloc générique
+				$version=maj_version($nelle_version);
+				}	
+
+
+	
+			
 ?>

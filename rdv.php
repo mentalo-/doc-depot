@@ -177,6 +177,16 @@ include 'inc_style.php';
 		echo "<a href=\"https://doc-depot.com\">retour sur page d'accueil doc-depot.com</a>";
 		}
 	else
+		if (($_SESSION['droit']=="s") || ($_SESSION['droit']=="p") )
+		{
+		echo "Compte Inactif: merci de contacter votre responsable pour réactiver votre compte";
+		}
+		else	
+		if (($_SESSION['droit']=="P") )
+		{
+		echo "Vous n'avez pas les droits pour accèder à ce module.";
+		}
+		else
 		{
 		
 		$organisme =$donnees["organisme"];

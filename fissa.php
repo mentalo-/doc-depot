@@ -145,6 +145,8 @@ include 'inc_style.php';
 	
 	// =========================================================== procedures générales
 
+		
+
 	
 	function nouveau( $date_jour, $nom, $pres2,$com ,$memo)
 		{
@@ -164,7 +166,7 @@ include 'inc_style.php';
 				{
 				$user= $_SESSION['user'];
 				$modif=time();
-				$cmd = "INSERT INTO `$bdd`  VALUES ( '$nom', '', '','','$user','$modif','')";
+				$cmd = "INSERT INTO `$bdd`  VALUES ( '$nom', '', '','','$user','$modif','','')";
 				$reponse = command($cmd);
 				}
 				
@@ -186,7 +188,7 @@ include 'inc_style.php';
 					if ( ((strstr($nom,"(B)")) || (strstr($nom,"(S)")) ) && ($pres2=="Visite") )		
 						$pres2="Acteur Social";
 
-					$cmd = "INSERT INTO `$bdd`  VALUES ( '$nom', '$d', '$pres2','$com','$user','$modif','')";
+					$cmd = "INSERT INTO `$bdd`  VALUES ( '$nom', '$d', '$pres2','$com','$user','$modif','','1')";
 					$reponse = command($cmd);
 					}
 				}
@@ -268,11 +270,8 @@ include 'inc_style.php';
 	function liste_type($val_init ="" )
 		{
 		echo "<SELECT name=\"type\"  >";
-		affiche_un_choix($val_init,"Bénéficiaire");
-		affiche_un_choix($val_init,"Bénéficiaire femme");
-//		affiche_un_choix($val_init,"Bénévole");
-//		affiche_un_choix($val_init,"Salarié");
-//		affiche_un_choix($val_init,"Activité");
+		affiche_un_choix($val_init,"Bénéficiaire","Homme");
+		affiche_un_choix($val_init,"Bénéficiaire femme","Femme");
 		echo "</SELECT>";
 		}
 
@@ -756,6 +755,34 @@ include 'inc_style.php';
 		if ($i!=0)
 			echo "<br>";
 		}
+	
+	function ajouter_beneficiaire()
+		{
+		global $jmax,$liste_nom,$date_jour;
+		
+		echo "<table id=\"dujour\"  border=\"2\" >";
+		echo "<form method=\"GET\" action=\"fissa.php#dujour\">";
+		echo "<input type=\"hidden\" name=\"action\" value=\"nouveau\"> " ;
+		echo "<input type=\"hidden\" name=\"femme\" value=\"\"> " ;
+		echo "<input type=\"hidden\" name=\"memo\" value=\"\"> " ;	
+		echo "<input type=\"hidden\" name=\"commentaire\" value=\"\"> " ;
+		echo "<input type=\"hidden\" name=\"presence\" value=\"Visite\"> " ;	
+		echo "<input type=\"hidden\" name=\"date_jour\"  value=\"$date_jour\">";
+		echo "<tr> <td bgcolor=\"#d4ffaa\"> ";
+		echo "<SELECT name=nom onChange=\"this.form.submit();\">";
+		echo "<OPTION  VALUE=\"\">  </OPTION>";
+		for ($j=0;$j<$jmax;$j++)
+			{
+			$sel=$liste_nom[$j];
+			if (  (strpos($sel,"(A)")===FALSE) && (strpos($sel,"(B)")===FALSE) && (strpos($sel,"(S)")===FALSE))
+				echo "<OPTION  VALUE=\"$sel\"> $sel </OPTION>";
+			}
+		echo "</SELECT>";
+		echo "</td> <td bgcolor=\"#d4ffaa\"> "; 
+		echo "<input type=\"submit\" value=\"Ajouter\" >  ";
+		echo "</td>";
+		echo " </form> ";	
+		}
 		
 	// -====================================================================== Saisie
 
@@ -775,6 +802,7 @@ include "connex_inc.php";
 $action=variable_s("action");	
 require_once 'cx.php';
 
+include 'suivi_liste.php';	
  
 $reponse = command("SELECT * FROM fct_fissa WHERE support='$bdd' "); 
 if ((!($donnees = fetch_command($reponse))) || (!$_SESSION['pass']) )
@@ -784,7 +812,7 @@ if ((!($donnees = fetch_command($reponse))) || (!$_SESSION['pass']) )
 else
 	if (($_SESSION['droit']=="s") || ($_SESSION['droit']=="p") )
 	{
-	echo "Compte Inctif: merci de contacter votre responsable pour réactiver votre compte";
+	echo "Compte Inactif: merci de contacter votre responsable pour réactiver votre compte";
 	}
 	else
 		{
@@ -834,6 +862,13 @@ else
 					$nom .= " (A)";		
 				$com1=variable_s("commentaire");
 				nouveau($date_jour,$nom, $presence,$com1,$memo);
+				}
+			
+			if ($action=="nouveau2")
+				{
+				if ($type=="Bénéficiaire femme")
+					$nom .= " (F)";
+				nouveau2($date_jour,$nom, variable_s("age"),variable_s("nationalite"));
 				}
 
 			if ($action=="chgt_nom")
@@ -965,8 +1000,11 @@ else
 
 				echo "</td>";
 				echo "<td><a href=\"index.php\"> <img src=\"images/logo.png\" width=\"70\" height=\"50\"><a></td>";		
-				echo "<td><a href=\"suivi.php\"><img src=\"images/suivi.jpg\" width=\"70\" height=\"50\"><a></td>";					
-				echo "<td><a href=\"rdv.php\"> <img src=\"images/rdv.jpg\" width=\"70\" height=\"50\"><a></td>";			
+				echo "<td><a href=\"suivi.php\"><img src=\"images/suivi.jpg\" width=\"70\" height=\"50\"><a></td>";						
+				if (($_SESSION['droit']!="P") )
+					{
+					echo "<td><a href=\"rdv.php\"> <img src=\"images/rdv.jpg\" width=\"70\" height=\"50\"><a></td>";
+					}
 				echo "<td><a title=\"Alerte Grand Froid/Forte Pluie\" href=\"alerte.php\"><img src=\"images/logo-alerte.jpg\" width=\"70\" height=\"50\"></a> ";
 				if ($logo!="")
 					echo "<td> <a href=\"fissa.php\"> <img src=\"images/$logo\" width=\"200\" height=\"100\"  > </a> </td>";
@@ -979,7 +1017,26 @@ else
 				echo "<table border=\"0\" >";
 				
 				// =====================================================================loc AJOUTER
-
+				// Echo "Visistes : ". presents(date('Ymd'));
+				echo "<tr> <td width=\"1000\">";
+				//ajouter_beneficiaire();
+				echo "<table id=\"dujour\"  border=\"2\" >";
+				// =====================================================================loc NOUVEAU
+				$age=variable_s("age");
+				echo "<tr><td bgcolor=\"#d4ffaa\"><table><tr><td><form method=\"GET\" action=\"fissa.php\">Prénom / Nom : ";
+				echo "<input type=\"hidden\" name=\"action\" value=\"nouveau2\"> " ;
+				echo "<input type=\"hidden\" name=\"date_jour\"  value=\"$date_jour\">";
+				echo "<input type=\"text\" name=\"nom\" size=\"30\" value=\"$nom\"></td>";	
+				echo " </td> <td> Date naissance : <input type=\"text\" name=\"age\" size=\"12\" value=\"$age\"> </td> <td> Origine : ";	
+				select_pays( "", variable_s("nationalite") );
+				echo "</td> <td> ";
+				liste_type();
+				echo "</td><td></table></td><td bgcolor=\"#d4ffaa\"><input type=\"submit\" value=\"Nouveau\" >  ";
+				echo "</form></td> ";
+				
+				
+				
+				echo "</table></td>";
 				proposition("","Ajout rapide");
 				proposition("(S)",$acteur);	
 				proposition("(B)","Bénévoles");				
@@ -997,47 +1054,14 @@ else
 				if ($date_jour==date('d/m/Y'))
 					affiche_memo();
 					
-				echo "<table id=\"dujour\"  border=\"2\" >";
-				
 				// =====================================================================loc AJOUTER
-				echo "<form method=\"GET\" action=\"fissa.php#dujour\">";
-				echo "<input type=\"hidden\" name=\"action\" value=\"nouveau\"> " ;
-				echo "<input type=\"hidden\" name=\"femme\" value=\"\"> " ;
-				echo "<input type=\"hidden\" name=\"memo\" value=\"\"> " ;	
-				echo "<input type=\"hidden\" name=\"commentaire\" value=\"\"> " ;
-				echo "<input type=\"hidden\" name=\"presence\" value=\"Visite\"> " ;	
-				echo "<input type=\"hidden\" name=\"date_jour\"  value=\"$date_jour\">";
-				echo "<tr> <td bgcolor=\"#d4ffaa\"> ";
-				echo "<SELECT name=nom onChange=\"this.form.submit();\">";
-				echo "<OPTION  VALUE=\"\">  </OPTION>";
-				for ($j=0;$j<$jmax;$j++)
-					{
-					$sel=$liste_nom[$j];
-					if (  (strpos($sel,"(A)")===FALSE) && (strpos($sel,"(B)")===FALSE) && (strpos($sel,"(S)")===FALSE))
-						echo "<OPTION  VALUE=\"$sel\"> $sel </OPTION>";
-					}
-				echo "</SELECT>";
-				echo "</td> <td bgcolor=\"#d4ffaa\"> "; 
-				echo "<input type=\"submit\" value=\"Ajouter\" >  ";
-				echo "</td>";
-
-				echo " </form> ";	
+				ajouter_beneficiaire()	;
 				
 				echo "<td bgcolor=\"#d4ffaa\"></td> ";
 								
 				// =====================================================================loc NOUVEAU
-				echo "<td bgcolor=\"#d4ffaa\"></td> <td bgcolor=\"#d4ffaa\"><form method=\"GET\" action=\"fissa.php\">";
-				echo "<input type=\"hidden\" name=\"action\" value=\"nouveau\"> " ;
-				echo "<input type=\"hidden\" name=\"date_jour\"  value=\"$date_jour\">";
-				echo "<input type=\"hidden\" name=\"memo\" value=\"\"> " ;	
-				echo "<input type=\"text\" name=\"nom\" size=\"30\" value=\"\">";	
-				liste_type();
-				echo "<input type=\"hidden\" name=\"commentaire\" value=\"\"> " ;	
-				echo "<input type=\"hidden\" name=\"presence\" value=\"Visite\"> " ;
-				echo "<input type=\"submit\" value=\"Créer Nouveau\" >  ";
-				echo "</td></form> ";	
+				echo "<td bgcolor=\"#d4ffaa\"></td> <td bgcolor=\"#d4ffaa\"></td> ";	
 
-				
 				echo "<tr> <td bgcolor=\"#3f7f00\"><font color=\"white\"> Prénom / Nom </td> <td bgcolor=\"#3f7f00\"> <font color=\"white\">Evénement </td>";
 				echo "<td bgcolor=\"#3f7f00\"> <font color=\"white\">Memo </td><td bgcolor=\"#3f7f00\"> <font color=\"white\"> Activités</font></td><td bgcolor=\"#3f7f00\"> <font color=\"white\"> Commentaire du jour</font></td>";		
 				$ncolor=0;
@@ -1074,7 +1098,6 @@ else
 
 						$valeur=mef_activites( $activites[$i],$nom_charge[$i],$date_jour); // T355
 						echo "$valeur </td>";						
-						
 					
 						echo "</td> <td bgcolor=\"$color\"> ";
 						$valeur=mef_texte_a_afficher( stripcslashes($commentaire[$i]));
