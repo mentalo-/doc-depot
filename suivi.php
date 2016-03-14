@@ -546,7 +546,7 @@ include 'inc_style.php';
 						if ($donnees = fetch_command($reponse))
 							$reponse = command("UPDATE $bdd set activites='$echeance' , modif='$modif' , user='$user' where nom='$nom_slash' and pres_repas='pda' ");
 						else
-							$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom_slash', '', 'pda','$echeance','$user','$modif','','')");					
+							$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom_slash', '', 'pda','','$user','$modif','$echeance','')");					
 						$action="suivi";
 						}	
 					
