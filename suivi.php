@@ -418,7 +418,8 @@ include 'inc_style.php';
 		if ($nom!="")
 			{
 
-				
+
+							
 			if ($action=="activites")
 				{
 				$activites=variable_s("activites");
@@ -576,7 +577,7 @@ include 'inc_style.php';
 					
 					$derniere_maj_pda="";
 					
-					if ($pda=="")
+					if ($action!="pda")
 						{
 						$reponse = command("SELECT * FROM $bdd WHERE nom='$nom_slash' and pres_repas='pda' "); 
 						if ($donnees = fetch_command($reponse))
@@ -598,7 +599,7 @@ include 'inc_style.php';
 					else
 						{
 						$pda=addslashes2($pda);
-						$reponse = command("SELECT * FROM $bdd WHERE nom='$nom_slash' and pres_repas='pda' "); 
+						$reponse = command("SELECT * FROM $bdd WHERE nom='$nom_slash' and pres_repas='pda'"); 
 						
 						$user= $_SESSION['user'];
 						$modif=time();
@@ -760,6 +761,7 @@ include 'inc_style.php';
 						echo "<table> <tr><td> <b> Plan d'action en cours </b> </td> <td> - Echéance  : </td><td>";
 						echo "<form method=\"GET\" action=\"suivi.php\">";
 						echo "<input type=\"hidden\" name=\"action\" value=\"echeance\"> " ;
+						echo "<input type=\"hidden\" name=\"date_jour\"  value=\"$date_jour\">";
 						echo "<input type=\"hidden\" name=\"nom\"  value=\"$nom\">";
 						echo "<input type=\"text\" name=\"echeance\" size=\"10\"  value=\"$echeance\"  onChange=\"this.form.submit();\" class=\"calendrier\" >";
 						echo "<input type=\"submit\" value=\"Valider\" > </form> 	</td>   ";
@@ -768,6 +770,8 @@ include 'inc_style.php';
 						
 						echo "<tr> <td><form method=\"GET\" action=\"suivi.php\">";
 						echo "<input type=\"hidden\" name=\"action\" value=\"pda\"> " ;
+						echo "<input type=\"hidden\" name=\"date_jour\"  value=\"$date_jour\">";
+
 						echo "<input type=\"hidden\" name=\"nom\"  value=\"$nom\">";
 						echo "<TEXTAREA rows=\"4\" cols=\"110\" name=\"pda\" onChange=\"this.form.submit();\">$pda</TEXTAREA>";
 						echo "</td> </form> ";

@@ -13,7 +13,7 @@
 			$d=mise_en_forme_date_aaaammjj( $date_jour);
 			$r1 = command("SELECT DISTINCT count(*) FROM $bdd WHERE nom='$nom_slash'  ");
 			$r2=nbre_enreg($r1); 
-			if ($r2[0]==0) // il ne doit pas déjaà exister 
+			if ($r2[0]==0) // il ne doit pas déjà exister 
 					{
 					$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom_slash', '', '','','$user','$modif','','')");
 					$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom_slash', '$d', 'Visite','','$user','$modif','','1')");
@@ -203,6 +203,7 @@
 
 		affiche_un_choix($act,"Banque");
 				
+		affiche_un_choix($act,"CAF");	
 		affiche_un_choix($act,"CCAS");	
 		affiche_un_choix($act,"Centre de soin");
 		affiche_un_choix($act,"CPAM");

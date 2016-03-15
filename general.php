@@ -35,30 +35,36 @@ include 'bdd.php';
 			affiche_un_choix($val_init,$autre);
 		echo "</SELECT></td>";
 		}			
-		
+
+	require_once "connex_inc.php";
+	$traductions_fr_fr =( strtolower(parametre("DD_traductions_fr_fr","oui"))=="non"); 	
+	
 	function traduire($ligne)
 		{
-		global $user_lang;
-		
+		global $user_lang, $traductions_fr_fr;
+				
 		if (($user_lang!="fr") && ($user_lang!="gb") && ($user_lang!="de") &&  ($user_lang!="es") && ($user_lang!="ru"))
 			$user_lang="fr";
-			
-		$l=addslashes($ligne);
-		$r1 =command("select * from  z_traduire where original='$l' ");
-		if (!($d1=fetch_command($r1))) 
+		
+		if ($traductions_fr_fr)
 			{
-			if ($l!="")
+			$l=addslashes($ligne);
+			$r1 =command("select * from  z_traduire where original='$l' ");
+			if (!($d1=fetch_command($r1))) 
 				{
-				$idx=inc_index('traduire');
-				command("insert into z_traduire VALUES ($idx,'$l','','','','','','$l','') ");
+				if ($l!="")
+					{
+					$idx=inc_index('traduire');
+					command("insert into z_traduire VALUES ($idx,'$l','','','','','','$l','') ");
+					}
+				}			
+			else
+				{
+				//echo 
+				$l=stripcslashes($d1[$user_lang]); // T358
+				if ($l!="")	
+					$ligne=$l;
 				}
-			}			
-		else
-			{
-			//echo 
-			$l=stripcslashes($d1[$user_lang]); // T358
-			if ($l!="")	
-				$ligne=$l;
 			}
 		return($ligne);
 		}	
