@@ -221,7 +221,7 @@ include 'suivi_liste.php';
 						$d2 = fetch_command($r2) ;	
 						$freq = $d2["TOTAL"];
 						echo "<td width=\"20\" ALIGN=\"RIGHT\" bgcolor=\"$color\"> $freq </td>";
-						echo "<td width=\"20\" ALIGN=\"RIGHT\" > ".sprintf("%2.1f",$freq/$nb)."</td>";
+						echo "<td width=\"20\" ALIGN=\"RIGHT\" bgcolor=\"$color\" > ".sprintf("%2.1f",$freq/$nb)."</td>";
 						
 						}
 					else

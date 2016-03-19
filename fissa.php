@@ -1298,7 +1298,7 @@ else
 						
 							echo "</td> <td bgcolor=\"$color\"> ";
 							$valeur=mef_texte_a_afficher( stripcslashes($commentaire[$i]));
-							echo "<TEXTAREA rows=\"1\" cols=\"60\" name=\"commentaire\" onChange=\"this.form.submit();\" >$valeur</TEXTAREA>";
+							echo "<TEXTAREA rows=\"1\" cols=\"50\" name=\"commentaire\" onChange=\"this.form.submit();\" >$valeur</TEXTAREA>";
 							echo " </form> ";
 							}
 						}
