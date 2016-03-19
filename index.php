@@ -2549,7 +2549,9 @@ function affiche_membre($idx)
 				case "raz_mdp1":
 				case "dde_acces" :
 				case "sms_test" :
+				case "sms_test_ovh" :
 				case "sms_envoi" :
+				case "sms_envoi_ovh" :
 				case "mail_test" :
 				case "mail_envoi" :
 				
@@ -3759,8 +3761,6 @@ if (isset($_POST['pass']))
 		$user_lang=$donnees["langue"];		
 		supp_fichier("tmp/A-$user_idx.pdf");	
 		supp_fichier("tmp/_A-$user_idx.pdf");	
-	
-
 
 		echo "<table border=\"0\" >";	
 		echo "<tr> <td> ";		
@@ -3960,7 +3960,7 @@ if (isset($_POST['pass']))
 			pied_de_page("x");
 			}	
 			
-	if (($action=="sms_envoi") &&  ($user_droit!=""))
+	if ((($action=="sms_envoi") || ($action=="sms_envoi_ovh") ) &&  ($user_droit!=""))
 		{
 		$msg= stripcslashes(variable("msg"));		
 		$org = stripcslashes(variable("origine"));
@@ -3968,10 +3968,37 @@ if (isset($_POST['pass']))
 		if (strlen($msg)>10)
 			{
 			$msg.= " Message de ".$org;
-			envoi_SMS( $tel , $msg);
-			ajout_log( $idx, traduire("Envoi SMS personnel à")." : $tel", $user_idx );
+			if ($action=="sms_envoi")
+				{
+				envoi_SMS( $tel , $msg);
+				ajout_log( $idx, traduire("Envoi SMS personnel à")." : $tel", $user_idx );
+				msg_ok (traduire("Envoi du SMS réalisé"));
+				}
+			else
+				{
+				envoi_SMS_operateur( $tel , $msg);
+				ajout_log( $idx, traduire("Envoi SMS (via opérateur) personnel à")." : $tel", $user_idx );
+				msg_ok (traduire("Envoi du SMS via opérateur réalisé"));
+				}
 
-			msg_ok (traduire("Envoi du SMS réalisé"));
+			$action="";
+			}
+		else
+			{
+			erreur (traduire("Message trop court"));
+			$action="sms_test";			
+			}
+		}	
+
+	if (($action=="sms_envoi_ovh") &&  ($user_droit!=""))
+		{
+		$msg= stripcslashes(variable("msg"));		
+		$org = stripcslashes(variable("origine"));
+		$tel= variable("tel");		
+		if (strlen($msg)>10)
+			{
+			$msg.= " Message de ".$org;
+
 			$action="";
 			}
 		else
@@ -3981,7 +4008,7 @@ if (isset($_POST['pass']))
 			}
 		}	
 		
-	if (($action=="sms_test") &&  ($user_droit!=""))
+	if ((($action=="sms_test") || ($action=="sms_test_ovh"))  &&  ($user_droit!=""))
 		{
 		$tel= variable("tel");
 		if ($tel=="")
@@ -3993,7 +4020,11 @@ if (isset($_POST['pass']))
 		
 			debut_cadre("500");
 			echo "<br><img src=\"images/sms.png\" width=\"50\" height=\"40\" > ";
-			formulaire ("sms_envoi");
+			if ($action=="sms_test") 
+				formulaire ("sms_envoi");
+			else
+				formulaire ("sms_envoi_ovh");
+
 			echo "<TABLE><TR><td> ".traduire('Destinataire')." : </td> ";
 			if ($tel=="")
 				echo "<td> <input type=\"text\" name=\"tel\" size=\"13\" value=\"06\"/></td>";
@@ -4104,6 +4135,7 @@ if (isset($_POST['pass']))
 			echo "<li><a href=\"index.php?action=active_sms2mail\">  active_sms2mail </a></li>";
 			echo "<li><a href=\"index.php?action=desactive_sms2mail\"> desactive_sms2mail </a></li>";		
 			echo "<li><a href=\"index.php?action=sms_test\"> Envoi SMS </a></li>";		
+			echo "<li><a href=\"index.php?action=sms_test_ovh\"> Envoi SMS OVH </a></li>";		
 			echo "</li></ul>";			
 			
 			echo "<li> <a href=\"index.php\">CTRL</a><ul>";			

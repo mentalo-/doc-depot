@@ -47,9 +47,9 @@ include 'inc_style.php';
 
 		if (($nom!="") && ($nom!="Mail") && ($nom!="Synth") && (!is_numeric($nom)))
 			{
-			$r1 = command("SELECT DISTINCT count(*) FROM $bdd WHERE date='0000-00-00' and nom='$nom_slash' ");
+			$r1 = command("SELECT DISTINCT * FROM $bdd WHERE date='0000-00-00' and nom='$nom_slash' ");
 			$r2=nbre_enreg($r1); 
-			if ($r2[0]==0)
+			if ($r2==0)
 				{
 				$user= $_SESSION['user'];
 				$modif=time();

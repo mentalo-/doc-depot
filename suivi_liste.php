@@ -251,283 +251,291 @@
 		}
 
 
+	
+$liste_pays = array(
 		
+'0' => 'Inconnu',
+'1' => 'Afghanistan',
+'2' => 'Afrique Centrale',
+'3' => 'Afrique du sud',
+'4' => 'Albanie',
+'5' => 'Algérie',
+'6' => 'Allemagne',
+// '' => 'Andorre',
+'7' => 'Angola',
+//'' => 'Anguilla',
+'8' => 'Arabie Saoudite',
+'9' => 'Argentine',
+'10' => 'Arménie',
+'11' => 'Australie',
+'12' => 'Autriche',
+'13' => 'Autre Asie',
+'14' => 'Autre Amérique',
+'15' => 'Autre Afrique',
+'16' => 'Autre DOM-TOM',
+'17' => 'Autre Europe',
+'18' => 'Autre Océanie',
+
+'19' => 'Azerbaidjan',
+
+//'' => 'Bahamas',
+'20' => 'Bangladesh',
+//'' => 'Barbade',
+'21' => 'Bahrein',
+'22' => 'Belgique',
+//'' => 'Belize',
+'23' => 'Benin',
+//'' => 'Bermudes',
+'24' => 'Biélorussie',
+'25' => 'Bolivie',
+'26' => 'Botswana',
+'27' => 'Bhoutan',
+'28' => 'Boznie Herzegovine',
+'29' => 'Brésil',
+'30' => 'Brunei',
+'31' => 'Bulgarie',
+'32' => 'Burkina Faso',
+'33' => 'Burundi',
+
+//'' => 'Caiman',
+'34' => 'Cambodge',
+'35' => 'Cameroun',
+'36' => 'Canada',
+'37' => 'Canaries',
+'38' => 'Cap Vert',
+'39' => 'Chili',
+'40' => 'Chine',
+'41' => 'Chypre',
+'42' => 'Colombie',
+'43' => 'Comores',
+'44' => 'Congo',
+'45' => 'Congo RD',
+//'' => 'Cook',
+'46' => 'Corée du Nord',
+'47' => 'Corée du Sud',
+'48' => 'Costa Rica',
+'49' => 'Côte d Ivoire',
+'50' => 'Croatie',
+'51' => 'Cuba',
+
+'52' => 'Danemark',
+'53' => 'Djibouti',
+'54' => 'Dominique',
+
+'55' => 'Egypte',
+'56' => 'Emirats Arabes Unis',
+'57' => 'Equateur',
+'58' => 'Erythree',
+'59' => 'Espagne',
+'60' => 'Estonie',
+'61' => 'Etats Unis',
+'62' => 'Ethiopie',
+'63' => 'Erythrée',
+
+//'' => 'Falkland',
+//'' => 'Feroe',
+//'' => 'Fidji',
+'64' => 'Finlande',
+'65' => 'France',
+
+'66' => 'Gabon',
+'67' => 'Gambie',
+'68' => 'Géorgie',
+'69' => 'Ghana',
+'70' => 'Gibraltar',
+'71' => 'Gréce',
+//'' => 'Grenade',
+'72' => 'Groenland',
+//'' => 'Guadeloupe',
+//'' => 'Guam',
+'73' => 'Guatemala',
+//'' => 'Guernesey',
+'74' => 'Guinee',
+'75' => 'Guinée Bissau',
+'76' => 'Guinée équatoriale',
+'77' => 'Guyana',
+'78' => 'Guyane Française ',
+
+'79' => 'Haïti',
+'80' => 'Hawaii',
+'81' => 'Honduras',
+'82' => 'Hong Kong',
+'83' => 'Hongrie',
+
+'84' => 'Inde',
+'85' => 'Indonésie',
+'86' => 'Iran',
+'87' => 'Iraq',
+'88' => 'Irlande',
+'89' => 'Islande',
+'90' => 'Israël',
+'91' => 'Italie',
+
+'92' => 'Jamaique',
+//'' => 'Jan Mayen',
+'93' => 'Japon',
+//'' => 'Jersey',
+'94' => 'Jordanie',
+
+'95' => 'Kazakhstan',
+'96' => 'Kenya',
+'97' => 'Kirghizstan',
+//'' => 'Kiribati',
+'98' => 'Kosovo ',
+'99' => 'Koweit',
+
+'100' => 'Laos',
+'101' => 'Lesotho',
+'102' => 'Lettonie',
+'103' => 'Liban',
+'104' => 'Liberia',
+//'' => 'Liechtenstein',
+'105' => 'Lituanie',
+//'' => 'Luxembourg',
+'106' => 'Lybie',
+
+//'' => 'Macao',
+'107' => 'Macédoine',
+'108' => 'Madagascar',
+//'' => 'Madère',
+'109' => 'Malaisie',
+'110' => 'Malawi',
+//'' => 'Maldives',
+'111' => 'Mali',
+//'' => 'Malte',
+//'' => 'Man',
+//'' => 'Mariannes du Nord', 
+'112' => 'Maroc',
+//'' => 'Marshall',
+'113' => 'Martinique',
+'114' => 'Maurice',
+'115' => 'Mauritanie',
+'116' => 'Mayotte',
+'117' => 'Mexique',
+//'' => 'Micronesie',
+//'' => 'Midway',
+'118' => 'Moldavie',
+//'' => 'Monaco',
+'119' => 'Mongolie',
+//'' => 'Montserrat',
+'120' => 'Mozambique',
+
+'121' => 'Namibie',
+//'' => 'Nauru',
+'122' => 'Népal',
+'123' => 'Nicaragua',
+'124' => 'Niger',
+'125' => 'Nigéria',
+//'' => 'Niue',
+//'' => 'Norfolk',
+'126' => 'Norvège',
+'127' => 'Nouvelle Calédonie',
+'128' => 'Nouvelle Zelande',
+
+'129' => 'Oman',
+'130' => 'Ouganda',
+'131' => 'Ouzbekistan',
+
+'132' => 'Pakistan',
+//'' => 'Palau',
+'133' => 'Palestine',
+'134' => 'Panama',
+'135' => 'Papouasie_Nouvelle_Guinee',
+'136' => 'Paraguay',
+'137' => 'Pays Bas',
+'138' => 'Pérou',
+'139' => 'Philippines',
+'140' => 'Pologne',
+'141' => 'Polynésie',
+'142' => 'Porto Rico',
+'143' => 'Portugal',
+
+'144' => 'Qatar',
+
+'145' => 'Republique Dominicaine',
+'146' => 'Republique Tcheque',
+//'' => 'Reunion',
+'147' => 'Roumanie',
+'148' => 'Royaume-Uni',
+'149' => 'Russie',
+'150' => 'Rwanda',
+
+'151' => 'Sahara Occidental', 
+//'' => 'Sainte_Lucie',
+//'' => 'Saint_Marin',
+//'' => 'Salomon',
+'152' => 'Salvador',
+//'' => 'Samoa_Occidentales',
+//'' => 'Samoa_Americaine',
+'153' => 'Samoa',
+//'' => 'Sao_Tome_et_Principe',
+'154' => 'Sénégal',
+'155' => 'Serbie',
+
+//'' => 'Seychelles',
+'156' => 'Sierra Léone', 
+'157' => 'Singapour',
+'158' => 'Slovaquie',
+'159' => 'Slovénie',
+'160' => 'Somalie',
+'161' => 'Soudan',
+'162' => 'Sri Lanka',
+'163' => 'Suède',
+'164' => 'Suisse',
+'165' => 'Surinam',
+'166' => 'Swaziland',
+'167' => 'Syrie',
+
+'168' => 'Tadjikistan',
+'169' => 'Taiwan',
+//'' => 'Tonga',
+'170' => 'Tanzanie',
+'171' => 'Tchad',
+'172' => 'Tchéquie',
+'173' => 'Tchétchénie',
+'174' => 'Thailande',
+'175' => 'Tibet',
+//'' => 'Timor_Oriental',
+'176' => 'Togo',
+//'' => 'Trinite_et_Tobago',
+//'' => 'Tristan da cunha',
+'177' => 'Tunisie',
+'178' => 'Turkmenistan',
+'179' => 'Turquie',
+
+'180' => 'Ukraine',
+'181' => 'Uruguay',
+
+//'' => 'Vanuatu',
+//'' => 'Vatican',
+'182' => 'Venezuela',
+//'' => 'Vierges_Americaines',
+//'' => 'Vierges_Britanniques',
+
+'183' => 'Vietnam',
+
+//'' => 'Wake',
+//'' => 'Wallis et Futuma',
+
+'184' => 'Yemen',
+'185' => 'Yougoslavie',
+
+'186' => 'Zambie',
+'187' => 'Zimbabwe'	
+				);
+				
+				
 	function select_pays($auto="", $nat="")
 		{		
+		global $liste_pays;
+		
 		if ($auto!="")
 			echo "<SELECT name=\"nationalite\"  onChange=\"this.form.submit();\">";	
 		else
 			echo "<SELECT name=\"nationalite\">";	
-
-if ($nat=="") $nat= "Inconnu";
-affiche_un_choix($nat,"Inconnu");
-affiche_un_choix($nat,"Afghanistan");
-affiche_un_choix($nat,"Afrique Centrale");
-affiche_un_choix($nat,"Afrique du sud");
-affiche_un_choix($nat,"Albanie");
-affiche_un_choix($nat,"Algérie");
-affiche_un_choix($nat,"Allemagne");
-// affiche_un_choix($nat,"Andorre");
-affiche_un_choix($nat,"Angola");
-//affiche_un_choix($nat,"Anguilla");
-affiche_un_choix($nat,"Arabie Saoudite");
-affiche_un_choix($nat,"Argentine");
-affiche_un_choix($nat,"Arménie");
-affiche_un_choix($nat,"Australie");
-affiche_un_choix($nat,"Autriche");
-affiche_un_choix($nat,"Autre Asie");
-affiche_un_choix($nat,"Autre Amérique");
-affiche_un_choix($nat,"Autre Afrique");
-affiche_un_choix($nat,"Autre DOM-TOM");
-affiche_un_choix($nat,"Autre Europe");
-affiche_un_choix($nat,"Autre Océanie");
-
-affiche_un_choix($nat,"Azerbaidjan");
-
-//affiche_un_choix($nat,"Bahamas");
-affiche_un_choix($nat,"Bangladesh");
-//affiche_un_choix($nat,"Barbade");
-affiche_un_choix($nat,"Bahrein");
-affiche_un_choix($nat,"Belgique");
-//affiche_un_choix($nat,"Belize");
-affiche_un_choix($nat,"Benin");
-//affiche_un_choix($nat,"Bermudes");
-affiche_un_choix($nat,"Biélorussie");
-affiche_un_choix($nat,"Bolivie");
-affiche_un_choix($nat,"Botswana");
-affiche_un_choix($nat,"Bhoutan");
-affiche_un_choix($nat,"Boznie Herzegovine");
-affiche_un_choix($nat,"Brésil");
-affiche_un_choix($nat,"Brunei");
-affiche_un_choix($nat,"Bulgarie");
-affiche_un_choix($nat,"Burkina Faso");
-affiche_un_choix($nat,"Burundi");
-
-//affiche_un_choix($nat,"Caiman");
-affiche_un_choix($nat,"Cambodge");
-affiche_un_choix($nat,"Cameroun");
-affiche_un_choix($nat,"Canada");
-affiche_un_choix($nat,"Canaries");
-affiche_un_choix($nat,"Cap Vert");
-affiche_un_choix($nat,"Chili");
-affiche_un_choix($nat,"Chine");
-affiche_un_choix($nat,"Chypre");
-affiche_un_choix($nat,"Colombie");
-affiche_un_choix($nat,"Comores");
-affiche_un_choix($nat,"Congo");
-affiche_un_choix($nat,"Congo RD");
-//affiche_un_choix($nat,"Cook");
-affiche_un_choix($nat,"Corée du Nord");
-affiche_un_choix($nat,"Corée du Sud");
-affiche_un_choix($nat,"Costa Rica");
-affiche_un_choix($nat,"Côte d'Ivoire");
-affiche_un_choix($nat,"Croatie");
-affiche_un_choix($nat,"Cuba");
-
-affiche_un_choix($nat,"Danemark");
-affiche_un_choix($nat,"Djibouti");
-affiche_un_choix($nat,"Dominique");
-
-affiche_un_choix($nat,"Egypte");
-affiche_un_choix($nat,"Emirats Arabes Unis");
-affiche_un_choix($nat,"Equateur");
-affiche_un_choix($nat,"Erythree");
-affiche_un_choix($nat,"Espagne");
-affiche_un_choix($nat,"Estonie");
-affiche_un_choix($nat,"Etats Unis");
-affiche_un_choix($nat,"Ethiopie");
-affiche_un_choix($nat,"Erythrée");
-
-//affiche_un_choix($nat,"Falkland");
-//affiche_un_choix($nat,"Feroe");
-//affiche_un_choix($nat,"Fidji");
-affiche_un_choix($nat,"Finlande");
-affiche_un_choix($nat,"France");
-
-affiche_un_choix($nat,"Gabon");
-affiche_un_choix($nat,"Gambie");
-affiche_un_choix($nat,"Géorgie");
-affiche_un_choix($nat,"Ghana");
-affiche_un_choix($nat,"Gibraltar");
-affiche_un_choix($nat,"Gréce");
-//affiche_un_choix($nat,"Grenade");
-affiche_un_choix($nat,"Groenland");
-//affiche_un_choix($nat,"Guadeloupe");
-//affiche_un_choix($nat,"Guam");
-affiche_un_choix($nat,"Guatemala");
-//affiche_un_choix($nat,"Guernesey");
-affiche_un_choix($nat,"Guinee");
-affiche_un_choix($nat,"Guinée Bissau");
-affiche_un_choix($nat,"Guinée équatoriale");
-affiche_un_choix($nat,"Guyana");
-affiche_un_choix($nat,"Guyane Française ");
-
-affiche_un_choix($nat,"Haïti");
-affiche_un_choix($nat,"Hawaii");;
-affiche_un_choix($nat,"Honduras");
-affiche_un_choix($nat,"Hong Kong");
-affiche_un_choix($nat,"Hongrie");
-
-affiche_un_choix($nat,"Inde");
-affiche_un_choix($nat,"Indonésie");
-affiche_un_choix($nat,"Iran");
-affiche_un_choix($nat,"Iraq");
-affiche_un_choix($nat,"Irlande");
-affiche_un_choix($nat,"Islande");
-affiche_un_choix($nat,"Israël");
-affiche_un_choix($nat,"Italie");
-
-affiche_un_choix($nat,"Jamaique");
-//affiche_un_choix($nat,"Jan Mayen");
-affiche_un_choix($nat,"Japon");
-//affiche_un_choix($nat,"Jersey");
-affiche_un_choix($nat,"Jordanie");
-
-affiche_un_choix($nat,"Kazakhstan");
-affiche_un_choix($nat,"Kenya");
-affiche_un_choix($nat,"Kirghizstan");
-//affiche_un_choix($nat,"Kiribati");
-affiche_un_choix($nat,"Kosovo ");
-affiche_un_choix($nat,"Koweit");
-
-affiche_un_choix($nat,"Laos");
-affiche_un_choix($nat,"Lesotho");
-affiche_un_choix($nat,"Lettonie");
-affiche_un_choix($nat,"Liban");
-affiche_un_choix($nat,"Liberia");
-//affiche_un_choix($nat,"Liechtenstein");
-affiche_un_choix($nat,"Lituanie");
-//affiche_un_choix($nat,"Luxembourg");
-affiche_un_choix($nat,"Lybie");
-
-//affiche_un_choix($nat,"Macao");
-affiche_un_choix($nat,"Macédoine");
-affiche_un_choix($nat,"Madagascar");
-//affiche_un_choix($nat,"Madère");
-affiche_un_choix($nat,"Malaisie");
-affiche_un_choix($nat,"Malawi");
-//affiche_un_choix($nat,"Maldives");
-affiche_un_choix($nat,"Mali");
-//affiche_un_choix($nat,"Malte");
-//affiche_un_choix($nat,"Man");
-//affiche_un_choix($nat,"Mariannes du Nord"); 
-affiche_un_choix($nat,"Maroc");
-//affiche_un_choix($nat,"Marshall");
-affiche_un_choix($nat,"Martinique");
-affiche_un_choix($nat,"Maurice");
-affiche_un_choix($nat,"Mauritanie");
-affiche_un_choix($nat,"Mayotte");
-affiche_un_choix($nat,"Mexique");
-//affiche_un_choix($nat,"Micronesie");
-//affiche_un_choix($nat,"Midway");
-affiche_un_choix($nat,"Moldavie");
-//affiche_un_choix($nat,"Monaco");
-affiche_un_choix($nat,"Mongolie");
-//affiche_un_choix($nat,"Montserrat");
-affiche_un_choix($nat,"Mozambique");
-
-affiche_un_choix($nat,"Namibie");
-//affiche_un_choix($nat,"Nauru");
-affiche_un_choix($nat,"Népal");
-affiche_un_choix($nat,"Nicaragua");
-affiche_un_choix($nat,"Niger");
-affiche_un_choix($nat,"Nigéria");
-//affiche_un_choix($nat,"Niue");
-//affiche_un_choix($nat,"Norfolk");
-affiche_un_choix($nat,"Norvège");
-affiche_un_choix($nat,"Nouvelle Calédonie");
-affiche_un_choix($nat,"Nouvelle Zelande");
-
-affiche_un_choix($nat,"Oman");
-affiche_un_choix($nat,"Ouganda");
-affiche_un_choix($nat,"Ouzbekistan");
-
-affiche_un_choix($nat,"Pakistan");
-//affiche_un_choix($nat,"Palau");
-affiche_un_choix($nat,"Palestine");
-affiche_un_choix($nat,"Panama");
-affiche_un_choix($nat,"Papouasie_Nouvelle_Guinee");
-affiche_un_choix($nat,"Paraguay");
-affiche_un_choix($nat,"Pays Bas");
-affiche_un_choix($nat,"Pérou");
-affiche_un_choix($nat,"Philippines");
-affiche_un_choix($nat,"Pologne");
-affiche_un_choix($nat,"Polynésie");
-affiche_un_choix($nat,"Porto Rico");
-affiche_un_choix($nat,"Portugal");
-
-affiche_un_choix($nat,"Qatar");
-
-affiche_un_choix($nat,"Republique Dominicaine");
-affiche_un_choix($nat,"Republique Tcheque");
-//affiche_un_choix($nat,"Reunion");
-affiche_un_choix($nat,"Roumanie");
-affiche_un_choix($nat,"Royaume-Uni");
-affiche_un_choix($nat,"Russie");
-affiche_un_choix($nat,"Rwanda");
-
-affiche_un_choix($nat,"Sahara Occidental"); 
-//affiche_un_choix($nat,"Sainte_Lucie");
-//affiche_un_choix($nat,"Saint_Marin");
-//affiche_un_choix($nat,"Salomon");
-affiche_un_choix($nat,"Salvador");
-//affiche_un_choix($nat,"Samoa_Occidentales");
-//affiche_un_choix($nat,"Samoa_Americaine");
-affiche_un_choix($nat,"Samoa");
-//affiche_un_choix($nat,"Sao_Tome_et_Principe");
-affiche_un_choix($nat,"Sénégal");
-affiche_un_choix($nat,"Serbie");
-
-//affiche_un_choix($nat,"Seychelles");
-affiche_un_choix($nat,"Sierra Léone"); 
-affiche_un_choix($nat,"Singapour");
-affiche_un_choix($nat,"Slovaquie");
-affiche_un_choix($nat,"Slovénie");
-affiche_un_choix($nat,"Somalie");
-affiche_un_choix($nat,"Soudan");
-affiche_un_choix($nat,"Sri Lanka");
-affiche_un_choix($nat,"Suède");
-affiche_un_choix($nat,"Suisse");
-affiche_un_choix($nat,"Surinam");
-affiche_un_choix($nat,"Swaziland");
-affiche_un_choix($nat,"Syrie");
-
-affiche_un_choix($nat,"Tadjikistan");
-affiche_un_choix($nat,"Taiwan");
-//affiche_un_choix($nat,"Tonga");
-affiche_un_choix($nat,"Tanzanie");
-affiche_un_choix($nat,"Tchad");
-affiche_un_choix($nat,"Tchéquie");
-affiche_un_choix($nat,"Tchétchénie");
-affiche_un_choix($nat,"Thailande");
-affiche_un_choix($nat,"Tibet");
-//affiche_un_choix($nat,"Timor_Oriental");
-affiche_un_choix($nat,"Togo");
-//affiche_un_choix($nat,"Trinite_et_Tobago");
-//affiche_un_choix($nat,"Tristan da cunha");
-affiche_un_choix($nat,"Tunisie");
-affiche_un_choix($nat,"Turkmenistan");
-affiche_un_choix($nat,"Turquie");
-
-affiche_un_choix($nat,"Ukraine");
-affiche_un_choix($nat,"Uruguay");
-
-//affiche_un_choix($nat,"Vanuatu");
-//affiche_un_choix($nat,"Vatican");
-affiche_un_choix($nat,"Venezuela");
-//affiche_un_choix($nat,"Vierges_Americaines");
-//affiche_un_choix($nat,"Vierges_Britanniques");
-
-affiche_un_choix($nat,"Vietnam");
-
-//affiche_un_choix($nat,"Wake");
-//affiche_un_choix($nat,"Wallis et Futuma");
-
-affiche_un_choix($nat,"Yemen");
-affiche_un_choix($nat,"Yougoslavie");
-
-affiche_un_choix($nat,"Zambie");
-affiche_un_choix($nat,"Zimbabwe");
+		if ($nat=="") $nat= "Inconnu";
+		for ($i=0; isset ($liste_pays[$i]); $i++)
+			affiche_un_choix($nat,$liste_pays[$i]);
 
 		echo "</SELECT>";		
 		}

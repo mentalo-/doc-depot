@@ -31,9 +31,14 @@
 		
 	function nbre_enreg ($reponse)
 		{
+		return(  mysql_num_rows($reponse) );
+		}	
+
+	function nbre_enreg_fetch ($reponse)
+		{
 		return(  mysql_fetch_row($reponse) );
 		}	
-	
+		
 	// nom utilisé
 	function ouverture_bdd ()
 		{

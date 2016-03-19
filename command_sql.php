@@ -19,7 +19,7 @@ if ($_SESSION['pass']==true)
 		
 		$tables = array();
 		$result = command('SHOW TABLES');
-		while($row = nbre_enreg($result))
+		while($row = mysql_fetch_row($result))
 				$tables[] = $row[0];
 
 		//cycle through
