@@ -551,16 +551,7 @@ include 'inc_style.php';
 						$action="suivi";
 						}	
 					
-					if ($com=="") 
-						{
-						$date_jour_gb=mise_en_forme_date_aaaammjj( $date_jour);
-						$reponse = command("SELECT * FROM $bdd WHERE date='$date_jour_gb' and nom='$nom_slash' and pres_repas='Suivi' "); 
-						if ($donnees = fetch_command($reponse))
-							$com=mef_texte_a_afficher( stripcslashes($donnees["commentaire"]));
-						else
-							$com="";
-						}
-					else
+			if ($action=="suivi_maj")					
 						{
 						$date_jour_gb=mise_en_forme_date_aaaammjj( $date_jour);
 						$com=addslashes2($com);
@@ -572,8 +563,16 @@ include 'inc_style.php';
 							$reponse = command("UPDATE $bdd set commentaire='$com' , user='$user' , modif='$modif' where nom='$nom_slash' and date='$date_jour_gb' and pres_repas='Suivi' ");
 						else
 							$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom_slash', '$date_jour_gb', 'Suivi','$com','$user','$modif','$act','')");					
-						//$commentaire=$com;
-						}
+						$action="suivi";
+						}					
+					
+				$date_jour_gb=mise_en_forme_date_aaaammjj( $date_jour);
+				$reponse = command("SELECT * FROM $bdd WHERE date='$date_jour_gb' and nom='$nom_slash' and pres_repas='Suivi' "); 
+				if ($donnees = fetch_command($reponse))
+					$com=mef_texte_a_afficher( stripcslashes($donnees["commentaire"]));
+				else
+					$com="";
+		
 					
 					$derniere_maj_pda="";
 					
@@ -719,7 +718,7 @@ include 'inc_style.php';
 						echo "<input type=\"hidden\" name=\"action\" value=\"suivi\"> " ;
 						echo "<input type=\"hidden\" name=\"nom\"  value=\"$nom\">";
 						echo "<input type=\"text\" name=\"date_jour\" size=\"10\"  value=\"$date_jour\"  onChange=\"this.form.submit();\" class=\"calendrier\" >";
-						echo "<input type=\"submit\" value=\"Valider\" > </form> 	</td>   ";					
+						echo "<input type=\"submit\" value=\"Valider date\" > </form> 	</td>   ";					
 						echo "</table> ";	
 						
 						echo "<TABLE><TR><td > <div class=\"CSS_titre\"  >";
@@ -742,11 +741,11 @@ include 'inc_style.php';
 
 						echo "</table></td>";
 						echo "<tr> <td><form method=\"GET\" action=\"suivi.php\">";
-						echo "<input type=\"hidden\" name=\"action\" value=\"suivi\"> " ;
+						echo "<input type=\"hidden\" name=\"action\" value=\"suivi_maj\"> " ;
 						echo "<input type=\"hidden\" name=\"nom\"  value=\"$nom\">";
 						echo "<input type=\"hidden\" name=\"date_jour\"  value=\"$date_jour\">";
 						echo "<TEXTAREA rows=\"4\" cols=\"110\" name=\"com\" onChange=\"this.form.submit();\">$com</TEXTAREA>";
-						echo "</td> ";
+						echo "<input type=\"submit\" value=\"Valider texte\" ></td>  ";
 						echo "</form> ";
 						fin_cadre();	
 						
@@ -764,7 +763,7 @@ include 'inc_style.php';
 						echo "<input type=\"hidden\" name=\"date_jour\"  value=\"$date_jour\">";
 						echo "<input type=\"hidden\" name=\"nom\"  value=\"$nom\">";
 						echo "<input type=\"text\" name=\"echeance\" size=\"10\"  value=\"$echeance\"  onChange=\"this.form.submit();\" class=\"calendrier\" >";
-						echo "<input type=\"submit\" value=\"Valider\" > </form> 	</td>   ";
+						echo "<input type=\"submit\" value=\"Valider Date\" > </form> 	</td>   ";
 						
 						echo "</table></td> ";
 						
@@ -774,7 +773,8 @@ include 'inc_style.php';
 
 						echo "<input type=\"hidden\" name=\"nom\"  value=\"$nom\">";
 						echo "<TEXTAREA rows=\"4\" cols=\"110\" name=\"pda\" onChange=\"this.form.submit();\">$pda</TEXTAREA>";
-						echo "</td> </form> ";
+//						echo "<input type=\"image\" src=\"images/oui.png\" width=\"20\" height=\"20\" title=\"".traduire('Valider le texte')."\" ></td> </form> ";
+						echo "<input type=\"submit\" value=\"Valider texte\" > </td> </form> ";
 						echo "<tr><td>  $derniere_maj_pda </td> ";
 						echo "</table>  ";
 						

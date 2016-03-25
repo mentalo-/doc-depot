@@ -199,6 +199,7 @@
 		affiche_un_choix($act,"Agence Interim");
 		affiche_un_choix($act,"Accueil de jour");
 		affiche_un_choix($act,"AME");
+		affiche_un_choix($act,"Association");
 		affiche_un_choix($act,"ASTI");		
 
 		affiche_un_choix($act,"Banque");
