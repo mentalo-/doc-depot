@@ -83,6 +83,70 @@
 				}
 			}
 		}
+	
+	// tous les jours à 23h on réinitialise les score pour chaque visiteur de Fissa de façon à pouvoir être calculé dasn le nuit par tranche
+	function init_score_fissa()
+		{
+		echo "<BR> Init_score_fissa : ";
+		$reponse =command("select * from fct_fissa  ");
+		while ($donnees = mysql_fetch_array($reponse) )
+			{
+			$support=$donnees["support"];
+			echo "$support; ";
+			command("UPDATE $support set qte='?' where date='0000-00-00' and pres_repas='' ");
+			}
+		}			
+
+	
+	
+	function plus1( $bdd, $nom, $fenetre )
+		{
+		global $score  ;
+		
+		$filtre = " and ( ( pres_repas='Visite') or  ( pres_repas='Visite+Repas') ) ";
+		$t=  time() - $fenetre* 86400;
+		$l= date('Y-m-d', $t);
+		echo " $l ";
+
+		$nbj=  (time() - $t) /86400; 
+		$reponse = command("SELECT count(*) as TOTAL FROM $bdd where date>'$l' and nom='$nom' $filtre   "); 
+		$donnees = fetch_command($reponse);
+		$nb=$donnees["TOTAL"];				
+		if ($nb>0)
+			{
+			$score+=$nb/$nbj;			
+			return (true);
+			}
+		return (false);
+		}	
+		
+	function calcule_score()
+		{
+		global $time_ttt, $score;
+		echo "<BR> Calcule_score : ";
+		$reponse =command("select * from fct_fissa  ");
+		while ($donnees = mysql_fetch_array($reponse) )
+			{
+			$bdd=$donnees["support"];
+			
+			$r1 = command("SELECT * FROM $bdd where date='0000-00-00'  and qte='?' "); 
+			while ($d1 = fetch_command($r1) ) 
+				{
+				$score=0;
+				$nom=$d1["nom"];
+				echo "<br> $nom : ";
+				if ( plus1( $bdd, $nom, 61 ))				
+					if ( plus1( $bdd, $nom, 30 ))
+						if ( plus1( $bdd, $nom, 15 ))
+							 plus1( $bdd, $nom, 7);
+					
+				command("UPDATE $bdd SET qte='$score' where nom='$nom' and date='0000-00-00' ");
+				echo " ==> ". sprintf("%2.2f",  $score*10);
+				if  ( (time() -$time_ttt) >5)
+					break;
+				}
+			}
+		}
 		
 // Génére une chine aléatoire pour le message de supervision
 function random_chaine($car) 
@@ -139,7 +203,15 @@ function random_chaine($car)
 				ecrit_parametre("TECH_nb_mail_envoyes",0) ;
 				ecrit_parametre("TECH_nb_sms_envoyes",0) ;
 				}
-			
+
+
+		if (date('Y-m-d-h',  time()) != date('Y-m-d-h',  $ancien_ttt ))
+			if ($heure==23)
+				init_score_fissa();
+
+//		if (($heure	>=23) or ($heure<8)) 
+			calcule_score();
+				
 		if (date('Y-m-d-h',  time()) != date('Y-m-d-h',  $ancien_ttt ))
 			if ($heure==1)
 				{

@@ -515,10 +515,16 @@ include 'inc_style.php';
 						$action="suivi";
 						}
 					
+					$premiere_visite="---";
+					$reponse = command("SELECT * FROM $bdd WHERE nom='$nom_slash' and ( pres_repas='Visite' or pres_repas='Visite+repas' ) order by date ASC "); 
+					if ($donnees = fetch_command($reponse))
+						$premiere_visite=mef_date_fr($donnees["date"]);
+					
+					
 					echo "<table><tr> <td >";
 					echo "<ul id=\"menu-bar\">";					
 					echo "<li><a href=\"suivi.php?action=suivi&nom=$nom\" > <b> $nom </b> </a></li>";
-					echo "</ul> </td>";
+					echo "</ul> </td><td> - 1ere visite : $premiere_visite </td>";
 
 					echo "</table> ";					
 					
@@ -763,7 +769,7 @@ include 'inc_style.php';
 						echo "<input type=\"hidden\" name=\"date_jour\"  value=\"$date_jour\">";
 						echo "<input type=\"hidden\" name=\"nom\"  value=\"$nom\">";
 						echo "<input type=\"text\" name=\"echeance\" size=\"10\"  value=\"$echeance\"  onChange=\"this.form.submit();\" class=\"calendrier\" >";
-						echo "<input type=\"submit\" value=\"Valider Date\" > </form> 	</td>   ";
+						echo "<input type=\"submit\" value=\"Valider date\" > </form> 	</td>   ";
 						
 						echo "</table></td> ";
 						
@@ -785,16 +791,16 @@ include 'inc_style.php';
 						if  (($action=="suivi") || ($action=="pda"))
 							affiche_rdv($nom);		
 							
-							if ($action!="accompagnement")
-									echo "<a href=\"suivi.php?action=accompagnement&nom=$nom&date_jour=$date_jour\" > ( N'afficher que l'accompagnement )</a>";
+							if ($action=="accompagnement")
+									echo "<a href=\"suivi.php?actionsuivi=&nom=$nom&date_jour=$date_jour\" > ( N'afficher que l'accompagnement )</a>";
 								else
-									echo "<a href=\"suivi.php?action=suivi&nom=$nom&date_jour=$date_jour\" > ( Afficher tout l'historique )</a>";
+									echo "<a href=\"suivi.php?action=accompagnement&nom=$nom&date_jour=$date_jour\" > (Afficher aussi les visites)</a>";
 						}						
 					}
 
 				if (($_SESSION['droit']!="P") )
 					{						
-					if  (($action=="suivi") || ($action=="pda"))
+					if ($action=="accompagnement")
 						histo($nom,"");
 					else
 						histo($nom,"accompagnement");

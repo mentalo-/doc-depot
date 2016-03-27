@@ -119,7 +119,8 @@ include 'inc_style.php';
 		$exclus="";
 		for ($i=0; $i<$imax; $i++)
 			$exclus.="'".addslashes2($nom_charge[$i])."',";
-		$exclus=  " and nom NOT IN (".$exclus." '' ) " ;
+		if ($exclus<>"")
+			$exclus=  " and nom NOT IN (".$exclus." '' ) " ;
 		}
 	
 	//===========================================================================
@@ -308,6 +309,34 @@ include 'inc_style.php';
 				}
 		return $t;
 		}
+
+	// proposition sur score
+	function proposition_sur_score($profil, $titre="", $fin_cadre="")
+		{
+		global  $exclus, $date_jour, $bdd;
+
+		$i=0;
+		$nu=0;
+		$reponse = command("SELECT nom,qte FROM $bdd where date='0000-00-00' and pres_repas='' and qte<>'0' and qte<>'?' $exclus order by qte DESC  "); 
+		while ($donnees = fetch_command($reponse) ) 
+			{
+			if ($i<80)
+				$tab_nom[$i]=$donnees["nom"];
+			else 
+				break;
+			$i++;
+			}
+		asort($tab_nom);
+		echo "<tr> <td width=\"1000\"><hr> $titre: ";
+		foreach ($tab_nom as $n)
+			{
+			$n_court=stripcslashes($n);
+			echo "<a href=\"fissa.php?action=nouveau&date_jour=$date_jour&nom=$n&memo=&presence=Visite&commentaire=\">$n_court</a>; " ;
+			}
+
+		
+		}		
+		
 		
 	function proposition($profil, $titre="", $fin_cadre="")
 		{
@@ -1042,7 +1071,8 @@ else
 				
 				
 				echo "</table></td>";
-				proposition("","Ajout rapide");
+				proposition_sur_score("","Ajout rapide");
+//				proposition("","Ajout rapide");
 				proposition("(S)",$acteur);	
 				proposition("(B)","Bénévoles");				
 				proposition("(A)","Activités");					
