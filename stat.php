@@ -138,11 +138,11 @@ include 'suivi_liste.php';
 			$crit_activite="( nom like '%(A)%')";
 			$crit_mail="(nom='Mail')";
 			
-		if (!$detail)
-			{
 			$jd=mise_en_forme_date_aaaammjj( $date_jour);
 			$jf=mise_en_forme_date_aaaammjj( $date_fin);	
 			
+		if (!$detail)
+			{
 			echo "<table border=\"0\" >";	
 	
 			kpi_sur_periode($jd, $jf );
@@ -408,14 +408,25 @@ include 'suivi_liste.php';
 			echo "<p><a href=\"javascript:window.close();\">Fermer la fenêtre</a>"; 	
 			}
 		else
+		// ================================================================================== HISTORIQUE
 			{
 			$deb=-1;
 			$i=0;
-			$annee_courante=date("Y");
 			
-			for ($an=2013; $an<=$annee_courante; $an++)
+			$d3= explode("-",$jd);  
+			$an_debut=$d3[0];
+			$m_debut=$d3[1];
+			
+			$d3= explode("-",$jf);  
+			$an_fin=$d3[0];
+			$m_fin=$d3[1];
+			
+			for ($an=$an_debut; $an<=$an_fin; $an++)
 				for ($mois=1; $mois<=12; $mois++)
 					{
+					if ($an==$an_debut) 
+						$mois=max($mois,$m_debut);
+						
 					$periode[$i]="$mois/$an";
 					if ($mois<10)	
 						$periode[$i]="0$mois/$an";
@@ -434,6 +445,11 @@ include 'suivi_liste.php';
 					$tab_refus[$i]=$refus;
 					$tab_suivi[$i]=$suivi;	
 					$i++;
+			
+					if ($an==$an_fin) 
+						if ($mois==$m_fin) 
+							break;
+							
 					if (date("m/Y")==$periode[$i-1])  break;
 					}			
 			$imax=$i;
@@ -506,7 +522,7 @@ include 'suivi_liste.php';
 			aff($tot);	
 			// ===================================================== Activités
 			
-			$req_sql_activite="SELECT *,count(*) as TOTAL FROM $bdd where date>='2013-01-01' and date<='$annee_courante-12-31' and $crit_activite and pres_repas<>'Pour info' group by nom order by TOTAL DESC";
+			$req_sql_activite="SELECT *,count(*) as TOTAL FROM $bdd where date>='$an_debut-01-01' and date<='$an_fin-12-31' and $crit_activite and pres_repas<>'Pour info' group by nom order by TOTAL DESC";
 			$r1 = command($req_sql_activite); 
 			while ($d1 = fetch_command($r1) )	
 				{
@@ -523,9 +539,12 @@ include 'suivi_liste.php';
 					echo "<td bgcolor=\"$color\"> </td>";		
 					
 				$i=0;
-				for ($an=2013; $an<=$annee_courante; $an++)
+				for ($an=$an_debut; $an<=$an_fin; $an++)
 					for ($mois=1; $mois<=12; $mois++)
 						{
+						if ($an==$an_debut) 
+							$mois=max($mois,$m_debut);
+							
 						if (($i>=$deb) && ($i<$imax) )
 							{
 							$jd="$an-$mois-01";

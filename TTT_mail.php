@@ -88,6 +88,11 @@
 	function init_score_fissa()
 		{
 		echo "<BR> Init_score_fissa : ";
+		ajout_log_tech( "Debut Scoring:".date('Y-m-d H:i', time() ) );
+		ecrit_parametre("TECH_Fissa_scoring", date('Y-m-d H:i', time() ) ) ;
+		ecrit_parametre("TECH_Fissa_scoring_nb",  0 ) ;
+		ecrit_parametre("TECH_Fissa_scoring_fin", "") ;			
+
 		$reponse =command("select * from fct_fissa  ");
 		while ($donnees = mysql_fetch_array($reponse) )
 			{
@@ -123,6 +128,8 @@
 	function calcule_score()
 		{
 		global $time_ttt, $score;
+		
+		$nb_calcul=0;
 		echo "<BR> Calcule_score : ";
 		$reponse =command("select * from fct_fissa  ");
 		while ($donnees = mysql_fetch_array($reponse) )
@@ -132,9 +139,10 @@
 			$r1 = command("SELECT * FROM $bdd where date='0000-00-00'  and qte='?' "); 
 			while ($d1 = fetch_command($r1) ) 
 				{
+				$nb_calcul++;
 				$score=0;
-				$nom=$d1["nom"];
-				echo "<br> $nom : ";
+				$nom=addslashes2($d1["nom"]);
+				echo "<br> $bdd -> $nom : ";
 				if ( plus1( $bdd, $nom, 61 ))				
 					if ( plus1( $bdd, $nom, 30 ))
 						if ( plus1( $bdd, $nom, 15 ))
@@ -146,6 +154,16 @@
 					break;
 				}
 			}
+		if ($nb_calcul==0)
+			{
+			if (parametre("TECH_Fissa_scoring_fin","")=="")
+				{
+				ecrit_parametre("TECH_Fissa_scoring_fin", date('Y-m-d H:i', time() ) ) ;	
+				ajout_log_tech( "Fin Scoring:".date('Y-m-d H:i', time() ). " (#".parametre("TECH_Fissa_scoring_nb").")" );
+				}				
+			}
+		else
+			ecrit_parametre("TECH_Fissa_scoring_nb", parametre("TECH_Fissa_scoring_nb")+$nb_calcul ) ;
 		}
 		
 // Génére une chine aléatoire pour le message de supervision
@@ -204,13 +222,12 @@ function random_chaine($car)
 				ecrit_parametre("TECH_nb_sms_envoyes",0) ;
 				}
 
-
+		if (parametre("TECH_Fissa_scoring_fin","")=="")
+			calcule_score();
+			
 		if (date('Y-m-d-h',  time()) != date('Y-m-d-h',  $ancien_ttt ))
 			if ($heure==23)
 				init_score_fissa();
-
-//		if (($heure	>=23) or ($heure<8)) 
-			calcule_score();
 				
 		if (date('Y-m-d-h',  time()) != date('Y-m-d-h',  $ancien_ttt ))
 			if ($heure==1)
@@ -410,6 +427,7 @@ function random_chaine($car)
 					}
 				}
 			else
+			if ($delta< 20 )
 				{
 				if (parametre("TECH_alarme_delais_TTT")!="")	
 					{

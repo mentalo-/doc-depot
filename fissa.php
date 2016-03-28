@@ -100,7 +100,7 @@ include 'inc_style.php';
 		$select_activites="";
 		
 		$d=mise_en_forme_date_aaaammjj( $date_jour);
-		$reponse = command("SELECT DISTINCT * FROM $bdd WHERE date='$d' and pres_repas!='Suivi' and pres_repas!='reponse' and pres_repas!='partenaire' and pres_repas!='Age'  and pres_repas!='Telephone' and pres_repas!='Mail'  "); 
+		$reponse = command("SELECT DISTINCT * FROM $bdd WHERE date='$d' and pres_repas!='Suivi' and pres_repas!='reponse' and pres_repas!='partenaire' and pres_repas!='Age'  and pres_repas!='Telephone' and pres_repas!='Mail' order by nom ASC "); 
 		while (($donnees = fetch_command($reponse) ) && ($i<10000))
 			if ($donnees["nom"]!="Synth")
 				{
@@ -320,18 +320,29 @@ include 'inc_style.php';
 		$reponse = command("SELECT nom,qte FROM $bdd where date='0000-00-00' and pres_repas='' and qte<>'0' and qte<>'?' $exclus order by qte DESC  "); 
 		while ($donnees = fetch_command($reponse) ) 
 			{
-			if ($i<80)
-				$tab_nom[$i]=$donnees["nom"];
-			else 
+			if ($i>80) 
 				break;
+			$tab_nom[$i]=$donnees["nom"];
+						
 			$i++;
 			}
 		asort($tab_nom);
-		echo "<tr> <td width=\"1000\"><hr> $titre: ";
+		echo "<tr> <td width=\"1000\">";
+
+		if ($profil!="")
+			echo "$titre: ";
+		else
+			echo "<hr>$titre: ";
+
 		foreach ($tab_nom as $n)
 			{
 			$n_court=stripcslashes($n);
-			echo "<a href=\"fissa.php?action=nouveau&date_jour=$date_jour&nom=$n&memo=&presence=Visite&commentaire=\">$n_court</a>; " ;
+			if ( ( ($profil!="") && strstr($n_court,'(F)'))  ||  ( ($profil=="") && !strstr($n_court,'(F)')) )
+				{
+				$n_court=str_replace("(F)","",$n_court);
+				echo "<a href=\"fissa.php?action=nouveau&date_jour=$date_jour&nom=$n&memo=&presence=Visite&commentaire=\">$n_court</a>; " ;
+				}
+				
 			}
 
 		
@@ -1071,7 +1082,8 @@ else
 				
 				
 				echo "</table></td>";
-				proposition_sur_score("","Ajout rapide");
+				proposition_sur_score("(F)","Femme");
+				proposition_sur_score("","Homme");
 //				proposition("","Ajout rapide");
 				proposition("(S)",$acteur);	
 				proposition("(B)","Bénévoles");				
