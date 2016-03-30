@@ -230,6 +230,7 @@
 		affiche_un_choix($act,"Médecin");
 
 		affiche_un_choix($act,"Ordre de Malte");
+		affiche_un_choix($act,"O.F.I.I");
 		
 		affiche_un_choix($act,"Préfecture");
 		affiche_un_choix($act,"Police/Gendarmerie");
