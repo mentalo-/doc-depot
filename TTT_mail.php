@@ -88,7 +88,7 @@
 	function init_score_fissa()
 		{
 		echo "<BR> Init_score_fissa : ";
-		ajout_log_tech( "Debut Scoring:".date('Y-m-d H:i', time() ) );
+		ajout_log_tech( "Debut Scoring" );
 		ecrit_parametre("TECH_Fissa_scoring", date('Y-m-d H:i', time() ) ) ;
 		ecrit_parametre("TECH_Fissa_scoring_nb",  0 ) ;
 		ecrit_parametre("TECH_Fissa_scoring_fin", "") ;			
@@ -147,7 +147,12 @@
 					if ( plus1( $bdd, $nom, 30 ))
 						if ( plus1( $bdd, $nom, 15 ))
 							 plus1( $bdd, $nom, 7);
-					
+				
+				// si memo on le valorise dans le scoring 
+				$reponse = command("SELECT * FROM $bdd WHERE nom='$nom' and commentaire<>'' and date='0000-00-00' and pres_repas<>'pda' and pres_repas<>'Age' and pres_repas<>'Mail' and pres_repas<>'Téléphone' and pres_repas<>'nationalie' and pres_repas<>'PE'  "); 
+				if ($donnees = fetch_command($reponse) )
+					$score++;
+		
 				command("UPDATE $bdd SET qte='$score' where nom='$nom' and date='0000-00-00' ");
 				echo " ==> ". sprintf("%2.2f",  $score*10);
 				if  ( (time() -$time_ttt) >5)
@@ -159,7 +164,7 @@
 			if (parametre("TECH_Fissa_scoring_fin","")=="")
 				{
 				ecrit_parametre("TECH_Fissa_scoring_fin", date('Y-m-d H:i', time() ) ) ;	
-				ajout_log_tech( "Fin Scoring:".date('Y-m-d H:i', time() ). " (#".parametre("TECH_Fissa_scoring_nb").")" );
+				ajout_log_tech( "Fin Scoring (#".parametre("TECH_Fissa_scoring_nb").")" );
 				}				
 			}
 		else
@@ -262,7 +267,17 @@ function random_chaine($car)
 				ajout_log_tech( "purge Log");
 				purge_bdd_log();
 				}
-				
+
+		if (date('Y-m-d-h',  time()) != date('Y-m-d-h',  $ancien_ttt ))
+			if ($heure==7)
+				{
+				if (parametre("TECH_Fissa_scoring_fin","")=="")
+					{
+					ajout_log_tech( "Fin Scoring non terminé à 7h !!" ,"P0" );
+					envoi_sms( parametre('DD_tel_alarme1') , parametre('TECH_identite_environnement')." : Fin Scoring non terminé à 7h !!");
+					}
+				}				
+
 		commentaire_html( "Purge temporaire");
 		purge_fichiers_temporaires("dir_zip/");		
 		purge_fichiers_temporaires("tmp/","*.pdf");		

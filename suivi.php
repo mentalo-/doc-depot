@@ -418,7 +418,14 @@ include 'inc_style.php';
 		if ($nom!="")
 			{
 
-
+			if ($action=="compte_dd")
+				{
+				$user= $_SESSION['user'];
+				$modif=time();
+				$compte_dd=variable_s("compte_dd");
+				command("UPDATE $bdd set activites='$compte_dd' , modif='$modif', user='$user' where date='0000-00-00' and nom='$nom_slash' and pres_repas='' ");
+				$action="suivi";
+				}
 							
 			if ($action=="activites")
 				{
@@ -524,7 +531,10 @@ include 'inc_style.php';
 					echo "<table><tr> <td >";
 					echo "<ul id=\"menu-bar\">";					
 					echo "<li><a href=\"suivi.php?action=suivi&nom=$nom\" > <b> $nom </b> </a></li>";
-					echo "</ul> </td><td> - 1ere visite : $premiere_visite </td>";
+					echo "</ul></td>";
+					if (!(strstr($nom,"(M)")))
+						echo "<td> - 1ere visite : $premiere_visite </td>";
+
 
 					echo "</table> ";					
 					
@@ -622,81 +632,84 @@ include 'inc_style.php';
 							echo "<TABLE><TR><td > <div class=\"CSS_titre\"  >";
 							
 							
-							echo "<table border=\"0\" > <TR> <td> ";	
-							if (!(strpos($nom,"(A)")>0))
+							echo "<table border=\"0\" >";
+							if (!(strstr($nom,"(M)")))
 								{
-								$reponse = command("SELECT * FROM $bdd WHERE nom='$nom_slash' and pres_repas='Age' "); 
-								if ($donnees = fetch_command($reponse))
-									$age=$donnees["commentaire"];
-								else 
-									$age="";
-								echo "<b> Date naissance </b> : </td>";
-								echo " <td><TABLE><TR> <td><form method=\"GET\" action=\"suivi.php\">";
-								echo "<input type=\"hidden\" name=\"action\" value=\"age\"> " ;
-								echo "<input type=\"hidden\" name=\"nom\"  value=\"$nom\">";
-								echo "<input type=\"text\" name=\"age\" size=\"10\"  value=\"$age\"  onChange=\"this.form.submit();\">";
-								echo "</form> </td> <td>jj/mm/aaaa </td></table> </td>";	
-								
-								$reponse = command("SELECT * FROM $bdd WHERE nom='$nom_slash' and pres_repas='nationalite' "); 
-								if ($donnees = fetch_command($reponse))
-									$nat=$donnees["commentaire"];
-								else 
-									$nat="";
-								choix_pays($nom, $nat);
-								}
-								
-							$tel="";
-							$age="";
-							$reponse = command("SELECT * FROM $bdd WHERE nom='$nom_slash' and pres_repas='Téléphone' "); 
-							if ($donnees = fetch_command($reponse))
-								$tel=$donnees["commentaire"];
-							else 
+								echo "<TR> <td> ";	
+								if (!(strpos($nom,"(A)")>0))
+									{
+									$reponse = command("SELECT * FROM $bdd WHERE nom='$nom_slash' and pres_repas='Age' "); 
+									if ($donnees = fetch_command($reponse))
+										$age=$donnees["commentaire"];
+									else 
+										$age="";
+									echo "<b> Date naissance </b> : </td>";
+									echo " <td><TABLE><TR> <td><form method=\"GET\" action=\"suivi.php\">";
+									echo "<input type=\"hidden\" name=\"action\" value=\"age\"> " ;
+									echo "<input type=\"hidden\" name=\"nom\"  value=\"$nom\">";
+									echo "<input type=\"text\" name=\"age\" size=\"10\"  value=\"$age\"  onChange=\"this.form.submit();\">";
+									echo "</form> </td> <td>jj/mm/aaaa </td></table> </td>";	
+									
+									$reponse = command("SELECT * FROM $bdd WHERE nom='$nom_slash' and pres_repas='nationalite' "); 
+									if ($donnees = fetch_command($reponse))
+										$nat=$donnees["commentaire"];
+									else 
+										$nat="";
+									choix_pays($nom, $nat);
+									}
+									
 								$tel="";
+								$reponse = command("SELECT * FROM $bdd WHERE nom='$nom_slash' and pres_repas='Téléphone' "); 
+								if ($donnees = fetch_command($reponse))
+									$tel=$donnees["commentaire"];
+								else 
+									$tel="";
 
-							echo "<tr> <td> <b> Portable </b> : ";
-							if ( VerifierPortable($tel )  )
-									echo "<a href=\"index.php?action=sms_test&tel=$tel\" > <img src=\"images/sms.png\" width=\"30\" height=\"30\" title=\"Envoyer SMS\"></a>";
-							echo "</td><td>";
-							
-							echo "<form method=\"GET\" action=\"suivi.php\">";
-							echo "<input type=\"hidden\" name=\"action\" value=\"telephone\"> " ;
-							echo "<input type=\"hidden\" name=\"nom\"  value=\"$nom\">";
-							echo "<input type=\"text\" name=\"telephone\"  value=\"$tel\"  onChange=\"this.form.submit();\">";
-							echo "</form> ";
+								echo "<tr> <td> <b> Portable </b> : ";
+								if ( VerifierPortable($tel )  )
+										echo "<a href=\"index.php?action=sms_test&tel=$tel\" > <img src=\"images/sms.png\" width=\"30\" height=\"30\" title=\"Envoyer SMS\"></a>";
+								echo "</td><td>";
+								
+								echo "<form method=\"GET\" action=\"suivi.php\">";
+								echo "<input type=\"hidden\" name=\"action\" value=\"telephone\"> " ;
+								echo "<input type=\"hidden\" name=\"nom\"  value=\"$nom\">";
+								echo "<input type=\"text\" name=\"telephone\"  value=\"$tel\"  onChange=\"this.form.submit();\">";
+								echo "</form> ";
 
-							echo "</td>";
-							
+								echo "</td>";
+								
 
-							$reponse = command("SELECT * FROM $bdd WHERE nom='$nom_slash' and pres_repas='Mail' "); 
-							if ($donnees = fetch_command($reponse))
-								$mail=$donnees["commentaire"];
-							else
-								$mail="";
-							echo "<td> <b> Mail </b> : ";
-							if ( VerifierAdresseMail($mail )  )
-									echo "<a href=\"index.php?action=mail_test&mail=$mail\" > <img src=\"images/mail2.png\" width=\"30\" height=\"30\" title=\"Envoyer Mail\"></a>";
-							echo "</td><td>";
-							echo "<form method=\"GET\" action=\"suivi.php\">";
-							echo "<input type=\"hidden\" name=\"action\" value=\"mail\"> " ;
-							echo "<input type=\"hidden\" name=\"nom\"  value=\"$nom\">";
-							echo "<input type=\"text\" name=\"mail\" size=\"40\"  value=\"$mail\"  onChange=\"this.form.submit();\">";
-							echo "</form></td> ";
-							
-							
-							echo "</td></table>";
-							
-							echo "<table>";
-							$reponse = command("SELECT * FROM $bdd WHERE nom='$nom_slash' and pres_repas='adresse' "); 
-							if ($donnees = fetch_command($reponse))
-								$adresse=$donnees["commentaire"];
-							else 
-								$adresse="";
-							echo "<tr><td> <b> Adresse </b> : </td><td>";
-							echo "<form method=\"GET\" action=\"suivi.php\">";
-							echo "<input type=\"hidden\" name=\"action\" value=\"adresse\"> " ;
-							echo "<input type=\"hidden\" name=\"nom\"  value=\"$nom\">";
-							echo "<input type=\"text\" name=\"adresse\" size=\"80\"  value=\"$adresse\"  onChange=\"this.form.submit();\">";
-							echo "</form> </td>";														
+								$reponse = command("SELECT * FROM $bdd WHERE nom='$nom_slash' and pres_repas='Mail' "); 
+								if ($donnees = fetch_command($reponse))
+									$mail=$donnees["commentaire"];
+								else
+									$mail="";
+								echo "<td> <b> Mail </b> : ";
+								if ( VerifierAdresseMail($mail )  )
+										echo "<a href=\"index.php?action=mail_test&mail=$mail\" > <img src=\"images/mail2.png\" width=\"30\" height=\"30\" title=\"Envoyer Mail\"></a>";
+								echo "</td><td>";
+								echo "<form method=\"GET\" action=\"suivi.php\">";
+								echo "<input type=\"hidden\" name=\"action\" value=\"mail\"> " ;
+								echo "<input type=\"hidden\" name=\"nom\"  value=\"$nom\">";
+								echo "<input type=\"text\" name=\"mail\" size=\"40\"  value=\"$mail\"  onChange=\"this.form.submit();\">";
+								echo "</form></td> ";
+								
+								
+								echo "</td></table>";
+								
+								echo "<table>";
+								$reponse = command("SELECT * FROM $bdd WHERE nom='$nom_slash' and pres_repas='adresse' "); 
+								if ($donnees = fetch_command($reponse))
+									$adresse=$donnees["commentaire"];
+								else 
+									$adresse="";
+								echo "<tr><td> <b> Adresse </b> : </td><td>";
+								echo "<form method=\"GET\" action=\"suivi.php\">";
+								echo "<input type=\"hidden\" name=\"action\" value=\"adresse\"> " ;
+								echo "<input type=\"hidden\" name=\"nom\"  value=\"$nom\">";
+								echo "<input type=\"text\" name=\"adresse\" size=\"80\"  value=\"$adresse\"  onChange=\"this.form.submit();\">";
+								echo "</form> </td>";														
+								}
 							
 							$reponse = command("SELECT * FROM $bdd WHERE nom='$nom_slash' and pres_repas='PE' "); 
 							if ($donnees = fetch_command($reponse))
@@ -712,6 +725,70 @@ include 'inc_style.php';
 							echo "</table>";
 							
 							fin_cadre();
+					
+					/* Accès à Doc-depot
+					if ( (!(strstr($nom,"(M)"))) && (!(strstr($nom,"(A)"))) &&	(!(strstr($nom,"(B)"))) && 	(!(strstr($nom,"(S)"))) &&  ($_SESSION['droit']!="P") ) 				
+						{
+						echo "<table><tr><td> <img src=\"images/papier.png\" width=\"35\" height=\"35\" > </td>";
+						$reponse = command("SELECT * FROM $bdd WHERE nom='$nom_slash' and date='0000-00-00' and pres_repas='' and activites<>''  "); 
+						if ($donnees = fetch_command($reponse))
+							{ // compte Doc-depot existe
+
+							echo "<TD>Accèder aux documents via doc-depot </td> ";						
+
+							}
+						else // compte Doc-depot n'existe pas ==> alors  propose création
+							{
+							$nom2="";
+							$d3= explode(" ",$nom);  
+							$prenom=trim($d3[0]);
+							if (isset($d3[1]))
+								$nom2=$d3[1];
+							if (isset($d3[2]))
+								$nom2.=$d3[2];
+							
+							$nom2=trim(str_replace("(F)","",$nom2));
+							echo "<TD>";						
+							formulaire ("ajout_beneficiaire","index.php");
+							echo "<input type=\"hidden\" name=\"nom\"  value=\"$nom2\"> " ;
+							echo "<input type=\"hidden\" name=\"prenom\"  value=\"$prenom\"> " ;
+							echo "<input type=\"hidden\" name=\"anniv\"   value=\"$age\"> " ;
+							echo "<input type=\"hidden\" name=\"nationalite\"   value=\"$nat\">" ;
+							echo "<input type=\"submit\"  id=\"nouveau_user\"  value=\"Création compte Doc-depot\" > </form></td>  ";		
+							$val_init="";
+							$reponse = command("SELECT * from  fct_fissa WHERE support='$bdd'"); 
+							if ($donnees = fetch_command($reponse))
+								{
+								$organisme=$donnees["organisme"];
+								echo "<td> ou associer au compte non affecté </td>";
+								$reponse =command("select * from  r_referent where (nom='Tous' or  nom='$user_idx')  and organisme='$organisme' ");		
+								echo "<form method=\"GET\" action=\"suivi.php\">";
+								echo "<input type=\"hidden\" name=\"nom\"  value=\"$nom\">";
+								echo "<input type=\"hidden\" name=\"action\" value=\"compte_dd\"> " ;
+								echo "<td><SELECT name=\"compte_dd\"  onChange=\"this.form.submit();\" >";
+								affiche_un_choix($val_init, "" ,"Choisir dans la liste");
+								while ($donnees = fetch_command($reponse))
+									{
+									$b1=$donnees["user"];	
+									
+									$r1 = command("SELECT * from  r_user WHERE idx='$b1'"); 
+									if ($d1 = fetch_command($r1))
+										{
+										$n1=$d1["nom"];
+										$p1=$d1["prenom"];				
+										$a1=$d1["anniv"];
+										affiche_un_choix($val_init, $b1 ,"$p1 $n1 ($a1)");
+
+										}
+									 }
+								
+								echo "</select></form></td>";								
+								}
+							}
+						echo "</table>";							
+						}
+					*/			
+								
 
 					if (($_SESSION['droit']!="P") )
 						{		
@@ -730,19 +807,23 @@ include 'inc_style.php';
 						echo "<TABLE><TR><td > <div class=\"CSS_titre\"  >";
 
 						echo " <table border=\"0\" >";
-						echo "<tr> <td> <table border=\"0\" ><tr> <td> <b> Suivi </b> : </td>";
-						if (!(strpos($nom,"(A)")>0))
-							{
-							echo "<form method=\"GET\" action=\"suivi.php\">";
-							
-							$reponse = command("SELECT * FROM $bdd WHERE date='$date_jour_gb' and  nom='$nom_slash' and pres_repas='Suivi' "); 
-							if ($donnees = fetch_command($reponse))
-								$act=$donnees["activites"];
-							else 
-								$act="";
-							choix_action_suivi($act);
-							choix_reponse_suivi($act);
-							choix_partenaire_suivi($act);
+						echo "<tr> <td> <table border=\"0\" >";
+						if (!(strstr($nom,"(M)")))
+							{						
+							echo "<tr> <td> <b> Suivi </b> : </td>";
+							if (!(strpos($nom,"(A)")>0))
+								{
+								echo "<form method=\"GET\" action=\"suivi.php\">";
+								
+								$reponse = command("SELECT * FROM $bdd WHERE date='$date_jour_gb' and  nom='$nom_slash' and pres_repas='Suivi' "); 
+								if ($donnees = fetch_command($reponse))
+									$act=$donnees["activites"];
+								else 
+									$act="";
+								choix_action_suivi($act);
+								choix_reponse_suivi($act);
+								choix_partenaire_suivi($act);
+								}
 							}
 
 						echo "</table></td>";
@@ -787,17 +868,20 @@ include 'inc_style.php';
 						echo "</td>";
 						echo "</table>  ";
 						
-
-						if  (($action=="suivi") || ($action=="pda"))
-							affiche_rdv($nom);		
-							
+						if (!(strstr($nom,"(M)")))
+							{
+							if  (($action=="suivi") || ($action=="pda")) 
+								affiche_rdv($nom);		
+								
 							if ($action=="accompagnement")
 									echo "<a href=\"suivi.php?actionsuivi=&nom=$nom&date_jour=$date_jour\" > ( N'afficher que l'accompagnement )</a>";
 								else
 									echo "<a href=\"suivi.php?action=accompagnement&nom=$nom&date_jour=$date_jour\" > (Afficher aussi les visites)</a>";
+							}
 						}						
 					}
-
+			if (!(strstr($nom,"(M)")))
+				{
 				if (($_SESSION['droit']!="P") )
 					{						
 					if ($action=="accompagnement")
@@ -807,22 +891,12 @@ include 'inc_style.php';
 					}
 				else
 					histo($nom,"Visites");
-
+				}
 			}
 		else 
 			{
 			proposition_suivi ("Accès rapide");
 			
-			// =====================================================================loc NOUVEAU
-		/*
-			echo "<table><tr><td bgcolor=\"#d4ffaa\">Création nouveau :</td><td bgcolor=\"#d4ffaa\"><form method=\"GET\" action=\"suivi.php\">";
-			echo "<input type=\"hidden\" name=\"action\" value=\"nouveau\"> " ;
-			echo "<input type=\"text\" name=\"nom\" size=\"30\" value=\"\">";	
-			liste_type();
-			echo "<input type=\"submit\" value=\"Créer Nouveau\" >  ";
-			echo "</td></form> ";	
-			echo " </table>";	
-		*/
 
 				echo "<table id=\"dujour\"  border=\"2\" >";
 				// =====================================================================loc NOUVEAU

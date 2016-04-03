@@ -136,6 +136,7 @@ include 'suivi_liste.php';
 			$crit_bene="  ( not (nom like '%(B)%')) and ( not (nom like '%(S)%')) and ( not (nom like '%(A)%')) and (nom<>'Synth') and (nom<>'Mail') and (pres_repas<>'Pour info') and (pres_repas<>'Suivi') and (pres_repas<>'reponse')and (pres_repas<>'partenaire')  ";
 			$crit_AS=" (nom like '%(B)%' or nom like '%(S)%' )";
 			$crit_activite="( nom like '%(A)%')";
+			$crit_materiel="( nom like '%(M)%')";
 			$crit_mail="(nom='Mail')";
 			
 			$jd=mise_en_forme_date_aaaammjj( $date_jour);
@@ -227,9 +228,45 @@ include 'suivi_liste.php';
 					else
 						echo "<td width=\"20\" bgcolor=\"$color\"> </td><td width=\"20\" bgcolor=\"$color\"> </td>";
 					}
+				echo "<tr> <td><hr></td><td> <hr> </td><td> <hr> </td><td> <hr> </td><td> <hr> </td>";	
 				}
 				
+
+	
+		
+			// ============================================================================ Matériel 
+			
+			$req_sql_materiel="SELECT *,count(*) as TOTAL FROM $bdd where date<='$jf' and date>='$jd' and $crit_materiel and pres_repas<>'Pour info' group by nom order by TOTAL DESC";
+			
+			$r1 = command($req_sql_materiel); 
+			$num=nbre_enreg ($r1);
+				
+			if ($num!=0)
+				{
+
+				echo "<tr> <td> Matériel </td><td> Variation </td>";	
+				$ncolor=0;
+				$num=0;
+				$r1 = command($req_sql_materiel); 
+				while ($d1 = fetch_command($r1) )	
+					{
+					$num++;
+					$nom=$d1["nom"];
+					if (($ncolor++ %2 )==0) $color="#ffffff" ; else $color="#d4ffaa" ; 
+
+					echo "<tr> <td bgcolor=\"$color\"> $num - <a href=\"suivi.php?action=suivi&nom=$nom&date_jour=$aujourdhui\" target=_blank> <b>$nom  </b></td>";
+					
+					$req_sql_materiel="SELECT *  FROM $bdd where nom='$nom' and date<='$jf' and date>='$jd' and pres_repas<>'Pour info' group by nom ";
+					$r2 = command($req_sql_materiel); 
+					$delta=0;
+					while ($d2 = fetch_command($r2))
+						$delta+= $d2["qte"];
+						
+					echo "<td width=\"20\" ALIGN=\"RIGHT\" bgcolor=\"$color\"> $delta </td>";
+					}
 			echo "<tr> <td><hr></td><td> <hr> </td><td> <hr> </td>";
+				}
+				
 
 	// -------------------------------------------------------------	Usagers
 
@@ -588,7 +625,58 @@ include 'suivi_liste.php';
 						aff($freq[$i]/$nb[$i]);	
 				aff($memo_freq/$memo_nb);						
 				}
+	
+
+			// ===================================================== Matériel
+			
+			$req_sql_activite="SELECT *,count(*) as TOTAL FROM $bdd where date>='$an_debut-01-01' and date<='$an_fin-12-31' and $crit_materiel and pres_repas<>'Pour info' group by nom order by TOTAL DESC";
+			$r1 = command($req_sql_activite); 
+			while ($d1 = fetch_command($r1) )	
+				{
+				$nom=$d1["nom"];
+
+				echo "<tr> <td bgcolor=\"#3f7f00\">  </td>";				
+				for ($i=$deb; $i<$imax; $i++)
+						echo "<td bgcolor=\"#3f7f00\"> <font color=\"white\">".$periode[$i]."</td>";	
+				echo "<td bgcolor=\"#3f7f00\"> <font color=\"white\"> Total </td>";	
 					
+				if (($ncolor++ %2 )==0) $color="#ffffff" ; else $color="#d4ffaa" ; 
+				echo "<tr> <td bgcolor=\"$color\"> <a href=\"suivi.php?action=suivi&nom=$nom&date_jour=$aujourdhui\" target=_blank> <b>$nom  </b></td>";
+				for ($i=$deb; $i<=$imax; $i++)
+					echo "<td bgcolor=\"$color\"> </td>";		
+					
+				$i=0;
+				for ($an=$an_debut; $an<=$an_fin; $an++)
+					for ($mois=1; $mois<=12; $mois++)
+						{
+						if ($an==$an_debut) 
+							$mois=max($mois,$m_debut);
+							
+						if (($i>=$deb) && ($i<$imax) )
+							{
+							$jd="$an-$mois-01";
+							$jf="$an-$mois-31";
+							
+							$req_sql_materiel="SELECT * FROM $bdd where nom='$nom' and date<='$jf' and date>='$jd' ";
+							$r2 = command($req_sql_materiel); 
+							$delta=0;
+							while ($d2 = fetch_command($r2))
+								$delta+=$d2["qte"];			
+							$tab_delta[$i] =$delta;
+							}
+						$i++;
+						}
+						
+				if (($ncolor++ %2 )==0) $color="#ffffff" ; else $color="#d4ffaa" ; 
+				echo "<tr> <td bgcolor=\"$color\"> Varition </td>";
+				for ($i=$deb; $i<$imax; $i++)
+					aff($tab_delta[$i]);		
+				for ($tot=0 , $i=$deb; $i<$imax; $i++) 
+					$tot+=$tab_delta[$i];				
+				aff($tot);	
+				}
+
+	
 			}
 
 		fermeture_bdd ();

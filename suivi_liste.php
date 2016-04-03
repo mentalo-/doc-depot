@@ -243,6 +243,7 @@
 		affiche_un_choix($act,"Secours Populaire");
 		affiche_un_choix($act,"Secours catholique");
 		affiche_un_choix($act,"SIAO");		
+		affiche_un_choix($act,"S.P.I.P");		
 		
 		affiche_un_choix($act,"Tuteur");
 		
