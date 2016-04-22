@@ -7,6 +7,7 @@
 include 'calendrier.php';
 include 'general.php';
 include 'inc_style.php';	 
+include 'include_mail.php';	 
 
 		echo "<title> FISSA </title>";
 		
@@ -431,26 +432,7 @@ include 'inc_style.php';
 				echo "</td>";				
 		}
 
-	function mail2($dest, $titre, $contenu, $libelle, $mail_struct )
-		{
-		
-		// Entete
-		$headers  = "MIME-Version: 1.0 \n"; 
-		$headers .='Content-Type: text/html; charset="iso-8859-1"'."\n";
-        $headers .='Content-Transfer-Encoding: 8bit'."\n";		
-		
-		$libelle = '=?iso-8859-1?B?'.base64_encode($libelle).'?='; // T354
-		$headers  .= "From: FISSA $libelle <$mail_struct>" . "\r\n"; 
-		
-		// mise en forme HTML
-		$contenu = supprime_html($contenu);
-		$contenu = "<html><body>$contenu</body></html>";	
-		$titre = '=?iso-8859-1?B?'.base64_encode($titre).'?=';  // T354
-		
-		mail ( $dest , $titre, $contenu,$headers );
-		return(true);
-		}
-	
+
 	
 	function rapport_mail2($date, $envoi_mail)
 		{
@@ -1054,6 +1036,8 @@ else
 		$libelle=$donnees["libelle"];
 		$logo=$_SESSION['logo'];	
 
+		$_SESSION['bene']="";
+				
 		$memo=variable_s("memo");
 
 		$pda=variable_s("pda");
@@ -1079,6 +1063,14 @@ else
 			
 			if ($action=="nouveau")
 				{
+				if ($type!="")
+					{
+					$nom=str_replace ('(A)','',$nom);
+					$nom=str_replace ('(M)','',$nom);
+					$nom=str_replace ('(S)','',$nom);
+					$nom=str_replace ('(B)','',$nom);
+					}
+
 				if ($type=="Bénéficiaire femme")
 					$nom .= " (F)";
 				if ($type=="Bénévole")
@@ -1095,6 +1087,11 @@ else
 			
 			if ($action=="nouveau2")
 				{
+				$nom=str_replace ('(A)','',$nom);
+				$nom=str_replace ('(M)','',$nom);
+				$nom=str_replace ('(S)','',$nom);
+				$nom=str_replace ('(B)','',$nom);
+
 				if ($type=="Bénéficiaire femme")
 					$nom .= " (F)";
 				nouveau2($date_jour,$nom, variable_s("age"),variable_s("nationalite"));

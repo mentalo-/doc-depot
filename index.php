@@ -486,6 +486,11 @@ function maj_mdp_fichier($idx, $pw )
 		$action=variable("retour");
 		}
 
+		
+		
+		
+		
+		
 	// $num est le nom du fichier
 	// $flag_acces est le code d'accès ( a minima pour répondre aux demandes d'accès des AS)
 	function visu_doc($num, $flag_acces, $ordre=1, $sans_lien="")
@@ -814,6 +819,7 @@ function maj_mdp_fichier($idx, $pw )
 			else
 				$flag_acces=$user_lecture;
 			echo "</ul></ul></td>";
+			lien_c ("images/ajouter.png", "draganddrop", "" , traduire("Ajouter un doc") , "30");
 			}
 		else
 			{
@@ -829,6 +835,8 @@ function maj_mdp_fichier($idx, $pw )
 			echo "<li> <a href=\"index.php?action=draganddrop_p\"> ".traduire('Déposer des documents')." </a></li>";	
 			
 			echo "</ul></ul></td>";
+			lien_c ("images/ajouter.png", "draganddrop_p", "" , traduire("Ajouter un doc") , "30");
+
 			}
 		
 		if (substr($ref,0,1)=="A")
@@ -1150,7 +1158,7 @@ function maj_mdp_fichier($idx, $pw )
 		
 	FUNCTION nouveau_user($id,$pw,$droit,$mail,$organisme,$nom,$prenom,$anniv,$telephone,$nationalite,$ville_nat,$adresse,$recept_mail ,$prenom_p,$prenom_m,$code_lecture,$nss,$type_user)
 		{
-		global $action,$user_idx,$user_prenom,$user_nom;
+		global $action,$user_idx,$user_prenom,$user_nom,$bdd;
 		
 		$action="ajout_user";
 		$date_jour=date('Y-m-d');
@@ -1158,8 +1166,9 @@ function maj_mdp_fichier($idx, $pw )
 		$reponse = command("select * from r_user where nom='$nom' and prenom='$prenom' and anniv='$anniv'and ville_nat='$ville_nat'");
 		if (!fetch_command($reponse) )
 			{
-			if ($code_lecture=="")
-				$code_lecture=$pw;		
+		// A la création du compte le code lecture n'est plus initialisé avec le mot de passe de connexion
+		//	if ($code_lecture=="")
+		//		$code_lecture=$pw;		
 
 			$anniv=mef_date($anniv);
 			if ($anniv=="")
@@ -1186,7 +1195,8 @@ function maj_mdp_fichier($idx, $pw )
 						if ( (!fetch_command($reponse) ) || ($id!="jm") || ($id!="jean-michel.cot")|| ($id!="jm.cot") || ($id!="contact")|| ($id!="fixeo"))
 							{
 							$pw=encrypt($pw);
-							$code_lecture=encrypt($code_lecture);					
+							if ($code_lecture!="")
+								$code_lecture=encrypt($code_lecture);					
 
 							if ($droit!="")
 								{
@@ -1209,7 +1219,7 @@ function maj_mdp_fichier($idx, $pw )
 										
 										command("INSERT INTO `r_user`  VALUES (  '$idx', '$id', '$pw','$droit','$mail','$organisme','$nom','$prenom','$anniv','$telephone','$nationalite','$ville_nat','$adresse','$recept_mail' ,'$prenom_p','$prenom_m','$date_jour','$code_lecture','','' ,'' ,'','$type_user','fr')");
 										ajout_log( $idx, traduire("Création utilisateur")."  $idx / $droit / $nom/ $prenom",	 $user_idx );
-											
+
 										$body= traduire("Bonjour").", $prenom $nom ";
 										$body.= "<p> $user_prenom $user_nom ".traduire("vous a créé un compte sur 'Doc-depot.com': ");
 										$body.= "<p> ".traduire("Pour accepter et finaliser la création de votre compte sur 'Doc-depot.com', merci de cliquer sur ce")." <a id=\"lien\" href=\"".serveur."index.php?action=finaliser_user&idx=".addslashes(encrypt($idx))."\">".traduire('lien')."</a> ". traduire("et compléter les informations manquantes.");
@@ -1228,9 +1238,25 @@ function maj_mdp_fichier($idx, $pw )
 								}	
 							else
 								{
+								// si création depuis fissa
+								$compte_fissa= variable("fissa");	
+								if ($compte_fissa!="")
+									{
+									$mail= variable("fissa_mail");
+									$telephone= variable("fissa_tel");
+									$adresse= variable("fissa_add");
+									}
+								
 								$idx=inc_index("user");
 								command("INSERT INTO `r_user`  VALUES (  '$idx', '$id', '$pw','$droit','$mail','$organisme','$nom','$prenom','$anniv','$telephone','$nationalite','$ville_nat','$adresse','$recept_mail' ,'$prenom_p','$prenom_m','$date_jour','$code_lecture','$nss','','','','$type_user','fr')");
 								ajout_log( $idx, traduire("Création compte Bénéficiaire")."  $idx / $nom/ $prenom", $user_idx );
+
+								if ($compte_fissa!="")
+									{
+									$user= $_SESSION['user'];
+									$modif=time();
+									command("UPDATE $bdd set activites='$idx' , modif='$modif', user='$user' where date='0000-00-00' and nom='$compte_fissa' and pres_repas='' ");
+									}
 								}
 
 							}
@@ -1672,6 +1698,10 @@ function maj_mdp_fichier($idx, $pw )
 		echo "<tr> <td> ".traduire('Mot de passe 1ere connexion')." :</td><td> 123456 </td>" ;
 		echo "<input type=\"hidden\" name=\"pw\"  value=\"123456\"> " ;
 		echo "<input type=\"hidden\" name=\"droit\"  value=\"\"> " ;
+		echo "<input type=\"hidden\" name=\"fissa\"   value=\"".variable("fissa")."\">" ;
+		echo "<input type=\"hidden\" name=\"fissa_mail\"   value=\"".variable("fissa_mail")."\">" ;
+		echo "<input type=\"hidden\" name=\"fissa_tel\"   value=\"".variable("fissa_tel")."\">" ;
+		echo "<input type=\"hidden\" name=\"fissa_add\"   value=\"".variable("fissa_add")."\">" ;
 		echo "<tr><td> ".traduire('Nom')." :  </td> <td><input type=\"texte\" name=\"nom\"   size=\"20\" value=\"".variable("nom")."\"> </td>" ;
 		echo "<tr><td> ".traduire('Prénom').":</td> <td><input type=\"texte\" name=\"prenom\"   size=\"20\" value=\"".variable("prenom")."\"> </td>" ;
 		echo "<tr><td> ".traduire('Date de naissance').": </td><td><input type=\"texte\" name=\"anniv\"   size=\"10\" value=\"".variable("anniv")."\"> </td><td>".traduire('jj/mm/aaaa')."</td>" ;
@@ -3652,7 +3682,7 @@ if (isset($_POST['pass']))
 		$idx1= nouveau_user(variable("id"),variable("pw"),variable("droit"),variable("mail"),variable("organisme"),variable("nom"),variable("prenom"),mef_date(variable("anniv")),variable("telephone"),variable("nationalite"),variable("ville_nat"),variable("adresse"),variable("recept_mail"),variable("prenom_p"),variable("prenom_m"),variable("code_lecture"),variable("nss"),variable("type_user"));
 		if ( ($idx1!="") && (variable("droit")=="") )
 			// par défaut on impose le créateur comme référent de  confiance
-			nouveau_referent($idx1 ,$user_organisme, $user_idx, "", "","","");
+			nouveau_referent($idx1 ,$user_organisme, "Tous", "", "","","");
 		$action="";
 		}
 
@@ -3817,7 +3847,8 @@ if (isset($_POST['pass']))
 		echo "</td></table></td>";
 		
 		echo "<tr><td><hr>";
-
+	
+		
 		if ($action=="upload")
 			traite_upload($user_idx, $code_lecture, variable ("idx") );
 			
@@ -3897,6 +3928,22 @@ if (isset($_POST['pass']))
 			}
 			
 		echo "<a title=\"Alerte Grand Froid/Forte Pluie\" href=\"alerte.php\"><img src=\"images/logo-alerte.jpg\" width=\"70\" height=\"50\"></a> ";
+
+//	http://127.0.0.1/doc-depot/suivi.php?action=suivi&nom=Boudjema%20BOUZEGZI
+// si existe lien vers suivi	
+		if ((isset($_SESSION['support'])) && (isset( $_SESSION['user_idx'])) )
+			{
+			$bdd= $_SESSION['support'];
+			$uidx_fissa= $_SESSION['user_idx'];
+			$reponse = command("SELECT * FROM $bdd WHERE date='0000-00-00' and pres_repas='' and activites='$uidx_fissa'  "); 
+			if ($donnees = fetch_command($reponse))
+				{
+				$nom_slash=$donnees["nom"];
+				echo "<br><a href=\"suivi.php??action=suivi&nom=$nom_slash\">Accès au Suivi individuel de $nom_slash</a>";
+				}
+
+			}		
+		
 		echo "</center></td>";			
 		if ((($user_droit=="S") || ($user_droit=="R") ) && (est_image($logo) ) )
 			echo "<td><a href=\"index.php\"> <img src=\"images/$logo\" width=\"200\" height=\"100\"  > </a> </td> ";
@@ -3931,6 +3978,10 @@ if (isset($_POST['pass']))
 			affiche_alarme();
 		
 		echo "<hr>";
+
+		
+		
+
 
 	if (($action=="phpinfo") && ( ($user_droit=="A") || ($user_droit=="E")) )
 		{

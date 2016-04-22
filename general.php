@@ -4,6 +4,7 @@
 include 'param.php';
 include 'bdd.php';
 
+
 	function jour($t)
 		{
 		return (($t+4) % 7);

@@ -686,6 +686,23 @@
 				// ------------------------------------------- Bloc générique
 				$version=maj_version($nelle_version);
 				}	
-					
+
+		$nelle_version="V1.26";
+		if ($version<$nelle_version)
+				{
+				backup_tables(false);  // A utiliser si changement de structure ou de contenu de la base
+				
+				// ------------------------------------------- Bloc Spécifique à la montée de version
+				command("DROP TABLE `cc_audit_cnil` ");
+				command("CREATE TABLE IF NOT EXISTS `cc_audit_cnil` (
+						  `periode` text NOT NULL,
+						  `support` text NOT NULL,
+						  `resultat` text NOT NULL
+						) ENGINE=InnoDB DEFAULT CHARSET=latin1;");
+				// ------------------------------------------- Fin bloc spécifique
+
+				// ------------------------------------------- Bloc générique
+				$version=maj_version($nelle_version);
+				}					
 			
 ?>

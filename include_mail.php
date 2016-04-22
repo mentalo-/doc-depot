@@ -30,6 +30,9 @@
 			ajout_log_tech( "Attention seuil d'envoi mails dépassé :".parametre("TECH_nb_mail_envoyes")." / ".parametre("DD_nbre_mail_jour_max"));
 
 		}
+
+	
+		
 		
 	// envoi de mail sans mise en forme Doc-dépot
 	function envoi_mail_perso($to,$subject,$body, $origine, $from="")
@@ -67,6 +70,35 @@
 
 		if ($CR_Mail === FALSE)
 			erreur( " Erreur envoi mail: $CR_Mail <br> \n");
+		}	
+
+
+
+	function mail2($dest, $titre, $contenu, $libelle, $mail_struct )
+		{
+		if (($_SERVER['REMOTE_ADDR']=="127.0.0.1") ||(isset ($_SESSION['chgt_user']) && ($_SESSION['chgt_user']==true) ))
+			{
+			echo "<table border=\"2\"> <tr> <td>$dest <hr>" ;
+			echo "$titre <hr>" ;
+			echo "$contenu </td> </table>" ;
+			return;
+			}		
+			
+		// Entete
+		$headers  = "MIME-Version: 1.0 \n"; 
+		$headers .='Content-Type: text/html; charset="iso-8859-1"'."\n";
+        $headers .='Content-Transfer-Encoding: 8bit'."\n";		
+		
+		$libelle = '=?iso-8859-1?B?'.base64_encode($libelle).'?='; // T354
+		$headers  .= "From: FISSA $libelle <$mail_struct>" . "\r\n"; 
+		
+		// mise en forme HTML
+		$contenu = supprime_html($contenu);
+		$contenu = "<html><body>$contenu</body></html>";	
+		$titre = '=?iso-8859-1?B?'.base64_encode($titre).'?=';  // T354
+					
+		mail ( $dest , $titre, $contenu,$headers );
+		return(true);
 		}	
 		
 	// envoi de mail avec mise en forme doc-depot

@@ -296,6 +296,84 @@ include 'inc_style.php';
 		echo "<input type=\"text\" name=\"telephone\"  value=\"$val\"  onChange=\"this.form.submit();\">";
 		echo "</form> </td>";
 		}
+		
+		
+	// $num est le nom du fichier
+	// $flag_acces est le code d'accès ( a minima pour répondre aux demandes d'accès des AS)
+	function visu_doc_liste($num,$flag_acces="", $sans_lien="")
+		{
+		global $user_droit,$doc_autorise, $user_lecture;
+		
+		$taille="50";
+		
+		$reponse =command("select * from r_attachement where num='$num' ");
+		if ($donnees = fetch_command($reponse) ) 
+			{
+			$ref=$donnees["ref"];
+			$date=$donnees["date"];
+			$num=$donnees["num"];	
+			$l_num=strstr($num,".");
+			$type=$donnees["status"];			
+			$ident=stripcslashes($donnees["ident"]);	
+			$type_org=$type;
+			
+			echo "<td width=\"25\" align=\"center\" >";
+					
+			if (est_image($num)) 
+				{
+				if ((substr($ref,0,1)=="A") &&( $user_lecture!=""))
+					{
+					if (($doc_autorise=="") || (stristr($doc_autorise, ";$type_org;") === FALSE) )
+						{
+						if ($flag_acces=="") 
+							lien("visu.php?action=visu_image_mini&nom=$num", "visu_image", param ("nom","$num"), "", $taille,"B",$sans_lien, false);
+						else
+							lien("visu.php?action=visu_image_mini&nom=-$num", "visu_fichier", param ("num","$num").param ("code","$flag_acces"), traduire("Document protégé"), $taille,"B",$sans_lien, false);
+						}
+					else
+						lien("visu.php?action=visu_image_mini&nom=-$num", "visu_image", param ("nom","$num"), "", $taille,"B",$sans_lien, false);
+					}
+				else
+					lien("visu.php?action=visu_image_mini&nom=$num", "visu_image", param ("nom","$num"), "", $taille,"B",$sans_lien, false);
+
+				}
+			else
+				if (extension_fichier($num)=="pdf")
+					{
+					if (!file_exists("upload_mini/$num.jpg"))
+						{
+						$icone_a_afficher="images/fichier.jpg";	
+						$icone_a_afficher_cadenas="images/-fichier.jpg";	
+						}
+					else
+						{
+						$icone_a_afficher="visu.php?action=visu_image_mini&nom=$num.jpg";
+						$icone_a_afficher_cadenas="visu.php?action=visu_image_mini&nom=-$num.jpg";
+						}
+							
+					if ((substr($ref,0,1)=="A") &&( $user_lecture!=""))
+						{
+							
+						if (($doc_autorise=="") ||(stristr($doc_autorise, ";$type_org;") === FALSE) )
+							{
+							if ($flag_acces=="") 
+								lien("$icone_a_afficher", "visu_fichier", param ("num","$num"), "", $taille,"B",$sans_lien, false);
+							else 
+								lien("$icone_a_afficher_cadenas", "visu_fichier", param ("num","$num").param ("code","$flag_acces"), "", $taille,"B",$sans_lien, false);
+							}
+						else
+							lien("$icone_a_afficher", "visu_fichier", param ("num","$num"), "", $taille,"B",$sans_lien, false);
+				
+						}
+					else
+						lien("$icone_a_afficher", "visu_fichier", param ("num","$num"), "", $taille,"B",$sans_lien, false);
+			
+					}
+				else
+					lien("images/fichier.png", "visu_doc", param ("num","$num"), "", $taille,"B",$sans_lien, false);
+			}
+		}
+
 	// -====================================================================== Saisie
 
 
@@ -332,6 +410,8 @@ include 'inc_style.php';
 		$libelle=$donnees["libelle"];
 		$logo=$_SESSION['logo'];	
 
+		$_SESSION['bene']="";
+		
 		$memo=variable_s("memo");
 		$action=variable_s("action");
 		if ($action=="")
@@ -365,6 +445,10 @@ include 'inc_style.php';
 			
 		if ($action=="nouveau2")
 			{
+			$nom=str_replace ('(A)','',$nom);
+			$nom=str_replace ('(M)','',$nom);
+			$nom=str_replace ('(S)','',$nom);
+			$nom=str_replace ('(B)','',$nom);
 			if (variable_s("type")=="Bénéficiaire femme")
 				$nom .= " (F)";
 			nouveau2($date_jour,$nom, variable_s("age"),variable_s("nationalite"));
@@ -726,19 +810,38 @@ include 'inc_style.php';
 							
 							fin_cadre();
 					
-					/* Accès à Doc-depot
+					//Accès à Doc-depot
 					if ( (!(strstr($nom,"(M)"))) && (!(strstr($nom,"(A)"))) &&	(!(strstr($nom,"(B)"))) && 	(!(strstr($nom,"(S)"))) &&  ($_SESSION['droit']!="P") ) 				
 						{
-						echo "<table><tr><td> <img src=\"images/papier.png\" width=\"35\" height=\"35\" > </td>";
+						echo "<table><tr>";
 						$reponse = command("SELECT * FROM $bdd WHERE nom='$nom_slash' and date='0000-00-00' and pres_repas='' and activites<>''  "); 
 						if ($donnees = fetch_command($reponse))
 							{ // compte Doc-depot existe
-
-							echo "<TD>Accèder aux documents via doc-depot </td> ";						
-
+							$idx=$donnees["activites"];
+							
+							//
+							$_SESSION['user_idx']=$idx;
+							
+							lien_c ("images/logo.png", "detail_user", param("user","$idx" ), traduire("Accès à Doc-depot") , "50");
+							
+							$r1 =command("select * from  r_user where idx='$idx' ");
+							$d1 = fetch_command($r1) ;
+							$flag_acces=$d1["lecture"];
+							
+							$r1 =command("select * from r_attachement where ref='A-$idx' order by date DESC ");
+							while ($d1 = fetch_command($r1) ) 
+								{
+								$num=$d1["num"];	
+								visu_doc_liste($num,$flag_acces);
+								}
+				
+						lien_c ("images/ajouter.png", "draganddrop", "" , traduire("Ajouter un doc") , "30");
+							
 							}
 						else // compte Doc-depot n'existe pas ==> alors  propose création
 							{
+							echo "<td> <img src=\"images/logo.png\" width=\"60\" height=\"50\" > </td>";
+
 							$nom2="";
 							$d3= explode(" ",$nom);  
 							$prenom=trim($d3[0]);
@@ -750,44 +853,19 @@ include 'inc_style.php';
 							$nom2=trim(str_replace("(F)","",$nom2));
 							echo "<TD>";						
 							formulaire ("ajout_beneficiaire","index.php");
+							echo "<input type=\"hidden\" name=\"fissa\"  value=\"$nom\"> " ;
 							echo "<input type=\"hidden\" name=\"nom\"  value=\"$nom2\"> " ;
 							echo "<input type=\"hidden\" name=\"prenom\"  value=\"$prenom\"> " ;
 							echo "<input type=\"hidden\" name=\"anniv\"   value=\"$age\"> " ;
+							echo "<input type=\"hidden\" name=\"fissa_mail\"   value=\"$mail\"> " ;
+							echo "<input type=\"hidden\" name=\"fissa_tel\"   value=\"$tel\"> " ;
+							echo "<input type=\"hidden\" name=\"fissa_add\"   value=\"$adresse\"> " ;
 							echo "<input type=\"hidden\" name=\"nationalite\"   value=\"$nat\">" ;
 							echo "<input type=\"submit\"  id=\"nouveau_user\"  value=\"Création compte Doc-depot\" > </form></td>  ";		
-							$val_init="";
-							$reponse = command("SELECT * from  fct_fissa WHERE support='$bdd'"); 
-							if ($donnees = fetch_command($reponse))
-								{
-								$organisme=$donnees["organisme"];
-								echo "<td> ou associer au compte non affecté </td>";
-								$reponse =command("select * from  r_referent where (nom='Tous' or  nom='$user_idx')  and organisme='$organisme' ");		
-								echo "<form method=\"GET\" action=\"suivi.php\">";
-								echo "<input type=\"hidden\" name=\"nom\"  value=\"$nom\">";
-								echo "<input type=\"hidden\" name=\"action\" value=\"compte_dd\"> " ;
-								echo "<td><SELECT name=\"compte_dd\"  onChange=\"this.form.submit();\" >";
-								affiche_un_choix($val_init, "" ,"Choisir dans la liste");
-								while ($donnees = fetch_command($reponse))
-									{
-									$b1=$donnees["user"];	
-									
-									$r1 = command("SELECT * from  r_user WHERE idx='$b1'"); 
-									if ($d1 = fetch_command($r1))
-										{
-										$n1=$d1["nom"];
-										$p1=$d1["prenom"];				
-										$a1=$d1["anniv"];
-										affiche_un_choix($val_init, $b1 ,"$p1 $n1 ($a1)");
-
-										}
-									 }
-								
-								echo "</select></form></td>";								
-								}
 							}
 						echo "</table>";							
 						}
-					*/			
+							
 								
 
 					if (($_SESSION['droit']!="P") )

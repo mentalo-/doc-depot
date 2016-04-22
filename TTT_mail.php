@@ -8,6 +8,8 @@
 	include 'general.php';
  	include 'include_crypt.php';
 	include 'include_charge_image.php';	
+	include 'audit_cnil.php';	
+
 	// doublon avec INDEX.HTML
 	
 	function recept_mail($id,$date)
@@ -229,46 +231,61 @@ function random_chaine($car)
 
 		if (parametre("TECH_Fissa_scoring_fin","")=="")
 			calcule_score();
-			
+	
+	
+		if (date('d-h',  time()=='01-06') )
+				{
+				$reponse =command("select * from fct_fissa  ");
+				while ($donnees = mysql_fetch_array($reponse) )
+					{
+					$periode=date('Y-m',  time());
+					$support=$donnees["support"];
+					$r1 =command("select * from cc_audit_cnil where support='$support' and periode='$periode' ");
+					if (!($d1 = mysql_fetch_array($r1) ) )
+						{
+						audit_cnil($periode, $support);
+						break;
+						}
+					}
+				}
+	
 		if (date('Y-m-d-h',  time()) != date('Y-m-d-h',  $ancien_ttt ))
+			{
 			if ($heure==23)
 				init_score_fissa();
 				
-		if (date('Y-m-d-h',  time()) != date('Y-m-d-h',  $ancien_ttt ))
 			if ($heure==1)
 				{
 				ajout_log_tech( "Backup tables");
 				backup_tables();
 				}			
 			
-		if (date('Y-m-d-h',  time()) != date('Y-m-d-h',  $ancien_ttt ))
 			if ($heure==2)
 				{
 				ajout_log_tech( "Controle de signature");
 				ctrl_signature();
 				}			
 
-		if (date('Y-m-d-h',  time()) != date('Y-m-d-h',  $ancien_ttt ))
 			if ($heure==3)
 				{
 				ajout_log_tech( "purge BdD FISSA");
 				purge_bdd_fissa();
 				}
-		if (date('Y-m-d-h',  time()) != date('Y-m-d-h',  $ancien_ttt ))
 			if ($heure==4)
 				{
 				ajout_log_tech( "purge Alerte");
 				purge_bdd_alerte();
 				}		
 				
-		if (date('Y-m-d-h',  time()) != date('Y-m-d-h',  $ancien_ttt ))
 			if ($heure==5)
 				{
 				ajout_log_tech( "purge Log");
 				purge_bdd_log();
 				}
+			
+			
 
-		if (date('Y-m-d-h',  time()) != date('Y-m-d-h',  $ancien_ttt ))
+				
 			if ($heure==7)
 				{
 				if (parametre("TECH_Fissa_scoring_fin","")=="")
@@ -276,7 +293,8 @@ function random_chaine($car)
 					ajout_log_tech( "Fin Scoring non terminé à 7h !!" ,"P0" );
 					envoi_sms( parametre('DD_tel_alarme1') , parametre('TECH_identite_environnement')." : Fin Scoring non terminé à 7h !!");
 					}
-				}				
+				}
+			}				
 
 		commentaire_html( "Purge temporaire");
 		purge_fichiers_temporaires("dir_zip/");		
