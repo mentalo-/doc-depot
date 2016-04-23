@@ -232,8 +232,8 @@ function random_chaine($car)
 		if (parametre("TECH_Fissa_scoring_fin","")=="")
 			calcule_score();
 	
-	
-		if (date('d-h',  time()=='01-06') )
+		// traitement le 1 jour du mois à 6 heures
+		if (date('d-h',  time())==parametre("DD_jour_heure_audit_cnil","01-06") )
 				{
 				$reponse =command("select * from fct_fissa  ");
 				while ($donnees = mysql_fetch_array($reponse) )

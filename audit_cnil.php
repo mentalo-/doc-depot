@@ -63,7 +63,10 @@
 				
 		echo "<p><hr>Audit CNIL sur $support ($i mots à tester) <br>";
 
-		$debut = mktime(0,0,0 , date("m")-1, 1, date ("Y"));
+		if ($_SERVER['REMOTE_ADDR']=="127.0.0.1")
+			$debut = mktime(0,0,0 , date("m")-10, 1, date ("Y"));
+		else
+			$debut = mktime(0,0,0 , date("m")-1, 1, date ("Y"));
 		$fin = mktime(0,0,0 , date("m"), 1, date ("Y"));
 		$r1 = command("SELECT *  FROM $support where commentaire<>'' and pres_repas<>'nationalite' and modif>'$debut' and modif<'$fin' "); 
 		
@@ -153,9 +156,9 @@
 				
 			if ($nb!=0)
 				{
-				$entete=  "<p>Bonjour,<p>Veuillez trouvez ci-dessous les saisies du mois dernier faites par les acteurs sociaux de votre structure et qui nécessitent votre regard. ";
+				$entete=  "<p>Bonjour,<p>Veuillez trouver ci-dessous les saisies du mois dernier faites par les acteurs sociaux de votre structure et qui nécessitent votre regard. ";
 				$entete.=  " Certains mots ou expressions utilisés sont succeptibles de ne pas respecter les directives de la CNIL.";
-				$entete.=  "<p>Ce système de détection, en phase experimentale, peut ne pas avoir détecter certains mots ou expressions inappropriés, n'hésitez pas à nous faire des retours via le lien <a id=\"lien\"  href=\"https://www.doc-depot.com/index.php?action=contact\">contact de FISSA</a><p>";				
+				$entete.=  "<p>Ce système de détection, en phase experimentale, peut ne pas avoir détecté certains mots ou expressions inappropriés, n'hésitez pas à nous faire des retours via le lien <a id=\"lien\"  href=\"https://www.doc-depot.com/index.php?action=contact\">contact de FISSA</a><p>";				
 				$entete.=  "<p>Rappel CNIL: les informations personnelles enregistrées doivent être «adéquates, pertinentes et non excessives au regard des finalités pour lesquelles elles sont collectées (article 6-3°).";
 				$entete.=  "<br>En principe, les données sensibles (information concernant l’origine raciale ou ethnique, les opinions politiques, philosophiques ou religieuses, l’appartenance syndicale, la santé ou la vie sexuelle) ne peuvent être recueillies et exploitées qu’avec le consentement explicite des personnes. ";
 				
@@ -165,7 +168,7 @@
 				$entete.=  "<td bgcolor=\"$color\"> <font color=\"white\"> Dernier rédacteur de la saisie </td> <td bgcolor=\"$color\"> <font color=\"white\"> Date de la saisie </td> <td bgcolor=\"$color\">   </td> ";
 				$entete.=  "<td bgcolor=\"$color\">  <font color=\"white\">Bénéficiaire </td> <td bgcolor=\"$color\"> <font color=\"white\"> Jour </td>";
 				$entete.=  "<td bgcolor=\"$color\">  </td> <td bgcolor=\"$color\"><font color=\"white\">  Commentaire  saisie</td> ";						
-				$entete.=  "<td bgcolor=\"$color\"><font color=\"white\">  En rouge, partie nécessitant votre attention </td> ";						
+				$entete.=  "<td bgcolor=\"$color\"><font color=\"white\">  En souligné jaune, partie nécessitant votre attention </td> ";						
 				$resultat=addslashes2("$entete $cumul </table>"); 
 				command("INSERT INTO `cc_audit_cnil`  VALUES ( '$periode','$support', '$resultat' )" );		
 				// il faut envoyer le mail

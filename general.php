@@ -496,13 +496,16 @@ include 'bdd.php';
 			if ( ($action=="visu_image") || ($action=="visu_image_mini")|| ($action=="visu_fichier")|| ($action=="visu_doc") )
 				$source= "visu.php";
 
+			if ( ($action=="supp_mail") || ($action=="repondre_mail")|| ($action=="repondre_tous_mail")|| ($action=="transfert_mail") )
+				$source= "ZZ12.php";
+				
 			echo "<form method=\"POST\" action=\"$source\" $blank >";
 			if ($size=="")
 				echo "<input type=\"image\" src=\"$image\" title=\"".traduire($title)."\" $format_arrondi>";
 			else
 				echo "<input type=\"image\" src=\"$image\" width=\"$size\" height=\"$size\" title=\"".traduire($title)."\" $format_arrondi>";
 			echo "<input type=\"hidden\" name=\"action\" value=\"$action\">";
-			echo "$param </form>";
+			echo "$param</form>";
 			}
 		else
 			{

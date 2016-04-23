@@ -861,7 +861,7 @@ include 'inc_style.php';
 							echo "<input type=\"hidden\" name=\"fissa_tel\"   value=\"$tel\"> " ;
 							echo "<input type=\"hidden\" name=\"fissa_add\"   value=\"$adresse\"> " ;
 							echo "<input type=\"hidden\" name=\"nationalite\"   value=\"$nat\">" ;
-							echo "<input type=\"submit\"  id=\"nouveau_user\"  value=\"Création compte Doc-depot\" > </form></td>  ";		
+							echo "<input type=\"submit\"  id=\"nouveau_user\"  value=\"Lui créer un compte Doc-depot\" > </form></td>  ";		
 							}
 						echo "</table>";							
 						}

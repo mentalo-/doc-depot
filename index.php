@@ -2329,6 +2329,8 @@ function affiche_titre_user($user)
 	$nom=$donnees["nom"];
 	$prenom=$donnees["prenom"];				
 	$anniv=$donnees["anniv"];	
+	if ($anniv!="")
+		$anniv="($anniv)";
 	$tel=$donnees["telephone"];				
 	$mail=$donnees["mail"];	
 			
@@ -2338,8 +2340,7 @@ function affiche_titre_user($user)
 	
 	$user=encrypt($user);
 	echo "<table><tr><td> <ul id=\"menu-bar\">";
-	echo "<li> <a href=\"index.php?action=detail_user2&user=$user\" > $nom-$prenom ( $anniv ) </a></li>";
-//	echo "<li> <a > $nom-$prenom ( $anniv ) </a></li>";
+	echo "<li> <a href=\"index.php?action=detail_user2&user=$user\" > $nom $prenom $anniv </a></li>";
 	echo "</ul></td><td> - ".traduire('Domiciliation').": $organisme / $adresse / $tel / $mail </td></table>";
 	}
 
@@ -3557,12 +3558,15 @@ if (isset($_POST['pass']))
 		$_SESSION['bene']=variable_get("user");	
 		$action="detail_user";
 		}
-		
+
 	if ($action=="")
+		{
 		$_SESSION['bene']=$user_idx;
+		$_SESSION['user_idx']=$user_idx;
+		}		
+
 	if (($user_droit=="R") || ($user_droit=="A")) 
 		$_SESSION['bene']="";
-	
 		
 	if ($action=="recept_mail")
 		recept_mail($_SESSION['user_idx'],$date_jour);	
@@ -3683,7 +3687,11 @@ if (isset($_POST['pass']))
 		if ( ($idx1!="") && (variable("droit")=="") )
 			// par défaut on impose le créateur comme référent de  confiance
 			nouveau_referent($idx1 ,$user_organisme, "Tous", "", "","","");
-		$action="";
+
+		if (($idx1!="") || ($user_droit!="S") )
+			$action="";
+		else
+			$action="ajout_beneficiaire";
 		}
 
 	if (($action=="modif_user") && (($user_droit=="R") || ($user_droit=="A") ) )
