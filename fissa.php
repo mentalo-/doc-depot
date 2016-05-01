@@ -334,6 +334,9 @@ include 'include_mail.php';
 						
 			$i++;
 			}
+		if ($i==0)
+			return;
+			
 		asort($tab_nom);
 		echo "<tr> <td width=\"1000\">";
 
@@ -860,7 +863,7 @@ include 'include_mail.php';
 		if ($select!="")
 			{
 			echo "<table id=\"dujour\"  border=\"2\" >";
-			// =====================================================================loc AJOUTER Matériel
+			// =====================================================================loc AJOUTER 
 			echo "<form method=\"GET\" action=\"fissa.php#dujour\">";
 			echo "<input type=\"hidden\" name=\"action\" value=\"nouveau\"> " ;
 			echo "<input type=\"hidden\" name=\"memo\" value=\"\"> " ;	
@@ -1293,30 +1296,49 @@ else
 				// =====================================================================loc SALARIE et BENEVOLES
 				echo "</table> ";
 				echo "<p> ";
+
 				if (liste_ajout_par_type( "Visite", "(B)"))
 					{
 					creation_par_type( "Bénévole",  "Atelier",  "nouvel Acteur Social");
 					liste_du_jour( "Acteur Social","Evénement","(B)");	
 					echo "</table><p> ";
 					}
-
+				else
+				if ($_SESSION['droit']=="R")					
+					{
+					echo "<table id=\"dujour\"  border=\"2\" >";
+					creation_par_type( "Bénévole",  "Atelier",  "nouvel Acteur Social");					
+					echo "</table><p> ";
+					}
 				// =====================================================================loc ACTIVITES
-
 				if (liste_ajout_par_type( "Visite", "(A)"))
 					{
 					creation_par_type( "Activité",  "Atelier",  "nouvelle Activité");
 					liste_du_jour( "Activité","Evénement","(A)");
 					echo "</table><p> ";
 					}
+				else
+				if ($_SESSION['droit']=="R")
+					{
+					echo "<table id=\"dujour\"  border=\"2\" >";
+					creation_par_type( "Activité",  "Atelier",  "nouvelle Activité");					
+					echo "</table><p> ";
 
+					}
 				// =====================================================================loc MATERIEL
-						
 				if (liste_ajout_par_type( "Matériel", "(M)"))
 					{
 					creation_par_type( "Matériel",  "Matériel",  "nouveau Matériel");
 					liste_du_jour( "Matériel","Quantité","(M)");
 					echo "</table><p> ";
 					}
+				else
+					if ($_SESSION['droit']=="R")
+						{	
+						echo "<table id=\"dujour\"  border=\"2\" >";
+						creation_par_type( "Matériel",  "Matériel",  "nouveau Matériel");
+						echo "</table><p> ";
+						}				
 				
 				
 				// =====================================================================locYNTHESE

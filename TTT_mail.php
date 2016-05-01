@@ -100,7 +100,7 @@
 			{
 			$support=$donnees["support"];
 			echo "$support; ";
-			command("UPDATE $support set qte='?' where date='0000-00-00' and pres_repas='' ");
+			command("UPDATE $support set qte='?' where date='0000-00-00' and pres_repas='' and nom<>'Synth'  and nom<>'Mail' ");
 			}
 		}			
 
@@ -446,30 +446,38 @@ function random_chaine($car)
 			$delta=($time_ttt-$ancien_ttt);
 			// attention cette action doit être en dernier sinon mise à jour z_ttt ne fonctionne pas !!!
 			decremente_echec_cx ($delta/15);
-			if ($delta> 30 )
+			
+			ecrit_parametre("TECH_al_nb_TTT",parametre("TECH_al_nb_TTT")+1)  ;
+			$tempo_mesure=15*11;
+			if ( (time()-parametre("TECH_al_tempo_TTT",time()))>$tempo_mesure) 
 				{
+				$nb_ttt=parametre("TECH_al_nb_TTT");
 				if (parametre("TECH_alarme_delais_TTT")=="")
+					// si pas d'alarme
 					{
-					ajout_log_tech( "Traitement mail hors delais : $delta sec ");
-					if ($delta> 250 )
+					if ($nb_ttt<($tempo_mesure/15/3))
 						{
-						ajout_log_tech( "Début alarme Traitement mail hors delais","P0");
+						ajout_log_tech( "Traitement mail hors delais ");
 						envoi_mail(parametre('DD_mail_gestinonnaire'),"Début alarme Traitement mail hors delais ","");
-						ecrit_parametre("TECH_alarme_delais_TTT",time()) ;
-						}
+						ecrit_parametre("TECH_alarme_delais_TTT",time()) ;			
+						}						
 					}
-				}
-			else
-			if ($delta< 20 )
-				{
-				if (parametre("TECH_alarme_delais_TTT")!="")	
+				else
 					{
-					ajout_log_tech( "Fin alarme Traitement mail hors delais","P0");
-					envoi_mail(parametre('DD_mail_gestinonnaire'),"Fin alarme Traitement mail hors delais ","");
+					if ($nb_ttt>($tempo_mesure/15*2/3))
+						{
+						ajout_log_tech( "Fin alarme Traitement mail hors delais","P0");
+						envoi_mail(parametre('DD_mail_gestinonnaire'),"Fin alarme Traitement mail hors delais ","");;
+						ecrit_parametre("TECH_alarme_delais_TTT",'') ;
+						}						
 					}
-				ecrit_parametre("TECH_alarme_delais_TTT",'') ;
+				
+				// on remet le compteur à zéro
+				ecrit_parametre("TECH_al_nb_TTT",0) ;
+				ecrit_parametre("TECH_al_tempo_TTT",time());
 				}
 
+		
 		ajout_log_jour(" ==================================================================================================== TTT_Alerte");
 		require_once "alerte_ttt.php";
 		}		

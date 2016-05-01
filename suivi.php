@@ -95,9 +95,9 @@ include 'inc_style.php';
 			}
 		
 		$i=0; 
-		if ( $_SESSION['droit']=="R")
-			$date_deb="0000-00-00";
-		else
+//		if ( $_SESSION['droit']=="R")
+//			$date_deb="0000-00-00";
+//		else
 			$date_deb="2000-00-00";
 		if ($detail=="")
 			$reponse = command("SELECT * FROM $bdd WHERE nom='$nom_slash' and date>'$date_deb' and pres_repas<>'pda' and pres_repas<>'reponse' and pres_repas<>'partenaire' order by date DESC "); 
@@ -952,7 +952,7 @@ include 'inc_style.php';
 								affiche_rdv($nom);		
 								
 							if ($action=="accompagnement")
-									echo "<a href=\"suivi.php?actionsuivi=&nom=$nom&date_jour=$date_jour\" > ( N'afficher que l'accompagnement )</a>";
+									echo "<a href=\"suivi.php?action=suivi&nom=$nom&date_jour=$date_jour\" > ( N'afficher que l'accompagnement )</a>";
 								else
 									echo "<a href=\"suivi.php?action=accompagnement&nom=$nom&date_jour=$date_jour\" > (Afficher aussi les visites)</a>";
 							}
