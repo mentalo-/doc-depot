@@ -4,11 +4,13 @@
 
 	function homogene ( $commentaire)
 		{
-		$commentaire = strtr($commentaire, 'Êáàâäãåçéèêëíìîïñóòôöõúùûüıÿ-_()<>;.,"?/!’«”“‘', 'Eaaaaaaceeeeiiiinooooouuuuyy                  ');
+	//	$commentaire = strtr($commentaire, 'Êáàâäãåçéèêëíìîïñóòôöõúùûüıÿ-_()<>;.,"?/!’«”“‘', 'Eaaaaaaceeeeiiiinooooouuuuyy                  ');
 		$commentaire = strtr($commentaire, "'", " ");
 		$commentaire = str_replace ("&apos"," ", $commentaire);
 		$commentaire = str_replace ("   "," ", $commentaire);
 		$commentaire = str_replace ("  "," ", $commentaire);
+		$commentaire = str_replace ("\n"," ", $commentaire);
+		$commentaire = str_replace ("\r"," ", $commentaire);
 		return($commentaire);
 		}
 		
@@ -20,29 +22,28 @@
 		return(stristr($commentaire,$recherche));
 		 }
 	
+
+	function test1( $m)
+		{
+		global $autorises, $commentaire;
+
+		if 	(dd_strstr($commentaire,$m) )
+			$commentaire=str_ireplace ($m, "<B><span style=\"background-color:#ffff66;\" >&nbsp;$m&nbsp;</span></b>", $commentaire);
+		}
+		
 	function test( $m)
 		{
 		global $autorises, $commentaire;
 					
-		if 	(dd_strstr($commentaire,$m))
+		if 	(dd_strstr($commentaire," ".$m))
 			{
-
-			if ( 
-				(dd_strstr($commentaire," ".$m."e ")) || 
-				(dd_strstr($commentaire," ".$m."es ")) || 
-				(dd_strstr($commentaire," ".$m."s ")) || 
-				(dd_strstr($commentaire," ".$m."r ")) || 
-				(dd_strstr($commentaire," $m "))
-				)
-					{
-					if ( 
-						(!isset ($autorises[$m] ))
-						||
-						( !dd_strstr($commentaire,$autorises[$m] ) )
-						)
-						$commentaire=str_ireplace ( $m , "<B><span style=\"background-color:#ffff66;\" >&nbsp;$m&nbsp;</span></b>", $commentaire);
-					}
-				}
+			test1(" ".$m."e ");
+			test1(" ".$m."es ");
+			test1(" ".$m."s ");
+			test1(" ".$m."r ");
+			test1(" $m ");		
+			}
+			
 		}
 	
 	function test_approx( $org, $approx,$m)
@@ -78,7 +79,7 @@
 			{
 			$commentaire = $d1["commentaire"];
 			$org=$commentaire ;		
-			$commentaire = homogene ( " ".$commentaire);
+			$commentaire = " ".homogene ( $commentaire)." ";
 			$original=$commentaire;
 				
 			for ($i=0; isset($mots[$i]); $i++)
@@ -157,8 +158,8 @@
 			if ($nb!=0)
 				{
 				$entete=  "<p>Bonjour,<p>Veuillez trouver ci-dessous les saisies du mois dernier faites par les acteurs sociaux de votre structure et qui nécessitent votre regard. ";
-				$entete.=  " Certains mots ou expressions utilisés sont succeptibles de ne pas respecter les directives de la CNIL.";
-				$entete.=  "<p>Ce système de détection, en phase experimentale, peut ne pas avoir détecté certains mots ou expressions inappropriés, n'hésitez pas à nous faire des retours via le lien <a id=\"lien\"  href=\"https://www.doc-depot.com/index.php?action=contact\">contact de FISSA</a><p>";				
+				$entete.=  " Certains mots ou expressions utilisés sont susceptibles de ne pas respecter les directives de la CNIL.";
+				$entete.=  "<p>Ce système de détection, en phase expérimentale, peut ne pas avoir détecté certains mots ou expressions inappropriés, n'hésitez pas à nous faire des retours via le lien <a id=\"lien\"  href=\"https://www.doc-depot.com/index.php?action=contact\">contact de FISSA</a><p>";				
 				$entete.=  "<p>Rappel CNIL: les informations personnelles enregistrées doivent être «adéquates, pertinentes et non excessives au regard des finalités pour lesquelles elles sont collectées (article 6-3°).";
 				$entete.=  "<br>En principe, les données sensibles (information concernant l’origine raciale ou ethnique, les opinions politiques, philosophiques ou religieuses, l’appartenance syndicale, la santé ou la vie sexuelle) ne peuvent être recueillies et exploitées qu’avec le consentement explicite des personnes. ";
 				

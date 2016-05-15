@@ -441,7 +441,6 @@ include 'suivi_liste.php';
 			echo "<tr> <td bgcolor=\"$color\"> Inconnu </td><td bgcolor=\"$color\"> </td><td ALIGN=\"RIGHT\" bgcolor=\"$color\"> $reste </td><td ALIGN=\"RIGHT\" bgcolor=\"$color\"> ".sprintf("%2.1f",100-$pourcentage_cumule)."% </td>";
 			echo " </table>";			
 			
-			
 			echo "<p><a href=\"javascript:window.close();\">Fermer la fenêtre</a>"; 	
 			}
 		else

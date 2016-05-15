@@ -1276,6 +1276,7 @@ else
 				proposition("(S)",$acteur);	
 				proposition("(B)","Bénévoles");				
 				proposition("(A)","Activités");					
+				proposition("(M)","Matériel");					
 				echo "  </table> <P> ";
 				fin_cadre();
 

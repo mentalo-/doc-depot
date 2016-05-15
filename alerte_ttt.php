@@ -369,7 +369,6 @@ require_once "include_mail.php";
 		Echo "<BR> Pas de traitment car envoi récent ";
 	else
 		{
-
 		if ($mode_test)
 			$reponse = command("SELECT * FROM cc_alerte WHERE tel<>''  ");	
 		else
@@ -403,7 +402,7 @@ require_once "include_mail.php";
 					$msg = msg_alerte_min(-5);
 					
 					if ($msg=="")
-						$msg = msg_alerte_max(28, 8);
+					$msg = msg_alerte_max(parametre("DD_seuil_canicule","28"), parametre("DD_seuil_canicule_nuit","14"));  // seuil pour test !!!!
 					// if ($mode_test)
 						{
 						if ($mode_test)
@@ -437,6 +436,67 @@ require_once "include_mail.php";
 				}
 			}
 		}
+	
+
+// ==================================================================  Canicule
+Echo "<hr> Canicule :<p>";
+	$reponse = command("SELECT * FROM cc_alerte_canicule WHERE dernier_envoi>'$ilya5minutes' ");
+	if ( ($donnees = fetch_command($reponse)) && (!$mode_test) )
+		Echo "<BR> Pas de traitment car envoi récent ";
+	else
+		{
+		if ($mode_test)
+			$reponse = command("SELECT * FROM cc_alerte_canicule WHERE tel<>''  ");	
+		else
+			{
+			if ((date("H")<21) && (date("H")>8) )
+				$reponse = command("SELECT * FROM cc_alerte_canicule WHERE ( dernier_ttt <='$hier' or dernier_envoi='' ) and tel<>'' limit 1 ");
+			else
+				$reponse = command("SELECT * FROM cc_alerte_canicule WHERE dernier_ttt='' and tel<>''  limit 1 ");
+			}
+
+		$auj=date("Y-m-d");
+		while ($donnees = fetch_command($reponse) ) 
+			{
+			$telephone=$donnees["tel"];	
+			$dept=$donnees["dept"];	
+			echo "<p> $telephone ($dept) ==> ";
+
+			$r1 = command("SELECT * FROM cc_alerte_canicule WHERE dept='$dept' and tel='' and creation='$auj' ");
 			
+			$result = false;
+			if ( ($d1 = fetch_command($r1) ) && (!$mode_test) ) 
+				{
+				$msg=stripcslashes($d1["sueil"]); // on récupére le texte s'il a déjà été calculé et mis en forme
+				$result = true;
+				}
+			else
+				{ // 
+				$result = calcul_moyenne($dept );
+				if ($result)
+					{
+					$msg = msg_alerte_max(parametre("DD_seuil_canicule","28"), parametre("DD_seuil_canicule_nuit","14"));  // seuil pour test !!!!
+					$msg= reformule_msg($msg);
+					$msg= filtre_xss($msg);
+					command("INSERT INTO `cc_alerte_canicule`  VALUES ( '$auj', '', '$dept', '$msg','','','','','','')");
+					}
+				else
+					$msg="Pb accès info météo";
+				}
+			echo "<br> --> ".stripcslashes ($msg)." (".strlen($msg).")";
+
+			if ($result)
+				{
+				if ($msg !="") 
+					{
+					$msg=str_replace (" .", ".", $msg);
+					command("UPDATE `cc_alerte_canicule` SET dernier_envoi='$maintenant'  where tel='$telephone'  ");
+					if (!$mode_test)
+						envoi_SMS_operateur($telephone,stripcslashes($msg));
+					}
+				command("UPDATE `cc_alerte_canicule` SET dernier_ttt='$maintenant'  where tel='$telephone'  ");
+				}
+			}
+		}	
 ?>
 

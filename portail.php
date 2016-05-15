@@ -57,11 +57,20 @@ Association de Développement et d’Intégration de Logiciels Economiques Orientés 
 	<b><font size="4">DOC-DEPOT : La Consigne Numérique Solidaire </b></font>
 <br><br>
 	Sauvegardez gratuitement de façon sécurisée vos documents, photos et informations essentielles .
-	</td>
+	</td>	
 	</TABLE>
 
-	
-
+		
+	<?php	
+	if (file_exists ( "webmail" )) 
+		{
+		echo "<br><TABLE><TR> <td> ";
+		echo "<a href=\"".serveur."wm.php\"> "; 
+		echo "<img src=\"images/webmail.jpg\" width=\"150\" height=\"100\" > </a> </td>";
+		echo "<td width=\"500\" class=\"ombre\"> <center> <b><font size=\"4\">WEBMAIL </b></font>";
+		echo "<br><br> Accèder à vos mails de façon très simple.</td></TABLE>";
+		}
+	?>
 
 <p>
 
@@ -90,15 +99,7 @@ Association de Développement et d’Intégration de Logiciels Economiques Orientés 
 
 		<b><font size="3">FISSA </b>: Simplifiez le suivi des activités et des bénéficiaires  </font> <br>
 </td>
-		 <TR> 
-<td > <center>
-	<?php echo "<a href=\"".serveur."rdv.php\"> "; ?>
-		<img src="images/rdv.jpg" width="101" height="75" > 
-		</a>
-					</td > <td > 
-
-		<b><font size="3">Rendez-vous SMS</b>: Rappel de rendez-vous par SMS </font> <br>
-</td>
+		
 		<TR> 
 <td > <center>
 <?php echo "<a href=\"".serveur."suivi.php\"> "; ?>
@@ -108,6 +109,17 @@ Association de Développement et d’Intégration de Logiciels Economiques Orientés 
 
 		<b><font size="3">Suivi personnalisé </b>: Enrichissez le suivi des bénéficiaires   </font> <br>
 </td>
+
+		 <TR> 
+<td > <center>
+	<?php echo "<a href=\"".serveur."rdv.php\"> "; ?>
+		<img src="images/rdv.jpg" width="101" height="75" > 
+		</a>
+					</td > <td > 
+
+		<b><font size="3">Rendez-vous SMS</b>: Rappel de rendez-vous par SMS </font> <br>
+</td>
+
 		</TABLE>
 		
 	</td>	

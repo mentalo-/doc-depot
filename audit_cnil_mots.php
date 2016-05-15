@@ -7,7 +7,8 @@
 		"culte" => "denier du culte",
 		"queue" => "queue de cerise",
 		"queue" => "queue de billard",
-		"lache" => "laché",
+		"lache" => "laché",	
+		"alcoolique" => "hydro-alcoolique",
 		);
 		
 		
@@ -105,6 +106,7 @@
 				"islam","islamiste","jihadiste","jihad", "non croyant",	"Judaïsme","Judaïque","Bouddhiste", "sunite", "sunnite", "chiite",
 				"dévotion", "envouté","culte","religion","croyance","idolatrie", "vaudou", "mystique", "chretien", "chretienne", "vaudou", "en trans", 
 				"pécheur", "impie","hérétique", "païen", "renégat",  "blasphématoire", "blasphéme", "impénitent",   "profanateur", "irréligieux", 
+				"pieux", "devot", "hallal", "ramadam", "excision", 
 				
 				// phylosophique
 				"epicurien","libre penseur", "feministe", "Transhumaniste", "altruiste", "Stoïcisme","Stoïcien", "libertaire",
@@ -144,7 +146,7 @@
 				"ingrat","laideron","laideur","monstre","monstrueux", "branque", "concupiscent", "bonne femme", "boniche", 
 				
 				// insulte
-				"pauvre type","conne","con","c o n","connard","connasse","conasse","salope","salo","salaud","emmerdeur","emmerdeuse","merde",
+				"pauvre type","conne","c o n","connard","connasse","conasse","salope","salo","salaud","emmerdeur","emmerdeuse","merde",
 				"abruti","andouille","avorton","bâtard","bouffon","couillon","crétin","crevure","enculé","enfoiré","fumier", "garce", "gogol", "mongol",
 				 "lâche",  "looser", "misérable", "morveux",   "minable", "minus",  "radasse", "radeuse", "tchebi", "tcheubi", 
 				"un moins que rien",  "pourriture", "chique molle", "foutre",  "mechant", "infect", 

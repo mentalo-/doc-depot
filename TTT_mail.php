@@ -33,6 +33,7 @@
 		command("delete from z_log_t  where ligne like '%Traitement mail hors delais%' and date<'$ilyaunmois' ");
 		command("delete from z_log_t  where ligne like '%Reception supervision gatewaysms%' and date<'$ilyaunmois' ");
 		command("delete from z_log_t  where ligne like '%Envoi SMS au ".parametre("DD_numero_tel_sms")."%' and date<'$ilyaunmois' ");
+		command("delete from z_log_t  where ligne like '%Nb TTT pendant alarme%' and date<'$ilyaunmois' ");
 		}
 		
 	// supprime les rdv envoyé ayant plus d'un mois d'ancieneté
@@ -282,9 +283,6 @@ function random_chaine($car)
 				ajout_log_tech( "purge Log");
 				purge_bdd_log();
 				}
-			
-			
-
 				
 			if ($heure==7)
 				{
@@ -448,14 +446,14 @@ function random_chaine($car)
 			decremente_echec_cx ($delta/15);
 			
 			ecrit_parametre("TECH_al_nb_TTT",parametre("TECH_al_nb_TTT")+1)  ;
-			$tempo_mesure=15*11;
+			$tempo_mesure=5*(4*15);
 			if ( (time()-parametre("TECH_al_tempo_TTT",time()))>$tempo_mesure) 
 				{
 				$nb_ttt=parametre("TECH_al_nb_TTT");
 				if (parametre("TECH_alarme_delais_TTT")=="")
 					// si pas d'alarme
 					{
-					if ($nb_ttt<($tempo_mesure/15/3))
+					if ($nb_ttt<($tempo_mesure/15/4))
 						{
 						ajout_log_tech( "Traitement mail hors delais ");
 						envoi_mail(parametre('DD_mail_gestinonnaire'),"Début alarme Traitement mail hors delais ","");
@@ -464,6 +462,7 @@ function random_chaine($car)
 					}
 				else
 					{
+					ajout_log_tech( "Nb TTT pendant alarme : $nb_ttt");
 					if ($nb_ttt>($tempo_mesure/15*2/3))
 						{
 						ajout_log_tech( "Fin alarme Traitement mail hors delais","P0");

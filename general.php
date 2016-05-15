@@ -519,7 +519,27 @@ include 'bdd.php';
 
 	function aff_logo($titre="")
 		{
-		
+		echo "<div id=\"logo\"> <center>";
+		echo "<a href=\"portail.php\"><img src=\"images/adileos.jpg\" width=\"150\" height=\"22\" ></a> ";
+		echo "<a href=\"index.php\"><img src=\"images/logo.png\" width=\"30\" height=\"22\" ></a> ";
+		echo "<a href=\"wm.php\"><img src=\"images/webmail.jpg\" width=\"30\" height=\"22\" ></a> ";
+		echo "<a href=\"fissa.php\"><img src=\"images/fissa.jpg\" width=\"30\" height=\"22\" ></a> ";	
+		echo "<a href=\"suivi.php\"><img src=\"images/suivi.jpg\" width=\"30\" height=\"22\" ></a> ";	
+		echo "<a href=\"rdv.php\"><img src=\"images/rdv.jpg\" width=\"30\" height=\"22\" ></a> ";	
+		echo "<a href=\"alerte.php\"><img src=\"images/logo-alerte.jpg\" width=\"30\" height=\"22\" ></a> ";	
+
+		echo "</div>  <center>";	
+	
+		if (strpos($_SERVER['PHP_SELF'],'wm')!==false)
+			{
+			echo "<div id=\"logo\"> <center><a href=\"wm.php\"><img src=\"images/webmail.jpg\" width=\"200\" height=\"150\" ></a> </div>  <center>";	
+			if ($titre!="")
+				{
+				echo "<h3>".traduire("Accèder à vos mails de façon très simple.")."</h3>";
+				echo "<p><i><b><p>";
+				}
+			}		
+		else			
 		if (strpos($_SERVER['PHP_SELF'],'suivi')!==false)
 			{
 			echo "<div id=\"logo\"> <center><a href=\"suivi.php\"><img src=\"images/suivi.jpg\" width=\"200\" height=\"150\" ></a> </div>  <center>";	

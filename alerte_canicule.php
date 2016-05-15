@@ -73,8 +73,7 @@ require_once "connex_inc.php";
 
 
     echo "<head>";
-	echo "<link rel=\"icon\" type=\"image/png\" href=\"images/identification.png\" />";
-	echo "<title>Alerte SMS météo </title>";
+	echo "<title>Alerte SMS Canicule </title>";
     echo "<meta http-equiv=\\\"Content-Type\\\" content=\\\"text/html; charset=iso-8859-1\\\" />";
 	echo "</head><body>";
 
@@ -111,13 +110,13 @@ require_once "connex_inc.php";
 	// ===================================================================== Bloc IMAGE
 
 		debut_cadre("800");
-		echo "<tr><td><a href=\"alerte.php\" > <img id=\"logo\" src=\"images/logo-alerte.jpg\" width=\"240\" height=\"180\" ></a> </td>";
-		echo "<td><center><h2>".traduire('Soyez alerté en cas de risque de grand-froid ou de forte pluie').".</h2>";
-		echo traduire("Vous possédez un téléphone portable, alors en remplissant le formulaire ci-dessous, vous recevrez gratuitement, pendant un an, un SMS s'il est prévu dans les 3 jours suivants :");
-		echo "<br>".traduire('précipitation importantes ou des températures ressenties très basses.');
+		echo "<tr><td><a href=\"alerte_canicule.php\" > <img id=\"logo\" src=\"images/canicule.jpg\" width=\"240\" height=\"180\" ></a> </td>";
+		echo "<td><center><h2>".traduire('Soyez alerté en cas de risque de canicule').".</h2>";
+		echo traduire("Vous possédez un téléphone portable, alors en remplissant le formulaire ci-dessous, <br>vous recevrez gratuitement, pendant un an, un SMS s'il est prévu dans les 3 jours suivants des températures très élevées.");
+		echo " <p>( Température Max en journée > à ".parametre("DD_seuil_canicule")."°C  et la température nocturne > à ".parametre("DD_seuil_canicule_nuit")."°C ) <p>";
+		echo "<br><p><br>";
 	
-		echo "<h3>".traduire("Ce service est strictement réservé aux personnes qui \"vivent\" dans la rue.")."</h3>";
-		echo "<FONT color=\"orange\">".traduire("Attention, la fonctionalité n'est ouverte que pour la région parisienne et ce à titre expérimental.")."</FONT> </center></td>";
+		echo "<FONT color=\"orange\">".traduire("Attention, la fonctionalité n'est ouverte que pour le Nord-Pas-de-Calais et ce à titre expérimental.")."</FONT> </center></td>";
 		fin_cadre();
 		
 		debut_cadre("300");
@@ -136,48 +135,43 @@ require_once "connex_inc.php";
 			if (($telephone=="") || (!VerifierPortable($telephone)) )
 				erreur (traduire("Format de téléphone incorrect"));
 			else
-			if (($dept<1) || ($dept>99) )
+//				if (($dept<1) || ($dept>99) )
+				{
+				$list_dept=array (59,62);
+				if ( !in_array($dept,$list_dept ) ) 
 					erreur (traduire("Numéro de département incorrect"));
 				else
 					{
-					$r1 = command("SELECT * FROM cc_alerte WHERE  tel='$telephone' ");
+					$r1 = command("SELECT * FROM cc_alerte_canicule WHERE  tel='$telephone' ");
 					$d1 = fetch_command($r1);
 					$date= date($format_date );
 					$t0=time();
 					$ip= $_SERVER["REMOTE_ADDR"];
 
 					if ($d1)
-						command("UPDATE `cc_alerte` SET dept='$dept' ,sueil='',stop='' ,modif='$t0', ip='$ip' where tel='$telephone'  ");
+						command("UPDATE `cc_alerte_canicule` SET dept='$dept' ,sueil='',stop='' ,modif='$t0', ip='$ip' where tel='$telephone'  ");
 					else
-						command("INSERT INTO `cc_alerte`  VALUES ( '$date', '$telephone', '$dept', '','','','','','$ip','$t0')");
+						command("INSERT INTO `cc_alerte_canicule`  VALUES ( '$date', '$telephone', '$dept', '','','','','','$ip','$t0')");
 					msg_ok(traduire("Mise à jour réalisée."));
-					ajout_log( "", "Inscription Alerte météo $telephone ($dept) via web ");
+					ajout_log( "", "Inscription Alerte canicule $telephone ($dept) via web ");
 
 					}
+				}
 			}
 		echo "<table>";
 		
-		formulaire ("saisie","alerte.php");
+		formulaire ("saisie","alerte_canicule.php");
 		echo "<tr><td> ".traduire('Téléphone')." : </td><td><input type=\"texte\" name=\"tel\"   size=\"15\" value=\"$user_telephone\" > " ;
 		echo "<tr><td> ".traduire('Département')." : </td><td><input type=\"texte\" name=\"dept\"   size=\"3\" value=\"$user_dept\" > " ;
 		echo "<tr><td> </td><td><input type=\"submit\"  id=\"nouveau\"  value=\"".traduire('Valider')."\" > </td> ";
 		echo "</form></table> ";
 		fin_cadre();
 		
-		echo "<p>".traduire("Autre méthode: depuis le téléphone devant recevoir les alertes, envoyez un SMS au 06.98.47.43.12 (numéro non surtaxé) contenant 'alerte' suivi du numéro de département où vous êtes(Par exemple \"alerte 75\" si vous êtes sur Paris)");
+		echo "<p>".traduire("Autre méthode: depuis le téléphone devant recevoir les alertes, envoyez un SMS au 06.98.47.43.12 (numéro non surtaxé)<br>contenant 'canicule' suivi du numéro de département où vous êtes<br>(Par exemple \"canicule 62\" si vous êtes sur Calais)");
 		
-		echo "<h2><a id=\"historique\" href=\"alerte_histo.php\"> Consulter les alertes en cours </a></h2>";
 		
-		echo "<center><table border=\"1\"><tr><td>";
-		debut_cadre("500");
-		echo "<tr><td><a href=\"index.php\" > <img id=\"logo\" src=\"images/logo.png\" width=\"140\" height=\"100\" ></a> </td>";
-		echo "<td><center><h4>".traduire("La Consigne Numérique Solidaire")."</h4>";
-		echo "</center>".traduire("Si vous souhaitez sauvegarder une copie de vos documents, photos et informations essentielles, vous pouvez utiliser \"doc-depot\" gratuitement. Consultez la liste des structures permettant de vous créer un compte en cliquant")." <a href=\"index.php?action=liste\" >".traduire("ici")."<a></td>";
-		fin_cadre();	
-		echo "</td></table>";
 
-
-		echo "<br>";
+		echo "<br><p><br><p><br><p><br><p><br>";
 		echo "<hr><center> ";
 
 		echo "<table> <tr> <td align=\"right\" valign=\"bottom\" ></td>";

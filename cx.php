@@ -32,8 +32,9 @@ if (isset($_POST['pass']))
 		||
 		// cas particulier en mode poste de développement on vérifie aussu un mot de passe en clair 
 		(($_POST['pass']==$mot_de_passe) && ($_SERVER['REMOTE_ADDR']=="127.0.0.1")	 )
-		) && ( !strstr($donnees["droit"] ,"-" ) )  // ceux qui sont désactivé ne peuvent pas accéder
-			&& ( ( ($droit!="")  && ($droit!="A") && ($droit!="E") ) || strpos( $_SERVER['PHP_SELF'],"index.php")>0  )  // ceux qui sont désactivé ne peuvent pas accéder
+		) 
+		&& ( !strstr($donnees["droit"] ,"-" ) )  // ceux qui sont désactivé ne peuvent pas accéder
+			&& ( ( ($droit!="")  && ($droit!="A") && ($droit!="E") ) || (strpos( $_SERVER['PHP_SELF'],"index.php")>0)  || (strpos( $_SERVER['PHP_SELF'],"wm.php")>0)  )  // ceux qui sont désactivé ne peuvent pas accéder
 			)
 			{
 			supp_echec_cx ($_POST['id']);
@@ -94,7 +95,7 @@ if (isset($_POST['pass']))
 			$date_cg=parametre("DD_date_cg");			
 			if ($last_cx<$date_cg)
 				echo traduire("Les conditions générales de 'doc-depot.com' ont changé, merci d'en prendre connaissance en cliquant")." <a href=\"conditions.html\"  >".traduire('ici')."</a> ";
-
+		
 			}
 		else
 			{	
@@ -140,7 +141,9 @@ if (isset($_POST['pass']))
 		$user_droit_org=$donnees["droit"];
 	
 		if 	( ( ($user_droit_org=="") || ($user_droit_org=="A") || ($user_droit_org=="F") || ($user_droit_org=="E")| ($user_droit_org=="T")| ($user_droit_org=="t") )  
-			&& strpos( $_SERVER['PHP_SELF'],"index.php")===FALSE   )
+			&& strpos( $_SERVER['PHP_SELF'],"index.php")===FALSE 
+			&& strpos( $_SERVER['PHP_SELF'],"wm.php")===FALSE  
+				)
 			{
 			$_SESSION['pass']=false;// et hop le mot de passe... poubelle !
 			$_SESSION['chgt_user']=false;
@@ -173,7 +176,7 @@ if (isset($_POST['pass']))
 			$_SESSION['logo']=$logo;
 			}
 		}
-		
+
 
 	if ( !isset($_SESSION['pass']) ||($_SESSION['pass']==false) || !(isset($_SESSION['user'])) || ($_SESSION['user']=="") )
 		// si pas de valeur pass en session on affiche le formulaire...
@@ -196,6 +199,5 @@ if (isset($_POST['pass']))
 		echo "<p><br></center></div>";
 		pied_de_page();
 		} 
-	
 
 ?>
