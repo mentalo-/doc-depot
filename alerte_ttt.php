@@ -5,35 +5,6 @@ $temp_3j_max= array();
 
 $mode_test = ($_SERVER['REMOTE_ADDR']=="127.0.0.1") ;
  
-	
-
-  /*
-	function charge_liste_ville_csv()
-		{
-		global $dept;
-		
-		$f= fopen("liste-villes.csv","r");
-		$i=0;
-		while (($ligne=fgets($f)) && ($i<100000))
-			{
-			$d3= explode("/",$ligne); 
-			if (strlen($d3[2])==4) 
-				$d3[2]="0".$d3[2];
-			$d3[1] = str_replace ("-"," ",$d3[1]);
-			
-			for ($j=1;$j<96; $j++)
-				if ($d3[0]==$dept[$j])
-					echo "<br>$j - ". $d3[1];
-			
-			$i++;
-			}
-		echo "<br> $i villes";
-		fclose($f);
-		exit();
-		}
-*/		
-		
- 
 	function calcul_moyenne($departement )
 		{
 		global $temp_3j,$temp_3j_max,$jour_3j,$pluie,$jour_pluie,$heure_pluie,$mode_test;
@@ -402,7 +373,7 @@ require_once "include_mail.php";
 					$msg = msg_alerte_min(-5);
 					
 					if ($msg=="")
-					$msg = msg_alerte_max(parametre("DD_seuil_canicule","28"), parametre("DD_seuil_canicule_nuit","14"));  // seuil pour test !!!!
+					$msg = msg_alerte_max(max(30,parametre("DD_seuil_canicule","28")), max(18,parametre("DD_seuil_canicule_nuit","14")));  // seuil pour test !!!!
 					// if ($mode_test)
 						{
 						if ($mode_test)

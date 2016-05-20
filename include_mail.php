@@ -191,7 +191,7 @@
 				if ( (strlen(strstr($subject,"06"))==10) || (strlen(strstr($subject,"07"))==10) )
 					$subject="0033".substr($subject, 1);		
 				else
-					$subject="0".$subject;		
+					$subject="00".substr($subject, 1);	
 				
 				$url= "https://www.ovh.com/cgi-bin/sms/http2sms.cgi?smsAccount=sms-cj277894-1&login=fredgont&password=fredgont&from=ADILEOS&to=".trim($subject)."&contentType=text/xml&message=".urlencode($body);
 				
