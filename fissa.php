@@ -1,7 +1,7 @@
 <?php session_start(); ?> 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0trict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">
-
+<?php include 'header.php';	  ?>
     <head>
 	 <?php
 include 'calendrier.php';
@@ -16,7 +16,7 @@ include 'include_mail.php';
 		$_SESSION['LAST_ACTIVITY'] = time();
 		
 		$refr=TIME_OUT+10;
-
+		
 		echo "<META HTTP-EQUIV=\"refresh\" CONTENT=\"$refr\">";		
 		echo "<meta http-equiv=\\\"Content-Type\\\" content=\\\"text/html; charset=iso-8859-1\\\" />";
 		echo "</head><body>";
@@ -158,7 +158,10 @@ include 'include_mail.php';
 		$nom_slash= addslashes2($nom);	
 		$pres2= addslashes2($pres2);	
 
-		if (($nom!="") && (!is_numeric($nom)))
+		if (
+			( ($nom!="")  && ($nom!=" (F)")  &&($nom!=" (M)")  &&($nom!=" (B)")  &&($nom!=" (S)")  )// le nom ne doit pas être vide
+			&& 
+			(!is_numeric($nom)))
 			{
 			$d=mise_en_forme_date_aaaammjj( $date_jour);
 			
@@ -325,7 +328,7 @@ include 'include_mail.php';
 
 		$i=0;
 		$nu=0;
-		$reponse = command("SELECT nom,qte FROM $bdd where date='0000-00-00' and pres_repas='' and qte<>'0' and qte<>'?' $exclus order by qte DESC  "); 
+		$reponse = command("SELECT nom,qte FROM $bdd where date='0000-00-00' and pres_repas='' and qte<>'0' and qte<>'?' $exclus group by nom order by qte DESC  "); 
 		while ($donnees = fetch_command($reponse) ) 
 			{
 			if ($i>80) 
@@ -443,6 +446,13 @@ include 'include_mail.php';
 
 		$date_a_afficher=$date;
 		
+		$date_gb=mise_en_forme_date_aaaammjj( $date);
+		$reponse = command("SELECT * FROM $bdd WHERE date='$date_gb' and nom='Mail' "); 
+		if (fetch_command($reponse) )  // il existe déjà un mail
+			$mail_deja_envoyé=true;
+		else
+			$mail_deja_envoyé=false;
+			
 		$reponse = command("SELECT * FROM fct_fissa WHERE support='$bdd' "); 
 		if ($donnees = fetch_command($reponse) )
 			{
@@ -464,9 +474,7 @@ include 'include_mail.php';
 
 		if (!$envoi_mail)
 			{
-			$date_gb=mise_en_forme_date_aaaammjj( $date);
-			$reponse = command("SELECT * FROM $bdd WHERE date='$date_gb' and nom='Mail' "); 
-			if (!fetch_command($reponse) )  // il existe déjà un mail
+			if (!$mail_deja_envoyé )  // il existe déjà un mail
 				{
 				echo "<form method=\"GET\" action=\"fissa.php\">";
 				echo "<input type=\"hidden\" name=\"action\" value=\"mail\"> " ;
@@ -492,7 +500,7 @@ include 'include_mail.php';
 		
 		$synth ="<b>$libelle</b> : aujourd'hui, $date_a_afficher, $r personnes accueillies, dont $r3 repas.";		
 		
-		if ( $envoi_mail)
+		if ( ( $envoi_mail) && (!$mail_deja_envoyé) )
 			{
 			Echo "<BR><BR>- Envoi Synthèse $bdd à '$dest_synthese' ";
 			
@@ -580,7 +588,7 @@ include 'include_mail.php';
 		$txt = $txt." - ". traduire("Services fournis par ")."<a href=\"https://adileos.doc-depot.com\"><img src=\"http://doc-depot.com/images/adileos.jpg\" width=\"150\" height=\"25\" ></a>";						
 		
 		
-		if ( $envoi_mail)
+		if ( ( $envoi_mail)  && (!$mail_deja_envoyé) ) 
 			{
 			Echo "<BR><BR>- Envoi rapport detaillé à $dest : ";
 			if  (mail2 ( $dest , "FISSA : Rapport d'activité $libelle du $date", "$txt", $libelle, $mail_struct  )) 
@@ -1027,7 +1035,6 @@ else
 	}
 	else
 		{
-		
 		$organisme =$donnees["organisme"];
 		
 		$beneficiaire=$donnees["beneficiaire"];
