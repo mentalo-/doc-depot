@@ -19,7 +19,7 @@
 		$code_lecture=$donnees["lecture"];	
 		
 
-		charge_image("0",$tempFile,$_FILES['file']['name'],$code_lecture,"P-$idx", "" , "Autres", $idx, $idx);
+		charge_image("0",$tempFile,str_replace(" ","_",$_FILES['file']['name']),$code_lecture,"P-$idx", "" , "Autres", $idx, $idx);
 
 		} 
 	?>

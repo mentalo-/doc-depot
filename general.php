@@ -522,7 +522,8 @@ include 'bdd.php';
 		echo "<div id=\"logo\"> <center>";
 		echo "<a href=\"portail.php\"><img src=\"images/adileos.jpg\" width=\"150\" height=\"22\" ></a> ";
 		echo "<a href=\"index.php\"><img src=\"images/logo.png\" width=\"30\" height=\"22\" ></a> ";
-		echo "<a href=\"wm.php\"><img src=\"images/webmail.jpg\" width=\"30\" height=\"22\" ></a> ";
+		if (file_exists ( "webmail" )) 
+			echo "<a href=\"wm.php\"><img src=\"images/webmail.jpg\" width=\"30\" height=\"22\" ></a> ";
 		echo "<a href=\"fissa.php\"><img src=\"images/fissa.jpg\" width=\"30\" height=\"22\" ></a> ";	
 		echo "<a href=\"suivi.php\"><img src=\"images/suivi.jpg\" width=\"30\" height=\"22\" ></a> ";	
 		echo "<a href=\"rdv.php\"><img src=\"images/rdv.jpg\" width=\"30\" height=\"22\" ></a> ";	
@@ -770,7 +771,7 @@ include 'bdd.php';
 			$m = "<form method=\"POST\" action=\"index.php\">$tel ";
 			$m .= "<input type=\"image\" src=\"images/sms.png\" width=\"20\" height=\"20\" title=\"".traduire('Envoyer un SMS')."\">";
 			$m .= "<input type=\"hidden\" name=\"tel\" value=\"$tel\">";
-			$m .= "<input type=\"hidden\" name=\"action\" value=\"sms_test\"></form>";
+			$m .= "<input type=\"hidden\" name=\"action\" value=\"sms_test_ovh\"></form>";
 			$tel =$m;
 			}
 		return  ($tel) ;			
@@ -851,7 +852,7 @@ include 'bdd.php';
 	function rappel_regles_messages()
 		{
 		echo "<center><p>".traduire("Il est interdit d’envoyer des messages à caractère injurieux, insultants, dénigrants, diffamatoires, dégradants ou susceptibles de porter atteinte à la vie privée des personnes ou à leur dignité, relatifs à la race, l’origine nationale, les mœurs, la religion, les opinions politiques, les origines sociales, l’âge ou le handicap ;")." : ";
-
+		echo "<center><br>".traduire("Envoi du lundi au samedi entre 8h et 20h (hors jours fériés) ");
 		}
 
 		

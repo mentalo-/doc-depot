@@ -19,7 +19,7 @@
 		if ($donnees = fetch_command($reponse))
 			{
 			$code_lecture=$donnees["lecture"];	
-			charge_image("0",$tempFile,$_FILES['file']['name'],$code_lecture,"A-$idx", "" , "Autres", $acteur, $idx);
+			charge_image("0",$tempFile,str_replace(" ","_",$_FILES['file']['name']),$code_lecture,"A-$idx", "" , "Autres", $acteur, $idx);
 			}
 		else
 		 // on demande de charger un document pour un compte qui n'existe pas 

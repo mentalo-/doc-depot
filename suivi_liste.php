@@ -8,7 +8,7 @@
 		$nom_slash= addslashes2($nom);	
 		$user= $_SESSION['user'];
 		$modif=time();
-		if ($nom!="") // le nom ne doit pas être vide
+		if ( ($nom!="")  && ($nom!=" (F)")  &&($nom!=" (M)")  &&($nom!=" (B)")  &&($nom!=" (S)")  )// le nom ne doit pas être vide
 			{
 			$d=mise_en_forme_date_aaaammjj( $date_jour);
 			$r1 = command("SELECT DISTINCT count(*) FROM $bdd WHERE nom='$nom_slash'  ");

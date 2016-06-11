@@ -34,6 +34,9 @@
 		command("delete from z_log_t  where ligne like '%Reception supervision gatewaysms%' and date<'$ilyaunmois' ");
 		command("delete from z_log_t  where ligne like '%Envoi SMS au ".parametre("DD_numero_tel_sms")."%' and date<'$ilyaunmois' ");
 		command("delete from z_log_t  where ligne like '%Nb TTT pendant alarme%' and date<'$ilyaunmois' ");
+		command("delete from z_log_t  where ligne like '%but Scoring%' and date<'$ilyaunmois' ");
+		command("delete from z_log_t  where ligne like '%fin Scoring%' and date<'$ilyaunmois' ");
+		command("optimize table z_log_t");
 		}
 		
 	// supprime les rdv envoyé ayant plus d'un mois d'ancieneté
@@ -43,7 +46,7 @@
 
 		echo "<br>Purge Rdv";
 		$ilyaunmois =date('Y-m-d H\hi',  mktime(0,0,0 , date("m")-1, date("d"), date ("Y")));		
-		command("delete from DD_rdv where etat='Envoyé' and date<'$ilyaunmois' ");
+		command("delete from DD_rdv where  date<'$ilyaunmois' ");
 		}
 	
 	// supprime les commentaire de plus de 2 ans 
@@ -146,10 +149,11 @@
 				$score=0;
 				$nom=addslashes2($d1["nom"]);
 				echo "<br> $bdd -> $nom : ";
-				if ( plus1( $bdd, $nom, 61 ))				
-					if ( plus1( $bdd, $nom, 30 ))
-						if ( plus1( $bdd, $nom, 15 ))
-							 plus1( $bdd, $nom, 7);
+				if ( plus1( $bdd, $nom, 180 ))				
+					if ( plus1( $bdd, $nom, 61 ))				
+						if ( plus1( $bdd, $nom, 30 ))
+							if ( plus1( $bdd, $nom, 15 ))
+								 plus1( $bdd, $nom, 7);
 				
 				// si memo on le valorise dans le scoring 
 				$reponse = command("SELECT * FROM $bdd WHERE nom='$nom' and commentaire<>'' and date='0000-00-00' and pres_repas<>'pda' and pres_repas<>'Age' and pres_repas<>'Mail' and pres_repas<>'Téléphone' and pres_repas<>'nationalie' and pres_repas<>'PE'  "); 
@@ -226,8 +230,10 @@ function random_chaine($car)
 
 				ajout_log_tech( "Mails envoyés:".parametre("TECH_nb_mail_envoyes")." / ".parametre("DD_nbre_mail_jour_max"));
 				ajout_log_tech( "SMS envoyés:".parametre("TECH_nb_sms_envoyes"));
+				ajout_log_tech( "SMS OVH envoyés:".parametre("TECH_nb_sms_envoyes_operateur"));
 				ecrit_parametre("TECH_nb_mail_envoyes",0) ;
-				ecrit_parametre("TECH_nb_sms_envoyes",0) ;
+				ecrit_parametre("TECH_nb_sms_envoyes",0) ;				
+				ecrit_parametre("TECH_nb_sms_envoyes_operateur",0) ;
 				}
 
 		if (parametre("TECH_Fissa_scoring_fin","")=="")
@@ -416,20 +422,15 @@ function random_chaine($car)
 							$telephone_user=$d1["telephone"];
 						}	
 						
-					if ($telephone_user!="") // si on a trouvé un numéro de téléphone 
+					if ( VerifierPortable($telephone_user) 	) 	// vérification au dernier momentdu le format du n° de téléphone avant envoi
 						{
-						if ( VerifierPortable($telephone_user) 	) 	// vérification au dernier momentdu le format du n° de téléphone avant envoi
-							{
-							envoi_SMS( $telephone_user  , $ligne );
-							ajout_log( $user_idx,"RDV - Envoi SMS au $telephone_user : '$ligne' ",$auteur);
-							}
+						envoi_SMS_operateur( $telephone_user  , $ligne );
+						ajout_log( $user_idx,"RDV - Envoi SMS au $telephone_user : '$ligne' ",$auteur);
 						command("UPDATE DD_rdv set etat='Envoyé' where user='$user_idx' and date='$date' ");
 						}
 					else
-						{
-						// echo "User inconnu $user_idx ";
 						command("UPDATE DD_rdv set etat='' where user='$user_idx' and date='$date' ");
-						}
+
 					}
 				}
 			echo "<p>";
@@ -483,13 +484,12 @@ function random_chaine($car)
 		
 	// memorise dans la table des paramétres avec le préfice MONITOR_ les appels fait avec la variable ddr
 	// cela permet de vérifier si un superviseur ne fonctionne plus depuis longtemps
-	echo "<br>-";
+	echo "<hr>DDR";
 	if (isset ($_GET["ddr"]))
 		{  
 		$ddr = $_GET["ddr"];
 		ecrit_parametre("MONITOR_$ddr",time());
 		}
-	
 	
 	echo "</body>";
 

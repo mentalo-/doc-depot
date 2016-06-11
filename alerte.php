@@ -33,6 +33,7 @@ if(isset($_SESSION['sauvegarde']))
 ?> 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">
+<?php include 'header.php';	  ?>
 
 <script src="http://code.jquery.com/jquery-1.5.1.min.js"></script> 
 
@@ -117,7 +118,7 @@ require_once "connex_inc.php";
 		echo "<br>".traduire('précipitation importantes ou des températures ressenties très basses.');
 	
 		echo "<h3>".traduire("Ce service est strictement réservé aux personnes qui \"vivent\" dans la rue.")."</h3>";
-		echo "<FONT color=\"orange\">".traduire("Attention, la fonctionalité n'est ouverte que pour la région parisienne et ce à titre expérimental.")."</FONT> </center></td>";
+		//echo "<FONT color=\"orange\">".traduire("Attention, la fonctionalité n'est ouverte que pour la région parisienne et ce à titre expérimental.")."</FONT> </center></td>";
 		fin_cadre();
 		
 		debut_cadre("300");

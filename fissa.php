@@ -328,7 +328,7 @@ include 'include_mail.php';
 
 		$i=0;
 		$nu=0;
-		$reponse = command("SELECT nom,qte FROM $bdd where date='0000-00-00' and pres_repas='' and qte<>'0' and qte<>'?' $exclus group by nom order by qte DESC  "); 
+		$reponse = command("SELECT nom,qte FROM $bdd where date='0000-00-00' and pres_repas='' and qte<>'0' and qte<>'?' and nom not like '%(A)%' $exclus group by nom order by qte DESC  "); 
 		while ($donnees = fetch_command($reponse) ) 
 			{
 			if ($i>80) 

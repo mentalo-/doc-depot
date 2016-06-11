@@ -1,6 +1,8 @@
 <?php session_start(); ?> 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">
+<?php include 'header.php';	  ?>
+
     <head>
 	
 	     <title>Statistiques </title>
@@ -591,8 +593,18 @@ include 'suivi_liste.php';
 
 							$req_sql_activite="SELECT *,count(*) as TOTAL  FROM $bdd where nom='$nom' and date<='$jf' and date>='$jd' and $crit_activite and pres_repas<>'Pour info' group by nom order by TOTAL DESC";
 							$r2 = command($req_sql_activite); 
+							
+							/*
 							$d2 = fetch_command($r2) ;
 							$nb[$i] = $d2["TOTAL"];			
+							*/
+							// variante en tenant compte de qte 
+							while ($d2 = fetch_command($r2))
+								{
+								$q=$d2["qte"];
+								if ($q=="") $q=1;
+								$nb[$i]+=$q;
+								}
 							
 							}
 						$i++;
@@ -667,7 +679,7 @@ include 'suivi_liste.php';
 						}
 						
 				if (($ncolor++ %2 )==0) $color="#ffffff" ; else $color="#d4ffaa" ; 
-				echo "<tr> <td bgcolor=\"$color\"> Varition </td>";
+				echo "<tr> <td bgcolor=\"$color\"> Variation </td>";
 				for ($i=$deb; $i<$imax; $i++)
 					aff($tab_delta[$i]);		
 				for ($tot=0 , $i=$deb; $i<$imax; $i++) 

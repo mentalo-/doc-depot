@@ -50,6 +50,8 @@ include 'general.php';
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">
 
+<?php include 'header.php';	  ?>
+
 <script src="http://code.jquery.com/jquery-1.5.1.min.js"></script> 
 		<script type="text/javascript">
 			$(document).ready(function() { $('#msg_ok').delay(3000).fadeOut();});
@@ -842,7 +844,11 @@ function maj_mdp_fichier($idx, $pw )
 		if (substr($ref,0,1)=="A")
 			if ($recept_mail>=$date_jour)
 				{
-				echo "<td> - ".traduire("Réception de document par mail autorisé pour la journée")." ('$id@fixeo.com' ".traduire("ou")." '$tel@fixeo.com')";
+				echo "<td> - ".traduire("Réception de document par mail autorisé pour la journée")." ('$id@fixeo.com' ";
+				if (VerifierTelephone($n))
+					echo traduire("ou")." '$tel@fixeo.com')";
+				else
+					echo ")";				
 				lien ("images/croixrouge.png", "supp_recept_mail", param("idx","$idx" ),"Annuler l'autorisation." );
 				echo "</td>";
 				}
@@ -3936,21 +3942,24 @@ if (isset($_POST['pass']))
 			}
 			
 		echo "<a title=\"Alerte Grand Froid/Forte Pluie\" href=\"alerte.php\"><img src=\"images/logo-alerte.jpg\" width=\"70\" height=\"50\"></a> ";
-
-//	http://127.0.0.1/doc-depot/suivi.php?action=suivi&nom=Boudjema%20BOUZEGZI
-// si existe lien vers suivi	
-		if ((isset($_SESSION['support'])) && (isset( $_SESSION['user_idx'])) )
+		
+		if ($user_droit!="")
 			{
-			$bdd= $_SESSION['support'];
-			$uidx_fissa= $_SESSION['user_idx'];
-			$reponse = command("SELECT * FROM $bdd WHERE date='0000-00-00' and pres_repas='' and activites='$uidx_fissa'  "); 
-			if ($donnees = fetch_command($reponse))
+			//	http://127.0.0.1/doc-depot/suivi.php?action=suivi&nom=Boudjema%20BOUZEGZI
+			// si existe lien vers suivi	
+			if ((isset($_SESSION['support'])) && (isset( $_SESSION['user_idx'])) )
 				{
-				$nom_slash=$donnees["nom"];
-				echo "<br><a href=\"suivi.php??action=suivi&nom=$nom_slash\">Accès au Suivi individuel de $nom_slash</a>";
-				}
+				$bdd= $_SESSION['support'];
+				$uidx_fissa= $_SESSION['user_idx'];
+				$reponse = command("SELECT * FROM $bdd WHERE date='0000-00-00' and pres_repas='' and activites='$uidx_fissa'  "); 
+				if ($donnees = fetch_command($reponse))
+					{
+					$nom_slash=$donnees["nom"];
+					echo "<br><a href=\"suivi.php??action=suivi&nom=$nom_slash\">Accès au Suivi individuel de $nom_slash</a>";
+					}
 
-			}		
+				}		
+			}
 		
 		echo "</center></td>";			
 		if ((($user_droit=="S") || ($user_droit=="R") ) && (est_image($logo) ) )

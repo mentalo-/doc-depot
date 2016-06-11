@@ -193,7 +193,7 @@
 				else
 					$subject="00".substr($subject, 1);	
 				
-				$url= "https://www.ovh.com/cgi-bin/sms/http2sms.cgi?smsAccount=sms-cj277894-1&login=fredgont&password=fredgont&from=ADILEOS&to=".trim($subject)."&contentType=text/xml&message=".urlencode($body);
+				$url= "https://www.ovh.com/cgi-bin/sms/http2sms.cgi?smsAccount=sms-cj277894-1&login=fredgont&password=fredgont&from=ADILEOS&to=".trim($subject)."&contentType=text/json&message=".urlencode($body);
 				
 				$soap_do = curl_init();
 				curl_setopt($soap_do, CURLOPT_URL,            $url );
@@ -203,7 +203,8 @@
 				curl_setopt($soap_do, CURLOPT_SSL_VERIFYPEER, false);
 				curl_setopt($soap_do, CURLOPT_SSL_VERIFYHOST, false);
 				curl_setopt($soap_do, CURLOPT_POST,           false );  							
-				curl_setopt($soap_do, CURLOPT_HTTPHEADER,     array('Content-Type: text/xml; charset=utf-8' ));
+//				curl_setopt($soap_do, CURLOPT_HTTPHEADER,     array('Content-Type: text/xml; charset=utf-8' ));
+				curl_setopt($soap_do, CURLOPT_HTTPHEADER,     array('Content-Type: text/json; charset=utf-8' ));
 
 				if(!($output=curl_exec($soap_do)))
 					{                
@@ -214,6 +215,7 @@
 					}
 				else
 					{
+					ajout_log_tech( "Retour OVH : $output ");
 					$statusCode = curl_getinfo($soap_do,CURLINFO_HTTP_CODE);
 					curl_close($soap_do);
 					return(true);
@@ -387,7 +389,11 @@ function TTT_mail($aff=true)
 								else
 									{
 									recept_mail($idx,date('Y-m-d'));
-									envoi_sms ("0$n","Réception de documents par mail autorisée pour la journée à $id@fixeo.com ou 0$n@fixeo.com");
+									if (VerifierTelephone($n))
+										envoi_sms ("0$n","Réception de documents par mail autorisée pour la journée à $id@fixeo.com ou 0$n@fixeo.com");
+									else
+										envoi_sms ("0$n","Réception de documents par mail autorisée pour la journée à $id@fixeo.com ");
+									
 									}
 								}
 							}
@@ -663,7 +669,7 @@ class MailAttachmentManager
 					if ($aff)
 						echo "<br> $jk/$i ($a) : $filename ";
 					
-					$reponse = command ("SELECT * FROM r_user WHERE ( id='$id' or telephone='$id') and droit='' "); 
+					$reponse = command ("SELECT * FROM r_user WHERE ( (id like '$id' ) or telephone='$id') and droit='' "); 
 					if ($donnees = fetch_command($reponse))
 						{
 						echo " x0 ";
@@ -680,7 +686,7 @@ class MailAttachmentManager
 							
 							$r1 = command("SELECT * FROM r_user WHERE mail='$from' and (droit='S' or droit='R' )"); 
 							if ($d1 = fetch_command($r1))  // on a trouver un utilisateur
-									$vient_de_RC=true;
+								$vient_de_RC=true;
 									
 							$r1 = command("SELECT * FROM r_user WHERE mail='$from' and user='$user'  "); 
 							if ($d1 = fetch_command($r1))  // le mail vient du bénéficiaire lui meme
@@ -705,7 +711,7 @@ class MailAttachmentManager
 									 {		
 									if (!$flag_MMS)
 										{
-										if (charge_image("1","tmp/$filename","$filename",$donnees["lecture"],"A-$user", $sujet, "Mail",$from, $user))
+										if (charge_image("1","tmp/$filename",str_replace(" ","_","$filename"),$donnees["lecture"],"A-$user", $sujet, "Mail",$from, $user))
 											envoi_mail($from,"Document $filename ajouté à $id.","");
 										else
 											envoi_mail($from,"Erreur : $filename n'a pas été ajouté à $id.","La taille doit être inférieure à 3 Mo et le format doit être du type image (JPG) ou PDF. ");
@@ -713,7 +719,7 @@ class MailAttachmentManager
 									else // si image dasn MMS alors on stocke dans espace perso
 										{
 
-										if (charge_image("1","tmp/$filename","$filename",$donnees["lecture"],"P-$user", $sujet, "MMS",$from, $user))
+										if (charge_image("1","tmp/$filename",str_replace(" ","_","$filename"),$donnees["lecture"],"P-$user", $sujet, "MMS",$from, $user))
 											{
 											envoi_SMS($telephone , "MMS déposé dans votre espace personnel.");
 											ajout_log( $user,"MMS reçu de $telephone et déposé dans espace personnel : '$filename' ",$user);
