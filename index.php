@@ -4035,7 +4035,7 @@ if (isset($_POST['pass']))
 		$tel= variable("tel");		
 		if (strlen($msg)>10)
 			{
-			$msg.= " Message de ".$org;
+			$msg.= " De ".$org;
 			if ($action=="sms_envoi")
 				{
 				envoi_SMS( $tel , $msg);
@@ -4045,7 +4045,7 @@ if (isset($_POST['pass']))
 			else
 				{
 				envoi_SMS_operateur( $tel , $msg);
-				ajout_log( $idx, traduire("Envoi SMS (via opérateur) personnel à")." : $tel", $user_idx );
+				ajout_log( $idx, traduire("Envoi SMS (via opérateur) personnel à")." : $tel ($msg)", $user_idx );
 				msg_ok (traduire("Envoi du SMS via opérateur réalisé"));
 				}
 

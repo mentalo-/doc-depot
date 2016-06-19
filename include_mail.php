@@ -178,6 +178,7 @@
 		
 	function envoi_SMS_operateur($subject,$body)		
 		{
+		$subject=homogenise_telephone($subject) ;
 		if (VerifierPortable($subject))
 			{
 			maj_compteur_envoi_mail();
@@ -229,6 +230,7 @@
 		
 	function envoi_SMS($subject,$body)		
 		{
+		$subject=homogenise_telephone($subject) ;
 		if (VerifierPortable($subject))
 			{
 			maj_compteur_envoi_mail();

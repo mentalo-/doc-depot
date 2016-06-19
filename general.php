@@ -141,13 +141,22 @@ include 'bdd.php';
 // ----------------------------------------------------------------- Mise en forme
 
 	function VerifierAdresseMail($adresse)  
-	{  
-	return (filter_var(trim($adresse), FILTER_VALIDATE_EMAIL));  
-	}
+		{  
+		return (filter_var(trim($adresse), FILTER_VALIDATE_EMAIL));  
+		}
+	
+	function homogenise_telephone($telephone)  
+		{
+		$telephone = str_replace (" ","", $telephone);
+		$telephone = str_replace ("-","", $telephone);
+		$telephone = str_replace (".","", $telephone);
+		return(trim($telephone));
+		}
 	
 	function VerifierTelephone($telephone)  
-	{ 
-	$telephone=trim($telephone);
+		{ 
+		$telephone=homogenise_telephone($telephone) ;
+	
 		if ( ($telephone[0]!='0')  && ($telephone[0]!='+'))
  		 return false;  
 		 
