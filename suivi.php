@@ -3,7 +3,34 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">
 <?php include 'header.php';	  ?>
     <head>
+	
+
+	<link href="css/dropzone.css" type="text/css" rel="stylesheet" />
+	<script src="dropzone.min.js" > </script>
+	<script>
+	Dropzone.options.myAwesomeDropzone = {
+	maxFilesize: TAILLE_FICHIER_dropzone, // MB
+	maxFiles: 20, 
+	
+};
+
+
+<script type="text/javascript">
+
+window.onload = function() {
+	for(var i = 0, l = document.getElementsByTagName('input').length; i < l; i++) {
+		if(document.getElementsByTagName('input').item(i).type == 'password') {
+			document.getElementsByTagName('input').item(i).setAttribute('autocomplete', 'off');
+		};
+	};
+};
+
+<script>
+	</script>	
+	
 	 <?php
+	 
+	 
 include 'calendrier.php';
 include 'general.php';
 include 'inc_style.php';	 
@@ -64,6 +91,8 @@ include 'inc_style.php';
 		
 	function mise_en_forme_date_aaaammjj( $date_jour)
 		{
+		if (substr_count($date_jour,"/")!=2)
+			return("");
 		$d3= explode("/",$date_jour);  
 		if (isset($d3[2]))
 			$a=$d3[2];
@@ -208,6 +237,11 @@ include 'inc_style.php';
 	function chgt_nom(  $nom, $nouveau)
 		{
 		global $bdd, $organisme;
+
+		$nouveau=str_replace("(A)","",$nouveau);
+		$nouveau=str_replace("(B)","",$nouveau);
+		$nouveau=str_replace("(S)","",$nouveau);
+		$nouveau=trim(str_replace("(M)","",$nouveau));		
 		
 		if (($nom!="") && ($nouveau!="") && ($nom!="Synth")&& ($nom!="Mail"))
 			{
@@ -216,7 +250,10 @@ include 'inc_style.php';
 			if ((strpos( $nom ,'(B)')>0) && (strpos( $nouveau ,'(B)')===false))
 				 $nouveau.=" (B)";	
 			if ((strpos( $nom ,'(S)')>0) && (strpos( $nouveau ,'(S)')===false))
-				 $nouveau.=" (S)";				 
+				 $nouveau.=" (S)";	
+			if ((strpos( $nom ,'(M)')>0) && (strpos( $nouveau ,'(M)')===false))
+				 $nouveau.=" (M)";	
+		
 			$nouveau= addslashes2($nouveau);
 			$user= $_SESSION['user'];
 			$modif=time();
@@ -241,8 +278,8 @@ include 'inc_style.php';
 					$idx_msg=$donnees["idx_msg"];
 					command("UPDATE DD_rdv SET nom='$nouveau'  WHERE idx='$idx_msg'  ","x") ;
 					}
-
 			}
+		return($nouveau);
 		}
 		
 		
@@ -255,27 +292,28 @@ include 'inc_style.php';
 		$date_jour2=  mise_en_forme_date_aaaammjj($date_jour);
 		$nu=0;
 		$l= date('Y-m-d',  mktime(0,0,0 , date("m")-2, date("d"), date ("Y")));
-		$reponse = command("SELECT * FROM $bdd where date>'$l' and pres_repas='Suivi' group by nom order by nom  "); 
+		$l1= date('Y-m-d',  mktime(0,0,0 , date("m")-1, date("d"), date ("Y")));
+		$reponse = command("SELECT * FROM $bdd where (date>'$l' and pres_repas='Suivi') or (pres_repas='presence' and qte>'$l1')  group by nom order by nom  "); 
 		while ($donnees = fetch_command($reponse) ) 
+			{
+			$n=$donnees["nom"];
+			if ($nu==0) 
 				{
-				$n=$donnees["nom"];
-				if ($nu==0) 
-					{
-					echo "<TABLE><TR> <td></td><td > <div class=\"CSS_titre\"  >";
-					echo "<table border=\"0\" >";
-					echo "<tr> <td width=\"1000\"> $titre: ";							
-					$nu++;
-					}		
-				$n_court=stripcslashes($n);
-				echo "<a href=\"suivi.php?action=suivi&nom=$n\">$n_court</a>; " ;
-				}
+				echo "<TABLE><TR> <td></td><td > <div class=\"CSS_titre\"  >";
+				echo "<table border=\"0\" >";
+				echo "<tr> <td width=\"1000\"> $titre: ";							
+				$nu++;
+				}		
+			$n_court=stripcslashes($n);
+			echo "<a href=\"suivi.php?action=suivi&nom=$n\">$n_court</a>; " ;
+			}
 
 		if ( $nu!=0) 
-				{
-				echo "</td>";
-				echo "  </table> <P> ";
-				fin_cadre();				
-				}				
+			{
+			echo "</td>";
+			echo "  </table> <P> ";
+			fin_cadre();				
+			}				
 		}
 	
 	function saisie ($titre,$libelle,$nom,$nom_slash)
@@ -424,8 +462,7 @@ include 'inc_style.php';
 		if ($action=="chgt_nom")
 			{
 			$nouveau=variable_s("nouveau");
-			chgt_nom($nom,$nouveau);
-			$nom=$nouveau;
+			$nom=chgt_nom($nom,$nouveau);
 			$action="suivi";
 			}
 
@@ -451,7 +488,7 @@ include 'inc_style.php';
 			$nom=str_replace ('(B)','',$nom);
 			if (variable_s("type")=="Bénéficiaire femme")
 				$nom .= " (F)";
-			nouveau2($date_jour,$nom, variable_s("age"),variable_s("nationalite"));
+			nouveau2($date_jour,$nom, variable_s("age"),variable_s("nationalite"),false);
 			}
 			
 		// =====================================================================loc IMAGE
@@ -475,7 +512,7 @@ include 'inc_style.php';
 			}
 		echo "</SELECT></form> </td>";
 		// =====================================================================loc RAPPORT
-		echo "<td width=\"150\"><center>";
+		echo "<td width=\"150\"><p><center>";
 		echo "<ul id=\"menu-bar\">";
 		echo "<li><a href=\"index.php?action=dx\">Deconnexion</a>";
 		if ($_SESSION['droit']=='R') 
@@ -484,7 +521,9 @@ include 'inc_style.php';
 			echo "<li><a href=\"export_bene.php\" target=_blank>Export des Bénéficiaires</a></ul >";
 			}
 		echo "</li> </ul> ";		
-		
+		$reponse = command("SELECT * FROM $bdd WHERE  pres_repas='présence' "); 
+			if ($donnees = fetch_command($reponse))
+				echo "<p><a href=\"hebergement.php\"  target=_blank > Planning Hébergement </a> ";
 		echo "</td>";
 		echo "<td><a href=\"index.php\"><img src=\"images/logo.png\" width=\"70\" height=\"50\"><a></td>";			
 		echo "<td><a href=\"fissa.php\"><img src=\"images/fissa.jpg\" width=\"70\" height=\"50\"><a></td>";			
@@ -538,19 +577,97 @@ include 'inc_style.php';
 				$action="suivi";
 				}			
 				
-				if ($action=="PE")
-						{
-						$PE=variable_s("PE");
+			if ($action=="releve")
+				{
+				$reponse = command("SELECT * FROM $bdd WHERE nom='$nom_slash' and pres_repas='Arrivée courrier' "); 
+				$user= $_SESSION['user'];
+				$modif=time();
+				$ic=0;
+				while ($donnees = fetch_command($reponse))
+					{
+					$date=$donnees["date"];
+					$qte=$donnees["qte"];
+					$ic+=$qte;
+					$reponse = command("UPDATE $bdd set qte='0', pres_repas='Remise courrier', commentaire='$qte courrier(s) remis le $date_jour_gb', modif='$modif', user='$user' where date='$date' and nom='$nom_slash' and pres_repas='Arrivée courrier' ");
+					}
+					
+				$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom_slash', '$date_jour_gb', 'Relevé courrier',' $ic courrier(s) remis','$user','$modif','','1')");					
 
-						$reponse = command("SELECT * FROM $bdd WHERE nom='$nom_slash' and pres_repas='PE' "); 
-						$user= $_SESSION['user'];
-						$modif=time();
-						if ($donnees = fetch_command($reponse))
-							$reponse = command("UPDATE $bdd set commentaire='$PE' ,date='1111-11-11', modif='$modif' , user='$user' where nom='$nom_slash' and pres_repas='PE' ");
-						else
-							$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom_slash', '1111-11-11', 'PE','$PE','$user','$modif','','')");					
-						$action="suivi";
-						}			
+				$action="suivi";
+				}
+						
+			if ($action=="Arrivée courrier")
+				{
+				$reponse = command("SELECT * FROM $bdd WHERE date='$date_jour_gb' and nom='$nom_slash' and pres_repas='Arrivée courrier' "); 
+				$user= $_SESSION['user'];
+				$modif=time();
+				if ($donnees = fetch_command($reponse))
+					{
+					$qte=$donnees["qte"];
+					$qte++;
+					$reponse = command("UPDATE $bdd set qte='$qte' , modif='$modif' , user='$user' where date='$date_jour_gb' and nom='$nom_slash' and pres_repas='Arrivée courrier' ");
+					}
+				else
+					$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom_slash', '$date_jour_gb', 'Arrivée courrier','','$user','$modif','','1')");					
+				$action="suivi";
+				}				
+						
+			if ($action=="présence")
+				{
+				$date_deb=mise_en_forme_date_aaaammjj( variable_s("date_deb"));
+				$date_fin=mise_en_forme_date_aaaammjj( variable_s("date_fin"));
+				$presence_comment=variable_s("commentaire");
+				$idx=variable_s("idx");
+				$user= $_SESSION['user'];
+				$modif=time();
+				if ($idx!="new" )
+					{
+					if ($date_deb==$date_fin)
+						{
+						erreur ("Suppression");
+						$reponse = command("DELETE FROM `$bdd` where nom='$nom_slash' and pres_repas='présence' and activites='$idx' ");					
+						}
+					else
+						$reponse = command("UPDATE $bdd set commentaire='$presence_comment' ,activites='$date_deb' ,qte='$date_fin' , modif='$modif' , user='$user' where nom='$nom_slash' and pres_repas='présence' and activites='$idx' ");
+					}
+				else
+					{
+					if ($idx=="" )
+						erreur ("Il faut une date de début");
+					else
+						if ($date_deb>$date_fin)
+							erreur ("Dates incohérentes");
+						else	
+							$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom_slash', '1111-11-11', 'présence','$presence_comment','$user','$modif','$date_deb','$date_fin')");					
+						}
+				$action="suivi";
+				}
+
+			if ($action=="alertecourrier")
+				{
+				$alerte=variable_s("alerte");
+				$reponse = command("SELECT * FROM $bdd WHERE nom='$nom_slash' and pres_repas='alertecourrier' "); 
+				$user= $_SESSION['user'];
+				$modif=time();
+				if ($donnees = fetch_command($reponse))
+					$reponse = command("UPDATE $bdd set commentaire='$alerte' , date='1111-11-11', modif='$modif' , user='$user' where nom='$nom_slash' and pres_repas='alertecourrier' ");
+				else
+					$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom_slash', '1111-11-11', 'alertecourrier','$alerte','$user','$modif','','')");					
+				$action="suivi";
+				}				
+						
+			if ($action=="PE")
+				{
+				$PE=variable_s("PE");
+				$reponse = command("SELECT * FROM $bdd WHERE nom='$nom_slash' and pres_repas='PE' "); 
+				$user= $_SESSION['user'];
+				$modif=time();
+				if ($donnees = fetch_command($reponse))
+					$reponse = command("UPDATE $bdd set commentaire='$PE' ,date='1111-11-11', modif='$modif' , user='$user' where nom='$nom_slash' and pres_repas='PE' ");
+				else
+					$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom_slash', '1111-11-11', 'PE','$PE','$user','$modif','','')");					
+				$action="suivi";
+				}			
 						
 				if ($action=="adresse")
 						{
@@ -808,8 +925,85 @@ include 'inc_style.php';
 							echo "</form> </td>";
 							echo "</table>";
 							
-							fin_cadre();
-					
+							echo "</td>";
+							
+							
+							
+						// =========================================================  DOMICILIATION 
+						if ( (!(strstr($nom,"(M)"))) && (!(strstr($nom,"(A)"))) &&	(!(strstr($nom,"(B)"))) && 	(!(strstr($nom,"(S)"))) &&  ($_SESSION['droit']!="P") ) 				
+							{
+							$date_deb="";
+							$date_fin="";
+							$presence_comment="";
+							$reponse = command("SELECT * FROM $bdd WHERE nom='$nom_slash' and pres_repas='Arrivée courrier' "); 
+
+							echo "<td > <TABLE><TR><td > <div class=\"CSS_titre\"  >";
+							
+							echo "<table>";
+							
+							echo "<tr><td> </td><td><ul id=\"menu-bar\">";					
+							echo "<li><a href=\"suivi.php?action=suivi&nom=$nom\"> Domiciliation </a> ";
+							echo "<ul><li><a href=\"suivi.php?nom=$nom&action=releve\">Relevé du courrier</a>";
+
+							$val_init=0;
+							$r2 = command("SELECT * FROM $bdd WHERE nom='$nom_slash' and pres_repas='alertecourrier' "); 
+							if ($d2 = fetch_command($r2))
+								$val_init=$d2["commentaire"];
+							if ($val_init>0)
+								echo "<li><a href=\"suivi.php?nom=$nom&action=alertecourrier&alerte=\">Désactiver alerte SMS </a>";
+							else
+								echo "<li><a href=\"suivi.php?nom=$nom&action=alertecourrier&alerte=2\">Activer alerte SMS </a>";
+								
+							echo "<li><a href=\"suivi.php?nom=$nom&action=Arrivée courrier\">Arrivée d'un courrier (+1)</a>";						
+
+							echo "</ul>  </ul>  </td><tr> ";	
+							$ic=0;
+							while ($donnees = fetch_command($reponse))
+								{
+								if ($ic==0) 
+									{
+									echo "<td ><img src=\"images/lettres.png\" width=\"35\" height=\"35\"></td>";
+									echo "<td > Courrier en attente : </td>";
+									}
+
+								$d3= explode("-",$donnees["date"]);
+								$m=$d3[1];
+								$j=$d3[2];
+								$courrier=$donnees["qte"];
+								echo "<td> $j/$m=$courrier </td>";
+								$ic++;
+								}						
+
+							
+							if ($ic==0) 
+								echo "<td><img src=\"images/lettres_vide.png\" width=\"50\" height=\"40\" > </td><td > Pas de courrier en attente.</td>";		
+
+							if ( VerifierPortable($tel )  )
+								{
+								echo "</table><p><table>";
+								$reponse = command("SELECT * FROM $bdd WHERE nom='$nom_slash' and pres_repas='alertecourrier' "); 
+								if ($donnees = fetch_command($reponse))
+									$val_init=$donnees["commentaire"];
+								if ($val_init>0)
+									echo "<tr><td> Alerte SMS active si courrier depuis 2 semaines </td> ";		
+								}								
+							echo "<p></table> ";		
+							fin_cadre();							
+							echo "</td></TABLE>";
+							}						
+						
+					if ($action=="charge")					
+						{
+						$_SESSION['nom_suivi']=$nom;
+						echo "<ul id=\"menu-bar\">";					
+						echo "<li><a href=\"suivi.php?action=charge&nom=$nom\" >Chargement d'images </a></li>";
+						echo "</ul><br>";	
+						echo "<form action=\"upload_suivi.php\" method=\"GET\"  class=\"dropzone\" id=\"my-awesome-dropzone\" >";
+						echo "</form>";	
+						pied_de_page();
+						}	
+
+							
 					//Accès à Doc-depot
 					if ( (!(strstr($nom,"(M)"))) && (!(strstr($nom,"(A)"))) &&	(!(strstr($nom,"(B)"))) && 	(!(strstr($nom,"(S)"))) &&  ($_SESSION['droit']!="P") ) 				
 						{
@@ -835,7 +1029,7 @@ include 'inc_style.php';
 								visu_doc_liste($num,$flag_acces);
 								}
 				
-						lien_c ("images/ajouter.png", "draganddrop", "" , traduire("Ajouter un doc") , "30");
+							lien_c ("images/ajouter.png", "draganddrop", "" , traduire("Ajouter un doc") , "30");
 							
 							}
 						else // compte Doc-depot n'existe pas ==> alors  propose création
@@ -863,11 +1057,39 @@ include 'inc_style.php';
 							echo "<input type=\"hidden\" name=\"nationalite\"   value=\"$nat\">" ;
 							echo "<input type=\"submit\"  id=\"nouveau_user\"  value=\"Lui créer un compte Doc-depot\" > </form></td>  ";		
 							}
+							
+							
+						echo "<td> <ul id=\"menu-bar\">";
+						echo "<li><a href=\"suivi.php?action=charge&nom=$nom\" >Documents internes</a></li>";
+						echo "</ul></td><td> - </td>";	
+					
+						$reponse = command("SELECT distinct* FROM $bdd WHERE nom='$nom_slash' and pres_repas='__upload' "); 
+						while ($donnees = fetch_command($reponse))
+							{
+							$fichier=$donnees["commentaire"];
+							$date=$donnees["date"];
+							if (extension_fichier($fichier)=="pdf")
+								{
+								if (file_exists("$fichier.jpg"))
+									echo "<td> <a href=\"$fichier\"  target=_blank > <img src=\"$fichier.jpg\" title=\"$date\" width=\"50\" height=\"50\" ><a> </td> ";
+								else
+									echo "<td> <a href=\"$fichier\"  target=_blank > <img src=\"images/fichier.jpg\" title=\"$date\" width=\"50\" height=\"50\" ><a> </td> ";
+								
+								}
+							else
+								if (est_doc($fichier))
+									echo "<td> <a href=\"$fichier\"  target=_blank > <img src=\"images/fichier.png\" title=\"$date\" width=\"50\" height=\"50\" ><a> </td> ";			
+								else
+									echo "<td> <a href=\"$fichier\"  target=_blank > <img src=\"$fichier\" title=\"$date\" width=\"50\" height=\"50\" ><a> </td> ";
+							}
+						echo "<td> <a href=\"suivi.php?action=charge&nom=$nom\" > <img src=\"images/ajouter.png\" width=\"30\" height=\"30\" > </a></td> ";
 						echo "</table>";							
 						}
 							
-								
 
+		
+
+					
 					if (($_SESSION['droit']!="P") )
 						{		
 						// ============================================================================== SUIVI
@@ -946,6 +1168,107 @@ include 'inc_style.php';
 						echo "</td>";
 						echo "</table>  ";
 						
+						// =========================================================  Présence 
+						if ( (!(strstr($nom,"(M)"))) && (!(strstr($nom,"(A)"))) &&	(!(strstr($nom,"(B)"))) && 	(!(strstr($nom,"(S)"))) &&  ($_SESSION['droit']!="P") ) 				
+							{
+							$date_deb="";
+							$date_fin="";
+							$presence_comment="";
+							$reponse = command("SELECT * FROM $bdd WHERE nom='$nom_slash' and pres_repas='présence' order by activites desc"); 
+							echo "<TABLE>";
+							echo "<TR><td > <div class=\"CSS_titre\"  >";
+							echo "<table>";
+							echo "<tr> <td >";
+							echo "<ul id=\"menu-bar\">";					
+							echo "<li><a href=\"suivi.php?action=suivi&nom=$nom\" >Hébergement </a></li>";
+							echo "</ul> </td>";
+							echo "<td> - </td><td> <a href=\"hebergement.php\"  target=_blank > Planning détaillé </a> </td>";
+							echo "</table>  ";
+	
+							echo "<table>";
+							$ip=0;
+							while ($donnees = fetch_command($reponse))
+								{
+								$date_deb=$donnees["activites"];
+								$date_fin=$donnees["qte"];
+								$presence_comment=$donnees["commentaire"];
+								$idx=$donnees["date"];
+								if  ($ip==0) 
+										{
+										echo "<tr> <td > Présence </td>";
+										echo "<td> du : </td><td><form method=\"GET\" action=\"suivi.php\">";
+										echo "<input type=\"hidden\" name=\"action\" value=\"présence\"> " ;
+										echo "<input type=\"hidden\" name=\"nom\"  value=\"$nom\">";
+										echo "<input type=\"hidden\" name=\"idx\"  value=\"new\">";
+										echo "<input type=\"text\" name=\"date_deb\" size=\"10\"  value=\"\"  onChange=\"this.form.submit();\" class=\"calendrier\" >";
+										echo "<td> au </td><td>";
+										echo "<input type=\"text\" name=\"date_fin\" size=\"10\"  value=\"\"  onChange=\"this.form.submit();\" class=\"calendrier\" >";
+										echo "<input type=\"submit\" value=\"Valider dates\" > </td>   ";		
+										echo "<td> Commentaire </td><td><input type=\"text\" name=\"commentaire\" size=\"40\"  value=\"\"  onChange=\"this.form.submit();\"></form> 	</td>";						
+										}							
+								
+								if ( 
+									($date_fin=="") 
+									|| 
+									($date_fin>=date('Y-m-d')) 
+									)
+									{
+									
+									if ( ($ip==0) && ($date_fin<date('Y-m-d')) )
+										{
+										$date_deb="";
+										$date_deb_org=$date_deb;
+										$date_fin="";
+										$presence_comment="";
+										}
+									else
+										{
+										$date_deb_org=$date_deb;
+										$date_deb=mef_date_fr($date_deb);
+										$date_fin=mef_date_fr($date_fin);
+										}									
+									echo "<tr> <td > Présence </td>";
+									echo "<td> du : </td><td><form method=\"GET\" action=\"suivi.php\">";
+									echo "<input type=\"hidden\" name=\"action\" value=\"présence\"> " ;
+									echo "<input type=\"hidden\" name=\"nom\"  value=\"$nom\">";
+									echo "<input type=\"hidden\" name=\"idx\"  value=\"$date_deb_org\">";
+
+									echo "<input type=\"text\" name=\"date_deb\" size=\"10\"  value=\"$date_deb\"  onChange=\"this.form.submit();\" class=\"calendrier\" >";
+									echo "<td> au </td><td>";
+									echo "<input type=\"text\" name=\"date_fin\" size=\"10\"  value=\"$date_fin\"  onChange=\"this.form.submit();\" class=\"calendrier\" >";
+									echo "<input type=\"submit\" value=\"Modifier dates\" > </td>   ";		
+									echo "<td> Commentaire </td><td><input type=\"text\" name=\"commentaire\" size=\"40\"  value=\"$presence_comment\"  onChange=\"this.form.submit();\"></form> 	</td>";						
+									}
+								else
+									{
+									$date_deb=mef_date_fr($date_deb);
+									$date_fin=mef_date_fr($date_fin);								
+									echo "<tr> <td > Présence </td>";
+									echo "<td> du : </td><td> $date_deb <td> au </td><td> $date_fin </td><td></td><td>$presence_comment	</td>";						
+									}							
+								$ip++;								
+								}
+
+								
+								if ($ip==0)
+									{
+									echo "<tr> <td > Présence </td>";
+									echo "<td> du : </td><td><form method=\"GET\" action=\"suivi.php\">";
+									echo "<input type=\"hidden\" name=\"action\" value=\"présence\"> " ;
+									echo "<input type=\"hidden\" name=\"nom\"  value=\"$nom\">";
+									echo "<input type=\"hidden\" name=\"idx\"  value=\"new\">";
+									echo "<input type=\"text\" name=\"date_deb\" size=\"10\"  value=\"$date_deb\"  onChange=\"this.form.submit();\" class=\"calendrier\" >";
+									echo "<td> au </td><td>";
+									echo "<input type=\"text\" name=\"date_fin\" size=\"10\"  value=\"$date_fin\"  onChange=\"this.form.submit();\" class=\"calendrier\" >";
+									echo "<input type=\"submit\" value=\"Valider dates\" > </td>   ";		
+									echo "<td> Commentaire <input type=\"text\" name=\"commentaire\" size=\"40\"  value=\"$presence_comment\"  onChange=\"this.form.submit();\"></form> 	</td>";						
+									}
+									
+							echo "</table> ";	
+							fin_cadre();	
+							}
+
+			
 						if (!(strstr($nom,"(M)")))
 							{
 							if  (($action=="suivi") || ($action=="pda")) 

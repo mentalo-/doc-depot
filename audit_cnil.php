@@ -4,13 +4,15 @@
 
 	function homogene ( $commentaire)
 		{
-	//	$commentaire = strtr($commentaire, 'Êáàâäãåçéèêëíìîïñóòôöõúùûüıÿ-_()<>;.,"?/!’«”“‘', 'Eaaaaaaceeeeiiiinooooouuuuyy                  ');
-		$commentaire = strtr($commentaire, "'", " ");
+		$commentaire = strtr($commentaire, 'Êáàâäãåçéèêëíìîïñóòôöõúùûüıÿ-_()<>;.,"?/!’«”“‘', 'Eaaaaaaceeeeiiiinooooouuuuyy                  ');
+	//	$commentaire = strtr($commentaire, "'", " ");
+		$commentaire = str_replace ("'"," ", $commentaire);
 		$commentaire = str_replace ("&apos"," ", $commentaire);
 		$commentaire = str_replace ("   "," ", $commentaire);
 		$commentaire = str_replace ("  "," ", $commentaire);
 		$commentaire = str_replace ("\n"," ", $commentaire);
 		$commentaire = str_replace ("\r"," ", $commentaire);
+		$commentaire = str_replace (" ;"," ", $commentaire);
 		return($commentaire);
 		}
 		
@@ -171,7 +173,8 @@
 				$entete.=  "<td bgcolor=\"$color\">  </td> <td bgcolor=\"$color\"><font color=\"white\">  Commentaire  saisie</td> ";						
 				$entete.=  "<td bgcolor=\"$color\"><font color=\"white\">  En souligné jaune, partie nécessitant votre attention </td> ";						
 				$resultat=addslashes2("$entete $cumul </table>"); 
-				command("INSERT INTO `cc_audit_cnil`  VALUES ( '$periode','$support', '$resultat' )" );		
+				if ($envoi_mail)
+					command("INSERT INTO `cc_audit_cnil`  VALUES ( '$periode','$support', '$resultat' )" );		
 				// il faut envoyer le mail
 				
 				$mail_struct="";

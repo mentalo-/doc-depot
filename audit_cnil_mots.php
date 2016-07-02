@@ -11,7 +11,7 @@
 		"alcoolique" => "hydro-alcoolique",
 		);
 		
-		
+		// ne pas mettre de ponctualtion ni d'apostrophe
 		$mots= array(
 				"syndrome", "symptôme",
 				
@@ -65,12 +65,12 @@
 				"défoncé", "junky", "pete", "toxico", "explosé", "teuchi", "schnouf", "chnouf", "ivre","chicon", "kif", 
 				 
 				// Médical       
-				"pathologie","hôpital","hosto","hospitalise","analyses medicales", "analyse medicale", 
+				"pathologie","hopital","hosto","hospitalise","analyses medicales", "analyse medicale", 
 				"rendez-vous medical","rdv medical","r d v medical","rendez vous medecin" ,"rdv medecin" , "medecin", "docteur", "dr", 
 				"maladie contagieuse",  "Escarre", "Hémorragie", "Glaucome", "Strabisme", "congenital", "cancéreux",
 				"Scanner", "IRM", "I R M", "contagieux", "puanteur", "septicémie", "medoc", "asphyxie", "hémiplégie", "hémiplégique",   
 				"soins palliatif",  "scarification", "scarifie", "contamine",  "grossesse difficile",  "grossesse à risque", 
-				"convulsion", "spasme",  
+				"convulsion", "spasme", "circoncision", "circoncire", 
 				 
 				 // les terminaison en ...gue sont aussi testées
 				 "Endocrinologie", "Gastroentérologie", "Gériatrie","Oncologie", "Pneumologie", "Urologie", "Rhumatologie", "Oto-rhino-laryngologie",
@@ -84,7 +84,7 @@
 				"Trouble cognitif","psychotique","psy", "niais", "nigaud", "imbécile", "idiot", "sot",  "depressif", "déjanté",
 				"imbecile","cretin","fou","folle","debile","manque une case","stupide","cyclothymie", "cyclothymique", "hysterie", "hysterique",
 				"pervers","perversion",  "suicide", "suicidaire","senile", "taré", "amoché", "arriéré", "qi", "quotient intellectuel", 
-				"persécution","sociopathe",  "faible d'esprit" , "infirme", "handicapé mental","handicapée mental",
+				"persécution","sociopathe",  "faible d esprit" , "infirme", "handicapé mental","handicapée mental",
 				"décérébré", "lobotomise", "en dépression", "psychose", "nevrose", "demence", "burn out",  "hyperactif",
 				"barge", "barjo","destroy", "dingue", "flippé", "givré", "guedin", "ouf", "stone", "tapé", "veugra", "vegra",
 				"furax", "furieux", "pyromanie","pyromane",  "délirant", "Troubles affectifs", "Troubles de la pessonnalité", 

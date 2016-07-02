@@ -185,7 +185,7 @@
 			ecrit_parametre("TECH_nb_sms_envoyes_operateur",parametre("TECH_nb_sms_envoyes_operateur")+1) ;	
 			
 			$body= supprime_html($body);
-			ajout_log_tech( "Envoi SMS au $subject : '$body' ");
+			ajout_log_tech( "Envoi SMS ADILEOS au $subject : '$body' ");
 			//envoi_mail_brut(parametre('DD_mail_pour_gateway_sms'),$subject,$body);
 			if ( ($body!=parametre('FORM_msg_rdv')) || ($subject!=parametre('FORM_tel_rdv'))) 
 				{

@@ -1,6 +1,6 @@
 <?php
 	
-	function nouveau2( $date_jour, $nom, $age, $nationalite)
+	function nouveau2( $date_jour, $nom, $age, $nationalite, $fissa=true)
 		{
 		global $bdd;
 
@@ -16,7 +16,8 @@
 			if ($r2[0]==0) // il ne doit pas déjà exister 
 					{
 					$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom_slash', '', '','','$user','$modif','','')");
-					$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom_slash', '$d', 'Visite','','$user','$modif','','1')");
+					if ($fissa)
+						$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom_slash', '$d', 'Visite','','$user','$modif','','1')");
 					if ($age!="")
 						$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom_slash', '1111-11-11', 'Age','$age','$user','$modif','','')");
 					if ($nationalite!="Inconnu")
@@ -215,7 +216,7 @@
 		
 		affiche_un_choix($act,"EDF/GDF/autres");		
 		
-		affiche_un_choix($act,"Hébergement d'urgence");		
+		affiche_un_choix($act,"Hébergement d urgence");		
 		affiche_un_choix($act,"Hopital");	
 		affiche_un_choix($act,"HLM");	
 		

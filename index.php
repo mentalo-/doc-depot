@@ -39,7 +39,7 @@ include 'general.php';
 	if 	(!isset($_SESSION['droit']) || ($_SESSION['droit']=="S")|| ($_SESSION['droit']=="A")|| ($_SESSION['droit']=="R")) 
 		$to=TIME_OUT;	
 	else
-		$to=TIME_OUT_BENE;
+		$to=TIME_OUT_BENE;  // tempo courte
 
 	if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > $to )) 
 		$_SESSION['pass']=false;
@@ -99,8 +99,8 @@ function calculeLongueur(){
             {
             done();
                 }
-                else { done("Format de fichier non accepté."); }
-           }
+                else { done("Format de fichier non accepté."); };
+
 		};
 		
 function unmask(truefalse) {
@@ -112,8 +112,8 @@ function unmask(truefalse) {
         elem.id = f;
         oldElem.parentNode.replaceChild(elem, oldElem);
         };
-    }
-}
+    };
+};
 
 
 <script type="text/javascript">
@@ -2006,7 +2006,7 @@ function maj_mdp_fichier($idx, $pw )
 				$idx=$donnees["idx"];	
 				$adresse=stripcslashes($donnees["adresse"]);
 				$organisme=stripcslashes($donnees["organisme"]);		
-				if ($user_droit=="A")
+				if  (($user_droit=="A") || ( ($user_droit=="R ") && ($user_organisme==$idx)  ) )
 					$organisme="<a href=\"index.php?action=membres_organisme&organisme=".encrypt($idx)."\"> $organisme </a>";
 				$tel=$donnees["tel"];	
 				$mail=$donnees["mail"];	
@@ -4460,7 +4460,7 @@ if (isset($_POST['pass']))
 			$action="membres_organisme";
 			}				
 
-	if ( ($action=="membres_organisme") && ( ($user_droit=="A") || ($user_droit=="S") ) )
+	if ( ($action=="membres_organisme") && ( ($user_droit=="A") || ($user_droit=="S")|| ($user_droit=="R") ) )
 			{
 			$organisme=variable_get("organisme");
 			if ($organisme=="")

@@ -1,3 +1,4 @@
+<?php include 'header.php';	  ?>
   <center>
 <a href="http://adileos.jimdo.com/"  target=_blank ><img src="images/adileos.jpg" width="700" height="90" > </a> 
 <br>

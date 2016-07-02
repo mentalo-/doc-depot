@@ -135,7 +135,8 @@ include 'suivi_liste.php';
 				echo "</td> <td> <a href=\"javascript:window.close();\">Fermer la fenêtre</a></td> "; 
 				echo " </form> </table>";	
 		
-			$crit_bene="  ( not (nom like '%(B)%')) and ( not (nom like '%(S)%')) and ( not (nom like '%(A)%')) and (nom<>'Synth') and (nom<>'Mail') and (pres_repas<>'Pour info') and (pres_repas<>'Suivi') and (pres_repas<>'reponse')and (pres_repas<>'partenaire')  ";
+			$crit_presence=" (pres_repas='présence') and ( not (nom like '%(B)%')) and ( not (nom like '%(S)%')) and ( not (nom like '%(A)%')) and ( not (nom like '%(M)%')) and (nom<>'Synth') and (nom<>'Mail')  ";
+			$crit_bene="  ( not (nom like '%(B)%')) and ( not (nom like '%(S)%')) and ( not (nom like '%(A)%')) and ( not (nom like '%(M)%')) and (nom<>'Synth') and (nom<>'Mail') and (pres_repas<>'presence')  and (pres_repas<>'__upload') and (nom<>'Mail') and (pres_repas<>'Pour info') and (pres_repas<>'Suivi') and (pres_repas<>'reponse')and (pres_repas<>'partenaire')  ";
 			$crit_AS=" (nom like '%(B)%' or nom like '%(S)%' )";
 			$crit_activite="( nom like '%(A)%')";
 			$crit_materiel="( nom like '%(M)%')";
@@ -268,7 +269,53 @@ include 'suivi_liste.php';
 					}
 			echo "<tr> <td><hr></td><td> <hr> </td><td> <hr> </td>";
 				}
+
+
+	
+		
+			// ============================================================================ Présence   (activites>='$an_debut-01-01' or qte<='$an_fin-12-31')
+			
+			$req_sql_presence="SELECT *,count(*) as TOTAL FROM $bdd where (activites>='$jd' or qte<='$jf') and $crit_presence  group by nom order by TOTAL DESC";
+			
+			$r1 = command($req_sql_presence); 
+			$num=nbre_enreg ($r1);
 				
+			if ($num!=0)
+				{
+
+				echo "<tr> <td> Hébergement   </td><td> Nuitées </td>";	
+				$ncolor=0;
+				$num=0;
+
+				$r1 = command($req_sql_presence); 
+				while ($d1 = fetch_command($r1) )	
+					{
+					$num++;
+					$nom=$d1["nom"];
+					if (($ncolor++ %2 )==0) $color="#ffffff" ; else $color="#d4ffaa" ; 
+
+					echo "<tr> <td bgcolor=\"$color\"> $num - <a href=\"suivi.php?action=suivi&nom=$nom&date_jour=$aujourdhui\" target=_blank> <b>$nom  </b></td>";
+					
+					$req_sql_presence2="SELECT *  FROM $bdd where nom='$nom' and  activites<='$jf' and qte>='$jd' and $crit_presence ";
+					$r2 = command($req_sql_presence2); 
+					$delta=0;
+					while ($d2 = fetch_command($r2))
+						{
+						$date_deb=$d2["activites"];
+						$date_fin=$d2["qte"];
+						if ($date_deb <$jd) $date_deb =$jd;								
+						if ($date_fin >$jf) $date_fin =$jf;
+						$date_deb= str_replace("-","/",$date_deb);						
+						$date_fin= str_replace("-","/",$date_fin);
+
+						$delta+= (strtotime($date_fin) - strtotime($date_deb))/3600/24;
+						}
+						
+					echo "<td width=\"20\" ALIGN=\"RIGHT\" bgcolor=\"$color\"> $delta </td>";
+					}
+				echo "<tr> <td><hr></td><td> <hr> </td><td> <hr> </td>";
+				}
+								
 
 	// -------------------------------------------------------------	Usagers
 
@@ -465,9 +512,7 @@ include 'suivi_liste.php';
 					if ($an==$an_debut) 
 						$mois=max($mois,$m_debut);
 						
-					$periode[$i]="$mois/$an";
-					if ($mois<10)	
-						$periode[$i]="0$mois/$an";
+					$periode[$i]=sprintf("%02d/%02d",$mois,$an);
 
 					$jd="$an-$mois-01";
 					$jf="$an-$mois-31";
@@ -558,6 +603,75 @@ include 'suivi_liste.php';
 			for ($tot=0 , $i=$deb; $i<$imax; $i++) 
 				$tot+=$tab_suivi[$i];				
 			aff($tot);	
+			
+			
+			
+				// ===================================================== Hébergement  activites==j_fin' ,  qte=j_debut
+			
+			echo "<tr> <td bgcolor=\"#3f7f00\">  </td>";				
+			for ($i=$deb; $i<$imax; $i++)
+				echo "<td bgcolor=\"#3f7f00\"> <font color=\"white\">".$periode[$i]."</td>";	
+			echo "<td bgcolor=\"#3f7f00\"> <font color=\"white\"> Total </td>";				
+
+			if (($ncolor++ %2 )==0) $color="#ffffff" ; else $color="#d4ffaa" ; 
+			echo "<tr> <td bgcolor=\"$color\">  <b> Hébergement (nuitées) </b></td>";
+			for ($i=$deb; $i<=$imax; $i++)
+				echo "<td bgcolor=\"$color\"> </td>";					
+				
+			$req_sql_presence="SELECT *,count(*) as TOTAL FROM $bdd where (activites>='$an_debut-01-01' or qte<='$an_fin-12-31') and $crit_presence and pres_repas<>'Pour info' group by nom order by TOTAL DESC";
+			$r1 = command($req_sql_presence); 
+			while ($d1 = fetch_command($r1) )	
+				{
+				$nom=$d1["nom"];
+				
+				if (($ncolor++ %2 )==0) $color="#ffffff" ; else $color="#d4ffaa" ; 
+				echo "<tr> <td bgcolor=\"$color\"> <a href=\"suivi.php?action=suivi&nom=$nom&date_jour=$aujourdhui\" target=_blank> <b>$nom  </b></td>";
+	
+				for ($i=$deb; $i<$imax; $i++)
+					$tab_delta[$i]=0;						
+				$i=0;
+				for ($an=$an_debut; $an<=$an_fin; $an++)
+					for ($mois=1; $mois<=12; $mois++)
+						{
+						if ($an==$an_debut) 
+							$mois=max($mois,$m_debut);
+							
+						if (($i>=$deb) && ($i<$imax) )
+							{
+							$jd=sprintf("%04d-%02d-01",$an,$mois) ;
+							$jf=sprintf("%04d-%02d-31",$an,$mois);
+							
+							$req_sql_presence2="SELECT *  FROM $bdd where nom='$nom' and  activites<='$jf' and qte>='$jd' and $crit_presence ";
+							$r2 = command($req_sql_presence2); 
+							$delta=0;
+							while ($d2 = fetch_command($r2))
+								{
+								$date_deb=$d2["activites"];
+								$date_fin=$d2["qte"];
+								
+								if ($date_deb <$jd) $date_deb =$jd;								
+								if ($date_fin >$jf) $date_fin =$jf;
+								
+								$date_deb= str_replace("-","/",$date_deb);						
+								$date_fin= str_replace("-","/",$date_fin);
+								
+								$delta+= (strtotime($date_fin) - strtotime($date_deb))/3600/24;
+								$tab_delta[$i] =$delta;
+								}
+							}
+						$i++;
+						}
+						
+				for ($i=$deb; $i<$imax; $i++)
+					aff($tab_delta[$i]);		
+				for ($tot=0 , $i=$deb; $i<$imax; $i++) 
+					$tot+=$tab_delta[$i];				
+				aff($tot);	
+				}
+		
+			
+			
+			
 			// ===================================================== Activités
 			
 			$req_sql_activite="SELECT *,count(*) as TOTAL FROM $bdd where date>='$an_debut-01-01' and date<='$an_fin-12-31' and $crit_activite and pres_repas<>'Pour info' group by nom order by TOTAL DESC";
@@ -598,6 +712,7 @@ include 'suivi_liste.php';
 							$d2 = fetch_command($r2) ;
 							$nb[$i] = $d2["TOTAL"];			
 							*/
+							$nb[$i] = 0;		
 							// variante en tenant compte de qte 
 							while ($d2 = fetch_command($r2))
 								{
@@ -655,6 +770,8 @@ include 'suivi_liste.php';
 				echo "<tr> <td bgcolor=\"$color\"> <a href=\"suivi.php?action=suivi&nom=$nom&date_jour=$aujourdhui\" target=_blank> <b>$nom  </b></td>";
 				for ($i=$deb; $i<=$imax; $i++)
 					echo "<td bgcolor=\"$color\"> </td>";		
+				for ($i=$deb; $i<$imax; $i++)
+					$tab_delta[$i]=0;	
 					
 				$i=0;
 				for ($an=$an_debut; $an<=$an_fin; $an++)

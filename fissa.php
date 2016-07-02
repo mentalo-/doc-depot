@@ -102,7 +102,7 @@ include 'include_mail.php';
 		$select_activites="";
 		
 		$d=mise_en_forme_date_aaaammjj( $date_jour);
-		$reponse = command("SELECT DISTINCT * FROM $bdd WHERE date='$d' and pres_repas!='Suivi' and pres_repas!='reponse' and pres_repas!='partenaire' and pres_repas!='Age'  and pres_repas!='Telephone' and pres_repas!='Mail' order by nom ASC "); 
+		$reponse = command("SELECT DISTINCT * FROM $bdd WHERE date='$d' and pres_repas!='Suivi' and pres_repas!='reponse' and pres_repas!='partenaire' and pres_repas!='Age'  and pres_repas!='Telephone' and pres_repas!='Mail'  and pres_repas!='suivi'  and pres_repas!='__upload' and pres_repas!='Arrivée courrier' and pres_repas!='Remise courrier' and pres_repas!='Relevé courrier' order by nom ASC "); 
 		while (($donnees = fetch_command($reponse) ) && ($i<10000))
 			if ($donnees["nom"]!="Synth")
 				{
@@ -218,10 +218,10 @@ include 'include_mail.php';
 							if ($donnees = fetch_command($reponse))
 								erreur ("Suppression impossible car il existe au moins une personne affectée à l'activité");
 							 else								
-								$reponse = command("DELETE FROM $bdd  WHERE nom='$nom' AND date='$d' and pres_repas<>'Suivi' and pres_repas<>'pda' and pres_repas<>'reponse' and pres_repas<>'partenaire' ") ;
+								$reponse = command("DELETE FROM $bdd  WHERE nom='$nom' AND date='$d' and pres_repas<>'Suivi' and pres_repas<>'pda' and pres_repas<>'presence' and pres_repas<>'__upload' and pres_repas<>'reponse' and pres_repas<>'partenaire' ") ;
 							}
 						else
-							$reponse = command("DELETE FROM $bdd  WHERE nom='$nom' AND date='$d' and pres_repas<>'Suivi' and pres_repas<>'pda' and pres_repas<>'reponse' and pres_repas<>'partenaire' ") ;
+							$reponse = command("DELETE FROM $bdd  WHERE nom='$nom' AND date='$d' and pres_repas<>'Suivi' and pres_repas<>'pda'  and pres_repas<>'presence' and pres_repas<>'__upload'  and pres_repas<>'reponse' and pres_repas<>'partenaire' ") ;
 
 						}	
 					}
@@ -291,7 +291,7 @@ include 'include_mail.php';
 
 		$t="";
 		$i=0; 
-		$crit_bene="  ( not (nom like '%(B)%')) and ( not (nom like '%(S)%')) and ( not (nom like '%(A)%')) and (nom<>'Synth') and (nom<>'Mail') and (pres_repas<>'Pour info')  ";
+		$crit_bene="  ( not (nom like '%(B)%')) and ( not (nom like '%(S)%')) and ( not (nom like '%(A)%'))and ( not (nom like '%(M)%')) and (nom<>'Synth') and (nom<>'Mail')  and (pres_repas<>'presence') and  (pres_repas<>'pda') and  (pres_repas<>'suivi')and  (pres_repas<>'reponse') and (pres_repas<>'partenaire') and (pres_repas<>'Pour info')  and (pres_repas<>'__upload')  ";
 
 		$reponse = command("SELECT * FROM $bdd WHERE date='$date' and $crit_bene group by nom ASC"); 
 		while (($donnees = fetch_command($reponse) ) && ($i<10000))
@@ -328,7 +328,7 @@ include 'include_mail.php';
 
 		$i=0;
 		$nu=0;
-		$reponse = command("SELECT nom,qte FROM $bdd where date='0000-00-00' and pres_repas='' and qte<>'0' and qte<>'?' and nom not like '%(A)%' $exclus group by nom order by qte DESC  "); 
+		$reponse = command("SELECT nom,qte FROM $bdd where date='0000-00-00' and pres_repas='' and qte<>'0' and qte<>'?' and nom not like '%(A)%' and nom not like '%(M)%'  and nom not like '%(B)%'   and nom not like '%(S)%' $exclus group by nom order by qte DESC  "); 
 		while ($donnees = fetch_command($reponse) ) 
 			{
 			if ($i>80) 
