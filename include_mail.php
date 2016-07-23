@@ -350,13 +350,12 @@ function TTT_mail($aff=true)
 							{
 							$r1 = command("SELECT * FROM cc_alerte WHERE (tel='+33$n')  ");
 							$d1 = fetch_command($r1);
-							$format_date = "d/m/Y";
-							$date= date($format_date );
+							$date= date("Y-m-d");
 							$t0=time();
 							$ip= $_SERVER["REMOTE_ADDR"];
 
 							if ($d1)
-								command("UPDATE `cc_alerte` SET dept='$dept' ,sueil='',stop='' ,modif='$t0', ip='$ip' where tel='+33$n'  ");
+								command("UPDATE `cc_alerte` SET creation='$date' ,dept='$dept' ,sueil='',stop='' ,modif='$t0', ip='$ip' where tel='+33$n'  ");
 							else
 								command("INSERT INTO `cc_alerte`  VALUES ( '$date', '+33$n', '$dept', '','','','','','$ip','$t0')");
 							envoi_sms("+33$n","Demande d'alerte SMS pris en compte pour 1 an. Vous pouvez arrêtez l'alerte en envoyant 'stop' au 06.98.47.43.12 (prix d'un sms non surtaxé)");

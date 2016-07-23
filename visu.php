@@ -117,7 +117,7 @@ if ( isset($_SESSION['pass']) && ($_SESSION['pass']==true) )
 			
 			$fichier = substr($fichier,strpos($fichier,".")+1 );
 
-			ajout_log($bene, traduire("Acces au fichier")." $fichier ".traduire('en lecture'),$_SESSION['user']);
+			ajout_log($bene, traduire("Accès au fichier")." $fichier ".traduire('en lecture'),$_SESSION['user']);
 
 			break;		
 			
@@ -148,7 +148,7 @@ if ( isset($_SESSION['pass']) && ($_SESSION['pass']==true) )
 			
 			$fichier = substr($fichier,strpos($fichier,".")+1 );
 
-			ajout_log($bene, traduire("Acces au fichier")." $fichier ".traduire('en lecture'),$_SESSION['user']);
+			ajout_log($bene, traduire("Accès au fichier")." $fichier ".traduire('en lecture'),$_SESSION['user']);
 
 			break;
 
@@ -168,7 +168,7 @@ if ( isset($_SESSION['pass']) && ($_SESSION['pass']==true) )
 			if ($bene=="") 
 				$bene=$_SESSION['user'];
 			
-			ajout_log($bene, traduire("Acces au fichier")." $fichier ".traduire("en lecture"),$_SESSION['user']);
+			ajout_log($bene, traduire("Accès au fichier")." $fichier ".traduire("en lecture"),$_SESSION['user']);
 			pied_de_page();
 			break;
 			

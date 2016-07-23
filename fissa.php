@@ -1241,9 +1241,9 @@ else
 					{
 					echo "<td><a href=\"rdv.php\"> <img src=\"images/rdv.jpg\" width=\"70\" height=\"50\"><a></td>";
 					}
-				echo "<td><a title=\"Alerte Grand Froid/Forte Pluie\" href=\"alerte.php\"><img src=\"images/logo-alerte.jpg\" width=\"70\" height=\"50\"></a> ";
+				// 	echo "<td><a title=\"Alerte Grand Froid/Forte Pluie\" href=\"alerte.php\"><img src=\"images/logo-alerte.jpg\" width=\"70\" height=\"50\"></a> ";
 				if ($logo!="")
-					echo "<td> <a href=\"fissa.php\"> <img src=\"images/$logo\" width=\"200\" height=\"100\"  > </a> </td>";
+					echo "<td> <img src=\"images/$logo\" width=\"200\" height=\"100\"  ></td>";
 
 				echo "</center></td>";					
 				echo "</table> ";

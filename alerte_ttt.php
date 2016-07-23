@@ -329,6 +329,8 @@ require_once "include_mail.php";
 	 if ($mode_test)
 		Echo "mode test alerte";
 		
+	$ilya1an = date ("Y-m-d",mktime(0,0, 0 , date("m"), date("d"), date ("Y")-1));
+	
 	$ilya5minutes = mktime(date("H"),date("i")-5, 0 , date("m"), date("d"), date ("Y"));
 	$hier = mktime(date("H")-12,date("i"), 0 , date("m"), date("d"), date ("Y"));
 	$maintenant = mktime(date("H"),date("i"), 0 , date("m"), date("d"), date ("Y"));
@@ -341,13 +343,13 @@ require_once "include_mail.php";
 	else
 		{
 		if ($mode_test)
-			$reponse = command("SELECT * FROM cc_alerte WHERE tel<>''  ");	
+			$reponse = command("SELECT * FROM cc_alerte WHERE tel<>'' and creation>'$ilya1an' ");	
 		else
 			{
 			if ((date("H")<21) && (date("H")>8) )
-				$reponse = command("SELECT * FROM cc_alerte WHERE ( dernier_ttt <='$hier' or dernier_envoi='' ) and tel<>'' limit 1 ");
+				$reponse = command("SELECT * FROM cc_alerte WHERE ( dernier_ttt <='$hier' or dernier_envoi='' ) and tel<>''  and creation>'$ilya1an' limit 1 ");
 			else
-				$reponse = command("SELECT * FROM cc_alerte WHERE dernier_ttt='' and tel<>''  limit 1 ");
+				$reponse = command("SELECT * FROM cc_alerte WHERE dernier_ttt='' and tel<>'' and creation>'$ilya1an'  limit 1 ");
 			}
 
 		$auj=date("Y-m-d");
@@ -396,8 +398,6 @@ require_once "include_mail.php";
 				{
 				if ($msg !="") 
 					{
-
-					
 					$msg=str_replace (" .", ".", $msg);
 					command("UPDATE `cc_alerte` SET dernier_envoi='$maintenant'  where tel='$telephone'  ");
 					if (!$mode_test)
@@ -417,13 +417,13 @@ Echo "<hr> Canicule :<p>";
 	else
 		{
 		if ($mode_test)
-			$reponse = command("SELECT * FROM cc_alerte_canicule WHERE tel<>''  ");	
+			$reponse = command("SELECT * FROM cc_alerte_canicule WHERE tel<>'' and creation>'$ilya1an'  ");	
 		else
 			{
 			if ((date("H")<21) && (date("H")>8) )
-				$reponse = command("SELECT * FROM cc_alerte_canicule WHERE ( dernier_ttt <='$hier' or dernier_envoi='' ) and tel<>'' limit 1 ");
+				$reponse = command("SELECT * FROM cc_alerte_canicule WHERE ( dernier_ttt <='$hier' or dernier_envoi='' ) and tel<>'' and creation>'$ilya1an' limit 1 ");
 			else
-				$reponse = command("SELECT * FROM cc_alerte_canicule WHERE dernier_ttt='' and tel<>''  limit 1 ");
+				$reponse = command("SELECT * FROM cc_alerte_canicule WHERE dernier_ttt='' and tel<>'' and creation>'$ilya1an'  limit 1 ");
 			}
 
 		$auj=date("Y-m-d");

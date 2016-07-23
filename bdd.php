@@ -4,6 +4,8 @@
 	// ========================================================== BDD ==========================================
 	function command($ligne, $flag="")
 		{
+		global $action;
+			
 		if ( ($flag!="") && ($_SERVER['REMOTE_ADDR']=="127.0.0.1"))
 			echo "<p>$ligne ";
 		
@@ -14,7 +16,14 @@
 		else
 			{
 			ajout_log_jour($ligne);
-			return( mysql_query($ligne) );	
+			$result= mysql_query($ligne);
+			if (!$result) 
+				{
+				if (!isset($action))
+					$action="";
+				ajout_log_tech( "Requête '$ligne' invalide (Action='$action'): " . mysql_error(),"P0");
+				}
+			return( $result );	
 			}
 		}
 	

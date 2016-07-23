@@ -404,7 +404,7 @@ function maj_mdp_fichier($idx, $pw )
 		affiche_un_choix($val_init,"Passeport");
 		affiche_un_choix($val_init,"Carte de séjour");
 		affiche_un_choix($val_init,"Permis conduire");
-		affiche_un_choix($val_init,"Pass Navigo");
+		affiche_un_choix($val_init,"Transport");
 		affiche_un_choix($val_init,"CAF");
 		affiche_un_choix($val_init,"RIB");
 		affiche_un_choix($val_init,"Pole Emploi");
@@ -533,25 +533,27 @@ function maj_mdp_fichier($idx, $pw )
 					if ( $action=="ajout_admin")
 						$type="";
 					else
-						$type="<br>$type";
+						$type="$type";
 					
 					if (($doc_autorise=="") || (stristr($doc_autorise, ";$type_org;") === FALSE) )
 						{
 						if ($flag_acces=="") 
-							lien("visu.php?action=visu_image_mini&nom=$num", "visu_image", param ("nom","$num"), "", "","B",$sans_lien, true);
+							lien("visu.php?action=visu_image_mini&nom=$num", "visu_image", param ("nom","$num"), "Déposé le $date", "","B",$sans_lien, true);
 						else
 							lien("visu.php?action=visu_image_mini&nom=-$num", "visu_fichier", param ("num","$num").param ("code","$flag_acces"), traduire("Document protégé"), "","B",$sans_lien, true);
 						echo " $type <br> $ident ";
 						}
 					else
 						{
-						lien("visu.php?action=visu_image_mini&nom=-$num", "visu_image", param ("nom","$num"), "", "","B",$sans_lien, true);
-						echo " $type <br> $ident $num  ";
+						lien("visu.php?action=visu_image_mini&nom=-$num", "visu_image", param ("nom","$num"), "Déposé le $date", "","B",$sans_lien, true);
+						echo " $type <br> $ident  ";
 						}
 					}
 				else
-					lien("visu.php?action=visu_image_mini&nom=$num", "visu_image", param ("nom","$num"), "", "","B",$sans_lien, true);
-
+					{
+					lien("visu.php?action=visu_image_mini&nom=$num", "visu_image", param ("nom","$num"), "Déposé le $date", "","B",$sans_lien, true);
+					echo " $ident <br> ";
+					}
 				}
 			else
 				if (extension_fichier($num)=="pdf")
@@ -574,32 +576,34 @@ function maj_mdp_fichier($idx, $pw )
 						if ( ($user_droit=="") && ($action=="ajout_admin"))
 							$type="";
 						else
-							$type="<br>$type";
+							$type="$type";
 							
 						if (($doc_autorise=="") ||(stristr($doc_autorise, ";$type_org;") === FALSE) )
 							{
 							if ($flag_acces=="") 
 								lien("$icone_a_afficher", "visu_fichier", param ("num","$num"), "", "","B",$sans_lien, true);
 							else 
-								lien("$icone_a_afficher_cadenas", "visu_fichier", param ("num","$num").param ("code","$flag_acces"), "", "","B",$sans_lien, true);
-							echo " $type <br> $ident $l_num ";}
+								lien("$icone_a_afficher_cadenas", "visu_fichier", param ("num","$num").param ("code","$flag_acces"), "Déposé le $date", "","B",$sans_lien, true);
+							echo " $type <br> $ident  ";}
 
 						else
 							{
-							lien("$icone_a_afficher", "visu_fichier", param ("num","$num"), "", "","B",$sans_lien, true);
-							echo " $type <br> $ident $l_num ";
+							lien("$icone_a_afficher", "visu_fichier", param ("num","$num"), "Déposé le $date", "","B",$sans_lien, true);
+							echo " $type <br> $ident  ";
 							}						
 						}
 					else
 						{
-						lien("$icone_a_afficher", "visu_fichier", param ("num","$num"), "", "","B",$sans_lien, true);
-						echo " $date : $l_num <br>$type <br> $ident ";
+						lien("$icone_a_afficher", "visu_fichier", param ("num","$num"), "Déposé le $date", "","B",$sans_lien, true);
+						echo " $ident<br>  ";
 						}				
 					}
 				else
 					{
-					lien("images/fichier.png", "visu_doc", param ("num","$num"), "", "","B",$sans_lien, true);
-					echo " $date : $l_num <br>$type <br> $ident";
+					lien("images/fichier.png", "visu_doc", param ("num","$num"), "Déposé le $date", "","B",$sans_lien, true);
+					if (substr($ref,0,1)=="A")
+						echo "$type <br>";
+					echo "$ident <br>";
 					}	
 
 			if ((($action=="ajout_admin") &&  (substr($ref,0,1)=="A")) ) 
@@ -899,15 +903,18 @@ function maj_mdp_fichier($idx, $pw )
 			echo " <table> <tr>";
 
 			if (($user_droit=="") || (($user_droit=="S") && ( ($donnees["deposeur"]==$user_idx) || ($donnees["deposeur"]=='') ) ) )
-				{
 				if ((($action=="ajout_admin") &&  (substr($ref,0,1)=="A"))|| ( ($action=="ajout_photo")&&  (substr($ref,0,1)=="P")) ) 
+					{
 					lien ("images/croixrouge.png", "supp_upload_a_confirmer", param("num","$num" ). param("retour","$action" ),"Supprimer" );
-				}
-			echo " . ";
+					echo " . ";	
+					}
+
 			if ($user_droit=="")
 				if ((($action=="ajout_admin") &&  (substr($ref,0,1)=="A"))|| ( ($action=="ajout_photo")&&  (substr($ref,0,1)=="P")) ) 
+					{
 					lien ("images/switch.png", "switch", param("num","$num" ). param("retour","$action" ),"Changer d'espace" );
-			echo " . ";
+					echo " . ";
+					}
 			
 			if ((($action=="ajout_admin") &&  (substr($ref,0,1)=="A"))|| ( ($action=="ajout_photo")&&  (substr($ref,0,1)=="P")) ) 
 				lien ("images/illicite.png", "illicite", param("num","$num" ). param("retour","$action" ),"Signaler comme illicite" );
@@ -953,6 +960,208 @@ function maj_mdp_fichier($idx, $pw )
 		$reponse =command("update r_attachement SET status = '$type' where num='$num' ");
 		$action = "ajout_admin";
 		}
+		
+		
+	
+	function liste_mail_administratifs($username, $password)
+		{
+		$domain = explode('@', $username); 
+		switch ($domain[1]) 
+			{
+			case "gmail.com": $hostname = '{imap.gmail.com:993/imap/ssl}INBOX'; break;
+			case "doc-depot.com": $hostname = '{ssl0.ovh.net:993/imap/ssl}INBOX'; break;
+			case "orange.fr": 
+			case "wanadoo.fr":$hostname = '{imap.orange.fr:993/imap/ssl}INBOX'; break; 
+			case "free.fr":$hostname = '{imap.free.fr:143/imap}INBOX'; break;
+
+			case "laposte.net":$hostname = '{imap.laposte.net:993}INBOX'; break;			
+			
+			case "hotmail.com":
+			case "hotmail.fr":
+			case "live.fr":$hostname = '{pop3.live.com:995/pop/ssl}INBOX'; break;			
+			
+			case "bbox.fr":$hostname = '{imap4.bbox.com:993/imap/ssl}INBOX'; break; 
+			case "yahoo.fr":$hostname = '{imap.mail.yahoo.com:995/pop/ssl}INBOX'; break;
+			case "neuf.fr":
+			case "sfr.fr":$hostname = '{imap.sfr.com:143/imap}INBOX'; break;
+			case "cegetel.fr":$hostname = '{imap.gmail.com:993/imap/ssl}INBOX'; break;
+			case "aol.com":$hostname = '{imap.fr.aol.com:143/imap}INBOX'; break;
+
+				
+			default : return;
+			}
+
+		/* try to connect */
+		$inbox = imap_open($hostname,$username,$password,OP_READONLY) or die('Cannot connect : ' . imap_last_error());
+
+		if($inbox)
+			{
+			/* grab emails */
+			//$emails = imap_search($inbox,'ALL');
+
+			//$emails = imap_search ( $inbox, "UNSEEN" );
+			$emails[] = imap_search ( $inbox, " UNSEEN FROM \"@raz.com\"  " );
+
+			/* if emails are returned, cycle through each... */
+			if($emails) 
+				{
+
+				/* begin output var */
+				$output = '';
+				
+				/* put the newest emails on top */
+				rsort($emails);
+				
+				$i=0;
+				/* for every email... */
+				foreach($emails as $email_number) 
+					if (!is_numeric($email_number))
+					break;
+					else
+					{
+					/* get information specific to this email */
+					$overview = imap_fetch_overview($inbox,$email_number,0);
+					$header = imap_header($inbox, $email_number);
+					
+					if ( isset($header->subject) && isset($header->from) && isset($header->date) )
+						{
+						$from = $header->from;
+						foreach ($from as $id => $object) {
+							$fromaddress = strtolower($object->mailbox . "@" . $object->host);
+							}
+							
+						if ($overview[0]->seen=="1")
+							$gras="</b>";
+						else
+							$gras="<b>";
+
+						
+						/* output the email header information */
+						$output.= "<tr><td>$gras".date ("d/m/Y H:i",strtotime($header->date));	
+						$output.= "</td><td>$gras".$fromaddress."</td><td>$gras";	
+						
+						$elements = imap_mime_header_decode($header->subject);
+						for ($j=0; $j<count($elements); $j++) {
+							$output.= $elements[$j]->text;
+							}
+						
+						/* output the email body */
+				   //    $structure = imap_fetchstructure($inbox, $email_number);
+				//		$message = imap_fetchbody($inbox,$email_number,0);
+				//		$output.= '<div class="body">'.$message.'</div>';
+						$i++;
+						if ($i==10) break;
+						}
+					}
+				
+				echo "</center><p>".traduire("Exemples des mails concernés").": <table><tr><td>Date</td><td>Expéditeur</td><td>Sujet mail</td><tr>$output</td></table>";
+				} 
+
+			/* close the connection */
+			imap_close($inbox);
+			}
+		else
+			erreur ("Mot de passe incorrect");
+		}
+		
+	function mail_valide_surv($user_mail)
+		{
+		$domain = explode('@', $user_mail); 
+		switch ($domain[1]) 
+			{
+			case "gmail.com":
+			case "doc-depot.com":
+			case "orange.fr":
+			case "wanadoo.fr":
+			case "hotmail.com":
+			case "hotmail.fr":
+			case "yahoo.fr":
+			case "live.fr":
+			case "sfr.fr":
+			case "cegetel.fr":
+			case "neuf.fr":
+			case "free.fr":
+			case "aol.com":
+			case "laposte.net":
+					return (true);
+					break;
+					
+			default : return (false);
+			}
+		}
+
+	function alerte_surv_mail()
+		{
+		global $user_idx;
+		
+		$pw=encrypt(variable("n1"));
+		$pw2=encrypt(variable("n2"));
+		$alerte=variable("alerte");
+		if ($pw==$pw2)
+			{
+			$reponse = command("select * FROM r_surv_mail where idx_user='$user_idx' ");
+			if ($donnees = fetch_command($reponse))
+				command("UPDATE `r_surv_mail` set pw='$pw' , alerte='$alerte' where idx_user='$user_idx' ");
+			else
+				command("INSERT INTO `r_surv_mail`  VALUES ( '$user_idx', '$pw', '$alerte', '')");
+			}
+		else
+			erreur ("Les 2 mots de passe ne sont pas identiques.");
+		}
+	
+	function surv_mail()
+		{
+		global $action,$user_mail, $user_idx;
+
+		echo "<table><tr><td > <img src=\"images/voir.png\" width=\"35\" height=\"35\" > </td><td >  <ul id=\"menu-bar\">";
+		echo "<li><a href=\"index.php?action=surv_mail\"  > + ".traduire('Surveillance arrivée mails administratifs')." </a></li>";
+		echo "</ul></td></table>";
+
+		echo traduire("En enregistrant votre mot de passe de votre messagerie mail, nous vérifierons l'arrivée de mails administratifs (CAF, pole_emploi, impôts, etc) et alerterons vous-même ou vos référents de confiance selon votre choix s'ils ne sont pas consultés dans les 5 jours suivnats leur arrivée). ");
+		echo traduire("Remarque : vos référents de confiance ne peuvent répondre ou traiter ces mails.");
+		echo "<p>";
+		
+		if (mail_valide_surv($user_mail))
+			{
+			$pw="";
+			$alerte="";
+			$reponse = command("select * FROM `r_surv_mail`  where idx_user='$user_idx' ");
+			if ($donnees = fetch_command($reponse))
+				{
+				$pw=decrypt($donnees["pw"]);
+				$alerte=$donnees["alerte"];
+				}
+			debut_cadre (500);
+			formulaire ("alerte_surv_mail");
+			echo "<table><tr>";
+			echo "<tr> <td> ".traduire('Mail')." : </td> <td> $user_mail</td>";
+			echo "<TR> <td>".traduire('Mot de passe').": </td><td><input class=\"center\" type=\"password\" id=\"pwd\" name=\"n1\" value=\"$pw\"/></td>";
+			echo "<TR> <td>".traduire('Confirmation').": </td><td><input class=\"center\" type=\"password\" name=\"n2\" id=\"pwd1\" value=\"$pw\"/></td>";
+			echo "<td><input type=\"checkbox\" onchange=\"document.getElementById('pwd').type = this.checked ? 'text' : 'password' ; document.getElementById('pwd1').type = this.checked ? 'text' : 'password' \"> Voir saisie<td>";
+
+			$val_init=$alerte;
+			echo "<tr> <td> ".traduire('Prévenir')." </td> <td><SELECT name=\"alerte\" >";
+			affiche_un_choix($val_init,"Aucun", traduire("Personne"));
+			affiche_un_choix($val_init,"Moi", traduire("Uniquement moi"));
+			affiche_un_choix($val_init,"RC", traduire("Référents de confiance"));
+			echo "</SELECT></td>";
+			echo "<input type=\"hidden\" name=\"user\"  value=\"$user_idx\"> " ;
+			echo "<tr> <td> </td> <td><input type=\"submit\" id=\"nouveau_referent\" value=\"".traduire('Modifier')."\" ></form> </td> ";
+			echo "</table></div></center>";
+			fin_cadre();
+			liste_mail_administratifs($user_mail, $pw);
+			}
+		else
+			{
+			debut_cadre (500);
+			echo "<p>";
+			echo traduire("Cette fonctionnalité n'est disponible que pour les adresses se terminant par @gmail.com, @doc-depot.com, @orange.fr, @wanadoo.fr, @hotmail.com, @hotmail.fr, @live.fr, @sfr.fr, @cegetel.fr, @neuf.fr, @yahoo.fr, @free.fr, @aol.com, @laposte.net");
+			echo "<p>";
+			fin_cadre();
+			}
+		
+		}
+	
 	
 	FUNCTION nouveau_referent($user,$organisme,$nom,$prenom,$tel,$mail,$adresse)
 		{
@@ -2222,20 +2431,27 @@ function autorise_acces($ddeur,$bene,$autorise)
 	// on ne travaille qu'avec l'index et plus l'id 
 	function histo_beneficiaire($user_idx, $id)
 		{
-		global $user_droit;
-		echo "<hr><img src=\"images/histo.png\" width=\"25\" height=\"25\" >  ".traduire('Historique')." : ";	
-
+		global $user_droit,$filtre;
+		
+		echo "<hr><table><tr><td><img src=\"images/histo.png\" width=\"25\" height=\"25\" >  ".traduire('Historique')." : </td><td>";	
+		
+		formulaire("filtre_histo");
+		echo "</td><td><input type=\"text\" name=\"filtre\" size=\"20\" value=\"$filtre\" onChange=\"this.form.submit();\"> ";
+		echo "</form><td><img src=\"images/loupe.png\"width=\"20\" height=\"20\">  </td>";
+		if ($filtre!="")
+			lien_c ("images/croixrouge.png", "supp_filtre_histo","" , traduire("Supprimer"));
+		echo "</table>";
+		
 		$j=0;
 		$reponse =command("select * from  log where (user='$user_idx' ) or (acteur='$user_idx' ) order by date DESC ");		
+
+		echo "<div class=\"CSSTableGenerator\" ><table> ";
+		echo "<tr><td> ".traduire('Date')." </td><td> ".traduire('Evénement')."</td><td> ".traduire('Acteur')."</td>";
+		if ($user_droit!="")
+			echo "<td> ".traduire('Bénéficiaire')."</td>";
+
 		while ($donnees = fetch_command($reponse) ) 
 			{
-			if ($j++==0)
-				{
-				echo "<div class=\"CSSTableGenerator\" ><table> ";
-				echo "<tr><td> ".traduire('Date')." </td><td> ".traduire('Evénement')."</td><td> ".traduire('Acteur')."</td>";
-				if ($user_droit!="")
-					echo "<td> ".traduire('Bénéficiaire')."</td>";
-				}
 			$date=$donnees["date"];	
 			
 			$d3= explode(" ",$date);
@@ -2249,17 +2465,20 @@ function autorise_acces($ddeur,$bene,$autorise)
 
 			if (($acteur!="") && (is_numeric($acteur) ) )
 				$acteur=libelle_user($acteur);
-			echo "<tr><td title=\"$ip\">  $date  </td><td> $ligne </td><td> $acteur </td>";
-			if ($user_droit!="")
+			
+			if (($filtre=="") || ( stripos($date, $filtre)!==false) || ( stripos($ligne, $filtre)!==false) || ( stripos($acteur, $filtre)!==false)|| ( stripos($user, $filtre)!==false))
 				{
-				if ($user!=$acteur)
-					echo "<td> $user</td>";	
-				else
-					echo "<td> </td>";	
+				echo "<tr><td title=\"$ip\">  $date  </td><td> $ligne </td><td> $acteur </td>";
+				if ($user_droit!="")
+					{
+					if ($user!=$acteur)
+						echo "<td> $user</td>";	
+					else
+						echo "<td> </td>";	
+					}
 				}
 			}
-		if ($j!=0)
-			echo "</table></div>";	  
+		echo "</table></div>";	  
 		pied_de_page("x");
 	  }
 
@@ -2482,6 +2701,11 @@ function affiche_membre($idx)
 				case "bug":
 				case "contact":				
 
+				
+				case "supp_filtre_histo": 
+				case "filtre_histo": 
+				case "alerte_surv_mail": 
+				case "surv_mail":
 				case "maj_user":
 				case "reinit_mdp":
 				case "changer_mdp":
@@ -2653,6 +2877,11 @@ function affiche_membre($idx)
 					else 
 						$nom="user non connecté (".$_SERVER["REMOTE_ADDR"].")";
 					ajout_log_tech ( "Action '$action' inconnue par $nom ", "P1" );
+					
+					// on pénalise l'utilisateur 
+					$ip=$_SERVER["REMOTE_ADDR"];
+					ajout_echec_cx ($ip);
+					tempo_cx ($ip);	
 					return ("");
 				}
 		}
@@ -3862,10 +4091,11 @@ if (isset($_POST['pass']))
 		
 		echo "<tr><td><hr>";
 	
-		
+		//    ?????     etrange que ce code soi au milieu de cette zone  ????  ==>> devrait être après
 		if ($action=="upload")
 			traite_upload($user_idx, $code_lecture, variable ("idx") );
-			
+
+		//    ?????     etrange que ce code soi au milieu de cette zone  ????  ==>> devrait être AVANT
 		if ($action=="modif_tel")
 			{
 			if (modif_tel(variable("idx"), variable("telephone"),variable("telephone2")) )
@@ -3886,28 +4116,33 @@ if (isset($_POST['pass']))
 			if ($user_droit=="")
 				{
 				echo "<td> <img src=\"images/telephone.png\" width=\"25\" height=\"25\" > ".traduire('Tel')." :<input type=\"texte\" name=\"telephone\"   size=\"15\" value=\"$user_telephone\" onChange=\"this.form.submit();\"> " ;
-				echo " - <img src=\"images/mail.png\" width=\"25\" height=\"25\" > ".traduire('Mail')." :<input type=\"texte\" name=\"telephone2\"   size=\"30\" value=\"$user_mail\" onChange=\"this.form.submit();\"> " ;
+				echo " - <img src=\"images/mail.png\" width=\"25\" height=\"25\" > ".traduire('Mail')." :<input type=\"texte\" name=\"telephone2\"   size=\"30\" value=\"$user_mail\" onChange=\"this.form.submit();\"> </form> </td>" ;
+				
+				if ((mail_valide_surv($user_mail)) && (parametre("DD_surv_mail")=="oui") )
+					lien_c ("images/voir.png", "surv_mail", param("idx","$idx" ) , traduire("Surveillance de l'arrivée mails adiministratifs"));
 				}
 			else
 				{
 				echo "<td> <img src=\"images/telephone.png\" width=\"25\" height=\"25\" > ".traduire('Tel pro')." :<input type=\"texte\" name=\"telephone\"   size=\"15\" value=\"$user_telephone\" onChange=\"this.form.submit();\"> " ;
-				echo " - <img src=\"images/mail.png\" width=\"25\" height=\"25\" > ".traduire('Mail pro')." : <input type=\"texte\" name=\"telephone2\"   size=\"30\" value=\"$user_mail\" onChange=\"this.form.submit();\"> " ;
+				echo " - <img src=\"images/mail.png\" width=\"25\" height=\"25\" > ".traduire('Mail pro')." : <input type=\"texte\" name=\"telephone2\"   size=\"30\" value=\"$user_mail\" onChange=\"this.form.submit();\"> </form></td>" ;
 				}		
-			echo "</form></table> </td>";
+			echo "</table> </td>";
 			}
 		else
 			{
 			if ($user_droit=="")
 				{
 				echo "<td> <img src=\"images/telephone.png\" width=\"25\" height=\"25\" > ".traduire('Tel').": $user_telephone " ;
-				echo " - <img src=\"images/mail.png\" width=\"25\" height=\"25\" > ".traduire('Mail').": $user_mail" ;
+				echo " - <img src=\"images/mail.png\" width=\"25\" height=\"25\" > ".traduire('Mail').": $user_mail </form></td>" ;
+				if ((mail_valide_surv($user_mail)) && (parametre("DD_surv_mail")=="oui") )
+					lien_c ("images/voir.png", "surv_mail", param("idx","$idx" ) , traduire("Surveillance de l'arrivée mails adiministratifs"));
 				}
 			else
 				{
 				echo "<td> <img src=\"images/telephone.png\" width=\"25\" height=\"25\" > ".traduire('Tel pro').": $user_telephone " ;
 				echo " - <img src=\"images/mail.png\" width=\"25\" height=\"25\" > ".traduire('Mail pro').": $user_mail" ;
 				}		
-			echo "</table> </td>";
+			echo "</td></table> </td>";
 			}
 
 		echo "</td>";
@@ -3941,11 +4176,10 @@ if (isset($_POST['pass']))
 				echo "<a href=\"index.php?action=cc_activite\"><img src=\"images/calendrier.jpg\" width=\"70\" height=\"50\"></a>";
 			}
 			
-		echo "<a title=\"Alerte Grand Froid/Forte Pluie\" href=\"alerte.php\"><img src=\"images/logo-alerte.jpg\" width=\"70\" height=\"50\"></a> ";
+		// echo "<a title=\"Alerte Grand Froid/Forte Pluie\" href=\"alerte.php\"><img src=\"images/logo-alerte.jpg\" width=\"70\" height=\"50\"></a> ";
 		
 		if ($user_droit!="")
 			{
-			//	http://127.0.0.1/doc-depot/suivi.php?action=suivi&nom=Boudjema%20BOUZEGZI
 			// si existe lien vers suivi	
 			if ((isset($_SESSION['support'])) && (isset( $_SESSION['user_idx'])) )
 				{
@@ -3963,7 +4197,7 @@ if (isset($_POST['pass']))
 		
 		echo "</center></td>";			
 		if ((($user_droit=="S") || ($user_droit=="R") ) && (est_image($logo) ) )
-			echo "<td><a href=\"index.php\"> <img src=\"images/$logo\" width=\"200\" height=\"100\"  > </a> </td> ";
+			echo "<td> <img src=\"images/$logo\" width=\"200\" height=\"100\"  ></td> ";
 			
 		//-----------------------------------*/ 		
 	
@@ -3984,8 +4218,15 @@ if (isset($_POST['pass']))
 				liste_organisme($user_organisme,"1");
 				
 				$user_adresse=($user_adresse);
-				if($user_droit=="")
-					echo "<tr><td> <img src=\"images/enveloppe.png\" width=\"25\" height=\"25\" >  ".traduire('Adresse postale')." :</td><td> <input type=\"texte\" name=\"adresse\" id=\"ReversBE\" onfocus=\"javascript:if(this.value=='ReversBE')this.value='';\"   size=\"80\" value=\"$user_adresse\" onChange=\"this.form.submit();\"> " ;
+				if ($user_droit=="")
+					{
+					echo "<tr><td> <img src=\"images/enveloppe.png\" width=\"25\" height=\"25\" >  ".traduire('Adresse postale')." :</td>" ;
+					
+					if  ($user_organisme=="") 
+						echo "<td> <input type=\"texte\" name=\"adresse\" id=\"ReversBE\" onfocus=\"javascript:if(this.value=='ReversBE')this.value='';\"   size=\"80\" value=\"$user_adresse\" onChange=\"this.form.submit();\"> " ;
+					else
+						echo "<td> $user_adresse" ;
+					}
 				else
 					echo "<input type=\"hidden\" name=\"adresse\"  value=\"\" > " ;
 				echo "<input type=\"hidden\" name=\"idx\" value=\"$idx\"> " ;
@@ -4423,8 +4664,27 @@ if (isset($_POST['pass']))
 			pied_de_page("x");
 			}
 			
+
+	if (($action=="alerte_surv_mail") && ($user_droit==""))
+		{
+		alerte_surv_mail();
+		$action="surv_mail";
+		}	
+				
+
+	if (($action=="surv_mail") && ($user_droit==""))
+		{
+		surv_mail();
+		pied_de_page("x");
+		}	
+
+	if ($action=="supp_filtre_histo") 
+		{
+		$filtre="";
+		$action = "histo";
+		}
 		
-	if ($action=="histo")
+	if (($action=="histo") || ($action=="filtre_histo") )
 		histo_beneficiaire($user_idx, $id);
 
 	if ( ($action=="nouveau_fissa") && ( ($user_droit=="A")  ) )
@@ -5102,7 +5362,8 @@ if (isset($_POST['pass']))
 				$idx=inc_index("rdv");
 				if ($date_jour<=$date)
 					{
-					$ligne .= "; De ".libelle_user($user_idx)." (".libelle_organisme($user_organisme).")";;
+					if ($user_droit!="")
+						$ligne .= "; De ".libelle_user($user_idx)." (".libelle_organisme($user_organisme).")";;
 				
 					command("INSERT INTO DD_rdv VALUES ('$idx', '$user1','$user_idx','$date $heure', '$ligne', '$avant', 'A envoyer' ) ");
 					ajout_log( $idx, traduire("Ajout RDV le")." $date $heure : $ligne ", $user1 );				

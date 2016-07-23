@@ -247,9 +247,9 @@ include 'inc_style.php';
 		echo "<td><a href=\"index.php\"><img src=\"images/logo.png\" width=\"70\" height=\"50\"><a></td>";			
 		echo "<td><a href=\"fissa.php\"><img src=\"images/fissa.jpg\" width=\"70\" height=\"50\"><a></td>";			
 		echo "<td><a href=\"suivi.php\"><img src=\"images/suivi.jpg\" width=\"70\" height=\"50\"><a></td>";			
-		echo "<td><a title=\"Alerte Grand Froid/Forte Pluie\" href=\"alerte.php\"><img src=\"images/logo-alerte.jpg\" width=\"70\" height=\"50\"></a> ";
+		//echo "<td><a title=\"Alerte Grand Froid/Forte Pluie\" href=\"alerte.php\"><img src=\"images/logo-alerte.jpg\" width=\"70\" height=\"50\"></a> ";
 		if ($logo!="")
-			echo "<td> <a href=\"fissa.php\"> <img src=\"images/$logo\" width=\"200\" height=\"100\"  > </a> </td>";
+			echo "<td> <img src=\"images/$logo\" width=\"200\" height=\"100\"  ></td>";
 		echo "</center></td>";	
 		echo "</table> ";				
 		echo"<hr>";

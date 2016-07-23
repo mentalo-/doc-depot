@@ -1,4 +1,7 @@
-  <?php  
+<?php session_start(); ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">
+<?php include 'header.php';	  
 
 	echo "<head>";
 	echo "</head><body>";
@@ -12,6 +15,15 @@
 	ajout_log_jour(" ==================================================================================================== X");
 	
 	affiche_alarme();
+
+	// vérification que la météo est accessible 
+	$url = "http://your-meteo.fr/prog/recup_data.php?id=29591";
+	$curl = curl_init($url);
+	curl_setopt($curl, CURLOPT_NOBODY, true);
+	$result = curl_exec($curl);
+	$statusCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+	if ($statusCode!=200)
+		echo "Météo $url :<FONT color=\"#ff0000\" > KO ($statusCode) </font><hr>";
 
 	$reponse = command("SELECT * FROM DD_param WHERE nom like 'MONITOR_%' ");
 	echo "<table><tr>";
@@ -59,6 +71,8 @@
 	
 	echo "</table><hr>";
 
+
+		
 	$d="";
 	echo "<div class=\"CSSTableGenerator\" ><table><tr><td > Date  </td><td> Prio </td><td> Evénement </td><td> Ip </td>";
 	$reponse =command("select * from  z_log_t  order by date desc limit 0,19");		
@@ -105,4 +119,4 @@
 
 	echo "</body>";
 	
-	?> 
+	?>

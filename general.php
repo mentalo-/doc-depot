@@ -505,8 +505,8 @@ include 'bdd.php';
 			if ( ($action=="visu_image") || ($action=="visu_image_mini")|| ($action=="visu_fichier")|| ($action=="visu_doc") )
 				$source= "visu.php";
 
-			if ( ($action=="supp_mail") || ($action=="repondre_mail")|| ($action=="repondre_tous_mail")|| ($action=="transfert_mail") )
-				$source= "ZZ12.php";
+			if  ($action=="visu_suivi") 
+				$source= "visu_suivi.php";
 				
 			echo "<form method=\"POST\" action=\"$source\" $blank >";
 			if ($size=="")
@@ -684,13 +684,14 @@ include 'bdd.php';
 		{
 		if ($_SERVER['REMOTE_ADDR']!="127.0.0.1")
 			{
+			$delta=parametre("DD_incremente_tempo",4);
 			$reponse = command("select * from cx where id='$id' ");
 			if ($donnees = fetch_command($reponse) )
 				{
-				$tempo=min( 120, $donnees["tempo"]+4);
+				$tempo=min( 120, $donnees["tempo"]+$delta);
 				
 				$tmax= parametre("DD_seuil_tempo_cx_max") ;
-				if ( ($tempo >= $tmax ) && ($tempo < $tmax+4 ) )
+				if ( ($tempo >= $tmax ) && ($tempo < $tmax+$delta ) )
 					alerte_sms("Seuil nbre connexion dépassé pour $id");
 					
 				$reponse = command("UPDATE cx SET tempo='$tempo' where id='$id' ") ;
@@ -702,7 +703,7 @@ include 'bdd.php';
 					alerte_sms("Dépassement nombre d'échec de connexion par période");
 				}
 			else
-				$reponse = command("INSERT INTO `cx` VALUES ( '$id', '4') ");
+				$reponse = command("INSERT INTO `cx` VALUES ( '$id', '$delta') ");
 			}
 		}
 		

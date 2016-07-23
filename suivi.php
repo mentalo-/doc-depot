@@ -29,7 +29,7 @@ window.onload = function() {
 	</script>	
 	
 	 <?php
-	 
+
 	 
 include 'calendrier.php';
 include 'general.php';
@@ -116,13 +116,14 @@ include 'inc_style.php';
 		echo "<table>";		
 		echo "<tr><td  bgcolor=\"#3f7f00\"> <font color=\"white\">Date </td> <td  bgcolor=\"#3f7f00\"></td><td  bgcolor=\"#3f7f00\"></td><td  bgcolor=\"#3f7f00\"></td> <td bgcolor=\"#3f7f00\" > <font color=\"white\">Auteur</td> ";
 
+		/*
 		$reponse = command("SELECT * FROM $bdd WHERE nom='$nom_slash' and commentaire<>'' and date='0000-00-00' and pres_repas<>'pda' and pres_repas<>'Age' and pres_repas<>'Mail' and pres_repas<>'Téléphone' and pres_repas<>'nationalie' and pres_repas<>'PE' order by nom DESC "); 
 		if ($donnees = fetch_command($reponse) ) 
 			{
 			$c=mef_texte_a_afficher( stripcslashes($donnees["commentaire"]) );
 			echo "<tr><td ></td> <td ><b>Memo FISSA : </b></td><td ></td><td >$c</td> ";
 			}
-		
+		*/
 		$i=0; 
 //		if ( $_SESSION['droit']=="R")
 //			$date_deb="0000-00-00";
@@ -142,6 +143,7 @@ include 'inc_style.php';
 				if (($ncolor++ %2 )==0) $color="#ffffff" ; else $color="#d4ffaa" ; 	
 
 				$c=mef_texte_a_afficher( stripcslashes($donnees["commentaire"]));
+				$c=str_replace("$bdd/","",$c);
 				$date_jour=$donnees["date"];
 				$d3= explode("-",$date_jour);  
 				$a=$d3[0];
@@ -150,7 +152,8 @@ include 'inc_style.php';
 				$d ="$j/$m/$a";
 				$act=$donnees["activites"];
 				$act=str_replace('#-#','; ',$act);
-				$p=$donnees["pres_repas"];
+				$p=$donnees["pres_repas"];	
+				$p=str_replace("__upload","Chargement",$p);
 				$c=nl2br ($c);
 				$user="";
 				if ($donnees["user"]!="")
@@ -490,7 +493,9 @@ include 'inc_style.php';
 				$nom .= " (F)";
 			nouveau2($date_jour,$nom, variable_s("age"),variable_s("nationalite"),false);
 			}
-			
+		
+		$nom_slash= addslashes2($nom);	
+		
 		// =====================================================================loc IMAGE
 		echo "<table border=\"0\" >";	
 		echo "<tr> <td> <a href=\"suivi.php\"> <img src=\"images/suivi.jpg\" width=\"140\" height=\"100\"  ></a></td> ";		
@@ -510,7 +515,18 @@ include 'inc_style.php';
 			else
 				echo "<OPTION  VALUE=\"$sel\"> $sel </OPTION>";
 			}
-		echo "</SELECT></form> </td>";
+		echo "</SELECT></form>";
+		if ($nom!="")
+			{
+			$reponse = command("SELECT * FROM $bdd WHERE nom='$nom_slash' and commentaire<>'' and date='0000-00-00' and pres_repas<>'pda' and pres_repas<>'Age' and pres_repas<>'Mail' and pres_repas<>'Téléphone' and pres_repas<>'nationalie' and pres_repas<>'PE' order by nom DESC "); 
+			if ($donnees = fetch_command($reponse) ) 
+				{
+				$c=mef_texte_a_afficher( stripcslashes($donnees["commentaire"]) );
+				echo "<br>Memo FISSA : $c ";
+				}
+			}
+
+		echo "</td>";
 		// =====================================================================loc RAPPORT
 		echo "<td width=\"150\"><p><center>";
 		echo "<ul id=\"menu-bar\">";
@@ -528,16 +544,16 @@ include 'inc_style.php';
 		echo "<td><a href=\"index.php\"><img src=\"images/logo.png\" width=\"70\" height=\"50\"><a></td>";			
 		echo "<td><a href=\"fissa.php\"><img src=\"images/fissa.jpg\" width=\"70\" height=\"50\"><a></td>";			
 		echo "<td><a href=\"rdv.php\"><img src=\"images/rdv.jpg\" width=\"70\" height=\"50\"><a></td>";			
-		echo "<td><a title=\"Alerte Grand Froid/Forte Pluie\" href=\"alerte.php\"><img src=\"images/logo-alerte.jpg\" width=\"70\" height=\"50\"></a> ";
+		//echo "<td><a title=\"Alerte Grand Froid/Forte Pluie\" href=\"alerte.php\"><img src=\"images/logo-alerte.jpg\" width=\"70\" height=\"50\"></a> ";
 		if ($logo!="")
-			echo "<td> <a href=\"fissa.php\"> <img src=\"images/$logo\" width=\"200\" height=\"100\"  > </a> </td>";
+			echo "<td> <img src=\"images/$logo\" width=\"200\" height=\"100\"  >  </td>";
 		echo "</center></td>";	
 		echo "</table><hr> ";				
 			
 		ajout_log_jour("----------------------------------------------------------------------------------- [ SUIVI = $action ] $date_jour ");
 		$date_jour_gb=mise_en_forme_date_aaaammjj( $date_jour);		
 		
-		$nom_slash= addslashes2($nom);	
+
 		if ($nom!="")
 			{
 
@@ -991,7 +1007,8 @@ include 'inc_style.php';
 							fin_cadre();							
 							echo "</td></TABLE>";
 							}						
-						
+					
+					// ==================================================================== upload documents internes
 					if ($action=="charge")					
 						{
 						$_SESSION['nom_suivi']=$nom;
@@ -1001,13 +1018,104 @@ include 'inc_style.php';
 						echo "<form action=\"upload_suivi.php\" method=\"GET\"  class=\"dropzone\" id=\"my-awesome-dropzone\" >";
 						echo "</form>";	
 						pied_de_page();
+						}						
+					// ==================================================================== rendre visible
+					if ($action=="fichier_actif")					
+						{
+						$fichier=variable_s("f");
+						$nom=variable_s("nom");
+						$user= $_SESSION['user'];
+						$modif=time();
+						$reponse = command("UPDATE $bdd set qte='' , user='$user' , modif='$modif' where  nom='$nom' and pres_repas='__upload' and commentaire='$fichier' ");
+						$action="gestion_doc";
+						}		
+
+				// ==================================================================== supprime 1 document interne
+					if ($action=="fichier_inactif")					
+						{
+						$fichier=variable_s("f");
+						$nom=variable_s("nom");
+						$user= $_SESSION['user'];
+						$modif=time();
+						$reponse = command("UPDATE $bdd set qte='-1' , user='$user' , modif='$modif' where  nom='$nom' and pres_repas='__upload' and commentaire='$fichier' ");
+						$action="gestion_doc";
+						}		
+
+						// ==================================================================== supprime 1 document interne
+					if ($action=="supp_fichier")					
+						{
+						$fichier=variable_s("f");
+						$nom=variable_s("nom");
+						$user= $_SESSION['user'];
+						$modif=time();
+						$reponse = command("UPDATE $bdd set qte='-2' , user='$user' , modif='$modif' where  nom='$nom' and pres_repas='__upload' and commentaire='$fichier' ");
+						$action="gestion_doc";
+						}	
+					
+					// ==================================================================== gére  documents internes
+					if ($action=="gestion_doc")					
+						{
+						// ======================================================================== Visualisation des miniatures des documents internes
+						echo "<table ><tr><td> <ul id=\"menu-bar\">";
+						echo "<li><a href=\"suivi.php?action=gestion_doc&nom=$nom\" >Documents internes</a></li>";
+						echo "</ul></td><td> - </td>";	
+					
+						$reponse = command("SELECT distinct* FROM $bdd WHERE nom='$nom_slash' and pres_repas='__upload' and qte<>'-2' "); 
+						while ($donnees = fetch_command($reponse))
+							{
+							$fichier=$donnees["commentaire"];
+							$date=$donnees["date"];
+							$qte=$donnees["qte"];							
+							echo "<tr><td>";
+							if (extension_fichier($fichier)=="pdf")
+								{
+								if (file_exists("$fichier.jpg"))
+									{
+									//echo "<a href=\"suivi/$fichier\"  target=_blank ><img src=\"suivi_mini/$fichier.jpg\"  width=\"100\" height=\"100\" ><a> ";
+									lien("suivi_mini/$fichier", "visu_suivi", param ("fichier","$fichier"), "", "100","B","", true);
+									}
+								else
+									{
+									//echo "<a href=\"suivi/$fichier\"  target=_blank ><img src=\"images/fichier.jpg\"  width=\"100\" height=\"100\" ><a> ";
+									lien("images/fichier.jpg", "visu_suivi", param ("fichier","$fichier"), "", "100","B","", true);
+									}
+								}
+							else
+								if (est_doc($fichier))
+									{
+									//echo "<a href=\"suivi/$fichier\"  target=_blank ><img src=\"images/fichier.png\" width=\"100\" height=\"100\" ><a>  ";	
+									lien("images/fichier.png", "visu_suivi", param ("fichier","$fichier"), "", "100","B","", true);
+									}
+								else
+									{
+									// echo "<a href=\"suivi/$fichier\"  target=_blank ><img src=\"suivi_mini/$fichier\" width=\"100\" height=\"100\" ><a> xxx";
+									lien("suivi_mini/$fichier", "visu_suivi", param ("fichier","$fichier"), "", "100","B","", true);
+									}
+							echo "</td>";
+							
+							if ($qte!="")
+								echo "<td> Masqué: <a href=\"suivi.php?action=fichier_actif&nom=$nom&f=$fichier\" > Rendre visible le fichier<img src=\"images/oui.png\" title=\"Rendre visible le fichier\" width=\"30\" height=\"30\" > </a></td> ";
+								else
+								echo "<td> Visible  <a href=\"suivi.php?action=fichier_inactif&nom=$nom&f=$fichier\" >Masquer le fichier<img src=\"images/restreint.png\"  title=\"Masquer le fichier\" width=\"30\" height=\"30\" > </a></td> ";
+
+								
+							echo "<td> $date</td> ";
+
+							if ($qte!="")
+								echo "<td> <a href=\"suivi.php?action=supp_fichier&nom=$nom&f=$fichier\" >Supprimer le fichier <img src=\"images/croixrouge.png\" title=\"Supprimer le fichier\" width=\"30\" height=\"30\" > </a></td> ";
+								
+							}						
+				
+						echo "</table>";							
+
+						pied_de_page();
 						}	
 
 							
-					//Accès à Doc-depot
+					//+===================================================================Accès à Doc-depot
 					if ( (!(strstr($nom,"(M)"))) && (!(strstr($nom,"(A)"))) &&	(!(strstr($nom,"(B)"))) && 	(!(strstr($nom,"(S)"))) &&  ($_SESSION['droit']!="P") ) 				
 						{
-						echo "<table><tr>";
+						echo "<table ><tr>";
 						$reponse = command("SELECT * FROM $bdd WHERE nom='$nom_slash' and date='0000-00-00' and pres_repas='' and activites<>''  "); 
 						if ($donnees = fetch_command($reponse))
 							{ // compte Doc-depot existe
@@ -1058,31 +1166,41 @@ include 'inc_style.php';
 							echo "<input type=\"submit\"  id=\"nouveau_user\"  value=\"Lui créer un compte Doc-depot\" > </form></td>  ";		
 							}
 							
-							
+						
+						// ======================================================================== Visualisation des miniatures des documents internes
 						echo "<td> <ul id=\"menu-bar\">";
-						echo "<li><a href=\"suivi.php?action=charge&nom=$nom\" >Documents internes</a></li>";
+						echo "<li><a href=\"suivi.php?action=gestion_doc&nom=$nom\" >Documents internes</a></li>";
 						echo "</ul></td><td> - </td>";	
 					
-						$reponse = command("SELECT distinct* FROM $bdd WHERE nom='$nom_slash' and pres_repas='__upload' "); 
+						$reponse = command("SELECT distinct* FROM $bdd WHERE nom='$nom_slash' and pres_repas='__upload'  and qte='' "); 
 						while ($donnees = fetch_command($reponse))
 							{
 							$fichier=$donnees["commentaire"];
 							$date=$donnees["date"];
+							
+							echo "<td>";
 							if (extension_fichier($fichier)=="pdf")
 								{
 								if (file_exists("$fichier.jpg"))
-									echo "<td> <a href=\"$fichier\"  target=_blank > <img src=\"$fichier.jpg\" title=\"$date\" width=\"50\" height=\"50\" ><a> </td> ";
+//									echo "<a href=\"suivi/$fichier\"  target=_blank ><img src=\"suivi_mini/$fichier.jpg\" title=\"$date\" width=\"50\" height=\"50\" ><a> ";
+									lien("suivi_mini/$fichier", "visu_suivi", param ("fichier","$fichier"), "", "50","B","", true);
 								else
-									echo "<td> <a href=\"$fichier\"  target=_blank > <img src=\"images/fichier.jpg\" title=\"$date\" width=\"50\" height=\"50\" ><a> </td> ";
-								
+//									echo "<a href=\"suivi/$fichier\"  target=_blank ><img src=\"images/fichier.jpg\" title=\"$date\" width=\"50\" height=\"50\" ><a> ";
+									lien("images/fichier.jpg", "visu_suivi", param ("fichier","$fichier"), "", "50","B","", true);
 								}
 							else
 								if (est_doc($fichier))
-									echo "<td> <a href=\"$fichier\"  target=_blank > <img src=\"images/fichier.png\" title=\"$date\" width=\"50\" height=\"50\" ><a> </td> ";			
+//									echo "<a href=\"suivi/$fichier\"  target=_blank ><img src=\"images/fichier.png\" title=\"$date\" width=\"50\" height=\"50\" ><a>  ";			
+									lien("images/fichier.png", "visu_suivi", param ("fichier","$fichier"), "", "50","B","", true);
 								else
-									echo "<td> <a href=\"$fichier\"  target=_blank > <img src=\"$fichier\" title=\"$date\" width=\"50\" height=\"50\" ><a> </td> ";
+//									echo "<a href=\"suivi/$fichier\"  target=_blank ><img src=\"suivi_mini/$fichier\" title=\"$date\" width=\"50\" height=\"50\" ><a> ";
+									lien("suivi_mini/$fichier", "visu_suivi", param ("fichier","$fichier"), "", "50","B","", true);
+
+							echo "</td>";
 							}
-						echo "<td> <a href=\"suivi.php?action=charge&nom=$nom\" > <img src=\"images/ajouter.png\" width=\"30\" height=\"30\" > </a></td> ";
+						echo "<td> <a href=\"suivi.php?action=charge&nom=$nom\" ><img src=\"images/ajouter.png\" width=\"30\" height=\"30\" > </a></td> ";
+						
+				
 						echo "</table>";							
 						}
 							

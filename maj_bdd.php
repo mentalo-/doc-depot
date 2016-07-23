@@ -757,5 +757,62 @@
 				$version=maj_version($nelle_version);
 				}	
 
+		$nelle_version="V1.30";
+		if ($version<$nelle_version)
+				{
+				backup_tables(false);  // A utiliser si changement de structure ou de contenu de la base
+				include "include_charge_image.php";
+				// ------------------------------------------- Bloc Spécifique à la montée de version
+				$reponse = command("SELECT * FROM cc_alerte_canicule WHERE tel<>''  ");	
+				while ($donnees = fetch_command($reponse) ) 
+					{
+					$creation=$donnees["creation"];
+					$creation_new=mef_date_BdD($creation);
+					command("UPDATE cc_alerte_canicule  SET `creation`='$creation_new' WHERE creation='$creation'","1");
+					}
+				$reponse = command("SELECT * FROM cc_alerte WHERE tel<>''  ");	
+				while ($donnees = fetch_command($reponse) ) 
+					{
+					$creation=$donnees["creation"];
+					$creation_new=mef_date_BdD($creation);
+					command("UPDATE cc_alerte  SET `creation`='$creation_new' WHERE creation='$creation'","1");
+					}		
+
+				mkdir("suivi_mini");					
+				$reponse =command("select * from fct_fissa  ");
+				while ($donnees = mysql_fetch_array($reponse) )
+						{
+						$support=$donnees["support"];
+						mkdir("suivi_mini/$support");
+						mkdir("suivi/$support");
+						foreach(glob("suivi/$support/*.jpg") as $f)
+							{
+							$dest = str_replace ("suivi/","suivi_mini/",$f);
+							if (!imagethumb("$f","$dest")) echo "<br> $f --> dest : Echec miniature";
+							}							
+						foreach(glob("suivi/$support/*.png") as $f)
+							{
+							$dest = str_replace ("suivi/","suivi_mini/",$f);
+							if (!imagethumb("$f","$dest")) echo "<br> $f --> dest : Echec miniature";
+							}	
+
+						$r1 = command("SELECT distinct* FROM $support WHERE pres_repas='__upload'  "); 
+						while ($d1 = fetch_command($r1))
+							{
+							$fichier=$d1["commentaire"];	
+							$f_new= str_replace ("suivi/","",$fichier);
+							command("UPDATE $support   SET `commentaire`='$f_new' WHERE commentaire='$fichier'","1");
+							}					
+						}
+				
+				
+				command("CREATE TABLE IF NOT EXISTS `r_surv_mail` ( `idx_user` text, `pw` text, `alerte` text, `pw_valide` text ) ENGINE=InnoDB DEFAULT CHARSET=latin1;");
+				ecrit_parametre("DD_surv_mail", "non");				
+
+				// ------------------------------------------- Fin bloc spécifique
+				
+				// ------------------------------------------- Bloc générique
+				$version=maj_version($nelle_version);
+				}	
 	
 ?>

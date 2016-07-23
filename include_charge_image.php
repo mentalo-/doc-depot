@@ -51,9 +51,12 @@
 			supp_fichier("upload/$source.jpg");
 			}
 		}
+	
+	if ($_SESSION['droit']!='')
+		met_point_vert($source);
 
 	echo "<p>Ajout cadenas";			
-	met_cadenas($source);
+	met_cadenas($source);	
 	
 	if ( est_image($source) )
 		{
@@ -207,8 +210,12 @@
 					}
 					
 				imagethumb("upload/$idx.$n","upload_mini/$idx.$n",$hauteur);
+				
+				if ($_SESSION['droit']!='')
+					met_point_vert("$idx.$n")	;		
+					
 				met_cadenas("$idx.$n");
-
+	
 				if (substr($ref,0,1)=="A")
 					{
 					if ($sens=="L")
@@ -252,7 +259,9 @@
 						exec ( "/usr/bin/convert -density 100 upload_pdf/$idx.$n upload_mini/_$idx.$n.jpg" ) ;
 						$hauteur=250;
 						imagethumb("upload_mini/_$idx.$n.jpg","upload_mini/$idx.$n.jpg",$hauteur);
-						met_cadenas("$idx.$n.jpg");
+						if ($_SESSION['droit']!='')
+							met_point_vert("$idx.$n.jpg");
+						met_cadenas("$idx.$n.jpg");	
 						supp_fichier("upload_mini/_$idx.$n.jpg");
 						}
 					if ($pw!="")
@@ -528,5 +537,43 @@ function rotateImage($sourceFile,$destImageName,$degreeOfRotation)
 				case "gif":		imagegif($destination, "upload_mini/-$image"); 	break;
 				case "png":		imagepng($destination, "upload_mini/-$image"); 	break;
 			  }
+		}	
+	
+	function met_point_vert($image)
+		{
+		// On charge d'abord les images
+		$source = imagecreatefrompng("images/oui.png"); // Le logo est la source
+		switch ( extension_fichier($image) )
+			  {    //create the image according to the content type
+				case "jpg":
+				case "jpeg":	$destination = imagecreatefromjpeg("upload_mini/$image"); 	break;
+				case "gif":		$destination = imagecreatefromgif("upload_mini/$image"); 	break;
+				case "png":		$destination = imagecreatefrompng("upload_mini/$image"); 	break;
+			  }
+		 
+		// Les fonctions imagesx et imagesy renvoient la largeur et la hauteur d'une image
+		$largeur_source = imagesx($source);
+		$hauteur_source = imagesy($source);
+		$largeur_destination = imagesx($destination);
+		$hauteur_destination = imagesy($destination);
+		 
+		// On veut placer le logo en bas à droite, on calcule les coordonnées où on doit placer le logo sur la photo
+		$destination_x = $largeur_destination - $largeur_source;
+		$destination_y =  $hauteur_destination - $hauteur_source;
+		 
+		// On met le logo (source) dans l'image de destination (la photo)
+		imagecopymerge($destination, $source, $destination_x, $destination_y, 0, 0, $largeur_source, $hauteur_source, 60);
+		 
+		// On affiche l'image de destination qui a été fusionnée avec le logo
+		switch( extension_fichier($image) )// La photo est la destination
+			  {    //create the image according to the content type
+				case "jpg":
+				case "jpeg":	imagejpeg($destination, "upload_mini/_$image"); 	break;
+				case "gif":		imagegif($destination, "upload_mini/_$image"); 	break;
+				case "png":		imagepng($destination, "upload_mini/_$image"); 	break;
+			  }
+		supp_fichier ("upload_mini/$image");
+		rename ("upload_mini/_$image","upload_mini/$image");
+		
 		}
 	?> 

@@ -30,12 +30,21 @@
 
 		echo "<br>Purge Log";
 		$ilyaunmois =date('Y-m-d H\hi.00',  mktime(0,0,0 , date("m")-1, date("d"), date ("Y")));		
+		$ilyaunesemaine =date('Y-m-d H\hi.00',  mktime(0,0,0 , date("m"), date("d")-7, date ("Y")));		
 		command("delete from z_log_t  where ligne like '%Traitement mail hors delais%' and date<'$ilyaunmois' ");
 		command("delete from z_log_t  where ligne like '%Reception supervision gatewaysms%' and date<'$ilyaunmois' ");
 		command("delete from z_log_t  where ligne like '%Envoi SMS au ".parametre("DD_numero_tel_sms")."%' and date<'$ilyaunmois' ");
 		command("delete from z_log_t  where ligne like '%Nb TTT pendant alarme%' and date<'$ilyaunmois' ");
 		command("delete from z_log_t  where ligne like '%but Scoring%' and date<'$ilyaunmois' ");
 		command("delete from z_log_t  where ligne like '%fin Scoring%' and date<'$ilyaunmois' ");
+		command("delete from z_log_t  where ligne like '%fin Scoring%' and date<'$ilyaunmois' ");
+		command("delete from z_log_t  where ligne like 'purge Log%' and date<'$ilyaunesemaine' ");
+		command("delete from z_log_t  where ligne like 'purge Alerte %' and date<'$ilyaunesemaine' ");
+		command("delete from z_log_t  where ligne like 'purge Log%' and date<'$ilyaunesemaine' ");
+		command("delete from z_log_t  where ligne like 'purge BdD FISSA%' and date<'$ilyaunesemaine' ");
+		command("delete from z_log_t  where ligne like 'Controle de signature%' and date<'$ilyaunesemaine' ");
+		command("delete from z_log_t  where ligne like 'Backup tables%' and date<'$ilyaunesemaine' ");
+		command("delete from z_log_t  where ligne like 'Traitement Purges%' and date<'$ilyaunesemaine' ");
 		command("optimize table z_log_t");
 		}
 		
@@ -60,7 +69,7 @@
 				{
 				$support =$donnees["support"];		
 				$crit=" ( not (nom like '%(A)%')) and (nom<>'Synth') and (nom<>'Mail')   ";
-				$r1 =command("update $support set commentaire='' where  $crit and date<'$avant' and date>'2000-01-01' ");		
+				$r1 =command("update $support set commentaire='' where  $crit and date<'$avant' and date>'2000-01-01' and pres_repas<>'__upload' ");		
 				}
 		}
 		
@@ -177,6 +186,66 @@
 		else
 			ecrit_parametre("TECH_Fissa_scoring_nb", parametre("TECH_Fissa_scoring_nb")+$nb_calcul ) ;
 		}
+	
+	function alerte_sms_domiciliation( $aff_log)
+				{
+				$nbsms=0;
+				echo "<BR> Alerte SMS Domiciliation : ";
+				if ($aff_log)
+					ajout_log_tech( "Debut Alerte SMS Domiciliation" );
+					
+				$reponse =command("select * from fct_fissa  ");
+				while ($donnees = mysql_fetch_array($reponse) )
+					{
+					$support=$donnees["support"];
+					$idx_organisme=$donnees["organisme"];
+					echo "<hr>  $support:  ";
+					
+					if (parametre("Formation_num_structure","")!=$idx_organisme) // on ne traite pas l'organisme de formation
+						{
+						// on défini les dates où on recherche du courier en attente
+						$date_debut_gb = date('Y-m-d',  mktime(0 ,0, 0  , date("m"), date("d")-10, date ("Y")) );
+						$date_fin_gb = date('Y-m-d',  mktime(0 ,0, 0  , date("m"), date("d")-17, date ("Y")) );
+						
+						$r2 = command("SELECT * FROM $support WHERE date<'$date_debut_gb' and date>='$date_fin_gb' and pres_repas='Arrivée courrier' "); 
+						while ($d2 = fetch_command($r2))
+							{
+							$nom=$d2["nom"]; 
+							echo "$nom, ";
+							
+							// on vérifie qu'il n'y en a pas antérieurement (déjà traités normalement)
+							$r3 = command("SELECT * FROM $support WHERE nom='$nom' and date<'$date_fin_gb' and pres_repas='Arrivée courrier' ","x"); 
+							if (!($d3 = fetch_command($r3)))
+								{
+								// on recherche le numéro de téléphone
+								$r3 = command("SELECT * FROM $support WHERE nom='$nom' and pres_repas='Téléphone' "); 
+								if ($d3 = fetch_command($r3))
+									{
+									$telephone=$d3["commentaire"];
+									if (VerifierTelephone($telephone) )
+										{ 	// s'il exite et est valable on va cherher à récupérer le nom de l'organisme ainsi que son adresse
+										$r3 = command("SELECT * FROM r_organisme WHERE idx='$idx_organisme'"); 
+										if ($d3 = fetch_command($r3))
+											{
+											$organisme=$d3["organisme"];
+											$adresse=$d3["adresse"];
+											$ligne="Vous avez du courrier en attente au service de domiciliation de $organisme ($adresse)";
+											//envoi_SMS_operateur( $telephone, $ligne );
+											envoi_SMS( $telephone, $ligne );
+											$nbsms++;
+											}	else echo " organisme $idx_organisme n'existe pas ";
+										}	else echo " Numero de téléphone '$telephone' n'est pas valide ou existant ";	
+									}	else echo " Numero de téléphone de '$nom' n'est pas existant ";	
+								} else echo " Existe déjaà du courrier non pris la semaine antérieure";	
+							}
+						}
+					}
+				if ($aff_log)
+					ajout_log_tech( "Fin Alerte SMS Domiciliation($nbsms SMS envoyés)" );
+				}
+				
+
+		
 		
 // Génére une chine aléatoire pour le message de supervision
 function random_chaine($car) 
@@ -242,7 +311,8 @@ function random_chaine($car)
 		// traitement le 1 jour du mois à 6 heures
 		if (date('d-h',  time())==parametre("DD_jour_heure_audit_cnil","01-06") )
 				{
-				$reponse =command("select * from fct_fissa  ");
+				$idx_organisme_formation = parametre("Formation_num_structure");
+				$reponse =command("select * from fct_fissa  where organisme <>$idx_organisme_formation ");
 				while ($donnees = mysql_fetch_array($reponse) )
 					{
 					$periode=date('Y-m',  time());
@@ -271,6 +341,7 @@ function random_chaine($car)
 				{
 				ajout_log_tech( "Controle de signature");
 				ctrl_signature();
+				audit_doc_internes();
 				}			
 
 			if ($heure==3)
@@ -298,8 +369,27 @@ function random_chaine($car)
 					envoi_sms( parametre('DD_tel_alarme1') , parametre('TECH_identite_environnement')." : Fin Scoring non terminé à 7h !!");
 					}
 				}
-			}				
-
+				
+			// =========================================================================== traitement alerte SMS sur courrier en attente de domiciliation
+			// sauf organisme de formation
+			if (($heure==10) && (date("N")=="1") ) // le lundi matin à 10h
+				alerte_sms_domiciliation(true);				
+				
+			// ----------------------------------------------------------------------- Envoi message de synthèses FISSA		
+			if ($heure==19)
+			    if ( parametre("Tech_date_envoi_synthses")!=date('Y-m-d',  time()) )
+					{
+					exploit_envoi_mail_synthese();
+					ecrit_parametre("Tech_date_envoi_synthses", date('Y-m-d',  time()));
+					}				
+				
+			}	
+			
+		// =========================================================================== traitement alerte SMS sur courrier en attente de domiciliation
+			// sauf organisme de formation
+			if 	($_SERVER['REMOTE_ADDR']=="127.0.0.1")
+				alerte_sms_domiciliation(false);			
+			
 		commentaire_html( "Purge temporaire");
 		purge_fichiers_temporaires("dir_zip/");		
 		purge_fichiers_temporaires("tmp/","*.pdf");		
@@ -345,19 +435,15 @@ function random_chaine($car)
 						}
 					ecrit_parametre('TECH_dernier_envoi_supervision', '' );
 					}
-		
-				
-		if (($heure>6) && ($heure<21))
-			{		
-			if (date('Y-m-d-h',  time()) != date('Y-m-d-h',  $ancien_ttt ))
-				if ($heure==19)
-				    if ( parametre("Tech_date_envoi_synthses")!=date('Y-m-d',  time()) )
-						{
-						exploit_envoi_mail_synthese();
-						ecrit_parametre("Tech_date_envoi_synthses", date('Y-m-d',  time()));
-						}
 					
-		// ----------------------------------------------------------------------- traitement des RDV				
+					
+					
+					
+		// ----------------------------------------------------------------------- traitement de JOUR			
+		if (($heure>6) && ($heure<21))
+			{
+	
+			// ----------------------------------------------------------------------- traitement des RDV				
 			Echo "<p>TTT rdv ";
 			
 			$reponse =command("select * from  DD_rdv where (etat='A envoyer' and avant<>'Aucun') ");		
@@ -405,21 +491,25 @@ function random_chaine($car)
 						if ($d1 = fetch_command($r1) ) 
 							{
 							$organisme=$d1["organisme"]; // on deduit de l'auteur l'organisme d'appartenance
-							$r1 =command("SELECT * from  fct_fissa WHERE organisme='$organisme' ");
-							if ($d1 = fetch_command($r1) ) 
+							if ($organisme!=parametre("Formation_num_structure"))
 								{
-								$support=$d1["support"]; // on déduit le support de l'organisme
-								$r1 =command("SELECT * from  $support WHERE nom='$user_idx' and pres_repas='Téléphone'");
-								if ($d1 = fetch_command($r1) )
-									$telephone_user=$d1["commentaire"];	
+								$r1 =command("SELECT * from  fct_fissa WHERE organisme='$organisme' ");
+								if ($d1 = fetch_command($r1) ) 
+									{
+									$support=$d1["support"]; // on déduit le support de l'organisme
+									$r1 =command("SELECT * from  $support WHERE nom='$user_idx' and pres_repas='Téléphone'");
+									if ($d1 = fetch_command($r1) )
+										$telephone_user=$d1["commentaire"];	
+									}
 								}
 							}
 						}
 					else // l'index est numrique ==> origine Doc-depot 
 						{
 						$r1 =command("SELECT * from  r_user WHERE idx='$user_idx' ");
-						if ($d1 = fetch_command($r1) ) 
-							$telephone_user=$d1["telephone"];
+						if ($d1 = fetch_command($r1) )
+							if ($d1["organisme"] !=  parametre("Formation_num_structure") )
+								$telephone_user=$d1["telephone"];
 						}	
 						
 					if ( VerifierPortable($telephone_user) 	) 	// vérification au dernier momentdu le format du n° de téléphone avant envoi
@@ -463,7 +553,7 @@ function random_chaine($car)
 					}
 				else
 					{
-					ajout_log_tech( "Nb TTT pendant alarme : $nb_ttt");
+					//ajout_log_tech( "Nb TTT pendant alarme : $nb_ttt");
 					if ($nb_ttt>($tempo_mesure/15*2/3))
 						{
 						ajout_log_tech( "Fin alarme Traitement mail hors delais","P0");
