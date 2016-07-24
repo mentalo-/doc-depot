@@ -2,7 +2,20 @@
 require_once 'include_crypt.php';
 require_once 'exploit.php';
 
-
+	function ttt_echec_cx ($id,$mot_de_passe="")
+		{
+		tempo_cx ($id);
+		$ip= $_SERVER["REMOTE_ADDR"];
+		tempo_cx ($ip);	
+		erreur(traduire("Mot de passe incorrect")." !!"). 
+		$_SESSION['pass']=false;
+		ajout_log( $id,traduire("Echec Connexion")."  $id ");
+		ajout_log_tech( traduire("Echec Connexion")."  $id / $mot_de_passe / ".$_POST['pass']);
+		ajout_echec_cx ($id);
+		ajout_echec_cx ($ip);
+		}
+		
+	
 	if ($action=="dx") 
 		{
 		if ( (isset ($_SESSION['pass'])) && ($_SESSION['pass']==TRUE)  ) 
@@ -15,102 +28,102 @@ require_once 'exploit.php';
 // ---------------------------------------on récupére les information de la personne connectée
 if (isset($_POST['pass']))
 	{
-	$id=$_POST['id'];
-	$reponse = command("SELECT * from  r_user WHERE id='$id' "); 
-	$donnees = fetch_command($reponse);
-	$mot_de_passe=$donnees["pw"];	
-	$droit=$donnees["droit"];	
-	$id=$donnees["id"];
-	$date_log=date('Y-m-d');	
-	$heure_jour=date("H\hi.s");	
-	$_SESSION['bene']="";
-
-
-	// verifion si la variable = mot de passe...
-	if ( ( 
-		(encrypt(addslashes($_POST['pass']))==$mot_de_passe) // on vérifie le mot de passe 
-		||
-		// cas particulier en mode poste de développement on vérifie aussu un mot de passe en clair 
-		(($_POST['pass']==$mot_de_passe) && ($_SERVER['REMOTE_ADDR']=="127.0.0.1")	 )
-		) 
-		&& ( !strstr($donnees["droit"] ,"-" ) )  // ceux qui sont désactivé ne peuvent pas accéder
-			&& ( ( ($droit!="")  && ($droit!="A") && ($droit!="E") ) || (strpos( $_SERVER['PHP_SELF'],"index.php")>0)  || (strpos( $_SERVER['PHP_SELF'],"wm.php")>0)  )  // ceux qui sont désactivé ne peuvent pas accéder
-			)
-			{
-			supp_echec_cx ($_POST['id']);
-			$ip= $_SERVER["REMOTE_ADDR"];
-			supp_echec_cx ($ip);
-			$_SESSION['pass']=true;	 
-			$idx=$donnees["idx"];
-			$_SESSION['user']=$idx;	 
-			ajout_log( $idx, traduire('Connexion') );
-			if (decrypt($mot_de_passe)=="123456") 
-				{
-				$action="modif_mdp";
-				$identifiant=$id;
-				}
-				
-			$ancien_droit="";
-			if (isset($_SESSION['droit']))
-				$ancien_droit=$_SESSION['droit'];
-				
-			$_SESSION['user_idx']=$donnees["idx"];
-			$_SESSION['droit']= $donnees["droit"];
-			$_SESSION['filtre']= "";
-			$_SESSION['ad']=false;	
-			$_SESSION['chgt_user']=false;
-			
-			if (($donnees["droit"]=="A") && ($ancien_droit!="A"))
-				envoi_mail( parametre('DD_mail_gestinonnaire') , "Connexion administrateur : ".$donnees["nom"]." ".$donnees["prenom"], "IP : $ip" );
-				
-			if (($donnees["droit"]=="E") && ($ancien_droit!="E"))
-				envoi_mail( parametre('DD_mail_gestinonnaire') , "Connexion exploitant : ".$donnees["nom"]." ".$donnees["prenom"], "IP : $ip" );		
-			
-			// supprime les demandes de recupération de mot de passe encore actif 
-			$reponse =command("UPDATE r_dde_acces set type='-' where user='$idx' and type='' and date_dde>='$date_log' ");
-			$label = libelle_user($idx);
-			$last_cx = "";
-			$reponse =command("select * from  log where ( user='$idx' or user='$id'or user='$label'  ) and  (ligne Like '%Connexion%') and  (not (ligne Like '%Déconnexion%')) and ( not (ligne Like '%Echec Connexion%'))  order by date DESC ");		
-			if ($donnees = fetch_command($reponse))// c'est la connexion actuelle
-				if ($donnees = fetch_command($reponse) )// c'est la connexion précédente
-					{
-					$last_cx=$donnees["date"];
-					if ($last_cx!="")
-						{
-						maj_last_cx($idx);
-						$ligne_last_cx = traduire('Dernière connexion')." :<br> $last_cx. ";
-						
-						$reponse =command("select * from  log where ( user='$idx' or user='$id'  or user='$label' ) and  (ligne Like '%Echec Connexion%') order by date DESC ");		
-						$donnees = fetch_command($reponse); 
-						$last_echec_cx=$donnees["date"];	
-						if ($last_echec_cx>$last_cx)
-							echo traduire("Depuis votre derniére connexion, il y a eu tentative de connexion à votre compte, merci de consulter votre")." <a href=\"index.php?action=histo\"  >".traduire('historique')."</a> ";
-						}
-					}
-			if ($_SESSION['droit']=="")
-				ctrl_signature_user( $idx );
-			
-			// verification que les dates CG n'ont pas changé depuis la derniere connexion
-			// si c'est le cas on en infome l'utilisateur
-			$date_cg=parametre("DD_date_cg");			
-			if ($last_cx<$date_cg)
-				echo traduire("Les conditions générales de 'doc-depot.com' ont changé, merci d'en prendre connaissance en cliquant")." <a href=\"conditions.html\"  >".traduire('ici')."</a> ";
-		
-			}
+	$id_post=$_POST['id'];
+	
+	$id_4=substr ( $id_post, -4, 4 );
+	$reponse = command("SELECT * from  r_user WHERE id like '%$id_4' "); 
+	if (!fetch_command($reponse))// sécurité : on vérifie que la fin de chaine est bien inclue dans l'identifiant de façon à éviter le passage de commndes SQL
+		ttt_echec_cx ("...$id_4");
+	else
+		{
+		$reponse = command("SELECT * from  r_user WHERE id='$id_post' "); 
+		if (!($donnees = fetch_command($reponse)))
+			ttt_echec_cx ($id);
 		else
-			{	
-			$id=$_POST['id'];
+			{
+			$mot_de_passe=$donnees["pw"];	
+			$droit=$donnees["droit"];	
+			$id=$donnees["id"];
+			$date_log=date('Y-m-d');	
+			$heure_jour=date("H\hi.s");	
+			$_SESSION['bene']="";
 
-			tempo_cx ($id);
-			$ip= $_SERVER["REMOTE_ADDR"];
-			tempo_cx ($ip);	
-			erreur(traduire("Mot de passe incorrect")." !!"). 
-			$_SESSION['pass']=false;
-			ajout_log( $id,traduire("Echec Connexion")."  $id ");
-			ajout_log_tech( traduire("Echec Connexion")."  $id / $mot_de_passe / ".$_POST['pass']);
-			ajout_echec_cx ($_POST['id']);
-			ajout_echec_cx ($ip);
+			// verifion si la variable = mot de passe...
+			if ( ( 
+				(encrypt(addslashes($_POST['pass']))==$mot_de_passe) // on vérifie le mot de passe 
+				||
+				// cas particulier en mode poste de développement on vérifie aussu un mot de passe en clair 
+				(($_POST['pass']==$mot_de_passe) && ($_SERVER['REMOTE_ADDR']=="127.0.0.1")	 )
+				) 
+				&& ( !strstr($donnees["droit"] ,"-" ) )  // ceux qui sont désactivé ne peuvent pas accéder
+				&& ( $id==$id_post)  // sécurité : on s'assure que l'id lu est bien celui demandé (et non in contournement de la requette
+					&& ( ( ($droit!="")  && ($droit!="A") && ($droit!="E") ) || (strpos( $_SERVER['PHP_SELF'],"index.php")>0)  || (strpos( $_SERVER['PHP_SELF'],"wm.php")>0)  )  // ceux qui sont désactivé ne peuvent pas accéder
+					)
+					{
+					supp_echec_cx ($_POST['id']);
+					$ip= $_SERVER["REMOTE_ADDR"];
+					supp_echec_cx ($ip);
+					$_SESSION['pass']=true;	 
+					$idx=$donnees["idx"];
+					$_SESSION['user']=$idx;	 
+					ajout_log( $idx, traduire('Connexion') );
+					if (decrypt($mot_de_passe)=="123456") 
+						{
+						$action="modif_mdp";
+						$identifiant=$id;
+						}
+						
+					$ancien_droit="";
+					if (isset($_SESSION['droit']))
+						$ancien_droit=$_SESSION['droit'];
+						
+					$_SESSION['user_idx']=$donnees["idx"];
+					$_SESSION['droit']= $donnees["droit"];
+					$_SESSION['filtre']= "";
+					$_SESSION['ad']=false;	
+					$_SESSION['chgt_user']=false;
+					
+					if (($donnees["droit"]=="A") && ($ancien_droit!="A"))
+						envoi_mail( parametre('DD_mail_gestinonnaire') , "Connexion administrateur : ".$donnees["nom"]." ".$donnees["prenom"], "IP : $ip" );
+						
+					if (($donnees["droit"]=="E") && ($ancien_droit!="E"))
+						envoi_mail( parametre('DD_mail_gestinonnaire') , "Connexion exploitant : ".$donnees["nom"]." ".$donnees["prenom"], "IP : $ip" );		
+					
+					// supprime les demandes de recupération de mot de passe encore actif 
+					$reponse =command("UPDATE r_dde_acces set type='-' where user='$idx' and type='' and date_dde>='$date_log' ");
+					$label = libelle_user($idx);
+					$last_cx = "";
+					$reponse =command("select * from  log where ( user='$idx' or user='$id'or user='$label'  ) and  (ligne Like '%Connexion%') and  (not (ligne Like '%Déconnexion%')) and ( not (ligne Like '%Echec Connexion%'))  order by date DESC ");		
+					if ($donnees = fetch_command($reponse))// c'est la connexion actuelle
+						if ($donnees = fetch_command($reponse) )// c'est la connexion précédente
+							{
+							$last_cx=$donnees["date"];
+							if ($last_cx!="")
+								{
+								maj_last_cx($idx);
+								$ligne_last_cx = traduire('Dernière connexion')." :<br> $last_cx. ";
+								
+								$reponse =command("select * from  log where ( user='$idx' or user='$id'  or user='$label' ) and  (ligne Like '%Echec Connexion%') order by date DESC ");		
+								$donnees = fetch_command($reponse); 
+								$last_echec_cx=$donnees["date"];	
+								if ($last_echec_cx>$last_cx)
+									echo traduire("Depuis votre derniére connexion, il y a eu tentative de connexion à votre compte, merci de consulter votre")." <a href=\"index.php?action=histo\"  >".traduire('historique')."</a> ";
+								}
+							}
+					if ($_SESSION['droit']=="")
+						ctrl_signature_user( $idx );
+					
+					// verification que les dates CG n'ont pas changé depuis la derniere connexion
+					// si c'est le cas on en infome l'utilisateur
+					$date_cg=parametre("DD_date_cg");			
+					if ($last_cx<$date_cg)
+						echo traduire("Les conditions générales de 'doc-depot.com' ont changé, merci d'en prendre connaissance en cliquant")." <a href=\"conditions.html\"  >".traduire('ici')."</a> ";
+				
+					}
+				else
+					ttt_echec_cx ($id,$mot_de_passe);
 			}
+		}
 	}
 
 	if ( ($action=="chgt_user") && ($_SESSION['droit']=="E"))

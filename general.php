@@ -682,29 +682,26 @@ include 'bdd.php';
 		
 	function ajout_echec_cx ($id)
 		{
-		if ($_SERVER['REMOTE_ADDR']!="127.0.0.1")
+		$delta=parametre("DD_incremente_tempo",4);
+		$reponse = command("select * from cx where id='$id' ");
+		if ($donnees = fetch_command($reponse) )
 			{
-			$delta=parametre("DD_incremente_tempo",4);
-			$reponse = command("select * from cx where id='$id' ");
-			if ($donnees = fetch_command($reponse) )
-				{
-				$tempo=min( 120, $donnees["tempo"]+$delta);
+			$tempo=min( 120, $donnees["tempo"]+$delta);
+			
+			$tmax= parametre("DD_seuil_tempo_cx_max") ;
+			if ( ($tempo >= $tmax ) && ($tempo < $tmax+$delta ) )
+				alerte_sms("Seuil nbre connexion dépassé pour $id");
 				
-				$tmax= parametre("DD_seuil_tempo_cx_max") ;
-				if ( ($tempo >= $tmax ) && ($tempo < $tmax+$delta ) )
-					alerte_sms("Seuil nbre connexion dépassé pour $id");
-					
-				$reponse = command("UPDATE cx SET tempo='$tempo' where id='$id' ") ;
-				
-				$nb_echec= parametre("nbre_echec_sur_periode");
-				ecrit_parametre("nbre_echec_sur_periode", $nb_echec+1 );
-				
-				if (parametre("DD_nbre_echec_max_par_periode")==$nb_echec)
-					alerte_sms("Dépassement nombre d'échec de connexion par période");
-				}
-			else
-				$reponse = command("INSERT INTO `cx` VALUES ( '$id', '$delta') ");
+			$reponse = command("UPDATE cx SET tempo='$tempo' where id='$id' ") ;
+			
+			$nb_echec= parametre("nbre_echec_sur_periode");
+			ecrit_parametre("nbre_echec_sur_periode", $nb_echec+1 );
+			
+			if (parametre("DD_nbre_echec_max_par_periode")==$nb_echec)
+				alerte_sms("Dépassement nombre d'échec de connexion par période");
 			}
+		else
+			$reponse = command("INSERT INTO `cx` VALUES ( '$id', '$delta') ");
 		}
 		
 	function supp_echec_cx ($id)
@@ -716,7 +713,8 @@ include 'bdd.php';
 		{
 		$reponse = command("select * from cx where id='$id' ");
 		if ($donnees = fetch_command($reponse) )
-			sleep ($donnees["tempo"]);		
+			if ($_SERVER['REMOTE_ADDR']!="127.0.0.1")
+				sleep ($donnees["tempo"]);		
 		}
 
 	function decremente_echec_cx ($pas=1)
@@ -818,12 +816,14 @@ include 'bdd.php';
 				echo "<td><a href=\"index.php?action=fr\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"français\" alt=\"français\" src=\"images/flag_fr.png\"/></a></td><td> | </td>";
 			if ($user_lang!="gb")
 				echo "<td><a href=\"index.php?action=gb\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"english\" alt=\"anglais\" src=\"images/flag_gb.png\"/></a></td><td> | </td>";
+			/*
 			if ($user_lang!="de")
 					echo "<td><a href=\"index.php?action=de\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"allemand\" alt=\"allemand\" src=\"images/flag_de.png\"/></a></td><td> | </td>";
 			if ($user_lang!="es")
 					echo "<td><a href=\"index.php?action=es\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"espagnol\" alt=\"espagnol\" src=\"images/flag_es.png\"/></a></td><td> | </td>";
 			if ($user_lang!="ru")
 					echo "<td><a href=\"index.php?action=ru\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"russe\" alt=\"russe\" src=\"images/flag_ru.png\"/></a></td><td> | </td>";
+			*/
 			echo "<td><a id=\"lien_conditions\" href=\"conditions.html\">".traduire('Conditions d\'utilisation')."</a>";
 			}
 		else
