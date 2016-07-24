@@ -540,7 +540,7 @@ function maj_mdp_fichier($idx, $pw )
 						if ($flag_acces=="") 
 							lien("visu.php?action=visu_image_mini&nom=$num", "visu_image", param ("nom","$num"), "Déposé le $date", "","B",$sans_lien, true);
 						else
-							lien("visu.php?action=visu_image_mini&nom=-$num", "visu_fichier", param ("num","$num").param ("code","$flag_acces"), traduire("Document protégé"), "","B",$sans_lien, true);
+							lien("visu.php?action=visu_image_mini&nom=-$num", "visu_fichier", param ("num","$num").param ("code","$flag_acces"), traduire("Document protégé")." Déposé le $date", "","B",$sans_lien, true);
 						echo " $type <br> $ident ";
 						}
 					else
@@ -583,7 +583,7 @@ function maj_mdp_fichier($idx, $pw )
 							if ($flag_acces=="") 
 								lien("$icone_a_afficher", "visu_fichier", param ("num","$num"), "", "","B",$sans_lien, true);
 							else 
-								lien("$icone_a_afficher_cadenas", "visu_fichier", param ("num","$num").param ("code","$flag_acces"), "Déposé le $date", "","B",$sans_lien, true);
+								lien("$icone_a_afficher_cadenas", "visu_fichier", param ("num","$num").param ("code","$flag_acces"), traduire("Document protégé")."Déposé le $date", "","B",$sans_lien, true);
 							echo " $type <br> $ident  ";}
 
 						else
@@ -1729,7 +1729,7 @@ function maj_mdp_fichier($idx, $pw )
 		
 	function bouton_user($droit, $organisme, $filtre1="")
 		{
-		global $action, $user_idx,$user_type_user;
+		global $action, $user_idx,$user_type_user, $user_organisme;
 		
 		if ($filtre1!="")
 			$filtre="and (nom REGEXP '$filtre1' or prenom REGEXP '$filtre1' or telephone REGEXP '$filtre1' or mail REGEXP '$filtre1' or anniv REGEXP '$filtre1') ";
@@ -1740,7 +1740,10 @@ function maj_mdp_fichier($idx, $pw )
 			echo "<li><a href=\"index.php?action=ajout_user\"  > + ".traduire('Responsable')."  </a></li>";
 		else
 			if ($droit=="R")
-				echo "<li><a href=\"index.php?action=ajout_user\"  > + ".traduire('Acteur Social')."  </a></li>";
+				{
+				echo "<li><a href=\"index.php?action=ajout_user\"  > + ".traduire('Acteur Social')."  </a>";
+				echo "<ul><li><a href=\"index.php?action=justificatifs&organisme=".encrypt($user_organisme)."\"> Liste des justificatifs </a></li></ul>";
+				}
 			else
 				if ($droit=="S")
 					{
@@ -1754,7 +1757,10 @@ function maj_mdp_fichier($idx, $pw )
 		echo "</form><td><img src=\"images/loupe.png\"width=\"20\" height=\"20\">  </td>";
 		if ($filtre1!="")
 			lien_c ("images/croixrouge.png", "","" , traduire("Supprimer"));
-
+		
+	//	if ($droit=="R")
+	//		echo "<td><a href=\"index.php?action=justificatifs&organisme=".encrypt($user_organisme)."\"> Liste des justificatifs </a></td>";	
+			
 		echo "</td></table>";
 				
 		echo "<div class=\"CSSTableGenerator\"><table> ";
@@ -2171,8 +2177,8 @@ function maj_mdp_fichier($idx, $pw )
 		
 	function bouton_organisme()
 		{
-		global $action, $user_droit;
-
+		global $action, $user_droit,$user_organisme;
+	
 		$filtre1=variable("filtre");
 
 		echo "<table><tr><td><img src=\"images/organisme.png\" width=\"35\" height=\"35\" ></td><td width> <ul id=\"menu-bar\">";
@@ -2217,6 +2223,7 @@ function maj_mdp_fichier($idx, $pw )
 				$organisme=stripcslashes($donnees["organisme"]);		
 				if  (($user_droit=="A") || ( ($user_droit=="R ") && ($user_organisme==$idx)  ) )
 					$organisme="<a href=\"index.php?action=membres_organisme&organisme=".encrypt($idx)."\"> $organisme </a>";
+
 				$tel=$donnees["tel"];	
 				$mail=$donnees["mail"];	
 				
@@ -2569,7 +2576,7 @@ function affiche_titre_user($user)
 	echo "</ul></td><td> - ".traduire('Domiciliation').": $organisme / $adresse / $tel / $mail </td></table>";
 	}
 
-function affiche_membre($idx)
+function affiche_membre($idx, $opt_aff="")
 	{
 	$reponse =command("select * from r_user where idx='$idx' ");		
 	$donnees = fetch_command($reponse) ;
@@ -2581,13 +2588,19 @@ function affiche_membre($idx)
 	$mail=$donnees["mail"];
 	$id=$donnees["id"];
 	$idx=$donnees["idx"];
-	echo "<tr><td>  $droit </td><td>  $id  </td><td> $nom </td><td> $prenom </td><td> $tel </td><td> $mail </td>";
+	if ($opt_aff=="")
+		echo "<tr><td>  $droit </td><td>  $id  </td><td> $nom </td><td> $prenom </td><td> $tel </td><td> $mail </td>";
+	else 
+		echo "<tr><td> $nom </td><td> $prenom </td>";
+	$nb=0;
 	$r1 =command("select * from r_attachement where ref='P-$idx' ");		
 	while ($d1 = fetch_command($r1) ) 
 		{
 		$num=$d1["num"];
 		visu_doc($num,0);
+		$nb++;
 		}
+	return ($nb);
 	}
 
 
@@ -2702,6 +2715,7 @@ function affiche_membre($idx)
 				case "contact":				
 
 				
+				case "justificatifs": 
 				case "supp_filtre_histo": 
 				case "filtre_histo": 
 				case "alerte_surv_mail": 
@@ -4168,12 +4182,13 @@ if (isset($_POST['pass']))
 					echo "<a href=\"rdv.php\"><img src=\"images/rdv.jpg\" width=\"70\" height=\"50\"><a>";		
 					}					
 				}
-
+			/*
 			//* ---------------------------------- Calendrier
 			$jfissa=0;
 			$reponse = command("SELECT * from  fct_calendrier WHERE organisme='$user_organisme'"); 
 			if ($donnees = fetch_command($reponse))
 				echo "<a href=\"index.php?action=cc_activite\"><img src=\"images/calendrier.jpg\" width=\"70\" height=\"50\"></a>";
+				*/
 			}
 			
 		// echo "<a title=\"Alerte Grand Froid/Forte Pluie\" href=\"alerte.php\"><img src=\"images/logo-alerte.jpg\" width=\"70\" height=\"50\"></a> ";
@@ -4769,6 +4784,24 @@ if (isset($_POST['pass']))
 				echo "</table></div>";
 				}
 			
+			pied_de_page("x");
+			}	
+
+	if ( ($action=="justificatifs") && ($user_droit=="R") )
+			{
+			$organisme=variable_get("organisme");
+			if ($organisme=="")
+				$organisme=variable("organisme");
+			echo traduire ("Liste des justificatifs de")." : ".libelle_organisme ($organisme); 
+			echo "<div class=\"CSSTableGenerator\" ><table><tr><td> ".traduire('Nom')." </td><td> ".traduire('Prénom')." </td>";
+			$reponse =command("select * from r_user where (organisme='$organisme' and (droit='S' or droit='s') )");		
+			while ($donnees = fetch_command($reponse) ) 
+				{
+				$idx=$donnees["idx"];	
+				if (affiche_membre($idx,"réduit")==0)
+					echo "<td>".traduire ("Justificatif manquant")." ! </td>";
+				}			
+			echo "</table></div>";
 			pied_de_page("x");
 			}	
 			
