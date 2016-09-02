@@ -34,9 +34,22 @@
 						{
 						if ($_SERVER['REMOTE_ADDR']!="127.0.0.1")
 							{
+							genere_miniature_pdf("suivi/$f" , "suivi_mini/$f" );
+							/*
 							exec ( "/usr/bin/convert -density 100 suivi/$f suivi/$f.jpg" ) ;  // si PDF et sur serveur OVH alors on crée une miniature
-							imagethumb("suivi/$f.jpg","suivi_mini/$f.jpg",$hauteur);
+							
+							// cas d'un pdf avec plusieurs pasges : ==> On n egarde que la 1ere
+							if (file_exists("suivi/$f-0.jpg"))
+								{
+								rename ("suivi/$f-0.jpg", "suivi/$f.jpg");
+								for ($i=1; $i<10; $i++)
+									supp_fichier("suivi/$f-$i.jpg");
+								}
+							
+							imagethumb("suivi/$f.jpg","suivi_mini/$f.jpg");
 							supp_fichier("suivi/$f.jpg");
+							*/
+							
 							}
 						}
 

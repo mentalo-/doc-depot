@@ -826,5 +826,37 @@
 
 				// ------------------------------------------- Bloc générique
 				$version=maj_version($nelle_version);
-				}	
+				}			
+		$nelle_version="V1.32";
+		if ($version<$nelle_version)
+				{
+				//backup_tables(false);  // A utiliser si changement de structure ou de contenu de la base
+				
+				// ------------------------------------------- Bloc Spécifique à la montée de version
+				mkdir("dossiers");	
+				ecrit_parametre("DD_duree_vie_dossier", "8");				
+				ecrit_parametre("DD_Ip_bannis", "");				
+				ecrit_parametre("DD_MODE_Debug", "");				
+				command("CREATE TABLE IF NOT EXISTS `r_pages_users_debug` ( `idx_user` text, `tps_exec` text, `resultat` text ) ENGINE=InnoDB DEFAULT CHARSET=latin1;");
+
+				// ------------------------------------------- Fin bloc spécifique
+
+				// ------------------------------------------- Bloc générique
+				$version=maj_version($nelle_version);
+				}
+
+		$nelle_version="V1.33";
+		if ($version<$nelle_version)
+				{
+				//backup_tables(false);  // A utiliser si changement de structure ou de contenu de la base
+				
+				// ------------------------------------------- Bloc Spécifique à la montée de version
+			
+				command("CREATE TABLE IF NOT EXISTS `r_pages_users_debug` ( `idx_user` text, `tps_exec` text, `resultat` text ) ENGINE=InnoDB DEFAULT CHARSET=latin1;");
+
+				// ------------------------------------------- Fin bloc spécifique
+
+				// ------------------------------------------- Bloc générique
+				$version=maj_version($nelle_version);
+				}				
 ?>

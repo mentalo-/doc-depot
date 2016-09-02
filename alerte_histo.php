@@ -4,7 +4,7 @@
 // DOC-DEPOT : COPYRIGTH ADILEOS - Décembre 2013/Mars 2015
 
 session_start(); 
-<?php include 'header.php';	  ?>
+include 'header.php';
 error_reporting(E_ALL | E_STRICT);
 
 

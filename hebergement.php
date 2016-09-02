@@ -16,17 +16,6 @@ include 'calendrier.php';
 include 'general.php';
 include 'suivi_liste.php';
 
-		
-	function mise_en_forme_date_aaaammjj( $date_jour)
-		{
-		$d3= explode("/",$date_jour);  
-		$a=$d3[2];
-		$m=$d3[1];
-		$j=$d3[0];
-			
-		return( "$a-$m-$j" );
-		}
-
 	function date_fr($d)
 		{
 		$d3= explode("-",$d);  
@@ -40,7 +29,6 @@ include 'suivi_liste.php';
 		{
 		global $color;
 		
-
 		if ($v>1)
 			echo "<td width=\"20\" ALIGN=\"RIGHT\" bgcolor=\"red\"> ".$v."</td>";		
 		else
@@ -54,8 +42,6 @@ include 'suivi_liste.php';
 						echo "<td width=\"20\" ALIGN=\"RIGHT\" bgcolor=\"silver\"> ".$v."</td>";
 					else
 						echo "<td width=\"20\" ALIGN=\"RIGHT\" bgcolor=\"$color2\"> ".$v."</td>";
-
-					
 		return($v);
 		}
 

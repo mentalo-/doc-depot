@@ -4,11 +4,15 @@ session_start();
 error_reporting(E_ALL | E_STRICT);
 
 include 'general.php';
-
+$fichier=variable_s('fichier');	
 if ( isset($_SESSION['pass']) && ($_SESSION['pass']==true) )
+	if (strpos($fichier, $_SESSION['support'])!=0) 
+		{
+		ajout_log_tech ( "Acces fichier interne illicite '$fichier' par user =".$_SESSION['user_idx']." sur base ".$_SESSION['support'], "P0" );
+		}
+	else
 		{
 		// methode sans passer par un fichier intermédiaire
-		$fichier=variable_s('fichier');	
 		$id=rand(1000000,999999999999);
 		
 		if (est_doc($fichier))

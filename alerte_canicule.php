@@ -7,29 +7,28 @@ session_start();
 
 error_reporting(E_ALL | E_STRICT);
 
-// { Début - Première partie
-if(!empty($_POST) OR !empty($_FILES))
-	{
-    $_SESSION['sauvegarde'] = $_POST ;
-    $_SESSION['sauvegardeFILES'] = $_FILES ;
+			// { Début - Première partie
+			if(!empty($_POST) OR !empty($_FILES))
+				{
+				$_SESSION['sauvegarde'] = $_POST ;
+				$_SESSION['sauvegardeFILES'] = $_FILES ;
 
-    $fichierActuel = $_SERVER['PHP_SELF'] ;
-    if(!empty($_SERVER['QUERY_STRING']))
-       $fichierActuel .= '?' . $_SERVER['QUERY_STRING'] ;
-    header('Location: ' . $fichierActuel);
-    exit;
-	}
-// } Fin - Première partie
+				$fichierActuel = $_SERVER['PHP_SELF'] ;
+				if(!empty($_SERVER['QUERY_STRING']))
+				   $fichierActuel .= '?' . $_SERVER['QUERY_STRING'] ;
+				header('Location: ' . $fichierActuel);
+				exit;
+				}
+			// } Fin - Première partie
 
-// { Début - Seconde partie
-if(isset($_SESSION['sauvegarde']))
-	{
-    $_POST = $_SESSION['sauvegarde'] ;
-    $_FILES = $_SESSION['sauvegardeFILES'] ;
-    unset($_SESSION['sauvegarde'], $_SESSION['sauvegardeFILES']);
-	}
-// } Fin - Seconde partie
-
+			// { Début - Seconde partie
+			if(isset($_SESSION['sauvegarde']))
+				{
+				$_POST = $_SESSION['sauvegarde'] ;
+				$_FILES = $_SESSION['sauvegardeFILES'] ;
+				unset($_SESSION['sauvegarde'], $_SESSION['sauvegardeFILES']);
+				}
+			// } Fin - Seconde partie
 ?> 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">
@@ -72,7 +71,6 @@ require_once 'general.php';
 require_once 'inc_style.php';
 require_once "connex_inc.php";
 
-
     echo "<head>";
 	echo "<title>Alerte SMS Canicule </title>";
     echo "<meta http-equiv=\\\"Content-Type\\\" content=\\\"text/html; charset=iso-8859-1\\\" />";
@@ -80,7 +78,12 @@ require_once "connex_inc.php";
 
 	$user_lang='fr';
 	$format_date = "d/m/Y";
-	$action=variable("action");
+	$token=variable("token");	
+	if ($token!="")	
+		$action=verifi_token($token,variable("action"));
+	else
+		$action=variable("action");		
+	//$action=variable_s("action");	
 	// ------------------------------------------------------------------------------ traitement des actions sans mot de passe
 	
 	if (isset($_SESSION['lang']))
@@ -177,7 +180,7 @@ require_once "connex_inc.php";
 
 		echo "<table> <tr> <td align=\"right\" valign=\"bottom\" ></td>";
 		echo "<td><a id=\"lien_conditions\" href=\"conditions_alerte.html\">".traduire('Conditions d\'utilisation')."</a>";
-		echo "- <a id=\"lien_contact\" href=\"index.php?action=contact\">".traduire('Nous contacter')."</a>";
+		echo "- <a id=\"lien_contact\" href=\"http://adileos.jimdo.com/contact\">".traduire('Nous contacter')."</a>";
 		echo "- Copyright <a href=\"http://adileos.doc-depot.com\">ADILEOS 2015</a> ";
 		$version= parametre("DD_version_portail") ;
 		echo "- $version ";	

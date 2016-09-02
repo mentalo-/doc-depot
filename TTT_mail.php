@@ -6,7 +6,7 @@
 	echo "</head><body>";
 	include "connex_inc.php";
 	include 'general.php';
- 	include 'include_crypt.php';
+ 	require_once 'include_crypt.php';
 	include 'include_charge_image.php';	
 	include 'audit_cnil.php';	
 
@@ -46,6 +46,10 @@
 		command("delete from z_log_t  where ligne like 'Backup tables%' and date<'$ilyaunesemaine' ");
 		command("delete from z_log_t  where ligne like 'Traitement Purges%' and date<'$ilyaunesemaine' ");
 		command("optimize table z_log_t");
+		
+		$hier =date('Y-m-d H\hi.00',  mktime(0,0,0 , date("m"), date("d")-1, date ("Y")));		
+		command("delete from r_pages_users_debug  where  tps_exec<'$hier' ");
+		
 		}
 		
 	// supprime les rdv envoyé ayant plus d'un mois d'ancieneté
@@ -98,7 +102,24 @@
 				}
 			}
 		}
-	
+
+	// supprime tous les fichiers temporaires de plus de 2 minutes
+	function purge_dossiers( )
+		{
+		commentaire_html("purge_dossiers");
+		
+		// suppression des fichiers temporaire
+		$l= date('Y-m-d H:i',  mktime(0,0, date ("s") , date("m"), date("d")-parametre("DD_duree_vie_dossier"), date ("Y") ));
+		foreach(glob($dir.'*.pdf') as $v)
+			{
+			if (date ("Y-m-d H:i:s", filemtime($v))<$l)
+				{
+				echo "<p>Purge dossier $v";
+				unlink($v);
+				}
+			}
+		}		
+		
 	// tous les jours à 23h on réinitialise les score pour chaque visiteur de Fissa de façon à pouvoir être calculé dasn le nuit par tranche
 	function init_score_fissa()
 		{
@@ -335,6 +356,8 @@ function random_chaine($car)
 				{
 				ajout_log_tech( "Backup tables");
 				backup_tables();
+				
+				purge_dossiers( );
 				}			
 			
 			if ($heure==2)

@@ -25,31 +25,22 @@ if ($_SESSION['pass']==true)
 		//cycle through
 	
 		echo "<table><tr>";
+		$i1=0;
 		foreach($tables as $table)
-			if(stripos($table, "z") === FALSE)
 				{
+				if ( ($i1++ % 6 )== 0)
+						echo "<tr>";
 				$cmd=encrypt_ltd("select * from $table");
 				echo "<td>";
-				echo "<a href=\"?action=cmd_sql&query=$cmd\">";
+				echo "<a href=\"index.php?".token_ref("cmd_sql")."&query=$cmd\">";
 				echo "$table </a></td><td>|</td>";
 				
 				if ( ( strpos($q,$table) ) && ( strpos($q,"select ")===false ) )
 					backup_tables(false,$table);
 					
 				}
-		echo "<tr>";
-		foreach($tables as $table)
-			if(stripos($table, "z") !== FALSE)
-				{
-				$cmd=encrypt_ltd("select * from $table");
-				echo "<td>";
-				echo "<a href=\"?action=cmd_sql&query=$cmd\">";
-				echo "$table </a></td><td>|</td>";
-				
-				if ( ( strpos($q,$table) ) && ( strpos($q,"select ")===false ) )
-					backup_tables(false,$table);
-					
-				}			
+	
+			
 		echo "</table>";
 
 	
@@ -58,7 +49,7 @@ if ($_SESSION['pass']==true)
 	echo "<p><textarea name=\"query\" cols=\"80\" rows=\"4\">$q</textarea>
 			<input type=\"submit\" name=\"Submit\" value=\"Submit\" />
 			<input  type=\"password\" name=\"mdp\" value=\"\"/></p></form>";
-	echo "<a href=\"?action=cmd_sql_backup&query=\"> ==> Sauvegardes tables </a>";
+	echo "<a href=\"?".token_ref("cmd_sql_backup")."&query=\"> ==> Sauvegardes tables </a>";
 	
 	if ($q!="select * from ")
 		{

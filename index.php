@@ -138,6 +138,7 @@ include 'include_charge_image.php';
 include 'exploit.php';	
 include 'include_mail.php';
 require_once "connex_inc.php";
+require_once "suivi_liste.php";  // pour la liste des pays
 
     echo "<head>";
 	echo "<link rel=\"icon\" type=\"image/png\" href=\"images/identification.png\" />";
@@ -207,7 +208,7 @@ require_once "connex_inc.php";
 				$version=$donnees["version"];
 				$commentaire=stripcslashes($donnees["commentaire"]);
 				$fonction=stripcslashes($donnees["fonction"]);
-				echo "<tr><td><a href=\"index.php?action=modif_bug&idx=".encrypt($idx1)."\">  $idx1 <a></td><td> $date </td><td> $titre </td><td> $type </td><td> $etat </td><td> $impact </td><td> $descript </td><td> $testeur </td><td> $domaine </td><td> $version </td><td> $commentaire </td><td> $fonction </td>";
+				echo "<tr><td><a href=\"index.php?".token_ref("modif_bug")."&idx=".encrypt($idx1)."\">  $idx1 <a></td><td> $date </td><td> $titre </td><td> $type </td><td> $etat </td><td> $impact </td><td> $descript </td><td> $testeur </td><td> $domaine </td><td> $version </td><td> $commentaire </td><td> $fonction </td>";
 				}
 			echo "</table></div>";
 		}
@@ -223,7 +224,7 @@ require_once "connex_inc.php";
 					$filtre1=$_SESSION["filtre"];
 			
 			formulaire ("");
-			echo "<table><tr><td><a href=\"index.php?action=bug\"> + ".traduire('Nouveau ticket')." </a> - </td><td > ".traduire('Filtre')." : <input type=\"text\" name=\"filtre\" size=\"20\" value=\"$filtre1\" onChange=\"this.form.submit();\"> ";
+			echo "<table><tr><td><a href=\"index.php?".token_ref("bug")."\"> + ".traduire('Nouveau ticket')." </a> - </td><td > ".traduire('Filtre')." : <input type=\"text\" name=\"filtre\" size=\"20\" value=\"$filtre1\" onChange=\"this.form.submit();\"> ";
 			echo "</form><td><img src=\"images/loupe.png\"width=\"20\" height=\"20\">  </td>";
 			lien_c ("images/croixrouge.png", "supp_filtre","" , traduire("Supprimer"));
 			echo "</table> ";
@@ -258,19 +259,19 @@ require_once "connex_inc.php";
 		$valeur= stripcslashes ($valeur);
 		if ($size!="")
 			$size = " size=\"$size\" ";
-		return ("<form method=\"post\" > <input  type=\"hidden\" name=\"action\" value=\"modif_champ_bug\"/> ".param("idx","$idx").param("champ","$champ")."<input type=\"text\" name=\"valeur\" value=\"$valeur\" $size onChange=\"this.form.submit();\" >  </form> ");
+		return ("<form method=\"post\" >".token_return("modif_champ_bug").param("idx","$idx").param("champ","$champ")."<input type=\"text\" name=\"valeur\" value=\"$valeur\" $size onChange=\"this.form.submit();\" >  </form> ");
 		}
 
 		
 	function saisie_champ_bug_area($idx, $champ, $valeur, $size="")
 		{
 		$valeur= stripcslashes ($valeur);
-		return ("<form method=\"post\" ><input  type=\"hidden\" name=\"action\" value=\"modif_champ_bug\"/>".param("idx","$idx").param("champ","$champ")."<TEXTAREA rows=\"5\" cols=\"$size\" name=\"valeur\"  onChange=\"this.form.submit();\" >$valeur</TEXTAREA></form> ");
+		return ("<form method=\"post\" >".token_return("modif_champ_bug").param("idx","$idx").param("champ","$champ")."<TEXTAREA rows=\"5\" cols=\"$size\" name=\"valeur\"  onChange=\"this.form.submit();\" >$valeur</TEXTAREA></form> ");
 		}
 		
 	function liste_type_bug( $idx, $champ, $val_init)
 		{
-		echo "<form method=\"post\" > <input  type=\"hidden\" name=\"action\" value=\"modif_champ_bug\"/> ".param("idx","$idx").param("champ","$champ");
+		echo "<form method=\"post\" >".token_return("modif_champ_bug").param("idx","$idx").param("champ","$champ");
 		echo "<SELECT name=\"valeur\" onChange=\"this.form.submit();\"  >";
 		affiche_un_choix($val_init,"Bugs");
 		affiche_un_choix($val_init,"Fonctionnel");
@@ -281,7 +282,7 @@ require_once "connex_inc.php";
 
 	function liste_impact_bug( $idx, $champ, $val_init)
 		{
-		echo "<form method=\"post\" > <input  type=\"hidden\" name=\"action\" value=\"modif_champ_bug\"/> ".param("idx","$idx").param("champ","$champ");
+		echo "<form method=\"post\" > ".token_return("modif_champ_bug").param("idx","$idx").param("champ","$champ");
 		echo "<SELECT name=\"valeur\" onChange=\"this.form.submit();\"  >";
 		affiche_un_choix($val_init,"Très simple");
 		affiche_un_choix($val_init,"Simple");
@@ -295,7 +296,7 @@ require_once "connex_inc.php";
 		
 	function liste_etat_bug( $idx, $champ, $val_init)
 		{
-		echo "<form method=\"post\" > <input  type=\"hidden\" name=\"action\" value=\"modif_champ_bug\"/> ".param("idx","$idx").param("champ","$champ");
+		echo "<form method=\"post\" >".token_return("modif_champ_bug").param("idx","$idx").param("champ","$champ");
 		echo "<SELECT name=\"valeur\" onChange=\"this.form.submit();\"  >";
 		affiche_un_choix($val_init,"New");
 		affiche_un_choix($val_init,"Ouvert");
@@ -310,7 +311,7 @@ require_once "connex_inc.php";
 
 	function liste_prioite_bug( $idx, $champ, $val_init)
 		{
-		echo "<form method=\"post\" > <input  type=\"hidden\" name=\"action\" value=\"modif_champ_bug\"/> ".param("idx","$idx").param("champ","$champ");
+		echo "<form method=\"post\" >".token_return("modif_champ_bug").param("idx","$idx").param("champ","$champ");
 		echo "<SELECT name=\"valeur\" onChange=\"this.form.submit();\"  >";
 		affiche_un_choix($val_init,"Urgent");
 		affiche_un_choix($val_init,"Prioritaire +");
@@ -349,15 +350,7 @@ require_once "connex_inc.php";
 		pied_de_page("x");
 		}
 		
-	function enreg_contact($qui, $coordo, $descript)
-		{
-		// temporaire
-		$message = "Auteur : $qui";	
-		$message .= "<p>Coordonnées : $coordo";
-		$message .= "<p>Description : $descript";
-		envoi_mail(parametre('DD_mail_fonctionnel'),"Demande 'Nous contacter' ",$message, true);
-		ajout_log( "", traduire("Demandeur")." : $qui / $coordo ", "");
-		}
+
 // ---------------------------------------------------------------------------------------
 
 function maj_mdp_fichier($idx, $pw )
@@ -399,16 +392,61 @@ function maj_mdp_fichier($idx, $pw )
 		
 	function liste_type( $val_init , $mode="")
 		{
+		/*
+		Justificatif de domicile
+		Déclaration de grossesse établie par le médecin
+		Carte d'invalidité
+		Récépissé de votre demande, convocation ou rdv en préfecture
+		Notification d’attribution de pensions
+		Carte d'ancien combattant
+		Attestation MDPH
+		*/
+		
 		echo "<SELECT name=\"type\" $mode >";
-		affiche_un_choix($val_init,"CNI");
+		affiche_un_choix($val_init,"Justificatif d'identité");
+		// Justificatif d'identité
+		// Carte nationale d'identité
+		
+		// Livret de famille
+		// Acte de naissance
+		
+		affiche_un_choix($val_init,"Banque");
+		//Relevés bancaires			
+		
+		affiche_un_choix($val_init,"CAF");		
+		
+		affiche_un_choix($val_init,"Impôts");		
+		//Déclaration de revenus	
+		// Dernier avis d’imposition		
+		
+		affiche_un_choix($val_init,"Mariage, PACS, Divorce");
+		// Certificat de concubinage ou attestation d'enregistrement d'un pacs
+		// Jugement de divorce
+		
 		affiche_un_choix($val_init,"Passeport");
-		affiche_un_choix($val_init,"Carte de séjour");
+		// Passeport
+		
 		affiche_un_choix($val_init,"Permis conduire");
-		affiche_un_choix($val_init,"Transport");
-		affiche_un_choix($val_init,"CAF");
-		affiche_un_choix($val_init,"RIB");
+		
 		affiche_un_choix($val_init,"Pole Emploi");
-		affiche_un_choix($val_init,"Mail");
+		// Attestation Pôle emploi / Avis de paiement des Assedic		
+
+		affiche_un_choix($val_init,"Quittances et Factures");		
+		//Quittance de loyer, gaz, électricité, téléphone
+			
+		affiche_un_choix($val_init,"RIB");
+		// RIB				
+		
+		affiche_un_choix($val_init,"Salaires");
+		//Bulletin de salaire		
+		
+		affiche_un_choix($val_init,"Titre de séjour");
+		// Titre de séjour
+		
+		affiche_un_choix($val_init,"Transport");
+	
+		affiche_un_choix($val_init,"Mail");		
+	
 		affiche_un_choix($val_init,"Autres");
 		echo "</SELECT>";
 		}
@@ -505,7 +543,20 @@ function maj_mdp_fichier($idx, $pw )
 		if ($donnees = fetch_command($reponse) ) 
 			{
 			$ref=$donnees["ref"];
-			$date=$donnees["date"];
+			$date=mef_date_fr($donnees["date"]);
+			$deposeur=$donnees["deposeur"];
+			if (is_numeric($deposeur))
+				{
+				$r1 =command("select * from  r_user where idx='$deposeur' ");
+				$d1 = fetch_command($r1);
+				if ( ($d1["droit"]=="S") || ($d1["droit"]=="s") || ($d1["droit"]=="R")|| ($d1["droit"]=="r") ) 
+					{
+					$deposeur=" ".traduire("par")." ".libelle_user($deposeur)." (".libelle_organisme_du_user($deposeur).")";
+					}
+				else
+					$deposeur="";
+				}
+			$date.=$deposeur;
 			$num=$donnees["num"];	
 			$l_num=strstr($num,".");
 			$type=$donnees["status"];			
@@ -538,20 +589,20 @@ function maj_mdp_fichier($idx, $pw )
 					if (($doc_autorise=="") || (stristr($doc_autorise, ";$type_org;") === FALSE) )
 						{
 						if ($flag_acces=="") 
-							lien("visu.php?action=visu_image_mini&nom=$num", "visu_image", param ("nom","$num"), "Déposé le $date", "","B",$sans_lien, true);
+							lien("visu.php?action=visu_image_mini&nom=$num", "visu_image", param ("nom","$num"), traduire('Déposé le')." $date", "","B",$sans_lien, true);
 						else
 							lien("visu.php?action=visu_image_mini&nom=-$num", "visu_fichier", param ("num","$num").param ("code","$flag_acces"), traduire("Document protégé")." Déposé le $date", "","B",$sans_lien, true);
 						echo " $type <br> $ident ";
 						}
 					else
 						{
-						lien("visu.php?action=visu_image_mini&nom=-$num", "visu_image", param ("nom","$num"), "Déposé le $date", "","B",$sans_lien, true);
+						lien("visu.php?action=visu_image_mini&nom=-$num", "visu_image", param ("nom","$num"), traduire('Déposé le')." $date", "","B",$sans_lien, true);
 						echo " $type <br> $ident  ";
 						}
 					}
 				else
 					{
-					lien("visu.php?action=visu_image_mini&nom=$num", "visu_image", param ("nom","$num"), "Déposé le $date", "","B",$sans_lien, true);
+					lien("visu.php?action=visu_image_mini&nom=$num", "visu_image", param ("nom","$num"), traduire('Déposé le')." $date", "","B",$sans_lien, true);
 					echo " $ident <br> ";
 					}
 				}
@@ -583,24 +634,24 @@ function maj_mdp_fichier($idx, $pw )
 							if ($flag_acces=="") 
 								lien("$icone_a_afficher", "visu_fichier", param ("num","$num"), "", "","B",$sans_lien, true);
 							else 
-								lien("$icone_a_afficher_cadenas", "visu_fichier", param ("num","$num").param ("code","$flag_acces"), traduire("Document protégé")."Déposé le $date", "","B",$sans_lien, true);
+								lien("$icone_a_afficher_cadenas", "visu_fichier", param ("num","$num").param ("code","$flag_acces"), traduire("Document protégé").traduire('Déposé le')." $date","","B",$sans_lien, true);
 							echo " $type <br> $ident  ";}
 
 						else
 							{
-							lien("$icone_a_afficher", "visu_fichier", param ("num","$num"), "Déposé le $date", "","B",$sans_lien, true);
+							lien("$icone_a_afficher", "visu_fichier", param ("num","$num"), traduire('Déposé le')." $date", "","B",$sans_lien, true);
 							echo " $type <br> $ident  ";
 							}						
 						}
 					else
 						{
-						lien("$icone_a_afficher", "visu_fichier", param ("num","$num"), "Déposé le $date", "","B",$sans_lien, true);
+						lien("$icone_a_afficher", "visu_fichier", param ("num","$num"), traduire('Déposé le')." $date", "","B",$sans_lien, true);
 						echo " $ident<br>  ";
 						}				
 					}
 				else
 					{
-					lien("images/fichier.png", "visu_doc", param ("num","$num"), "Déposé le $date", "","B",$sans_lien, true);
+					lien("images/fichier.png", "visu_doc", param ("num","$num"), traduire('Déposé le')." $date", "","B",$sans_lien, true);
 					if (substr($ref,0,1)=="A")
 						echo "$type <br>";
 					echo "$ident <br>";
@@ -617,6 +668,127 @@ function maj_mdp_fichier($idx, $pw )
 		}
 
 		
+		
+	// ================================================================================= Module DOSSIERS
+	
+	function recup_dossier()
+		{
+		echo "<center><a href=\"index.php\"><img src=\"images/logo.png\" width=\"150\" height=\"100\" ></a>";
+		echo "<h3>".traduire('La Consigne Numérique Solidaire')."</h3><font size=\"5\">'' ".traduire("Mon essentiel à l'abri en toute confiance")." ''</font> <p>";
+		debut_cadre("700");
+		$ref=variable_get("ref");
+		echo "<p><br>".traduire('Récupération documents')." : (".traduire('Référence dossier')." = $ref )";
+		if ($ref!="") 
+			{
+			if (file_exists("dossiers/$ref.pdf"))
+				{
+				supp_fichier("dossiers/$ref.jpg");
+				exec ( "/usr/bin/convert -density 100 dossiers/$ref.pdf dossiers/$ref.jpg" ) ;  // si PDF et sur serveur OVH alors on crée une miniature
+				echo "<br><p>";
+				if (file_exists("dossiers/$ref.jpg"))
+					lien("dossiers/$ref.jpg", "visu_dossier", param ("fichier","$ref"), "Dossier $ref", "","B","", true);
+				else
+					lien("images/fichier.jpg", "visu_dossier", param ("fichier","$ref"), "Dossier $ref", "","B","", true);
+				echo "<p>".traduire("Cliquez sur l'image pour ouvrir le fichier au format PDF contenant le(s) documents transmis")." : ";		
+				echo "<p>".traduire('Enregistrer le fichier pour le traiter').".<br><p>";				
+				}
+			else
+				{
+				echo "<p><br>".traduire("Désolé le dossier demandé n'est plus disponible").".<p>";		
+				}		
+			}
+		else
+			erreur ('Lien incorrect');
+		fin_cadre();
+		pied_de_page("x");
+		}
+		
+	function envoyer_dossier( $ref)
+		{
+		global $user_idx , $idx, $user_nom ,$user_prenom,$user_organisme, $user_telephone, $user_mail;
+		
+		$src=variable("src");
+		$dest=variable("dest");
+		$comment=variable("comment");		
+		if (VerifierAdresseMail($dest) )
+			{
+			$tab3= explode("-", $ref);
+			$user=$tab3[1] ;			
+			
+			// 10 tentatives pour trouver 
+			for ($i=0; $i<10;$i++)
+				{
+				$identifiant=$user."-".rand(1000000,9999999);
+				if ( (!file_exists("dossiers/$identifiant.jpg")) && (!file_exists("dossiers/$identifiant.pdf")) ) 
+					 break;
+				}
+				
+			copy("tmp/_$ref.pdf", "dossiers/$identifiant.pdf");
+			exec ( "/usr/bin/convert -density 100 dossiers/$ref.pdf dossiers/$identifiant.jpg" ) ;  //on crée une miniature
+			if (!file_exists("dossiers/$identifiant.jpg"))
+				copy("images/fichier.jpg", "dossiers/$identifiant.jpg");
+				
+			$reponse =command("select * from  r_user where idx='$user' ");		
+			$donnees = fetch_command($reponse) ;
+			$user_nom_b=$donnees["nom"];
+			$user_prenom_b=$donnees["prenom"];				
+			$title =traduire("Envoi des documents de")." $user_nom_b $user_prenom_b";
+			
+			$lien = serveur."index.php?".token_ref("recup_dossier")."&ref=".addslashes(encrypt("$identifiant"));
+			
+			$body= "Bonjour, <p> Veuillez trouver ci-dessous le lien vers les documents de $user_nom_b $user_prenom_b"  ;
+			$comment=stripcslashes($comment);
+			$comment=stripcslashes($comment);
+			$comment=nl2br($comment);
+			if ($comment!="")
+				$body .= "<p> Commentaire de l'expéditeur $user_nom $user_prenom : <table><tr><td><i>".$comment."</i></td> </table>";            
+		
+			$body .= "<p> Pour accéder aux documents sur 'Doc-depot.com', merci de cliquer sur ce <a  id=\"lien\"  href=\"$lien\">lien </a> "; 
+			
+			$body .= "ou sur l'image ci-dessous <p> <a  id=\"lien_image\"  href=\"$lien\">  <img src=\"http://".serveur."dossier/$ref.jpg\" width=\"100\" height=\"140\" > </a>"; 
+
+			$date_limite=date("d/m/Y",  mktime(0,0,0 , date("m"), date("d")+parametre("DD_duree_vie_dossier"), date ("Y")));
+			$body .= ". <p>Remarque importante: les documents doivent être récupérés avant le $date_limite ";            
+			$body .="<br><br>Si le lien ne fonctionne pas, recopiez dans votre navigateur internet cette adresse : <br>$lien";
+			$body .= "<p> Cordialement";		
+			$body .= "<p> $user_nom $user_prenom ($user_telephone/$user_mail)";		
+			if ($user_organisme!="")
+				{
+				$body .= "<br>". libelle_organisme($user_organisme) ;		
+				$body .= "<br>". adresse_organisme($user_organisme) ;		
+				$body .= "<br>Tel:". telephone_organisme($user_organisme) ;		
+				$body .= "<br>mail:". mail_organisme($user_organisme) ;		
+				}
+
+			$body .= "<p> <hr> <center> Copyright ADILEOS </center>";	
+			envoi_mail($dest,$title ,$body);
+			ajout_log( $idx, traduire("Envoi dossier")." '$identifiant' ".traduire("par mail de")." $user_nom $user_prenom  : $dest", $user_idx );	
+			msg_ok( traduire("Envoi dossier")." '$identifiant' ".traduire("par mail")." : $dest" );	
+			return(true);
+			}
+		else
+			return(false);
+		}
+		
+	function dossier_mail( $ref )
+		{
+		global $action,$user_droit,$user_idx,$id;
+
+		$dest=variable("dest");
+		$comment=variable("comment");
+		echo traduire('Envoi du dossier par mail');
+		echo "<p>".traduire('Le dossier généré qui sera envoyé via un lien :')."<a href=\"tmp/_$ref.pdf\"target=_blank > <img src=\"images/fichier.jpg\" width=\"40\" height=\"40\" ></a>";
+		formulaire ("envoyer_dossier");
+		echo" <table> <tr>";
+		echo "<td>".traduire('Adresse mail du destinataire')." : </td>";
+		echo "<input type=\"hidden\" name=\"src\" value=\"_$ref.pdf\"> " ;
+		echo "<td><input type=\"texte\" name=\"dest\" size=\"60\" value=\"$dest\"></td> " ;
+		echo "<tr><td>".traduire('Commentaire à introduire<br>dans le mail envoyé')." : </td><td><TEXTAREA rows=\"5\" cols=\"70\" name=\"comment\" >$comment</TEXTAREA></td>";
+		echo "<tr><td></td><td><input type=\"submit\" id=\"envoi_dossier\" value=\"".traduire('Envoyer le dossier')."\" ></form> </td></table>  ";
+		pied_de_page("x");
+		}	
+		
+		
 	function dossier( $ref )
 		{
 		global $action,$user_droit,$user_idx,$id;
@@ -624,7 +796,7 @@ function maj_mdp_fichier($idx, $pw )
 		$j=1;
 		formulaire ("creer_dossier");
 
-		echo traduire('Ajouter au dossier vos coordonnées ?')." <input type=\"checkbox\" name=\"add\" > ".traduire('Adresse')." ,<input type=\"checkbox\" name=\"tel\" > ".traduire('Téléphone')." , <input type=\"checkbox\" name=\"mail\" >".traduire('Mail');
+		echo traduire('Ajouter au dossier vos coordonnées ?')." <input type=\"checkbox\" name=\"add\" > ".traduire('Adresse')." ,<input type=\"checkbox\" name=\"tel\" > ".traduire('Téléphone')." , <input type=\"checkbox\" name=\"mail\" >".traduire('Mail').", <input type=\"checkbox\" name=\"anniv\" >".traduire('Date de naissance');
 		echo "<p>".traduire('Sélectionnez les fichiers à prendre en compte')." :<table>";
 		$reponse =command("select * from r_attachement where ref='$ref' order by date DESC ");
 		while (($donnees = fetch_command($reponse) ) && ($j<100))
@@ -653,11 +825,22 @@ function maj_mdp_fichier($idx, $pw )
 	
 	function creer_dossier( $ref )
 		{
-		global $code_lecture, $user_prenom,$user_nom, $id,$user_idx;
-		global $user_anniv,	$user_telephone, $user_mail,$user_adresse,$user_organisme;
-		
+		global $user_idx;
+	
 		include 'PDFMerger.php';
 
+		$tab3= explode("-", $ref);
+		$user=$tab3[1] ;
+		$reponse =command("select * from  r_user where idx='$user' ");		
+		$donnees = fetch_command($reponse) ;
+		$user_nom=$donnees["nom"];
+		$user_prenom=$donnees["prenom"];				
+		$user_anniv=$donnees["anniv"];	
+		$user_telephone=$donnees["telephone"];				
+		$user_mail=$donnees["mail"];	
+		$code_lecture=$donnees["lecture"];	
+		$user_adresse=stripcslashes($donnees["adresse"]);
+	
 		$pdf = new PDFMerger;
 		
 		supp_fichier("tmp/garde_$ref.pdf");
@@ -673,35 +856,85 @@ function maj_mdp_fichier($idx, $pw )
 
 		$pdf1->SetMargins(10,10);
 		$pdf1->AddPage();
-		$pdf1->Image("images/logo.png",50,20,50,50,'PNG');
-		$pdf1->SetFont('Arial','B',12);
+		$pdf1->Image("images/logo.png",150,10,50,40,'PNG');
+		$pdf1->SetFont('Arial','B',14);
 		$date_jour=date('Y-m-d');
-		$comment=stripcslashes(variable("comment"));
 
-		$pdf1->ln(70);		
-		$pdf1->write(20,"Dossier de $user_prenom $user_nom généré le $date_jour  ");
-		$pdf1->ln(12);
+		$pdf1->text(10,10,"Dossier de $user_prenom $user_nom ");
+		$pdf1->SetFont('Arial','',12);		
+		$pdf1->text(10,17,"généré le ". mef_date_fr($date_jour));
 		
-		if (variable("add")=="on")
-			{
-			$pdf1->write(20,"Adresse: $user_adresse ");
-			$pdf1->ln(12);
-			}
-			
+		if ( (variable("anniv")=="on") && ($user_anniv!=""))
+			$pdf1->text(10,30,"Date naissance  : $user_anniv ");
+
 		if ( (variable("tel")=="on") && ($user_telephone!=""))
-			{
-			$pdf1->write(20,"Téléphone :$user_telephone ");
-			$pdf1->ln(12);
-			}
+			$pdf1->text(10,37,"Téléphone : $user_telephone ");
 
 		if ( (variable("mail")=="on") && ($user_mail!=""))
-				{
-			$pdf1->write(20,"Mail: $user_mail ");
-			$pdf1->ln(12);
-			}
-		$pdf1->ln(12);
-		$pdf1->write(12,"Commentaire : $comment");
+			$pdf1->text(10,44,"Mail : $user_mail ");
+			
+		if  ((variable("add")=="on") && ($user_adresse!="") )
+			$pdf1->text(10,51,"Adresse : $user_adresse ");
+			
+		$comment=stripcslashes(variable("comment"));	
+		if ($comment!="")
+			$pdf1->text(10,58,"Commentaire : $comment");
 		
+		$nb_doc=0;
+		for ($j=1;$j<100;$j++)
+			if (variable("d$j")=="on") $nb_doc++;
+			
+		$offset=80;
+		$taille=30;
+		if ($nb_doc>7) 
+			$taille=20;	
+		if ($nb_doc>10) 
+			$taille=15;
+		$pdf1->text(80, $offset-5,"Liste des $nb_doc document(s)");
+		$pdf1->line(10,$offset-2,190,$offset-2);
+
+		$j=1;
+		$reponse =command("select * from r_attachement where ref='$ref' order by date DESC ");
+		while (($donnees = fetch_command($reponse) ) && ($j<100))
+			{
+			$num=$donnees["num"];
+			$val=variable("d$j");
+			$date= mef_date_fr($donnees["date"]);
+
+			if ($val=="on")
+				{
+				if (est_doc($num))
+					$pdf1->Image("images/fichier.png",10,$offset,$taille,$taille,'PNG');
+				else
+					if (extension_fichier($num)=="pdf")
+						{
+						if (file_exists("upload_mini/$num.jpg"))
+							$pdf1->Image("upload_mini/$num.jpg",10,$offset,$taille,$taille,'JPG');
+						else
+							$pdf1->Image("images/fichier.jpg",10,$offset,$taille,$taille,'JPG');							
+						}
+				else
+					$pdf1->Image("upload_mini/$num",10, $offset,$taille,$taille,'JPG');
+				
+				$deposeur=$donnees["deposeur"];
+				if (is_numeric($deposeur))
+					{
+					$r1 =command("select * from  r_user where idx='$deposeur' ");
+					$d1 = fetch_command($r1);
+					if ( ($d1["droit"]=="S") || ($d1["droit"]=="s") || ($d1["droit"]=="R")|| ($d1["droit"]=="r") ) 
+						$deposeur=" ".traduire("par")." ".libelle_user($deposeur)." (".libelle_organisme_du_user($deposeur).")";
+					else
+						$deposeur=traduire("par bénéficiaire");
+					}	
+					
+				$pdf1->text(15+$taille, $offset+$taille-10,"Déposé $deposeur le $date ");
+				$pdf1->ln(10);
+				
+				$offset+=$taille;
+				}
+			$j++; 	
+			}		
+
 	
 		$pdf1->Output("tmp/garde_$ref.pdf");
 		
@@ -745,6 +978,7 @@ function maj_mdp_fichier($idx, $pw )
 		echo " <BR> - ".traduire("Soit vous consultez maintenant le document : cliquez sur le lien et saisissez le code de lecture;");
 		echo " <BR> - ".traduire("Soit vous imprimez maintenant le document : ouvrir le fichier en cliquant sur le lien, saisissez le code de lecture et faire 'Imprimer';");
 		echo " <BR> - ".traduire("Soit vous enregistrer maintenant le fichier sur votre disque : clic droit sur le lien et faire 'enregistrer la cible du lien sous';");
+		echo " <BR> - ".traduire("Soit vous décidez d'envoyer un lien vers le dossier par mail vers le(s) destinataire(s) de votre choix en cliquant <a href=\"index.php?".token_ref("dossier_mail")."&dossier=_$ref.pdf\"  >ici</a>;");
 		echo " <p><BR><p> ".traduire("Pour lire le fichier, il est nécessaire d'utiliser des logiciels tels que ")."<a href=\"http://get.adobe.com/fr/reader/\">Acrobat Reader </a>, <a href=\"http://www.foxitsoftware.com/Secure_PDF_Reader/\">Foxit Reader </a>, etc. ";
 
 		ajout_log( $user_idx, traduire("Génération dossier:")." $comment", $user_idx );
@@ -764,11 +998,12 @@ function maj_mdp_fichier($idx, $pw )
 			$nb_doc++; 	
 		$j=1;
 
-		echo "<table>";
-		echo "<form method=\"POST\" action=\"index.php\" enctype=\"multipart/form-data\">";
-		echo "<input type=\"hidden\" name=\"action\" value=\"upload\"> " ;
-		echo "<input type=\"hidden\" name=\"retour\" value=\"$action\"> " ;
-		echo "<tr> ";
+		echo "<table><tr> ";
+		//echo "<form method=\"POST\" action=\"index.php\" enctype=\"multipart/form-data\">";
+		//echo "<input type=\"hidden\" name=\"action\" value=\"upload\"> " ;
+		//token ("upload");
+		//echo "<input type=\"hidden\" name=\"retour\" value=\"$action\"> " ;
+		//echo "</form>";
 		if (substr($ref,0,1)=="A")
 			{
 			$reponse =command("select * from  r_user where idx='$idx' ");
@@ -791,26 +1026,26 @@ function maj_mdp_fichier($idx, $pw )
 			echo "<td> <img src=\"images/papier.png\" width=\"35\" height=\"35\" > </td>";
 			
 			echo "<td><ul id=\"menu-bar\">";
-			echo "<li><a href=\"index.php?action=ajout_admin\"  > + ".traduire('Papier Administratif')."  </a>";
+			echo "<li><a href=\"index.php?".token_ref("ajout_admin")."\"  > + ".traduire('Papier Administratif')."  </a>";
 			$_SESSION['user_idx']=$idx;
 			
 			echo "<ul >";
 
-			echo "<li> <a href=\"index.php?action=ajout_admin\"> ".traduire('Gérer les documents')." </a></li>";
-			echo "<li> <a href=\"index.php?action=draganddrop\"> ".traduire('Déposer des documents')." </a></li>";			
+			echo "<li> <a href=\"index.php?".token_ref("ajout_admin")."\"> ".traduire('Gérer les documents')." </a></li>";
+			echo "<li> <a href=\"index.php?".token_ref("draganddrop")."\"> ".traduire('Déposer des documents')." </a></li>";			
 			if ($recept_mail<$date_jour)
-				echo "<li><a id=\"depot\" href=\"index.php?action=recept_mail\">".traduire('Autoriser dépot par Mail (Aujourd\'hui)')."</a></li>";
+				echo "<li><a id=\"depot\" href=\"index.php?".token_ref("recept_mail")."\">".traduire('Autoriser dépot par Mail (Aujourd\'hui)')."</a></li>";
 			
 			if ($user_droit=="")
-				echo "<li><a href=\"index.php?action=visu_lecture\">".traduire('Code de lecture')." </a></li>";
-
-			if ($user_droit=="") 
-				echo "<li><a href=\"index.php?action=dossier\"> ".traduire('Constituer un dossier')." </a></li>";
+				echo "<li><a href=\"index.php?".token_ref("visu_lecture")."\">".traduire('Code de lecture')." </a></li>";
+		// dossier aussi pour AS
+		//	if ($user_droit=="") 
+				echo "<li><a href=\"index.php?".token_ref("dossier")."\"> ".traduire('Constituer un dossier')." </a></li>";
 		
 			if ($user_droit!="")
 				{
 				if ($code=="")
-					echo "<li><a href=\"index.php?action=dde_acces\">".traduire('Demander code d\'accès')."</a></li>";
+					echo "<li><a href=\"index.php?".token_ref("dde_acces")."\">".traduire('Demander code d\'accès')."</a></li>";
 				else
 					if ($code=="????")
 						echo "<li> - ".traduire('En attente d\'autorisation d\'accès par responsable')."</li>";
@@ -832,13 +1067,13 @@ function maj_mdp_fichier($idx, $pw )
 			echo "<td> <img src=\"images/photo.png\" width=\"35\" height=\"35\" > </td>";
 			echo "<td><ul id=\"menu-bar\">";
 			if ($user_droit=="")
-				echo "<li><a href=\"index.php?action=ajout_photo\" > + ".traduire('Espace personnel')." </a>";
+				echo "<li><a href=\"index.php?".token_ref("ajout_photo")."\" > + ".traduire('Espace personnel')." </a>";
 			else
-				echo "<li><a href=\"index.php?action=ajout_photo\" > + ".traduire('Justificatifs')." </a>";
+				echo "<li><a href=\"index.php?".token_ref("ajout_photo")."\" > + ".traduire('Justificatifs')." </a>";
 				
 			echo "<ul>";
-			echo "<li> <a href=\"index.php?action=ajout_photo\"> ".traduire('Gérer les documents')." </a></li>";
-			echo "<li> <a href=\"index.php?action=draganddrop_p\"> ".traduire('Déposer des documents')." </a></li>";	
+			echo "<li> <a href=\"index.php?".token_ref("ajout_photo")."\"> ".traduire('Gérer les documents')." </a></li>";
+			echo "<li> <a href=\"index.php?".token_ref("draganddrop_p")."\"> ".traduire('Déposer des documents')." </a></li>";	
 			
 			echo "</ul></ul></td>";
 			lien_c ("images/ajouter.png", "draganddrop_p", "" , traduire("Ajouter un doc") , "30");
@@ -861,9 +1096,9 @@ function maj_mdp_fichier($idx, $pw )
 			if ( $nb_doc<MAX_FICHIER)
 				{
 				if (substr($ref,0,1)=="A")
-					echo "<td> <a href=\"index.php?action=draganddrop\"> ";
+					echo "<td> <a href=\"index.php?".token_ref("draganddrop")."\"> ";
 				else
-					echo "<td> <a href=\"index.php?action=draganddrop_p\"> ";
+					echo "<td> <a href=\"index.php?".token_ref("draganddrop_p")."\"> ";
 
 				echo traduire("Dépot par Glisser/Déposer (Drag&drop)")."<img src=\"images/fichier.png\" width=\"35\" height=\"35\" ><img src=\"images/fleche.png\" width=\"35\" height=\"35\" ><img src=\"images/dossier.png\" width=\"35\" height=\"35\" ></a></td>";
 				
@@ -1114,7 +1349,7 @@ function maj_mdp_fichier($idx, $pw )
 		global $action,$user_mail, $user_idx;
 
 		echo "<table><tr><td > <img src=\"images/voir.png\" width=\"35\" height=\"35\" > </td><td >  <ul id=\"menu-bar\">";
-		echo "<li><a href=\"index.php?action=surv_mail\"  > + ".traduire('Surveillance arrivée mails administratifs')." </a></li>";
+		echo "<li><a href=\"index.php?".token_ref("surv_mail")."\"  > + ".traduire('Surveillance arrivée mails administratifs')." </a></li>";
 		echo "</ul></td></table>";
 
 		echo traduire("En enregistrant votre mot de passe de votre messagerie mail, nous vérifierons l'arrivée de mails administratifs (CAF, pole_emploi, impôts, etc) et alerterons vous-même ou vos référents de confiance selon votre choix s'ils ne sont pas consultés dans les 5 jours suivnats leur arrivée). ");
@@ -1276,7 +1511,8 @@ function maj_mdp_fichier($idx, $pw )
 			{
 			$voir =	"<form method=\"POST\" action=\"index.php\" >";
 			$voir .="<input type=\"image\" width=\"45\" height=\"45\" src=\"images/contact.png\" title=\"Demander\">";
-			$voir .="<input type=\"hidden\" name=\"action\" value=\"recup_mdp\">";
+			//$voir .="<input type=\"hidden\" name=\"action\" value=\"recup_mdp\">";
+			$voir .= token_return("recup_mdp");
 			$voir .="<input type=\"hidden\" name=\"user\" value=\"$user\">";
 			$voir .="<input type=\"hidden\" name=\"as\" value=\"$idx2\">";
 			$voir .="</form>";
@@ -1287,7 +1523,10 @@ function maj_mdp_fichier($idx, $pw )
 			
 		$mail= formate_mail($mail);
 		if (($droit=="s") || ($droit=="p") )
-			echo "<tr><td> $organisme </td><td> <img src=\"images/inactif.png\" title=\"Inactif\" width=\"15\" height=\"15\"> $nom   </td><td> $prenom   </td><td> $tel </td><td> $mail</td><td> $adresse</td>";
+			{
+			if ($masque!="") 
+				echo "<tr><td> $organisme </td><td> <img src=\"images/inactif.png\" title=\"Inactif\" width=\"15\" height=\"15\"> $nom   </td><td> $prenom   </td><td> $tel </td><td> $mail</td><td> $adresse</td>";
+			}
 		else
 			echo "<tr><td> $organisme </td><td> $nom   </td><td> $prenom   </td><td> $tel </td><td> $mail</td><td> $adresse</td>";
 		}
@@ -1317,7 +1556,7 @@ function maj_mdp_fichier($idx, $pw )
 
 		echo "<table><tr><td> <img src=\"images/referent.png\" width=\"35\" height=\"35\" > </td><td>  <ul id=\"menu-bar\">";
 		if ($action!="detail_user")
-			echo "<li><a href=\"index.php?action=ajout_referent\"  > + ".traduire('Référents de confiance')." </a></li>";
+			echo "<li><a href=\"index.php?".token_ref("ajout_referent")."\"  > + ".traduire('Référents de confiance')." </a></li>";
 		else
 			echo "<li><a> + ".traduire('Référents de confiance')." </a></li>";
 		
@@ -1437,8 +1676,8 @@ function maj_mdp_fichier($idx, $pw )
 
 										$body= traduire("Bonjour").", $prenom $nom ";
 										$body.= "<p> $user_prenom $user_nom ".traduire("vous a créé un compte sur 'Doc-depot.com': ");
-										$body.= "<p> ".traduire("Pour accepter et finaliser la création de votre compte sur 'Doc-depot.com', merci de cliquer sur ce")." <a id=\"lien\" href=\"".serveur."index.php?action=finaliser_user&idx=".addslashes(encrypt($idx))."\">".traduire('lien')."</a> ". traduire("et compléter les informations manquantes.");
-										$body .="<br><br>".traduire("(Si le lien ne fonctionne pas, recopiez dans votre navigateur Internet cette adresse : ").serveur."index.php?action=finaliser_user&idx=".addslashes(encrypt($idx))." ).";
+										$body.= "<p> ".traduire("Pour accepter et finaliser la création de votre compte sur 'Doc-depot.com', merci de cliquer sur ce")." <a id=\"lien\" href=\"".serveur."index.php?".token_ref("finaliser_user")."&idx=".addslashes(encrypt($idx))."\">".traduire('lien')."</a> ". traduire("et compléter les informations manquantes.");
+										$body .="<br><br>".traduire("(Si le lien ne fonctionne pas, recopiez dans votre navigateur Internet cette adresse : ").serveur."index.php?".token_ref("finaliser_user")."=&idx=".addslashes(encrypt($idx))." ).";
 										$body .= "<p> <hr> <center> Copyright ADILEOS </center>";
 										// Envoyer mail pour demander saisie pseudo et PW
 										envoi_mail($mail,traduire("Finaliser la création de votre compte"),$body);
@@ -1693,7 +1932,7 @@ function maj_mdp_fichier($idx, $pw )
 			if ( ($user_droit=="A") || ($user_droit=="R"))
 				{
 				if ($id=="???")
-					$nom= "$nom (compte non finalisé: <a  id=\"lien\"  href=\"index.php?action=renvoyer_mail&idx=".encrypt($idx)."\"> renvoyer mail</a>)";
+					$nom= "$nom (compte non finalisé: <a  id=\"lien\"  href=\"index.php?".token_ref("renvoyer_mail")."&idx=".encrypt($idx)."\"> renvoyer mail</a>)";
 				else
 					$nom= "$nom (Identifiant='$id')";
 				}
@@ -1737,17 +1976,17 @@ function maj_mdp_fichier($idx, $pw )
 			$filtre="";
 		echo "<table><tr><td width> <ul id=\"menu-bar\">";
 		if ($droit=="A")
-			echo "<li><a href=\"index.php?action=ajout_user\"  > + ".traduire('Responsable')."  </a></li>";
+			echo "<li><a href=\"index.php?".token_ref("ajout_user")."\"  > + ".traduire('Responsable')."  </a></li>";
 		else
 			if ($droit=="R")
 				{
-				echo "<li><a href=\"index.php?action=ajout_user\"  > + ".traduire('Acteur Social')."  </a>";
-				echo "<ul><li><a href=\"index.php?action=justificatifs&organisme=".encrypt($user_organisme)."\"> Liste des justificatifs </a></li></ul>";
+				echo "<li><a href=\"index.php?".token_ref("ajout_user")."\"  > + ".traduire('Acteur Social')."  </a>";
+				echo "<ul><li><a href=\"index.php?".token_ref("justificatifs")."&organisme=".encrypt($user_organisme)."\"> Liste des justificatifs </a></li></ul>";
 				}
 			else
 				if ($droit=="S")
 					{
-					echo "<li><a href=\"index.php?action=ajout_user\"  > + ".traduire('Bénéficiaires')."   </a></li>";
+					echo "<li><a href=\"index.php?".token_ref("ajout_user")."\"  > + ".traduire('Bénéficiaires')."   </a></li>";
 					}
 		echo "</ul></td>";
 		
@@ -1902,7 +2141,7 @@ function maj_mdp_fichier($idx, $pw )
 		echo "<table> ";
 
 		echo "<tr><td width> <ul id=\"menu-bar\">";
-		echo "<li><a href=\"index.php?action=ajout_beneficiaire\"  > + ".traduire('Ajout')." </a></li>";
+		echo "<li><a href=\"index.php?".token_ref("ajout_beneficiaire")."\"  > + ".traduire('Ajout')." </a></li>";
 		
 		echo "</ul></td>";
 		echo "</table>";
@@ -1927,7 +2166,9 @@ function maj_mdp_fichier($idx, $pw )
 		echo "<tr><td> ".traduire('Prénom').":</td> <td><input type=\"texte\" name=\"prenom\"   size=\"20\" value=\"".variable("prenom")."\"> </td>" ;
 		echo "<tr><td> ".traduire('Date de naissance').": </td><td><input type=\"texte\" name=\"anniv\"   size=\"10\" value=\"".variable("anniv")."\"> </td><td>".traduire('jj/mm/aaaa')."</td>" ;
 		echo "<tr><td> ".traduire('Ville natale').": </td><td>  <input type=\"texte\" name=\"ville_nat\"   size=\"20\" value=\"".variable("ville_nat")."\"> </td>" ;
-		echo "<tr><td> ".traduire('Nationalité').":  </td><td><input type=\"texte\" name=\"nationalite\"   size=\"20\" value=\"".variable("nationalite")."\"> </td>" ;
+		echo "<tr><td> ".traduire("Pays d'origine").": </td><td> ";
+		select_pays("", variable("nationalite"));
+		echo "</td>" ;
 		echo "<input type=\"hidden\" name=\"recept_mail\"  value=\"\"> " ;
 		echo "<input type=\"hidden\" name=\"telephone\"  value=\"\"> " ;
 		echo "<input type=\"hidden\" name=\"mail\"  value=\"\"> " ;
@@ -1979,7 +2220,7 @@ function maj_mdp_fichier($idx, $pw )
 			$reponse =command("DELETE FROM `r_sms`  where idx='$user_idx' and num_seq='$num_seq' ");
 		echo "<table> <tr><td> <img src=\"images/sms.png\" width=\"35\" height=\"35\" ></td> ";
 		echo "<td> <ul id=\"menu-bar\">";
-		echo "<li> <a href=\"index.php?action=note_sms\"  >+ ".traduire('Notes et SMS')." </a> </li></ul></td>";
+		echo "<li> <a href=\"index.php?".token_ref("note_sms")."\"  >+ ".traduire('Notes et SMS')." </a> </li></ul></td>";
 		echo "<td> </form>";
 		formulaire ("");
 		echo "<input type=\"text\" name=\"filtre\" size=\"0\" value=\"$filtre1\" onChange=\"this.form.submit();\"> ";
@@ -2029,8 +2270,8 @@ function maj_mdp_fichier($idx, $pw )
 		$libelle= "Je suis le référent de ";
 		
 		echo "<table><tr><td><img src=\"images/bene.png\" width=\"35\" height=\"35\" ></td><td> <ul id=\"menu-bar\">";
-		echo "<li> <a href=\"index.php?action=ajout_beneficiaire\"  >+ ".traduire($libelle)." </a> ";
-		echo "<ul> <a href=\"index.php?action=verif_existe_user\"  > ".traduire('Vérifier si bénéficiaire existe déjà')."</a> </li> </ul>";
+		echo "<li> <a href=\"index.php?".token_ref("ajout_beneficiaire")."\"  >+ ".traduire($libelle)." </a> ";
+		echo "<ul> <a href=\"index.php?".token_ref("verif_existe_user")."\"  > ".traduire('Vérifier si bénéficiaire existe déjà')."</a> </li> </ul>";
 
 		echo "</td><td>";
 		formulaire ("");		
@@ -2039,7 +2280,7 @@ function maj_mdp_fichier($idx, $pw )
 		if ($filtre1!="")
 			lien_c ("images/croixrouge.png", "", "" , traduire("Supprimer filtre"));
 		echo "</table><div class=\"CSSTableGenerator\" ><table> ";
-		echo "<tr><td>   </td><td> ".traduire('Nom')."  </td><td> ".traduire('Prénom')." </td><td>  ".traduire('Téléphone')." </td><td> ".traduire('Mail')." </td><td> ".traduire('Anniv')." </td><td> ".traduire('Nationalité')."  </td><td> ".traduire('Ville natale')." </td><td> ".traduire('Adresse')." </td>";
+		echo "<tr><td>   </td><td> ".traduire('Nom')."  </td><td> ".traduire('Prénom')." </td><td>  ".traduire('Téléphone')." </td><td> ".traduire('Mail')." </td><td> ".traduire('Anniv')." </td><td> ".traduire("Pays d'origine")."  </td><td> ".traduire('Ville natale')." </td><td> ".traduire('Adresse')." </td>";
 		
 		affiche_beneficiaire(2,$organisme, $user_idx, $filtre2);		
 		
@@ -2148,12 +2389,6 @@ function maj_mdp_fichier($idx, $pw )
 		return($d1["doc_autorise"]);
 		}
 	
-	function adresse_organisme($organisme	)
-		{
-		$r1 =command("select * from  r_organisme where idx='$organisme' ");
-		$d1 = fetch_command($r1);
-		return(stripcslashes($d1["adresse"]));
-		}
 		
 	function responsables_organisme($organisme)
 		{
@@ -2182,7 +2417,7 @@ function maj_mdp_fichier($idx, $pw )
 		$filtre1=variable("filtre");
 
 		echo "<table><tr><td><img src=\"images/organisme.png\" width=\"35\" height=\"35\" ></td><td width> <ul id=\"menu-bar\">";
-		echo "<li><a href=\"index.php?action=ajout_organisme\"  > + ".traduire('Structure sociale')." </a></li>";
+		echo "<li><a href=\"index.php?".token_ref("ajout_organisme")."\"  > + ".traduire('Structure sociale')." </a></li>";
 		echo "</ul></td>";
 		formulaire ("");
 		echo " <td> <input type=\"text\" name=\"filtre\" size=\"20\" value=\"$filtre1\" onChange=\"this.form.submit();\"> ";
@@ -2222,7 +2457,7 @@ function maj_mdp_fichier($idx, $pw )
 				$adresse=stripcslashes($donnees["adresse"]);
 				$organisme=stripcslashes($donnees["organisme"]);		
 				if  (($user_droit=="A") || ( ($user_droit=="R ") && ($user_organisme==$idx)  ) )
-					$organisme="<a href=\"index.php?action=membres_organisme&organisme=".encrypt($idx)."\"> $organisme </a>";
+					$organisme="<a href=\"index.php?".token_ref("membres_organisme")."&organisme=".encrypt($idx)."\"> $organisme </a>";
 
 				$tel=$donnees["tel"];	
 				$mail=$donnees["mail"];	
@@ -2320,7 +2555,7 @@ function maj_mdp_fichier($idx, $pw )
 		global $action, $user_droit;
 
 		echo "<table><tr><td width> <ul id=\"menu-bar\">";
-		echo "<li><a href=\"index.php?action=ajout_affectation\"  > + ".traduire('Affectation')." </a></li>";
+		echo "<li><a href=\"index.php?".token_ref("ajout_affectation")."\"  > + ".traduire('Affectation')." </a></li>";
 		echo "</ul></td></table>";
 
 		titre_affectation();
@@ -2424,9 +2659,9 @@ function autorise_acces($ddeur,$bene,$autorise)
 				echo "<input type=\"hidden\" name=\"bene\" value=\"$qui\"> " ;
 				echo "<input type=\"hidden\" name=\"autorise\" value=\"$user_idx\"> " ;
 				if ($code=="")
-					echo "<input type=\"hidden\" name=\"action\" value=\"autorise_acces\"><input type=\"submit\" value=\"".traduire('Autoriser')."\"/> " ;
+					echo token_return("autorise_acces")."<input type=\"submit\" value=\"".traduire('Autoriser')."\"/> " ;
 				else
-					echo "<input type=\"hidden\" name=\"action\" value=\"supp_acces\"> <input type=\"submit\" value=\"".traduire('Supprimer accès')."\"/>" ;
+					echo token_return("supp_acces")."<input type=\"submit\" value=\"".traduire('Supprimer accès')."\"/>" ;
 				echo "</form>  </td>";	
 				}
 			if ($j!=0)
@@ -2571,9 +2806,19 @@ function affiche_titre_user($user)
 	$adresse=stripcslashes($donnees["adresse"]);
 	
 	$user=encrypt($user);
-	echo "<table><tr><td> <ul id=\"menu-bar\">";
-	echo "<li> <a href=\"index.php?action=detail_user2&user=$user\" > $nom $prenom $anniv </a></li>";
-	echo "</ul></td><td> - ".traduire('Domiciliation').": $organisme / $adresse / $tel / $mail </td></table>";
+
+	if ($_SESSION['user']!=$_SESSION['user_idx'])
+		{
+		echo "<table><tr><td> <ul id=\"menu-bar\">";
+		echo "<li> <a href=\"index.php?".token_ref("detail_user2")."&user=$user\" > $nom $prenom $anniv </a></li>";
+		echo "</ul></td><td> - ".traduire('Domiciliation').": $organisme / $adresse / $tel / $mail </td></table>";
+		}
+	else
+		{
+		echo "<table><tr><td> <ul id=\"menu-bar\">";
+		echo "<li> <a href=\"index.php\">Justificatifs $nom $prenom </a></li>";
+		echo "</ul></td></table>";
+		}	
 	}
 
 function affiche_membre($idx, $opt_aff="")
@@ -2645,7 +2890,7 @@ function affiche_membre($idx, $opt_aff="")
 				echo "<td> - ".traduire('Fonction non accessible car le bénéficiaire ne dispose pas d\'un n° de téléphone portable')."</td> ";
 			}
 		else
-			echo "<li> <a href=\"index.php?action=rdv\"  >+ ".traduire('Rendez-vous')." </a> </li></ul></td>";
+			echo "<li> <a href=\"index.php?".token_ref("rdv")."\"  >+ ".traduire('Rendez-vous')." </a> </li></ul></td>";
 
 		echo "<td> </table> ";
 			
@@ -2693,10 +2938,11 @@ function affiche_membre($idx, $opt_aff="")
 			echo "<hr>";
 		}
 
+
+		
 	// liste des  autorisées
 	function verif_action_autorise($action)
 		{
-		
 		switch ($action)
 				{
 				// liste des actions ne nécessitant pas de droits
@@ -2710,11 +2956,12 @@ function affiche_membre($idx, $opt_aff="")
 				case "dx":
 				case "recup_mdp":
 				case "enreg_bug":
-				case "enreg_contact":				
+//				case "enreg_contact":				
 				case "bug":
-				case "contact":				
-
-				
+//				case "contact":				
+				case "recup_dossier": 
+				case "envoyer_dossier": 
+				case "dossier_mail": 
 				case "justificatifs": 
 				case "supp_filtre_histo": 
 				case "filtre_histo": 
@@ -2745,6 +2992,8 @@ function affiche_membre($idx, $opt_aff="")
 				case "user_inactif_P":
 				case "user_actif_P":
 				case "phpinfo":
+				case "visu_pages_users":
+				case "visu_page":
 				case "archivage_php":
 				case "cmd_sql":
 				case "cmd_sql_backup":
@@ -2816,7 +3065,7 @@ function affiche_membre($idx, $opt_aff="")
 				case "ajout_beneficiaire":
 				case "verif_existe_user":
 				case "verif_user":
-				case "upload":
+//				case "upload":
 				case "modifier_user":
 				case "supp_filtre":
 				case "alerte_admin":
@@ -2903,8 +3152,6 @@ function affiche_membre($idx, $opt_aff="")
 		// -====================================================================== DEBUT de PAGE ===============================
 // Connexion BdD
 
-require_once 'include_crypt.php';
-
 	$user_lang='fr';
 		
 	// on teste le pays d'origine
@@ -2913,6 +3160,7 @@ require_once 'include_crypt.php';
 		$pays= strtoupper($_SERVER['GEOIP_COUNTRY_CODE']); 
 		if (($pays!="FR") && ($pays!="CA") && ($pays!="")&& ($pays!="UNKNOWN") )  // on n'autorise que la france 
 			{
+			ajout_log_tech ( "Rejet connexion ".$_SERVER['REMOTE_ADDR']." car pays = '$pays' ", "P1" );
 			aff_logo("x");
 			echo "<p>".traduire('Service only available from France and Canada');
 			pied_de_page(); 
@@ -2929,7 +3177,16 @@ require_once 'include_crypt.php';
 */
 	
 	// ------------------------------------------------------------------------------ traitement des actions sans mot de passe
-	$action=variable("action");	
+	$token=variable("token");	
+	if ($token!="")	
+		$action=verifi_token($token,variable("action"));
+	else
+		$action=variable("action");		
+	//$action=variable_s("action");		
+	if ($token!="")	
+		$action=verifi_token($token,variable("action"));
+	else
+		$action=variable("action");		
 
 	// on vérifie que l'action demandée (champ en clair) fait bien partie de la liste officielle ==> évite le piratage
 	$action = verif_action_autorise($action);	
@@ -2991,15 +3248,7 @@ require_once 'include_crypt.php';
 
 			pied_de_page("x");
 			}	
-		if ($action=="enreg_contact")
-			{
-			aff_logo_multiple();
-			$ip= $_SERVER["REMOTE_ADDR"];
-			tempo_cx ($ip);
-			enreg_contact(variable("qui"),variable("coordonnees"),variable("descript"));
-			msg_ok(traduire("Demande enregistrée."));
-			pied_de_page("x");
-			}		
+	
 
 		if ($action=="bug")
 			{
@@ -3034,7 +3283,26 @@ require_once 'include_crypt.php';
 			fin_cadre();
 			pied_de_page("x");
 			}	
-
+/*
+	function enreg_contact($qui, $coordo, $descript)
+		{
+		// temporaire
+		$message = "Auteur : $qui";	
+		$message .= "<p>Coordonnées : $coordo";
+		$message .= "<p>Description : $descript";
+		envoi_mail(parametre('DD_mail_fonctionnel'),"Demande 'Nous contacter' ",$message, true);
+		ajout_log( "", traduire("Demandeur")." : $qui / $coordo ", "");
+		}
+		if ($action=="enreg_contact")
+			{
+			aff_logo_multiple();
+			$ip= $_SERVER["REMOTE_ADDR"];
+			tempo_cx ($ip);
+			enreg_contact(variable("qui"),variable("coordonnees"),variable("descript"));
+			msg_ok(traduire("Demande enregistrée."));
+			pied_de_page("x");
+			}	
+			
 		if ($action=="contact")
 			{
 			$date_jour=date('Y-m-d');
@@ -3055,7 +3323,7 @@ require_once 'include_crypt.php';
 			fin_cadre();
 			pied_de_page();
 			}				
-	
+*/	
 		if ($action=="maj_user")
 			{
 			if (!maj_user(variable("idx"),variable("id"),variable("pw"),variable("nom"),variable("prenom")))
@@ -3067,6 +3335,9 @@ require_once 'include_crypt.php';
 				$_SESSION['user_idx']=variable("idx"); // T338
 				}
 			}
+
+		if ($action=="recup_dossier")
+			recup_dossier();
 			
 		if ($action=="reinit_mdp")
 			{
@@ -3137,7 +3408,7 @@ require_once 'include_crypt.php';
 										$mdp=encrypt($mdp);
 										aff_logo();
 										command("UPDATE r_user set pw='$mdp' where id='$id'");
-										echo "<p><br><p>".traduire('Modification du mot de passe réalisée.');
+										msg_ok (traduire('Modification du mot de passe réalisée.') );
 										$ok=TRUE;
 										ajout_log( $id, traduire('Changement de Mot de passe') );
 										$action="";
@@ -3229,7 +3500,8 @@ require_once 'include_crypt.php';
 			$prenom_p=mef_prenom(variable("prenom_p")); 
 			$prenom_m=mef_prenom(variable("prenom_m")); 
 
-			$reponse = command("SELECT * from  r_user WHERE droit='' and nom='$nom' and prenom='$prenom' and prenom_p='$prenom_p' and prenom_m='$prenom_m' and anniv='$anniv'and ville_nat='$ville_natale'"); 
+			$reponse = command(sprintf("SELECT * from  r_user WHERE droit='' and nom='%s' and prenom='%s' and prenom_p='%s' and prenom_m='%s' and anniv='%s' and ville_nat='%s'",
+																				$nom,       $prenom,          $prenom_p, 		$prenom_m, 			$anniv,      $ville_natale)	); 
 			if ($donnees = fetch_command($reponse))
 				{
 				aff_logo();
@@ -3277,54 +3549,68 @@ require_once 'include_crypt.php';
 			$prenom_m=mef_prenom(variable("prenom_m")); 
 			$code=variable("code"); 
 
-			$reponse = command("SELECT * from  r_user WHERE droit='' and nom='$nom' and prenom='$prenom' and prenom_p='$prenom_p' and prenom_m='$prenom_m' and anniv='$anniv'and ville_nat='$ville_natale'"); 
+//			$reponse = command(        "SELECT * from  r_user WHERE droit='' and nom='$nom' and prenom='$prenom' and prenom_p='$prenom_p' and prenom_m='$prenom_m' and anniv='$anniv'and ville_nat='$ville_natale'"); 
+			$reponse = command(sprintf("SELECT * from  r_user WHERE droit='' and nom='%s' and prenom='%s' and prenom_p='%s' and prenom_m='%s' and anniv='%s' and ville_nat='%s'",
+																				$nom,       $prenom,          $prenom_p, 		$prenom_m, 			$anniv,      $ville_natale)	); 
 			if ($donnees = fetch_command($reponse))
 				{
-				aff_logo();
 				$idx=$donnees["idx"];
 				$id=$donnees["id"];
 				$mdp_ancien=$donnees["pw"];
 				$mdp=variable('pwd');
+				$action="dde_mdp_avec_code";	// on considére par défaut 		
+				$date_jour=date('Y-m-d');
+				$r1 =command("select * from r_dde_acces where type='' and user=$idx  and date_dde>='$date_jour' ");
+				If ($d1 = fetch_command($r1) )
+					{
+					echo $code."-".$d1["code"];
+					If ($code==$d1["code"])
+						{
 						if (strlen($mdp)>7 )
-							{
-							if ($id!=$mdp )
 								{
-								if ( testpassword($mdp)>70 ) 
+								if ($id!=$mdp )
 									{
-									if ( compte_non_protege($id) )
+									if ( testpassword($mdp)>70 ) 
 										{
-										$code_lecture=$donnees["lecture"];
-										
-										if  ($code_lecture=="$mdp_ancien") 
-											command("UPDATE r_user set lecture='".encrypt($mdp)."' where id='$id'");
+										if ( compte_non_protege($id) )
+											{
+											$code_lecture=$donnees["lecture"];
+											
+											if  ($code_lecture=="$mdp_ancien") 
+												command("UPDATE r_user set lecture='".encrypt($mdp)."' where id='$id'");
 
-										$mdp=encrypt($mdp);
-										command("UPDATE r_user set pw='$mdp' where id='$id'");
-										echo "<p><br><p>".traduire('Modification du mot de passe réalisée.')."<p><br><p>";
-										$ok=TRUE;
-										ajout_log( $idx, traduire("Réinitialisation Mot de passe avec code de déverrouillage")." $code" );
-										$action="";
+											$mdp=encrypt($mdp);
+											command("UPDATE r_user set pw='$mdp' where id='$id'");
+											echo "<p><br><p>".traduire('Modification du mot de passe réalisée.')."<p><br><p>";
+											$ok=TRUE;
+											ajout_log( $idx, traduire("Réinitialisation Mot de passe avec code de déverrouillage")." $code" );
+											$action="";
+											}
+										else 
+											erreur (traduire("Le mot de passe de ce compte n'est pas modifiable"));
 										}
 									else 
-										erreur (traduire("Le mot de passe de ce compte n'est pas modifiable"));
-
+										erreur (traduire("Le mot de passe n'est pas assez complexe (utiliser des Majuscules, Chiffres, caractéres spéciaux)"));
 									}
 								else 
-									erreur (traduire("Le mot de passe n'est pas assez complexe (utiliser des Majuscules, Chiffres, caractéres spéciaux)"));
+									erreur (traduire( "Le mot de passe doit être différent de l'identifiant."));
 								}
 							else 
-								erreur (traduire( "Le mot de passe doit être différent de l'identifiant."));
+								erreur (traduire("Le mot de passe est trop court (au moins 8 caractères)."));
 							}
 						else 
-							erreur (traduire("Le mot de passe est trop court (au moins 8 caractères)."));
-				pied_de_page("x");
-				}
-			else
-				{
-				erreur (traduire("Les informations communiquées ne permettent pas de traiter votre demande."));
-				// Ajout log à faire
-				$action="dde_mdp_avec_code";
-				}
+							erreur (traduire("Code de déverrouillage incorrect."));		
+						}
+					else
+					erreur (traduire("Code de déverrouillage non existant ou trop ancien"));	
+					}
+				else
+					{
+					erreur (traduire("Les informations communiquées ne permettent pas de traiter votre demande."));
+					// Ajout log à faire
+					}
+			if ($action!="")
+				aff_logo();
 			}		
 
 		
@@ -3425,7 +3711,7 @@ require_once 'include_crypt.php';
 				aff_logo();
 				}
 			echo "<center>";	
-			$reponse = command("SELECT * from  r_user WHERE (id='$id' or mail='$id' or telephone='$id')"); 
+			$reponse = command(sprintf("SELECT * from  r_user WHERE (id='%s' or mail='%s' or telephone='%s')",$id,$id,$id) ); 
 			if ($donnees = fetch_command($reponse))
 				{
 				if (!fetch_command($reponse)) // vérifiction qu'il est unique
@@ -3450,7 +3736,7 @@ require_once 'include_crypt.php';
 							$tel_tronque[3]='.';
 							$tel_tronque[4]='.';
 							$tel_tronque[5]='.';
-							echo "<p><a  id=\"sms\" href=\"index.php?action=dde_code_par_sms&telephone=".encrypt($telephone)."\"> par SMS au <strong>$tel_tronque</strong></a>";
+							echo "<p><a  id=\"sms\" href=\"index.php?".token_ref("dde_code_par_sms")."&telephone=".encrypt($telephone)."\"> par SMS au <strong>$tel_tronque</strong></a>";
 							}
 							
 						if (VerifierAdresseMail($mail) )
@@ -3458,14 +3744,14 @@ require_once 'include_crypt.php';
 							$mail_tronque= $mail;
 							for ($i=5; $i<strlen($mail)-10; $i++)
 								$mail_tronque[$i]='.';
-							echo "<p><a  id=\"mail\" href=\"index.php?action=dde_code_par_mail&mail=".encrypt($mail)."\"> Par mail à l'adresse <strong>'$mail_tronque' </strong></a>";
+							echo "<p><a  id=\"mail\" href=\"index.php?".token_ref("dde_code_par_mail")."&mail=".encrypt($mail)."\"> Par mail à l'adresse <strong>'$mail_tronque' </strong></a>";
 							}
 						echo "</td></table>" ;
 						echo "<p>".traduire('Soit en contactant un référent de confiance.');
 						}
 
 					
-					if (( ($id1==$id) || ($mail==$id)|| ($telephone==$id)) && ($droit!="")) // cas des AS et responsables
+					if (( ($id1==$id) || ($mail==$id)|| ($telephone==$id)) && ($droit!="")&& ($droit!="s")) // cas des AS et responsables
 						{
 						$id=$donnees["id"];
 						$idx=$donnees["idx"];
@@ -3480,9 +3766,9 @@ require_once 'include_crypt.php';
 								$reponse =command("INSERT INTO `r_dde_acces`  VALUES ('$idx' , '$code', '$date_jour', '$idx', '', '', '' ) ");
 								$user_lang='fr'; // Attention : A initialiser quand le user aura mémorisé 
 								
-								$synth =traduire("Pour réinitialiser votre mot de passe, cliquez")." <a  id=\"lien\"  href=\"".serveur."index.php?action=reinit_mdp&code=".encrypt($code)."\">".traduire("ici")."</a> .";
-								$synth .="<br><br>".traduire("Si le lien ne fonctionne pas, recopiez dans votre navigateur internet cette adresse : ")."<br>".serveur."index.php?action=reinit_mdp&code=".encrypt($code);
-								$synth .="<p><br> ".traduire("Si vous n'êtes pas à l'origine de cette demande, cliquez")." <a  id=\"alerte\"  href=\"".serveur."index.php?action=alerte_admin&motif=".encrypt("reinit_mdp avec $code")."\">".traduire("ici")."</a> .";
+								$synth =traduire("Pour réinitialiser votre mot de passe, cliquez")." <a  id=\"lien\"  href=\"".serveur."index.php?".token_ref("reinit_mdp")."&code=".encrypt($code)."\">".traduire("ici")."</a> .";
+								$synth .="<br><br>".traduire("Si le lien ne fonctionne pas, recopiez dans votre navigateur internet cette adresse : ")."<br>".serveur."index.php?".token_ref("reinit_mdp")."&code=".encrypt($code);
+								$synth .="<p><br> ".traduire("Si vous n'êtes pas à l'origine de cette demande, cliquez")." <a  id=\"alerte\"  href=\"".serveur."index.php?".token_ref("alerte_admin")."&motif=".encrypt("reinit_mdp avec $code")."\">".traduire("ici")."</a> .";
 								$dest = "$mail";
 								$user_lang=$sauve_lang;
 								echo "<p><br><p>".traduire("Un mail contenant un lien, valable uniquement aujourd'hui,<p> permettant de réinitialiser votre mot de passe a été envoyé à")." $mail. ";
@@ -3513,7 +3799,7 @@ require_once 'include_crypt.php';
 								$nom=$donnees["nom"];
 								if ($nom!="Tous")
 									{
-									if ($organisme!="")
+									if ($organisme!="")	
 										visu_referent($idx,$idx1);
 									}
 								else
@@ -3548,7 +3834,7 @@ require_once 'include_crypt.php';
 							echo "<br> ".traduire('Puis, elle vous communiquera votre code de déverouillage (mais elle ne connaitra pas votre mot de passe). ');
 							echo "<p>".traduire('Si vous n\'arrivez pas à la joindre et que vous voulez contacter un autre référent de confiance,');
 							echo "<br>".traduire('attendez que le délai initial soit écoulé pour faire une nouvelle demande. ');
-							echo "<br><p><br><p><a href=\"index.php?action=dde_mdp_avec_code\"> <img src=\"images/code.png\" width=\"35\" height=\"35\" >".traduire('Si vous avez déjà reccueilli le code de déverrouillage, cliquez ici')."</a><p><br><p><br></center>";
+							echo "<br><p><br><p><a href=\"index.php?".token_ref("dde_mdp_avec_code")."\"> <img src=\"images/code.png\" width=\"35\" height=\"35\" >".traduire('Si vous avez déjà reccueilli le code de déverrouillage, cliquez ici')."</a><p><br><p><br></center>";
 						
 							}
 						}
@@ -3582,8 +3868,8 @@ require_once 'include_crypt.php';
 			echo " <input type=\"submit\"  id=\"envoi_mdp\"  value=\"".traduire('Valider')."\"><p></td>";
 			echo "</form> </table>";
 			fin_cadre();
-			echo "<br><p><a href=\"index.php?action=dde_identifiant\" > <img src=\"images/identifiant.png\" width=\"35\" height=\"35\" >".traduire('Si vous avez oublié votre identifiant, cliquez ici.')." </a>";
-			echo "<br><p><br><p><a href=\"index.php?action=dde_mdp_avec_code\"> <img src=\"images/code.png\" width=\"35\" height=\"35\">".traduire('Si vous avez déjà reccueilli le code de déverrouillage, cliquez ici')."</a><p><br><p><br></center>";
+			echo "<br><p><a href=\"index.php?".token_ref("dde_identifiant")."\" > <img src=\"images/identifiant.png\" width=\"35\" height=\"35\" >".traduire('Si vous avez oublié votre identifiant, cliquez ici.')." </a>";
+			echo "<br><p><br><p><a href=\"index.php?".token_ref("dde_mdp_avec_code")."\"> <img src=\"images/code.png\" width=\"35\" height=\"35\">".traduire('Si vous avez déjà reccueilli le code de déverrouillage, cliquez ici')."</a><p><br><p><br></center>";
 			pied_de_page("x");
 			}	
 
@@ -3611,186 +3897,12 @@ require_once 'include_crypt.php';
 
 $_SESSION['ad']=false;	
 
-
 require_once 'cx.php';
-/*
-			
-	if ($action=="dx") 
-		{
-		if ( (isset ($_SESSION['pass'])) && ($_SESSION['pass']==TRUE)  ) 
-				ajout_log( $_SESSION['user_idx'], traduire('Déconnexion') );
-		$_SESSION['pass']=false;// et hop le mot de passe... poubelle !
-		$_SESSION['chgt_user']=false;
-		echo "<div id=\"msg_dx\">".traduire('Vous êtes déconnecté!')."</div><br>";
-		}
-
-// ---------------------------------------on récupére les information de la personne connectée
-if (isset($_POST['pass']))
-	{
-	$id=$_POST['id'];
-	$reponse = command("SELECT * from  r_user WHERE id='$id' "); 
-	$donnees = fetch_command($reponse);
-	$mot_de_passe=$donnees["pw"];	
-	$id=$donnees["id"];
-	$date_log=date('Y-m-d');	
-	$heure_jour=date("H\hi.s");	
-	$_SESSION['bene']="";
-	// verifion si la variable = mot de passe...
-	if ( ( 
-		(encrypt(addslashes($_POST['pass']))==$mot_de_passe) // on vérifie le mot de passe 
-		||
-		// cas particulier en mode poste de développement on vérifie aussu un mot de passe en clair 
-		(($_POST['pass']==$mot_de_passe) && ($_SERVER['REMOTE_ADDR']=="127.0.0.1")	 )
-		) && ( !strstr($donnees["droit"] ,"-" ) ) ) // ceux qui sont désactivé ne peuvent pas accéder
-			{
-			supp_echec_cx ($_POST['id']);
-			$ip= $_SERVER["REMOTE_ADDR"];
-			supp_echec_cx ($ip);
-			$_SESSION['pass']=true;	 
-			$idx=$donnees["idx"];
-			$_SESSION['user']=$idx;	 
-			ajout_log( $idx, traduire('Connexion') );
-			if (decrypt($mot_de_passe)=="123456") 
-				{
-				$action="modif_mdp";
-				$identifiant=$id;
-				}
-				
-			$ancien_droit="";
-			if (isset($_SESSION['droit']))
-				$ancien_droit=$_SESSION['droit'];
-				
-			$_SESSION['user_idx']=$donnees["idx"];
-			$_SESSION['droit']= $donnees["droit"];
-			$_SESSION['filtre']= "";
-			$_SESSION['ad']=false;	
-			$_SESSION['chgt_user']=false;
-			
-			if (($donnees["droit"]=="A") && ($ancien_droit!="A"))
-				envoi_mail( parametre('DD_mail_gestinonnaire') , "Connexion administrateur : ".$donnees["nom"]." ".$donnees["prenom"], "IP : $ip" );
-				
-			if (($donnees["droit"]=="E") && ($ancien_droit!="E"))
-				envoi_mail( parametre('DD_mail_gestinonnaire') , "Connexion exploitant : ".$donnees["nom"]." ".$donnees["prenom"], "IP : $ip" );		
-			
-			// supprime les demandes de recupération de mot de passe encore actif 
-			$reponse =command("UPDATE r_dde_acces set type='-' where user='$idx' and type='' and date_dde>='$date_log' ");
-			$label = libelle_user($idx);
-			$last_cx = "";
-			$reponse =command("select * from  log where ( user='$idx' or user='$id'or user='$label'  ) and  (ligne Like '%Connexion%') and  (not (ligne Like '%Déconnexion%')) and ( not (ligne Like '%Echec Connexion%'))  order by date DESC ");		
-			if ($donnees = fetch_command($reponse))// c'est la connexion actuelle
-				if ($donnees = fetch_command($reponse) )// c'est la connexion précédente
-					{
-					$last_cx=$donnees["date"];
-					if ($last_cx!="")
-						{
-						maj_last_cx($idx);
-						$ligne_last_cx = traduire('Dernière connexion')." :<br> $last_cx. ";
-						
-						$reponse =command("select * from  log where ( user='$idx' or user='$id'  or user='$label' ) and  (ligne Like '%Echec Connexion%') order by date DESC ");		
-						$donnees = fetch_command($reponse); 
-						$last_echec_cx=$donnees["date"];	
-						if ($last_echec_cx>$last_cx)
-							echo traduire("Depuis votre derniére connexion, il y a eu tentative de connexion à votre compte, merci de consulter votre")." <a href=\"index.php?action=histo\"  >".traduire('historique')."</a> ";
-						}
-					}
-			ctrl_signature_user( $idx );
-			
-			// verification que les dates CG n'ont pas changé depuis la derniere connexion
-			// si c'est le cas on en infome l'utilisateur
-			$date_cg=parametre("DD_date_cg");			
-			if ($last_cx<$date_cg)
-				echo traduire("Les conditions générales de 'doc-depot.com' ont changé, merci d'en prendre connaissance en cliquant")." <a href=\"conditions.html\"  >".traduire('ici')."</a> ";
-
-			}
-		else
-			{	
-			$id=$_POST['id'];
-
-			tempo_cx ($id);
-			$ip= $_SERVER["REMOTE_ADDR"];
-			tempo_cx ($ip);	
-			erreur(traduire("Mot de passe incorrect")." !!"). 
-			$_SESSION['pass']=false;
-			ajout_log( $id,traduire("Echec Connexion")."  $id / $mot_de_passe / ".$_POST['pass']);
-			ajout_echec_cx ($_POST['id']);
-			ajout_echec_cx ($ip);
-			}
-	}
-
-	if ( ($action=="chgt_user") && ($_SESSION['droit']=="E"))
-		{
-		$_SESSION['user']=variable_s('user');
-		unset($_SESSION['droit']);
-		$_SESSION['chgt_user']=true;
-		
-		$idx=$_SESSION['user'];
-		$reponse = command("SELECT * from  r_user WHERE idx='$idx'"); 
-		$donnees = fetch_command($reponse);
-		$_SESSION['droit']=$donnees["droit"];
-		$action="";
-		}
-		
-	// ------------------------------------ on collecte les infos utiles du user connceté
-	if (isset($_SESSION['user']))
-		{
-		$idx=$_SESSION['user'];
-		$reponse = command("SELECT * from  r_user WHERE idx='$idx'"); 
-		$donnees = fetch_command($reponse);
-		$user_idx=$donnees["idx"];
-		$_SESSION['acteur']=$user_idx; // utilisé par le upload en mode drag and drop 
-		$id=$donnees["id"];
-		$pw=$donnees["pw"];
-		$user_nom=$donnees["nom"];
-		$user_prenom=$donnees["prenom"];
-		$user_droit_org=$donnees["droit"];
-		
-		if (!isset($_SESSION['droit']))
-			$user_droit=$donnees["droit"];
-		else
-			$user_droit=$_SESSION['droit'];
-		$user_type_user=$donnees["type_user"];
-		$user_anniv=$donnees["anniv"];
-		$user_telephone=$donnees["telephone"];
-		$user_mail=$donnees["mail"];
-		$user_lecture=$donnees["lecture"];
-		$user_nationalite=$donnees["nationalite"];
-		$user_ville_nat=$donnees["ville_nat"];
-		$user_adresse=stripcslashes($donnees["adresse"]);
-		$user_organisme=stripcslashes($donnees["organisme"]);
-		$user_lang=$donnees["langue"];
-		if ($user_droit=="S")
-			$doc_autorise=doc_autorise($user_organisme);
-		else
-			$doc_autorise="";
-		}
-
-	if ( !isset($_SESSION['pass']) ||($_SESSION['pass']==false) || !(isset($_SESSION['user'])) || ($_SESSION['user']=="") )
-		// si pas de valeur pass en session on affiche le formulaire...
-		{
-		aff_logo("x");
-		debut_cadre();
-		echo "<br><TABLE><TR> <td> <img src=\"images/identification.png\"  width=\"50\" height=\"50\"  > </td> <td>";
-		echo "<TABLE><TR> <td><form class=\"center\"  method=\"post\"> ".traduire('Identifiant').": </td><td><input required type=\"text\" name=\"id\" value=\"\"/></td>";
-		echo "<TR> <td>".traduire('Mot de passe').": </td><td><input required  id=\"pwd2\"  type=\"password\" name=\"pass\"  autocomplete=\"off\" value=\"\"/>";
-		echo "<td><input type=\"checkbox\" onchange=\"document.getElementById('pwd2').type = this.checked ? 'text' : 'password'\"> ".traduire('Voir saisie')."<td>";
-		echo "<input  type=\"hidden\" name=\"action\" value=\"\"/></td>";
-		echo "<TR> <td></td><td><input type=\"submit\" value=\"".traduire('Se connecter')."\"/><p></td>";
-		echo "</form> </table> </table> ";
-		fin_cadre();
-		echo "<br>";
-		$msg_tech=parametre("DD_msg_1ere_page");
-		if ($msg_tech!="")
-			echo $msg_tech;
-		echo "<p><br><a href=\"index.php?action=dde_mdp\" > <img src=\"images/oubli.png\" width=\"35\" height=\"35\" > ".traduire('Si vous avez oublié votre mot de passe, cliquez ici.')." </a><p><p>";
-		echo "<p><br></center></div>";
-		pied_de_page();
-		} 
-	
-*/	
 	
 	$user=variable("user"); 
 	if ($user=="")
 		if (isset ($_SESSION['user']))	$user=$_SESSION['user']; else $user="";
+		
 	$memo=variable("memo");	
 	$filtre=variable("filtre");	
 	
@@ -3804,8 +3916,13 @@ if (isset($_POST['pass']))
 		$_SESSION['bene']=variable("user");
 	if ($action=="detail_user2")
 		{
-		$_SESSION['bene']=variable_get("user");	
-		$action="detail_user";
+		if (is_numeric(variable_get("user")))
+			{
+			$_SESSION['bene']=variable_get("user");	
+			$action="detail_user";
+			}
+		else
+			$action="";	
 		}
 
 	if ($action=="")
@@ -4077,14 +4194,14 @@ if (isset($_POST['pass']))
 		if (isset ($_SESSION['chgt_user']) && ($_SESSION['chgt_user']==true) )
 			msg_ok("Lecture seule");
 		echo "<td> <ul id=\"menu-bar\">";
-		echo "<li><a href=\"index.php?action=dx\"  > ".traduire('Déconnexion')."</a>";
+		echo "<li><a href=\"index.php?".token_ref("dx")."\"  > ".traduire('Déconnexion')."</a>";
 		echo "<ul >";
-		echo "<li><a href=\"index.php?action=modif_mdp\"  >".traduire('Modification mot de passe')."</a></li>";
-		echo "<li><a href=\"index.php?action=histo\"  > ".traduire('Historique')." </a></li>";
+		echo "<li><a href=\"index.php?".token_ref("modif_mdp")."\"  >".traduire('Modification mot de passe')."</a></li>";
+		echo "<li><a href=\"index.php?".token_ref("histo")."\"  > ".traduire('Historique')." </a></li>";
 		if ($user_droit=="")
 			{
-			echo "<li><a href=\"index.php?action=supp_compte_a_confirmer\"> ".traduire('Suppression compte')." </a></li>";
-			echo "<li><a href=\"index.php?action=exporter_a_confirmer\"> ".traduire('Tout archiver')." </a></li>";
+			echo "<li><a href=\"index.php?".token_ref("supp_compte_a_confirmer")."\"> ".traduire('Suppression compte')." </a></li>";
+			echo "<li><a href=\"index.php?".token_ref("exporter_a_confirmer")."\"> ".traduire('Tout archiver')." </a></li>";
 			}		
 			
 		if ($user_droit=="")
@@ -4105,9 +4222,10 @@ if (isset($_POST['pass']))
 		
 		echo "<tr><td><hr>";
 	
-		//    ?????     etrange que ce code soi au milieu de cette zone  ????  ==>> devrait être après
-		if ($action=="upload")
-			traite_upload($user_idx, $code_lecture, variable ("idx") );
+//    ?????     Etrange que ce code soit au milieu de cette zone  ????  ==>> devrait être après
+// de plus il n'est appelé par personne ==> mis en commentaire 
+//		if ($action=="upload")
+//			traite_upload($user_idx, $code_lecture, variable ("idx") );
 
 		//    ?????     etrange que ce code soi au milieu de cette zone  ????  ==>> devrait être AVANT
 		if ($action=="modif_tel")
@@ -4204,7 +4322,7 @@ if (isset($_POST['pass']))
 				if ($donnees = fetch_command($reponse))
 					{
 					$nom_slash=$donnees["nom"];
-					echo "<br><a href=\"suivi.php??action=suivi&nom=$nom_slash\">Accès au Suivi individuel de $nom_slash</a>";
+					echo "<br><a href=\"suivi.php?".token_ref("suivi")."&nom=$nom_slash\">Accès au Suivi individuel de $nom_slash</a>";
 					}
 
 				}		
@@ -4262,7 +4380,7 @@ if (isset($_POST['pass']))
 		pied_de_page();
 		}
 
-	
+
 	if (($action=="archivage_php") &&  ($user_droit=="E")) 
 		{
 		ajout_log_tech( "Archivage PHP et SQL" , "P2");
@@ -4434,45 +4552,55 @@ if (isset($_POST['pass']))
 		// !!!!!!!!!!!!! ZONE COMPLEXE  !!!!!!!!!!!
 		if (($_SESSION['bene']!="") && ($action!="") && ($action!="dde_acces") && ($user_droit=="S"))
 			{
-			if (($action!="ajout_admin") &&  ($action!="draganddrop") &&  ($action!="rdv") &&  ($action!="ajout_rdv"))
+			if (($action!="ajout_admin") 
+			&& ($action!="dossier")
+			&& ($action!="dossier_mail")
+			&& ($action!="illicite")
+			&& ($action!="creer_dossier") 
+			&& ($action!="envoyer_dossier") 
+			&&  ($action!="draganddrop") 
+			&&  ($action!="rdv") 
+			&&  ($action!="ajout_rdv"))
 				$action="detail_user";
 			$user=$_SESSION['bene'];
 			}
 		else
 			$_SESSION['bene']="";
-		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
 
 	if ($user_droit=="E") 
 			{
 			echo "<table><tr><td width=\"500\">";
 			echo " <ul id=\"menu-bar\">";
 			echo "<li><a href=\"index.php\"> Journaux </a><ul>";
-			echo "<li><a href=\"index.php?action=afflog_t\"> Log technique </a></li>";
-			echo "<li><a href=\"index.php?action=afflog\"> Log Fonctionnel</a></li>";		
+			echo "<li><a href=\"index.php?".token_ref("afflog_t")."\"> Log technique </a></li>";
+			echo "<li><a href=\"index.php?".token_ref("afflog")."\"> Log Fonctionnel</a></li>";		
 			echo "<li><a href=\"tmp/log.txt\"> Aujourd'hui</a></li>";		
 			echo "<li><a href=\"tmp/hier.txt\"> Hier</a></li>";		
 			echo "</li></ul>";			
-			echo "<li><a href=\"index.php?action=liste_compte\"> Liste User</a></li>";
-			echo "<li><a href=\"index.php?action=force_supervision_sms\"> Télécom</a><ul>";
+			echo "<li><a href=\"index.php?".token_ref("liste_compte")."\"> Liste User</a><ul>";
+			echo "<li><a href=\"index.php?".token_ref("visu_pages_users")."\"> Pages </a></li></ul>";
 			
-			echo "<li><a href=\"index.php?action=force_supervision_sms\"> Supervision SMS à la demande </a></li>";
-			echo "<li><a href=\"index.php?action=active_sms2mail\">  active_sms2mail </a></li>";
-			echo "<li><a href=\"index.php?action=desactive_sms2mail\"> desactive_sms2mail </a></li>";		
-			echo "<li><a href=\"index.php?action=sms_test\"> Envoi SMS </a></li>";		
-			echo "<li><a href=\"index.php?action=sms_test_ovh\"> Envoi SMS OVH </a></li>";		
+			echo "<li><a href=\"index.php?".token_ref("force_supervision_sms")."\"> Télécom</a><ul>";
+			
+			echo "<li><a href=\"index.php?".token_ref("force_supervision_sms")."\"> Supervision SMS à la demande </a></li>";
+			echo "<li><a href=\"index.php?".token_ref("active_sms2mail")."\">  active_sms2mail </a></li>";
+			echo "<li><a href=\"index.php?".token_ref("desactive_sms2mail")."\"> desactive_sms2mail </a></li>";		
+			echo "<li><a href=\"index.php?".token_ref("sms_test")."\"> Envoi SMS </a></li>";		
+			echo "<li><a href=\"index.php?".token_ref("sms_test_ovh")."\"> Envoi SMS OVH </a></li>";		
 			echo "</li></ul>";			
 			
 			echo "<li> <a href=\"index.php\">CTRL</a><ul>";			
 
-			echo "<li><a href=\"index.php?action=en_trop\"> Fichiers en trop </a></li>";
-			echo "<li><a href=\"index.php?action=authenticite \"> Aunthenticité </a></li>";
-			echo "<li><a href=\"index.php?action=mini_pdf\"> Miniature PDF </a></li>";
-			echo "<li><a href=\"index.php?action=integrite \"> Intégrité BdD </a></li>";
-			echo "</ul><li> <a href=\"index.php?action=param_sys\">Paramètrage</a><ul>";			
+			echo "<li><a href=\"index.php?".token_ref("en_trop")."\"> Fichiers en trop </a></li>";
+			echo "<li><a href=\"index.php?".token_ref("authenticite")." \"> Aunthenticité </a></li>";
+			echo "<li><a href=\"index.php?".token_ref("mini_pdf")."\"> Miniature PDF </a></li>";
+			echo "<li><a href=\"index.php?".token_ref("integrite")."integrite \"> Intégrité BdD </a></li>";
+			echo "</ul><li> <a href=\"index.php?".token_ref("param_sys")."\">Paramètrage</a><ul>";			
 
-			echo "<li><a href=\"index.php?action=phpinfo\"> Phpinfo </a></li>";
-			echo "<li><a href=\"index.php?action=archivage_php\"> Archivage Php+Sql </a></li>";
-			echo "<li><a href=\"index.php?action=cmd_sql\"> Commande Sql </a></li>";
+			echo "<li><a href=\"index.php?".token_ref("phpinfo")."\"> Phpinfo </a></li>";
+			echo "<li><a href=\"index.php?".token_ref("archivage_php")."\"> Archivage Php+Sql </a></li>";
+			echo "<li><a href=\"index.php?".token_ref("cmd_sql")."\"> Commande Sql </a></li>";
 			echo "</ul></ul >";
 			echo "<td></table>";
 
@@ -4483,7 +4611,7 @@ if (isset($_POST['pass']))
 			{
 			echo "<table><tr><td width=\"400\">";
 			echo " <ul id=\"menu-bar\">";
-			echo "<li><a href=\"index.php?action=init_formation\"> Init comptes </a></li>";			
+			echo "<li><a href=\"index.php?".token_ref("init_formation")."\"> Init comptes </a></li>";			
 			echo "</ul>";
 			echo "<td></table>";
 			}	
@@ -4615,13 +4743,62 @@ if (isset($_POST['pass']))
 				$mail=$donnees["mail"];
 				$tel=$donnees["telephone"];
 				$droit=$donnees["droit"];
-				echo "<tr><td>  $idx1 </td><td> $creation </td><td>  <a href=\"index.php?action=chgt_user&user=$idx1\"> $id </a></td><td> $nom </td><td> $prenom </td><td> $mail </td><td> $tel </td><td> $droit </td>";
+				echo "<tr><td>  $idx1 </td><td> $creation </td><td>  <a href=\"index.php?".token_ref("chgt_user")."&user=$idx1\"> $id </a></td><td> $nom </td><td> $prenom </td><td> $mail </td><td> $tel </td><td> $droit </td>";
 				lien_c ("images/illicite.png", "raz_mdp1", param("idx","$idx1" ) , traduire("Raz MdP"));
 				}
 			echo "</table></div>";
 			pied_de_page("x");
 			}	
 
+				
+	if ( ($action=="visu_pages_users") && ($user_droit=="E"))
+			{
+			echo "</table><div class=\"CSSTableGenerator\" > ";
+			echo "<table><tr><td > ".traduire('Utilisateur')."  </td><td> ".traduire('Date')."</td>";
+			$reponse =command("select * from  r_pages_users_debug order by tps_exec desc");		
+			while ($donnees = fetch_command($reponse) ) 
+				{
+				$idx1=$donnees["idx_user"];	
+				$tps_exec=$donnees["tps_exec"];
+				echo "<tr><td>  ".libelle_user($idx1)." </td><td> <a target=_blank href=\"index.php?".token_ref("visu_page")."&user=$idx1&tps_exec=$tps_exec\"> ".date ("d/m/Y H:i's",$tps_exec)." </a></td>";
+				}
+			echo "</table></div>";
+			pied_de_page("x");
+			}	
+
+				
+	if ( ($action=="visu_page") && ($user_droit=="E"))
+			{
+			$idx1=variable_s("user");	
+			$tps_exec=variable_s("tps_exec");
+			$reponse =command("select * from  r_pages_users_debug where idx_user=$idx1 and tps_exec=$tps_exec");		
+			if ($donnees = fetch_command($reponse))
+				{
+				ob_end_clean();
+				echo "<H1>VISU PAGE ".libelle_user($idx1);
+				
+				$r1 =command("select * from  r_pages_users_debug where idx_user=$idx1 and tps_exec<$tps_exec order by tps_exec desc");		
+				if ($d1 = fetch_command($r1))
+					{
+					$tps_exec1=$d1["tps_exec"];
+					echo "<a href=\"index.php?".token_ref("visu_page")."&user=$idx1&tps_exec=$tps_exec1\"> ".date ("H:i's",$tps_exec1)." </a> - ";
+					}
+				
+				echo date ("d/m/Y H:i's",$tps_exec);
+
+				$r1 =command("select * from  r_pages_users_debug where idx_user=$idx1 and tps_exec>$tps_exec order by tps_exec asc");		
+				if ($d1 = fetch_command($r1))
+					{
+					$tps_exec1=$d1["tps_exec"];
+					echo "- <a href=\"index.php?".token_ref("visu_page")."&user=$idx1&tps_exec=$tps_exec1\"> ".date ("H:i's",$tps_exec1)."  </a>";
+					}				
+			
+				echo "</H1><hr>";
+				echo $donnees["resultat"];	
+				ob_end_flush();
+				exit();
+				}
+			}	
 			
 		if (($action=="afflog") &&  ($user_droit=="E"))
 			{
@@ -4810,9 +4987,9 @@ if (isset($_POST['pass']))
 			$idx=variable_get('idx');
 			$mail=mail_user($idx);
 			$body= traduire('Création de compte sur \'Doc-depot.com\':');
-			$body .= "<p>".traduire("Pour accepter et finaliser la création de votre compte sur 'Doc-depot.com', merci de cliquer sur ce")." <a  id=\"lien\"  href=\"".serveur."index.php?action=finaliser_user&idx=".addslashes(encrypt($idx))."\">".traduire('lien')." </a> ".traduire('et compléter les informations manquantes.');            
+			$body .= "<p>".traduire("Pour accepter et finaliser la création de votre compte sur 'Doc-depot.com', merci de cliquer sur ce")." <a  id=\"lien\"  href=\"".serveur."index.php?".token_ref("finaliser_user")."&idx=".addslashes(encrypt($idx))."\">".traduire('lien')." </a> ".traduire('et compléter les informations manquantes.');            
 			
-			$body .="<br><br>".traduire("Si le lien ne fonctionne pas, recopiez dans votre navigateur internet cette adresse : ")."<br>".serveur."index.php?action=finaliser_user&idx=".addslashes(encrypt($idx));
+			$body .="<br><br>".traduire("Si le lien ne fonctionne pas, recopiez dans votre navigateur internet cette adresse : ")."<br>".serveur."index.php?".token_ref("finaliser_user")."&idx=".addslashes(encrypt($idx));
 
 			
 			$body .= "<p>".traduire('Message de la part de')." $user_prenom $user_nom";
@@ -4946,7 +5123,7 @@ if (isset($_POST['pass']))
 		if (($action=="supp_compte_a_confirmer") && ($user_droit==""))
 			{
 			echo "<hr><p><br><p><center>".traduire('Attention, vous avez demandé la suppression de votre compte.');
-			echo "<p>".traduire('Il est vivement recommandé de faire une sauvegarde de tous vos documents, photos et notes/sms en cliquant sur')." <a href=\"index.php?action=exporter_a_confirmer\">".traduire('ce lien')." </a>";
+			echo "<p>".traduire('Il est vivement recommandé de faire une sauvegarde de tous vos documents, photos et notes/sms en cliquant sur')." <a href=\"index.php?".token_ref("exporter_a_confirmer")."\">".traduire('ce lien')." </a>";
 			echo traduire("puisqu'en supprimant le compte l'ensemble des informations et contenu sera détruit et que cette action est irreversible.");
 			debut_cadre("700");
 			echo "<p><br>".traduire('Si vous voulez confimer la suppression du compte, il faut saisir à nouveau votre mot de passe');
@@ -5252,7 +5429,7 @@ if (isset($_POST['pass']))
 	if ( ($user_droit=="S") && ($action=="verif_user") )
 			{
 			echo "<table><tr><td width> <ul id=\"menu-bar\">";
-			echo "<li><a href=\"index.php?action=verif_user\"  > ".traduire('Vérification existence')." </a></li>";
+			echo "<li><a href=\"index.php?".token_ref("verif_user")."\"  > ".traduire('Vérification existence')." </a></li>";
 			echo "</ul></td></table>";
 			
 			echo "<p><center><table><tr>";
@@ -5265,9 +5442,9 @@ if (isset($_POST['pass']))
 				{
 				$reponse = command("select * from r_user where nom='$nom' and prenom='$prenom' and anniv='$anniv' and droit='' ");
 				if ($donnees = fetch_command($reponse) )
-					echo"<td ALIGN=\"CENTER\" BGCOLOR=\"lightgreen\" ><br>Il existe un compte avec ces informations. Cliquez <a href=\"index.php?action=dde_identifiant\">ici</a> pour récupérer son compte<p>";
+					echo"<td ALIGN=\"CENTER\" BGCOLOR=\"lightgreen\" ><br>Il existe un compte avec ces informations. Cliquez <a href=\"index.php?".token_ref("dde_identifiant")."\">ici</a> pour récupérer son compte<p>";
 				else
-					echo "<td ALIGN=\"CENTER\" BGCOLOR=\"yellow\" ><br>Il n'existe pas de compte avec ces informations. Cliquez <a href=\"index.php?action=ajout_beneficiaire\">ici</a> pour créer un compte<p>";
+					echo "<td ALIGN=\"CENTER\" BGCOLOR=\"yellow\" ><br>Il n'existe pas de compte avec ces informations. Cliquez <a href=\"index.php?".token_ref("ajout_beneficiaire")."\">ici</a> pour créer un compte<p>";
 				}
 			else
 				if (($nom!="") || ($prenom!="") || ($anniv!=""))
@@ -5280,11 +5457,11 @@ if (isset($_POST['pass']))
 	if ( ($user_droit=="S") && ($action=="verif_existe_user") )
 			{
 			echo "<table><tr><td width> <ul id=\"menu-bar\">";
-			echo "<li><a href=\"index.php?action=verif_user\"  > ".traduire('Vérification existence')." </a></li>";
+			echo "<li><a href=\"index.php?".token_ref("verif_user")."\"  > ".traduire('Vérification existence')." </a></li>";
 			echo "</ul></td></table>";
 			verif_existe_user();
 			}
-		
+
 	// signalement d'un contenu illicite
 	if ($action=="illicite")
 			{
@@ -5313,14 +5490,43 @@ if (isset($_POST['pass']))
 				}
 			$action=variable('retour');
 			}			
+		
+//	if (($action=="dossier") && ($user_droit=="") )
+	if ($action=="dossier") 
+			{
+			if ($_SESSION['bene']=="")
+				dossier("A-$user_idx");
+			else
+				dossier("A-".$_SESSION['bene']);			
+			}
 			
-	if (($action=="dossier") && ($user_droit=="") )
-			dossier("A-$user_idx");
-			
-	if ( ($action=="creer_dossier") && ($user_droit=="") )
-		creer_dossier("A-$user_idx");	
+//	if ( ($action=="creer_dossier") && ($user_droit=="") )
+	if ($action=="creer_dossier")
+			{
+			if ($_SESSION['bene']=="")
+				creer_dossier("A-$user_idx");	
+			else
+				creer_dossier("A-".$_SESSION['bene']);		
+			}	
 
-	
+	if ($action=="envoyer_dossier")
+			{
+			if ($_SESSION['bene']=="")
+				$resul=envoyer_dossier("A-$user_idx");	
+			else
+				$resul=envoyer_dossier("A-".$_SESSION['bene']);		
+			if ($resul==false)
+				$action="dossier_mail";
+			}	
+			
+	if ($action=="dossier_mail")
+			{
+			if ($_SESSION['bene']=="")
+				dossier_mail("A-$user_idx");	
+			else
+				dossier_mail("A-".$_SESSION['bene']);		
+			}	
+			
 	if ( ( ($user_droit=="S") ) && ($action=="detail_user"))
 			{
 			affiche_titre_user($user);
@@ -5342,9 +5548,16 @@ if (isset($_POST['pass']))
 				echo "<td><input type=\"hidden\" name=\"bene\" value=\"$qui\"> " ;
 				echo "<input type=\"hidden\" name=\"autorise\" value=\"$user_idx\"> " ;
 				if ($code=="")
-					echo "<input type=\"hidden\" name=\"action\" value=\"autorise_recup_mdp\"><input type=\"submit\"  id=\"autorise_recup_mdp\"  value=\"".traduire('Autoriser après controle d\'identité')."\"/> " ;
+					{
+					token("autorise_recup_mdp");
+					echo "<input type=\"submit\"  id=\"autorise_recup_mdp\"  value=\"".traduire('Autoriser après controle d\'identité')."\"/> " ;
+					}
 				else
-					echo "<td> ".traduire('Code à communiquer <u>après vérification identité')."</u>: '<strong>$code</strong>' </td><td> (Valable jusqu'au $date_auto) </td><td>  <input type=\"hidden\" name=\"action\" value=\"supp_recup_mdp\"> <input type=\"submit\"  id=\"supp_recup_mdp\" value=\"".traduire('Supprimer accès')."\"/>" ;
+					{
+					echo "<td> ".traduire('Code à communiquer <u>après vérification identité')."</u>: '<strong>$code</strong>' </td><td> (Valable jusqu'au $date_auto) </td><td>";
+					token("supp_recup_mdp");
+					echo "<input type=\"submit\"  id=\"supp_recup_mdp\" value=\"".traduire('Supprimer accès')."\"/>" ;
+					}
 				echo "</form>  </td>";	
 				}
 			}
@@ -5455,7 +5668,7 @@ if (isset($_POST['pass']))
 					if (($user_droit=="S")  && ($action!="ajout_photo"))
 						{
 						echo "<table><tr><td> <img src=\"images/referent.png\" width=\"35\" height=\"35\" ></td><td><ul id=\"menu-bar\">";
-						echo "<li><a href=\"index.php?action=collegues\" > ".traduire('Mes Collègues')." </a></li>";
+						echo "<li><a href=\"index.php?".token_ref("collegues")."\" > ".traduire('Mes Collègues')." </a></li>";
 						echo "</ul></td></table><hr>";
 						}
 					}

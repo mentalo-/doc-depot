@@ -256,13 +256,16 @@
 					
 					if ($_SERVER['REMOTE_ADDR']!="127.0.0.1")
 						{
+						genere_miniature_pdf("upload_pdf/$idx.$n" , "upload_mini/$idx.$n" ,250 );
+						/*
 						exec ( "/usr/bin/convert -density 100 upload_pdf/$idx.$n upload_mini/_$idx.$n.jpg" ) ;
 						$hauteur=250;
 						imagethumb("upload_mini/_$idx.$n.jpg","upload_mini/$idx.$n.jpg",$hauteur);
+						supp_fichier("upload_mini/_$idx.$n.jpg");
+						*/	
 						if ($_SESSION['droit']!='')
 							met_point_vert("$idx.$n.jpg");
 						met_cadenas("$idx.$n.jpg");	
-						supp_fichier("upload_mini/_$idx.$n.jpg");
 						}
 					if ($pw!="")
 						pdfEncrypt("upload_pdf/$idx.$n", decrypt($pw) , "upload_prot/$idx.$n","P" );
@@ -576,4 +579,21 @@ function rotateImage($sourceFile,$destImageName,$degreeOfRotation)
 		rename ("upload_mini/_$image","upload_mini/$image");
 		
 		}
+			
+	function genere_miniature_pdf($source, $dest, $hauteur=100)
+		{
+		exec ( "/usr/bin/convert -density 100 $source $source.jpg" ) ;  // si PDF et sur serveur OVH alors on crée une miniature
+			
+		// cas d'un pdf avec plusieurs pasges : ==> On n egarde que la 1ere
+		if (file_exists("$source-0.jpg"))
+			{
+			rename ("$source-0.jpg", "$source.jpg");
+			for ($i=1; $i<10; $i++)
+				supp_fichier("$source-$i.jpg");
+			}
+		imagethumb("$source.jpg","$dest.jpg", $hauteur);
+		supp_fichier("$source.jpg");
+	
+		}
+	
 	?> 

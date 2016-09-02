@@ -4,9 +4,16 @@ session_start();
 error_reporting(E_ALL | E_STRICT);
 
 include 'general.php';
+require_once 'include_crypt.php';
+
+	$token=variable("token");	
+	if ($token!="")	
+		$action=verifi_token($token,variable("action"));
+	else
+		$action=variable("action");		
 
 if ( isset($_SESSION['pass']) && ($_SESSION['pass']==true) )
-	switch (variable_s('action'))
+	switch ($action)
 		{
 		case "exporter":	
 			include "connex_inc.php";
@@ -173,7 +180,6 @@ if ( isset($_SESSION['pass']) && ($_SESSION['pass']==true) )
 			break;
 			
 		case "visu_image_mini":
-		
 			switch( extension_fichier(variable_s("nom")) ) 
 				{
 				case "jpg": case "jpeg" :

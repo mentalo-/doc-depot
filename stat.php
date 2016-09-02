@@ -17,15 +17,6 @@ include 'general.php';
 include 'suivi_liste.php';
 
 		
-	function mise_en_forme_date_aaaammjj( $date_jour)
-		{
-		$d3= explode("/",$date_jour);  
-		$a=$d3[2];
-		$m=$d3[1];
-		$j=$d3[0];
-			
-		return( "$a-$m-$j" );
-		}
 
 	function date_fr($d)
 		{
@@ -92,24 +83,29 @@ include 'suivi_liste.php';
 			// ConnexiondD		
 		include "connex_inc.php";	
 
-		$detail=isset ($_GET["detail"]);
+		$token=variable("token");	
+		if ($token!="")	
+			$action=verifi_token($token,variable("action"));
+		else
+			$action=variable("action");		
+
+		$detail=isset ($_POST["detail"]);
 		
-		if (!isset ($_GET["date_jour"]))
+		if (!isset ($_POST["date_jour"]))
 			$date_jour=date($format_date,  mktime(0,0,0 , date("m")-1, date("d"), date ("Y")));
 		else 
-			$date_jour=$_GET["date_jour"];
+			$date_jour=$_POST["date_jour"];
 
-		if (!isset ($_GET["date_fin"]))
+		if (!isset ($_POST["date_fin"]))
 			$date_fin=date($format_date,  mktime(0,0,0 , date("m"), date("d"), date ("Y")));
 		else 
-			$date_fin=$_GET["date_fin"];		
+			$date_fin=$_POST["date_fin"];		
 
 				// ===================================================================== Bloc DATE
 				echo "<table border=\"0\" >";
 				echo "<td> <a href=\"\"> <img src=\"images/fissa.jpg\" width=\"140\" height=\"100\"  >  <a> </td>   ";
 				echo "<td> Debut:</td> <td> ";
-				echo "<form method=\"GET\" action=\"stat.php\">";
-				echo "<input type=\"hidden\" name=\"action\" value=\"date\"> " ;	
+				formulaire("date") ;	
 				echo "<input type=\"text\" name=\"date_jour\" size=\"10\" value=\"$date_jour\" class=\"calendrier\">";
 				echo "</td> <td> ";
 				
@@ -121,13 +117,11 @@ include 'suivi_liste.php';
 				
 				// ===================================================================== Bloc DATE
 				echo "</td> <td> ";
-				echo "<form method=\"GET\" action=\"stat.php\">";
-				echo "<input type=\"hidden\" name=\"action\" value=\"date\"> " ;	
-				echo "<input type=\"hidden\" name=\"date_jour\" value=\"$date_jour\">";
-				echo "<input type=\"hidden\" name=\"date_fin\" value=\"$date_fin\">";
-
+				formulaire("date") ;	
+				echo param("date_jour","$date_jour"); 
+				echo param("date_fin","$date_fin"); 
 				if (!$detail) 
-					echo "<input type=\"hidden\" name=\"detail\" value=\"\"> " ;	
+					echo param("detail","") ;	
 				echo "</td> <td> ";
 				if (!$detail) 
 					echo "<input type=\"submit\" value=\"Historique (par mois)\" >  ";
@@ -749,7 +743,12 @@ include 'suivi_liste.php';
 						echo "<td ALIGN=\"RIGHT\" bgcolor=\"$color\"> - </td>";				
 					else
 						aff($freq[$i]/$nb[$i]);	
-				aff($memo_freq/$memo_nb);						
+				if ($memo_nb>0)
+					aff($memo_freq/$memo_nb);
+				else
+					aff(0);
+
+					
 				}
 	
 

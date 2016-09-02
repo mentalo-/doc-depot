@@ -35,7 +35,7 @@ include 'calendrier.php';
 include 'general.php';
 include 'inc_style.php';	 
 	
-		if (isset ($_GET["action"])) $action=$_GET["action"]; else  	$action="";	
+//		if (isset ($_GET["action"])) $action=$_GET["action"]; else  	$action="";	// inutile
 		
 		if (isset ($_GET["nom"]))
 			{
@@ -87,25 +87,6 @@ include 'inc_style.php';
 		}
 
 	
-
-		
-	function mise_en_forme_date_aaaammjj( $date_jour)
-		{
-		if (substr_count($date_jour,"/")!=2)
-			return("");
-		$d3= explode("/",$date_jour);  
-		if (isset($d3[2]))
-			$a=$d3[2];
-		else
-			$a=date("Y");
-		if ($a<100) $a+=2000;
-		$m=$d3[1];
-		$j=$d3[0];	
-		if (($j<1) || ($j>31) || ($m<1) || ($m>12) )
-			return("");
-		
-		return( "$a-$m-$j" );
-		}
 		
 	function histo($nom,$detail)
 		{
@@ -179,7 +160,7 @@ include 'inc_style.php';
 					else
 						$partenaire="";
 						
-					echo "<tr><td bgcolor=\"$color\"><b><a href=\"suivi.php?action=accompagnement&nom=$nom&date_jour=$d\" > $d </a> </td><td bgcolor=\"$color\">$p </td><td bgcolor=\"$color\"> <b>$act</b> </td><td bgcolor=\"$color\">$rep $partenaire <br>$c </td><td bgcolor=\"$color\">$user "; 
+					echo "<tr><td bgcolor=\"$color\"><b><a href=\"suivi.php?".token_ref("accompagnement")."&nom=$nom&date_jour=$d\" > $d </a> </td><td bgcolor=\"$color\">$p </td><td bgcolor=\"$color\"> <b>$act</b> </td><td bgcolor=\"$color\">$rep $partenaire <br>$c </td><td bgcolor=\"$color\">$user "; 
 
 					}
 				else
@@ -194,18 +175,6 @@ include 'inc_style.php';
 		echo "</table>";
 		}
 	
-	function liste_participants_activite( $act, $date )
-		{
-		global $bdd;
-
-		$ret="";
-		
-		$reponse = command("SELECT * FROM $bdd WHERE date='$date' and (activites like '%$act%') group by nom ASC "); 
-		while ($donnees = fetch_command($reponse) )
-			$ret.=stripcslashes($donnees["nom"]).", ";
-	
-		return($ret);
-		}
 		
 	function affiche_rdv($nom)
 		{
@@ -308,7 +277,7 @@ include 'inc_style.php';
 				$nu++;
 				}		
 			$n_court=stripcslashes($n);
-			echo "<a href=\"suivi.php?action=suivi&nom=$n\">$n_court</a>; " ;
+			echo "<a href=\"suivi.php?".token_ref("suivi")."&nom=$n\">$n_court</a>; " ;
 			}
 
 		if ( $nu!=0) 
@@ -331,9 +300,8 @@ include 'inc_style.php';
 		$val="";
 
 		echo "<td> <b> $titre </b> : </td><td>";
-		echo "<form method=\"GET\" action=\"suivi.php\">";
-		echo "<input type=\"hidden\" name=\"action\" value=\"$libelle\"> " ;
-		echo "<input type=\"hidden\" name=\"nom\"  value=\"$nom\">";
+		formulaire("$libelle") ;
+		echo param ("nom","$nom");
 		echo "<input type=\"text\" name=\"telephone\"  value=\"$val\"  onChange=\"this.form.submit();\">";
 		echo "</form> </td>";
 		}
@@ -424,7 +392,12 @@ include 'inc_style.php';
 	// ConnexiondD
 	include "connex_inc.php";
 	
-	$action=variable_s("action");	
+	$token=variable("token");	
+	if ($token!="")	
+		$action=verifi_token($token,variable("action"));
+	else
+		$action=variable("action");		
+	//$action=variable_s("action");	
 	require_once 'cx.php';
 	
 	$reponse = command("SELECT * FROM fct_fissa WHERE support='$bdd' "); 
@@ -454,7 +427,7 @@ include 'inc_style.php';
 		$_SESSION['bene']="";
 		
 		$memo=variable_s("memo");
-		$action=variable_s("action");
+
 		if ($action=="")
 			$action="suivi";
 		$pda=variable_s("pda");
@@ -470,18 +443,16 @@ include 'inc_style.php';
 			}
 
 
-		if (!isset ($_GET["date_jour"]))
-			$date_jour=date('d/m/Y');
-		else 
-			{
-			$date_jour=variable_s("date_jour");
-			if ( mise_en_forme_date_aaaammjj($date_jour)=="")
-				{
-				erreur("Format de date incorrect");
-				$action="";
+			$date_jour=variable_s("date_jour");		
+			if ($date_jour=="")
 				$date_jour=date('d/m/Y');
-				}
-			}
+			else
+				if ( mise_en_forme_date_aaaammjj($date_jour)=="")
+					{
+					erreur("Format de date incorrect");
+					$action="";
+					$date_jour=date('d/m/Y');
+					}
 			
 		if ($action=="nouveau2")
 			{
@@ -502,8 +473,7 @@ include 'inc_style.php';
 
 		// =====================================================================loc Histo
 		echo "<td>Suivi de <br>";
-		echo "<form method=\"GET\" action=\"suivi.php\" >";
-		echo "<input type=\"hidden\" name=\"action\" value=\"suivi\"> " ;
+		formulaire("suivi");
 		echo "<SELECT name=nom onChange=\"this.form.submit();\">";
 		echo "<OPTION  VALUE=\"\">  </OPTION>";
 		$reponse = command("SELECT * FROM $bdd WHERE nom<>'Mail' group by nom "); 			
@@ -530,7 +500,7 @@ include 'inc_style.php';
 		// =====================================================================loc RAPPORT
 		echo "<td width=\"150\"><p><center>";
 		echo "<ul id=\"menu-bar\">";
-		echo "<li><a href=\"index.php?action=dx\">Deconnexion</a>";
+		echo "<li><a href=\"index.php?".token_ref("dx")."\">Deconnexion</a>";
 		if ($_SESSION['droit']=='R') 
 			{
 			echo "<ul ><li><a href=\"export_suivi.php\" target=_blank>Export des Suivis</a> ";
@@ -604,11 +574,11 @@ include 'inc_style.php';
 					$date=$donnees["date"];
 					$qte=$donnees["qte"];
 					$ic+=$qte;
+					// Attention : cette commande génére un message d'erreur sur poste local
 					$reponse = command("UPDATE $bdd set qte='0', pres_repas='Remise courrier', commentaire='$qte courrier(s) remis le $date_jour_gb', modif='$modif', user='$user' where date='$date' and nom='$nom_slash' and pres_repas='Arrivée courrier' ");
 					}
 					
 				$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom_slash', '$date_jour_gb', 'Relevé courrier',' $ic courrier(s) remis','$user','$modif','','1')");					
-
 				$action="suivi";
 				}
 						
@@ -747,7 +717,7 @@ include 'inc_style.php';
 					
 					echo "<table><tr> <td >";
 					echo "<ul id=\"menu-bar\">";					
-					echo "<li><a href=\"suivi.php?action=suivi&nom=$nom\" > <b> $nom </b> </a></li>";
+					echo "<li><a href=\"suivi.php?".token_ref("suivi")."&nom=$nom\" > <b> $nom </b> </a></li>";
 					echo "</ul></td>";
 					if (!(strstr($nom,"(M)")))
 						echo "<td> - 1ere visite : $premiere_visite </td>";
@@ -861,9 +831,9 @@ include 'inc_style.php';
 									else 
 										$age="";
 									echo "<b> Date naissance </b> : </td>";
-									echo " <td><TABLE><TR> <td><form method=\"GET\" action=\"suivi.php\">";
-									echo "<input type=\"hidden\" name=\"action\" value=\"age\"> " ;
-									echo "<input type=\"hidden\" name=\"nom\"  value=\"$nom\">";
+									echo " <td><TABLE><TR> <td>";
+									formulaire("age");
+									echo param ("nom","$nom");
 									echo "<input type=\"text\" name=\"age\" size=\"10\"  value=\"$age\"  onChange=\"this.form.submit();\">";
 									echo "</form> </td> <td>jj/mm/aaaa </td></table> </td>";	
 									
@@ -884,12 +854,10 @@ include 'inc_style.php';
 
 								echo "<tr> <td> <b> Portable </b> : ";
 								if ( VerifierPortable($tel )  )
-										echo "<a href=\"index.php?action=sms_test&tel=$tel\" > <img src=\"images/sms.png\" width=\"30\" height=\"30\" title=\"Envoyer SMS\"></a>";
+										echo "<a href=\"index.php?".token_ref("sms_test")."&tel=$tel\" > <img src=\"images/sms.png\" width=\"30\" height=\"30\" title=\"Envoyer SMS\"></a>";
 								echo "</td><td>";
-								
-								echo "<form method=\"GET\" action=\"suivi.php\">";
-								echo "<input type=\"hidden\" name=\"action\" value=\"telephone\"> " ;
-								echo "<input type=\"hidden\" name=\"nom\"  value=\"$nom\">";
+								formulaire("telephone");
+								echo param ("nom","$nom");
 								echo "<input type=\"text\" name=\"telephone\"  value=\"$tel\"  onChange=\"this.form.submit();\">";
 								echo "</form> ";
 
@@ -903,11 +871,10 @@ include 'inc_style.php';
 									$mail="";
 								echo "<td> <b> Mail </b> : ";
 								if ( VerifierAdresseMail($mail )  )
-										echo "<a href=\"index.php?action=mail_test&mail=$mail\" > <img src=\"images/mail2.png\" width=\"30\" height=\"30\" title=\"Envoyer Mail\"></a>";
+										echo "<a href=\"index.php?".token_ref("mail_test")."&mail=$mail\" > <img src=\"images/mail2.png\" width=\"30\" height=\"30\" title=\"Envoyer Mail\"></a>";
 								echo "</td><td>";
-								echo "<form method=\"GET\" action=\"suivi.php\">";
-								echo "<input type=\"hidden\" name=\"action\" value=\"mail\"> " ;
-								echo "<input type=\"hidden\" name=\"nom\"  value=\"$nom\">";
+								formulaire("mail");
+								echo param ("nom","$nom");
 								echo "<input type=\"text\" name=\"mail\" size=\"40\"  value=\"$mail\"  onChange=\"this.form.submit();\">";
 								echo "</form></td> ";
 								
@@ -921,9 +888,8 @@ include 'inc_style.php';
 								else 
 									$adresse="";
 								echo "<tr><td> <b> Adresse </b> : </td><td>";
-								echo "<form method=\"GET\" action=\"suivi.php\">";
-								echo "<input type=\"hidden\" name=\"action\" value=\"adresse\"> " ;
-								echo "<input type=\"hidden\" name=\"nom\"  value=\"$nom\">";
+								formulaire("adresse");
+								echo param ("nom","$nom");
 								echo "<input type=\"text\" name=\"adresse\" size=\"80\"  value=\"$adresse\"  onChange=\"this.form.submit();\">";
 								echo "</form> </td>";														
 								}
@@ -934,9 +900,8 @@ include 'inc_style.php';
 							else 
 								$PE="";
 							echo "<tr><td> <b> Commentaire </b> : </td><td>";
-							echo "<form method=\"GET\" action=\"suivi.php\">";
-							echo "<input type=\"hidden\" name=\"action\" value=\"PE\"> " ;
-							echo "<input type=\"hidden\" name=\"nom\"  value=\"$nom\">";
+							formulaire("PE");
+							echo param ("nom","$nom");
 							echo "<input type=\"text\" name=\"PE\" size=\"80\"  value=\"$PE\"  onChange=\"this.form.submit();\">";
 							echo "</form> </td>";
 							echo "</table>";
@@ -958,19 +923,19 @@ include 'inc_style.php';
 							echo "<table>";
 							
 							echo "<tr><td> </td><td><ul id=\"menu-bar\">";					
-							echo "<li><a href=\"suivi.php?action=suivi&nom=$nom\"> Domiciliation </a> ";
-							echo "<ul><li><a href=\"suivi.php?nom=$nom&action=releve\">Relevé du courrier</a>";
+							echo "<li><a href=\"suivi.php?".token_ref("suivi")."&nom=$nom\"> Domiciliation </a> ";
+							echo "<ul><li><a href=\"suivi.php?nom=$nom&".token_ref("releve")."\">Relevé du courrier</a>";
 
 							$val_init=0;
 							$r2 = command("SELECT * FROM $bdd WHERE nom='$nom_slash' and pres_repas='alertecourrier' "); 
 							if ($d2 = fetch_command($r2))
 								$val_init=$d2["commentaire"];
 							if ($val_init>0)
-								echo "<li><a href=\"suivi.php?nom=$nom&action=alertecourrier&alerte=\">Désactiver alerte SMS </a>";
+								echo "<li><a href=\"suivi.php?nom=$nom&".token_ref("alertecourrier")."&alerte=\">Désactiver alerte SMS </a>";
 							else
-								echo "<li><a href=\"suivi.php?nom=$nom&action=alertecourrier&alerte=2\">Activer alerte SMS </a>";
+								echo "<li><a href=\"suivi.php?nom=$nom&".token_ref("alertecourrier")."&alerte=2\">Activer alerte SMS </a>";
 								
-							echo "<li><a href=\"suivi.php?nom=$nom&action=Arrivée courrier\">Arrivée d'un courrier (+1)</a>";						
+							echo "<li><a href=\"suivi.php?nom=$nom&".token_ref("Arrivée courrier")."\">Arrivée d'un courrier (+1)</a>";						
 
 							echo "</ul>  </ul>  </td><tr> ";	
 							$ic=0;
@@ -1013,9 +978,9 @@ include 'inc_style.php';
 						{
 						$_SESSION['nom_suivi']=$nom;
 						echo "<ul id=\"menu-bar\">";					
-						echo "<li><a href=\"suivi.php?action=charge&nom=$nom\" >Chargement d'images </a></li>";
+						echo "<li><a href=\"suivi.php?".token_ref("charge")."&nom=$nom\" >Chargement d'images </a></li>";
 						echo "</ul><br>";	
-						echo "<form action=\"upload_suivi.php\" method=\"GET\"  class=\"dropzone\" id=\"my-awesome-dropzone\" >";
+						echo "<form action=\"upload_suivi.php\" method=\"POST\"  class=\"dropzone\" id=\"my-awesome-dropzone\" >";
 						echo "</form>";	
 						pied_de_page();
 						}						
@@ -1049,6 +1014,10 @@ include 'inc_style.php';
 						$user= $_SESSION['user'];
 						$modif=time();
 						$reponse = command("UPDATE $bdd set qte='-2' , user='$user' , modif='$modif' where  nom='$nom' and pres_repas='__upload' and commentaire='$fichier' ");
+						// ATTENTION: faut il supprimer le fichier  .?????
+						supp_fichier("suivi/$fichier");
+						supp_fichier("suivi_mini/$fichier");
+						supp_fichier("suivi_mini/$fichier.jpg");
 						$action="gestion_doc";
 						}	
 					
@@ -1057,8 +1026,9 @@ include 'inc_style.php';
 						{
 						// ======================================================================== Visualisation des miniatures des documents internes
 						echo "<table ><tr><td> <ul id=\"menu-bar\">";
-						echo "<li><a href=\"suivi.php?action=gestion_doc&nom=$nom\" >Documents internes</a></li>";
-						echo "</ul></td><td> - </td>";	
+						echo "<li><a href=\"suivi.php?".token_ref("gestion_doc")."&nom=$nom\" >Documents internes</a></li>";
+						echo "</ul></td>";	
+						echo "<td> <a href=\"suivi.php?".token_ref("charge")."&nom=$nom\" ><img src=\"images/ajouter.png\" width=\"30\" height=\"30\" > </a></td> ";
 					
 						$reponse = command("SELECT distinct* FROM $bdd WHERE nom='$nom_slash' and pres_repas='__upload' and qte<>'-2' "); 
 						while ($donnees = fetch_command($reponse))
@@ -1069,10 +1039,10 @@ include 'inc_style.php';
 							echo "<tr><td>";
 							if (extension_fichier($fichier)=="pdf")
 								{
-								if (file_exists("$fichier.jpg"))
+								if (file_exists("suivi_mini/$fichier.jpg"))
 									{
 									//echo "<a href=\"suivi/$fichier\"  target=_blank ><img src=\"suivi_mini/$fichier.jpg\"  width=\"100\" height=\"100\" ><a> ";
-									lien("suivi_mini/$fichier", "visu_suivi", param ("fichier","$fichier"), "", "100","B","", true);
+									lien("suivi_mini/$fichier.jpg", "visu_suivi", param ("fichier","$fichier"), "", "100","B","", true);
 									}
 								else
 									{
@@ -1094,15 +1064,15 @@ include 'inc_style.php';
 							echo "</td>";
 							
 							if ($qte!="")
-								echo "<td> Masqué: <a href=\"suivi.php?action=fichier_actif&nom=$nom&f=$fichier\" > Rendre visible le fichier<img src=\"images/oui.png\" title=\"Rendre visible le fichier\" width=\"30\" height=\"30\" > </a></td> ";
+								echo "<td> Masqué: <a href=\"suivi.php?".token_ref("fichier_actif")."&nom=$nom&f=$fichier\" > Rendre visible le fichier<img src=\"images/oui.png\" title=\"Rendre visible le fichier\" width=\"30\" height=\"30\" > </a></td> ";
 								else
-								echo "<td> Visible  <a href=\"suivi.php?action=fichier_inactif&nom=$nom&f=$fichier\" >Masquer le fichier<img src=\"images/restreint.png\"  title=\"Masquer le fichier\" width=\"30\" height=\"30\" > </a></td> ";
+								echo "<td> Visible  <a href=\"suivi.php?".token_ref("fichier_inactif")."&nom=$nom&f=$fichier\" >Masquer le fichier<img src=\"images/restreint.png\"  title=\"Masquer le fichier\" width=\"30\" height=\"30\" > </a></td> ";
 
 								
 							echo "<td> $date</td> ";
 
 							if ($qte!="")
-								echo "<td> <a href=\"suivi.php?action=supp_fichier&nom=$nom&f=$fichier\" >Supprimer le fichier <img src=\"images/croixrouge.png\" title=\"Supprimer le fichier\" width=\"30\" height=\"30\" > </a></td> ";
+								echo "<td> <a href=\"suivi.php?".token_ref("supp_fichier")."&nom=$nom&f=$fichier\" >Supprimer le fichier <img src=\"images/croixrouge.png\" title=\"Supprimer le fichier\" width=\"30\" height=\"30\" > </a></td> ";
 								
 							}						
 				
@@ -1155,21 +1125,21 @@ include 'inc_style.php';
 							$nom2=trim(str_replace("(F)","",$nom2));
 							echo "<TD>";						
 							formulaire ("ajout_beneficiaire","index.php");
-							echo "<input type=\"hidden\" name=\"fissa\"  value=\"$nom\"> " ;
-							echo "<input type=\"hidden\" name=\"nom\"  value=\"$nom2\"> " ;
-							echo "<input type=\"hidden\" name=\"prenom\"  value=\"$prenom\"> " ;
-							echo "<input type=\"hidden\" name=\"anniv\"   value=\"$age\"> " ;
-							echo "<input type=\"hidden\" name=\"fissa_mail\"   value=\"$mail\"> " ;
-							echo "<input type=\"hidden\" name=\"fissa_tel\"   value=\"$tel\"> " ;
-							echo "<input type=\"hidden\" name=\"fissa_add\"   value=\"$adresse\"> " ;
-							echo "<input type=\"hidden\" name=\"nationalite\"   value=\"$nat\">" ;
+							echo param ("fissa","$nom");
+							echo param ("nom","$nom2");
+							echo param ("prenom","$prenom");
+							echo param ("anniv","$age");
+							echo param ("fissa_mail","$mail");
+							echo param ("fissa_tel","$tel");
+							echo param ("fissa_add","$adresse");							
+							echo param ("nationalite","$nat");
 							echo "<input type=\"submit\"  id=\"nouveau_user\"  value=\"Lui créer un compte Doc-depot\" > </form></td>  ";		
 							}
 							
 						
 						// ======================================================================== Visualisation des miniatures des documents internes
 						echo "<td> <ul id=\"menu-bar\">";
-						echo "<li><a href=\"suivi.php?action=gestion_doc&nom=$nom\" >Documents internes</a></li>";
+						echo "<li><a href=\"suivi.php?".token_ref("gestion_doc")."&nom=$nom\" >Documents internes</a></li>";
 						echo "</ul></td><td> - </td>";	
 					
 						$reponse = command("SELECT distinct* FROM $bdd WHERE nom='$nom_slash' and pres_repas='__upload'  and qte='' "); 
@@ -1181,9 +1151,9 @@ include 'inc_style.php';
 							echo "<td>";
 							if (extension_fichier($fichier)=="pdf")
 								{
-								if (file_exists("$fichier.jpg"))
+								if (file_exists("suivi_mini/$fichier.jpg"))
 //									echo "<a href=\"suivi/$fichier\"  target=_blank ><img src=\"suivi_mini/$fichier.jpg\" title=\"$date\" width=\"50\" height=\"50\" ><a> ";
-									lien("suivi_mini/$fichier", "visu_suivi", param ("fichier","$fichier"), "", "50","B","", true);
+									lien("suivi_mini/$fichier.jpg", "visu_suivi", param ("fichier","$fichier"), "", "50","B","", true);
 								else
 //									echo "<a href=\"suivi/$fichier\"  target=_blank ><img src=\"images/fichier.jpg\" title=\"$date\" width=\"50\" height=\"50\" ><a> ";
 									lien("images/fichier.jpg", "visu_suivi", param ("fichier","$fichier"), "", "50","B","", true);
@@ -1198,14 +1168,11 @@ include 'inc_style.php';
 
 							echo "</td>";
 							}
-						echo "<td> <a href=\"suivi.php?action=charge&nom=$nom\" ><img src=\"images/ajouter.png\" width=\"30\" height=\"30\" > </a></td> ";
+						echo "<td> <a href=\"suivi.php?".token_ref("charge")."&nom=$nom\" ><img src=\"images/ajouter.png\" width=\"30\" height=\"30\" > </a></td> ";
 						
 				
 						echo "</table>";							
 						}
-							
-
-		
 
 					
 					if (($_SESSION['droit']!="P") )
@@ -1213,11 +1180,11 @@ include 'inc_style.php';
 						// ============================================================================== SUIVI
 						echo "<table><tr> <td >";
 						echo "<ul id=\"menu-bar\">";					
-						echo "<li><a href=\"suivi.php?action=suivi&nom=$nom\" >Suivi du </a></li>";
+						echo "<li><a href=\"suivi.php?".token_ref("suivi")."&nom=$nom\" >Suivi du </a></li>";
 						echo "</ul> </td>";
-						echo "<td> : </td><td><form method=\"GET\" action=\"suivi.php\">";
-						echo "<input type=\"hidden\" name=\"action\" value=\"suivi\"> " ;
-						echo "<input type=\"hidden\" name=\"nom\"  value=\"$nom\">";
+						echo "<td> : </td><td>";
+						formulaire("suivi");
+						echo param ("nom","$nom");
 						echo "<input type=\"text\" name=\"date_jour\" size=\"10\"  value=\"$date_jour\"  onChange=\"this.form.submit();\" class=\"calendrier\" >";
 						echo "<input type=\"submit\" value=\"Valider date\" > </form> 	</td>   ";					
 						echo "</table> ";	
@@ -1231,7 +1198,7 @@ include 'inc_style.php';
 							echo "<tr> <td> <b> Suivi </b> : </td>";
 							if (!(strpos($nom,"(A)")>0))
 								{
-								echo "<form method=\"GET\" action=\"suivi.php\">";
+								// echo "<form method=\"POST\" action=\"suivi.php\">";
 								
 								$reponse = command("SELECT * FROM $bdd WHERE date='$date_jour_gb' and  nom='$nom_slash' and pres_repas='Suivi' "); 
 								if ($donnees = fetch_command($reponse))
@@ -1245,10 +1212,10 @@ include 'inc_style.php';
 							}
 
 						echo "</table></td>";
-						echo "<tr> <td><form method=\"GET\" action=\"suivi.php\">";
-						echo "<input type=\"hidden\" name=\"action\" value=\"suivi_maj\"> " ;
-						echo "<input type=\"hidden\" name=\"nom\"  value=\"$nom\">";
-						echo "<input type=\"hidden\" name=\"date_jour\"  value=\"$date_jour\">";
+						echo "<tr> <td>";
+						formulaire("suivi_maj");
+						echo param ("nom","$nom");
+						echo param ("date_jour","$date_jour");
 						echo "<TEXTAREA rows=\"4\" cols=\"110\" name=\"com\" onChange=\"this.form.submit();\">$com</TEXTAREA>";
 						echo "<input type=\"submit\" value=\"Valider texte\" ></td>  ";
 						echo "</form> ";
@@ -1263,20 +1230,18 @@ include 'inc_style.php';
 							$echeance="";
 						echo "<tr> <td> ";
 						echo "<table> <tr><td> <b> Plan d'action en cours </b> </td> <td> - Echéance  : </td><td>";
-						echo "<form method=\"GET\" action=\"suivi.php\">";
-						echo "<input type=\"hidden\" name=\"action\" value=\"echeance\"> " ;
-						echo "<input type=\"hidden\" name=\"date_jour\"  value=\"$date_jour\">";
-						echo "<input type=\"hidden\" name=\"nom\"  value=\"$nom\">";
+						formulaire("echeance");
+						echo param ("date_jour","$date_jour");
+						echo param ("nom","$nom");
 						echo "<input type=\"text\" name=\"echeance\" size=\"10\"  value=\"$echeance\"  onChange=\"this.form.submit();\" class=\"calendrier\" >";
 						echo "<input type=\"submit\" value=\"Valider date\" > </form> 	</td>   ";
 						
 						echo "</table></td> ";
 						
-						echo "<tr> <td><form method=\"GET\" action=\"suivi.php\">";
-						echo "<input type=\"hidden\" name=\"action\" value=\"pda\"> " ;
-						echo "<input type=\"hidden\" name=\"date_jour\"  value=\"$date_jour\">";
-
-						echo "<input type=\"hidden\" name=\"nom\"  value=\"$nom\">";
+						echo "<tr> <td>";
+						formulaire("pda");
+						echo param ("date_jour","$date_jour");
+						echo param ("nom","$nom");
 						echo "<TEXTAREA rows=\"4\" cols=\"110\" name=\"pda\" onChange=\"this.form.submit();\">$pda</TEXTAREA>";
 //						echo "<input type=\"image\" src=\"images/oui.png\" width=\"20\" height=\"20\" title=\"".traduire('Valider le texte')."\" ></td> </form> ";
 						echo "<input type=\"submit\" value=\"Valider texte\" > </td> </form> ";
@@ -1298,7 +1263,7 @@ include 'inc_style.php';
 							echo "<table>";
 							echo "<tr> <td >";
 							echo "<ul id=\"menu-bar\">";					
-							echo "<li><a href=\"suivi.php?action=suivi&nom=$nom\" >Hébergement </a></li>";
+							echo "<li><a href=\"suivi.php?".token_ref("suivi")."&nom=$nom\" >Hébergement </a></li>";
 							echo "</ul> </td>";
 							echo "<td> - </td><td> <a href=\"hebergement.php\"  target=_blank > Planning détaillé </a> </td>";
 							echo "</table>  ";
@@ -1314,10 +1279,10 @@ include 'inc_style.php';
 								if  ($ip==0) 
 										{
 										echo "<tr> <td > Présence </td>";
-										echo "<td> du : </td><td><form method=\"GET\" action=\"suivi.php\">";
-										echo "<input type=\"hidden\" name=\"action\" value=\"présence\"> " ;
-										echo "<input type=\"hidden\" name=\"nom\"  value=\"$nom\">";
-										echo "<input type=\"hidden\" name=\"idx\"  value=\"new\">";
+										echo "<td> du : </td><td>";
+										formulaire("présence");
+										echo param ("nom","$nom");
+										echo param ("idx","new");
 										echo "<input type=\"text\" name=\"date_deb\" size=\"10\"  value=\"\"  onChange=\"this.form.submit();\" class=\"calendrier\" >";
 										echo "<td> au </td><td>";
 										echo "<input type=\"text\" name=\"date_fin\" size=\"10\"  value=\"\"  onChange=\"this.form.submit();\" class=\"calendrier\" >";
@@ -1346,11 +1311,10 @@ include 'inc_style.php';
 										$date_fin=mef_date_fr($date_fin);
 										}									
 									echo "<tr> <td > Présence </td>";
-									echo "<td> du : </td><td><form method=\"GET\" action=\"suivi.php\">";
-									echo "<input type=\"hidden\" name=\"action\" value=\"présence\"> " ;
-									echo "<input type=\"hidden\" name=\"nom\"  value=\"$nom\">";
-									echo "<input type=\"hidden\" name=\"idx\"  value=\"$date_deb_org\">";
-
+									echo "<td> du : </td><td>";
+									formulaire("présence");
+									echo param ("nom","$nom");
+									echo param ("idx","$date_deb_org");
 									echo "<input type=\"text\" name=\"date_deb\" size=\"10\"  value=\"$date_deb\"  onChange=\"this.form.submit();\" class=\"calendrier\" >";
 									echo "<td> au </td><td>";
 									echo "<input type=\"text\" name=\"date_fin\" size=\"10\"  value=\"$date_fin\"  onChange=\"this.form.submit();\" class=\"calendrier\" >";
@@ -1371,10 +1335,10 @@ include 'inc_style.php';
 								if ($ip==0)
 									{
 									echo "<tr> <td > Présence </td>";
-									echo "<td> du : </td><td><form method=\"GET\" action=\"suivi.php\">";
-									echo "<input type=\"hidden\" name=\"action\" value=\"présence\"> " ;
-									echo "<input type=\"hidden\" name=\"nom\"  value=\"$nom\">";
-									echo "<input type=\"hidden\" name=\"idx\"  value=\"new\">";
+									echo "<td> du : </td><td>";
+									formulaire("présence");
+									echo param ("nom","$nom");
+									echo param ("idx","new");
 									echo "<input type=\"text\" name=\"date_deb\" size=\"10\"  value=\"$date_deb\"  onChange=\"this.form.submit();\" class=\"calendrier\" >";
 									echo "<td> au </td><td>";
 									echo "<input type=\"text\" name=\"date_fin\" size=\"10\"  value=\"$date_fin\"  onChange=\"this.form.submit();\" class=\"calendrier\" >";
@@ -1393,9 +1357,9 @@ include 'inc_style.php';
 								affiche_rdv($nom);		
 								
 							if ($action=="accompagnement")
-									echo "<a href=\"suivi.php?action=suivi&nom=$nom&date_jour=$date_jour\" > ( N'afficher que l'accompagnement )</a>";
+									echo "<a href=\"suivi.php?".token_ref("suivi")."&nom=$nom&date_jour=$date_jour\" > ( N'afficher que l'accompagnement )</a>";
 								else
-									echo "<a href=\"suivi.php?action=accompagnement&nom=$nom&date_jour=$date_jour\" > (Afficher aussi les visites)</a>";
+									echo "<a href=\"suivi.php?".token_ref("accompagnement")."&nom=$nom&date_jour=$date_jour\" > (Afficher aussi les visites)</a>";
 							}
 						}						
 					}
@@ -1420,9 +1384,9 @@ include 'inc_style.php';
 				echo "<table id=\"dujour\"  border=\"2\" >";
 				// =====================================================================loc NOUVEAU
 				$age=variable_s("age");
-				echo "<tr><td bgcolor=\"#d4ffaa\"><table><tr><td><form method=\"GET\" action=\"suivi.php\">Prénom / Nom : ";
-				echo "<input type=\"hidden\" name=\"action\" value=\"nouveau2\"> " ;
-				echo "<input type=\"hidden\" name=\"date_jour\"  value=\"$date_jour\">";
+				echo "<tr><td bgcolor=\"#d4ffaa\"><table><tr><td>Prénom / Nom : ";
+				formulaire("nouveau2");
+				echo param ("date_jour","$date_jour");
 				echo "<input type=\"text\" name=\"nom\" size=\"30\" value=\"$nom\"></td>";	
 				echo " </td> <td> Date naissance : <input type=\"text\" name=\"age\" size=\"12\" value=\"$age\"> </td> <td> Origine : ";	
 				select_pays( "", variable_s("nationalite") );
@@ -1443,7 +1407,7 @@ include 'inc_style.php';
 				$nom=$donnees["nom"];
 				$echeance=$donnees["activites"];
 				$pda=$donnees["commentaire"];
-				echo "<tr> <td><a href=\"suivi.php?action=suivi&nom=$nom\" >$nom </td>";
+				echo "<tr> <td><a href=\"suivi.php?".token_ref("suivi")."&nom=$nom\" >$nom </td>";
 				$aujourdhui=date('Y-m-d');
 				if ($echeance<$aujourdhui)
 					echo "<td bgcolor=\"orange\" >";
@@ -1464,8 +1428,7 @@ include 'inc_style.php';
 				{
 				// =====================================================================loc CHANGEMENT NOM
 				echo "<P> <table border=\"0\" ><tr> <td>Modification d'un nom :</td><td>";
-				echo "<form method=\"GET\" action=\"suivi.php\">";
-				echo "<input type=\"hidden\" name=\"action\" value=\"chgt_nom\"> " ;
+				formulaire("chgt_nom");
 				echo "<SELECT name=nom>";
 				echo "<OPTION  VALUE=\"\">  </OPTION>";
 				$reponse = command("SELECT * FROM $bdd WHERE nom<>'Mail' and nom<>'Synth'  group by nom "); 			

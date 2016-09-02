@@ -34,10 +34,9 @@
 		{
 		global $bdd,$nom,$date_jour;
 		echo " <td>  Motif  : </td>";		
-		echo "<form method=\"GET\" action=\"suivi.php\">";
-		echo "<input type=\"hidden\" name=\"action\" value=\"activites\"> " ;
-		echo "<input type=\"hidden\" name=\"nom\"  value=\"$nom\">";
-		echo "<input type=\"hidden\" name=\"date_jour\"  value=\"$date_jour\">";
+		formulaire("activites");
+		echo param ("nom","$nom");
+		echo param ("date_jour","$date_jour");
 		echo "<td><SELECT name=\"activites\"  onChange=\"this.form.submit();\">";		
 		affiche_un_choix($act,"---");		
 		
@@ -131,17 +130,12 @@
 		$act="---";
 
 		echo " <td> - Réponse : </td>";
-		echo "<form method=\"GET\" action=\"suivi.php\">";
-		echo "<input type=\"hidden\" name=\"action\" value=\"reponse\"> " ;
-		echo "<input type=\"hidden\" name=\"nom\"  value=\"$nom\">";
-		echo "<input type=\"hidden\" name=\"date_jour\"  value=\"$date_jour\">";
-
+		formulaire("reponse");
+		echo param ("nom","$nom");
+		echo param ("date_jour","$date_jour");
 		echo "<td><SELECT name=\"reponse\"  onChange=\"this.form.submit();\">";		
 
 		affiche_un_choix($act,"---");
-
-		
-
 		
 		affiche_un_choix($act,"Accompagnement/bilan");
 		affiche_un_choix($act,"Accompagnement administratif");
@@ -185,8 +179,7 @@
 		$act="---";
 
 		echo " <td> - Partenaire : </td>";
-		echo "<form method=\"GET\" action=\"suivi.php\">";
-		echo "<input type=\"hidden\" name=\"action\" value=\"partenaire\"> " ;
+		formulaire("partenaire");
 		echo "<input type=\"hidden\" name=\"nom\"  value=\"$nom\">";
 		echo "<input type=\"hidden\" name=\"date_jour\"  value=\"$date_jour\">";
 
@@ -547,9 +540,8 @@ $liste_pays = array(
 	function choix_pays($nom, $nat)
 		{		
 		echo "<td> <b> Pays d'origine </b> : </td><td>";
-		echo "<form method=\"GET\" action=\"suivi.php\" >";
-		echo "<input type=\"hidden\" name=\"action\" value=\"nationalite\"> " ;
-		echo "<input type=\"hidden\" name=\"nom\"  value=\"$nom\">";
+		formulaire("nationalite");
+		echo param ("nom","$nom");
 		select_pays("auto_submit",$nat);
 
 		echo "</td>";		

@@ -57,6 +57,7 @@ include 'inc_style.php';
 			$date=$donnees["date"];	
 			$ligne=$donnees["ligne"];	
 			$reponse =command("DELETE FROM `DD_rdv` where idx='$idx' ");
+			msg_ok("Rendez-vous supprimé.");
 			}
 		}	
 		
@@ -84,7 +85,7 @@ include 'inc_style.php';
 			{
 			echo "<td><form method=\"POST\" action=\"rdv.php\"  >";
 			echo "<input type=\"image\" src=\"images/croixrouge.png\" width=\"20\" height=\"20\" title=\"".traduire("Supprimer filtre")."\" >";
-			echo "<input type=\"hidden\" name=\"action\" value=\"supp_filtre\">";
+			token("supp_filtre");
 			echo  "</form></td>";
 			}
 		echo "</table>";
@@ -137,13 +138,12 @@ include 'inc_style.php';
 							if ( !VerifierPortable($d1["commentaire"] )  )
 							$avant="";
 
-								
 						echo "<tr><td> $date </td><td> $heure </td><td> <a href=\"suivi.php?nom=$user\" > $user</a></td><td> $ligne </td><td> $avant </td><td> $auteur </td>";
 						if (  ($etat=="A envoyer") || ($avant=="Aucun")) 
 							{
 							echo "<td><form method=\"POST\" action=\"rdv.php\"  >";
 							echo "<input type=\"image\" src=\"images/croixrouge.png\" width=\"20\" height=\"20\" title=\"".traduire("Supprimer")."\" >";
-							echo "<input type=\"hidden\" name=\"action\" value=\"supp_rdv\">";
+							token("supp_rdv");
 							echo  param("idx","$idx" )."</form></td>";
 							if ($avant=="")
 								echo "<td><input type=\"image\" src=\"images/illicite.png\" width=\"20\" height=\"20\" title=\"".traduire("Pas de portable enregistré")."\" ></td>";
@@ -170,7 +170,12 @@ include 'inc_style.php';
 	// ConnexiondD
 	include "connex_inc.php";
 	
-	$action=variable_s("action");	
+	$token=variable("token");	
+	if ($token!="")	
+		$action=verifi_token($token,variable("action"));
+	else
+		$action=variable("action");		
+	//$action=variable_s("action");	
 	require_once 'cx.php';
 
 	$reponse = command("SELECT * FROM fct_fissa WHERE support='$bdd' "); 
@@ -202,7 +207,6 @@ include 'inc_style.php';
 		$libelle=$donnees["libelle"];
 		$logo=$_SESSION['logo'];	
 
-		$action=variable_s("action");
 		$nom=variable_s("nom");
 
 		if ($action=="ajout_rdv")
@@ -240,7 +244,7 @@ include 'inc_style.php';
 		// =====================================================================loc RAPPORT
 		echo "<td width=\"150\"><center>";
 		echo "<ul id=\"menu-bar\">";
-		echo "<li><a href=\"index.php?action=dx\">Deconnexion</a>";
+		echo "<li><a href=\"index.php?".token_ref("dx")."\">Deconnexion</a>";
 		echo "</ul> ";
 		
 		echo "</td>";

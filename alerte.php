@@ -7,28 +7,28 @@ session_start();
 
 error_reporting(E_ALL | E_STRICT);
 
-// { Début - Première partie
-if(!empty($_POST) OR !empty($_FILES))
-	{
-    $_SESSION['sauvegarde'] = $_POST ;
-    $_SESSION['sauvegardeFILES'] = $_FILES ;
+			// { Début - Première partie
+			if(!empty($_POST) OR !empty($_FILES))
+				{
+				$_SESSION['sauvegarde'] = $_POST ;
+				$_SESSION['sauvegardeFILES'] = $_FILES ;
 
-    $fichierActuel = $_SERVER['PHP_SELF'] ;
-    if(!empty($_SERVER['QUERY_STRING']))
-       $fichierActuel .= '?' . $_SERVER['QUERY_STRING'] ;
-    header('Location: ' . $fichierActuel);
-    exit;
-	}
-// } Fin - Première partie
+				$fichierActuel = $_SERVER['PHP_SELF'] ;
+				if(!empty($_SERVER['QUERY_STRING']))
+				   $fichierActuel .= '?' . $_SERVER['QUERY_STRING'] ;
+				header('Location: ' . $fichierActuel);
+				exit;
+				}
+			// } Fin - Première partie
 
-// { Début - Seconde partie
-if(isset($_SESSION['sauvegarde']))
-	{
-    $_POST = $_SESSION['sauvegarde'] ;
-    $_FILES = $_SESSION['sauvegardeFILES'] ;
-    unset($_SESSION['sauvegarde'], $_SESSION['sauvegardeFILES']);
-	}
-// } Fin - Seconde partie
+			// { Début - Seconde partie
+			if(isset($_SESSION['sauvegarde']))
+				{
+				$_POST = $_SESSION['sauvegarde'] ;
+				$_FILES = $_SESSION['sauvegardeFILES'] ;
+				unset($_SESSION['sauvegarde'], $_SESSION['sauvegardeFILES']);
+				}
+			// } Fin - Seconde partie
 
 ?> 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
@@ -68,10 +68,10 @@ function calculeLongueur(){
 
 
  <?php
+ 
 require_once 'general.php';
 require_once 'inc_style.php';
 require_once "connex_inc.php";
-
 
     echo "<head>";
 	echo "<link rel=\"icon\" type=\"image/png\" href=\"images/identification.png\" />";
@@ -81,7 +81,12 @@ require_once "connex_inc.php";
 
 	$user_lang='fr';
 	$format_date = "d/m/Y";
-	$action=variable("action");
+	$token=variable("token");	
+	if ($token!="")	
+		$action=verifi_token($token,variable("action"));
+	else
+		$action=variable("action");		
+	//$action=variable_s("action");	
 	// ------------------------------------------------------------------------------ traitement des actions sans mot de passe
 	
 	if (isset($_SESSION['lang']))
@@ -141,16 +146,16 @@ require_once "connex_inc.php";
 					erreur (traduire("Numéro de département incorrect"));
 				else
 					{
-					$r1 = command("SELECT * FROM cc_alerte WHERE  tel='$telephone' ");
+					$r1 = command(sprintf("SELECT * FROM cc_alerte WHERE  tel='%s' ",$telephone ));
 					$d1 = fetch_command($r1);
 					$date= date($format_date );
 					$t0=time();
 					$ip= $_SERVER["REMOTE_ADDR"];
 
 					if ($d1)
-						command("UPDATE `cc_alerte` SET dept='$dept' ,sueil='',stop='' ,modif='$t0', ip='$ip' where tel='$telephone'  ");
+						command(sprintf("UPDATE `cc_alerte` SET dept='%s' ,sueil='',stop='' ,modif='$t0', ip='$ip' where tel='$telephone'  ",$dept ) );
 					else
-						command("INSERT INTO `cc_alerte`  VALUES ( '$date', '$telephone', '$dept', '','','','','','$ip','$t0')");
+						command(sprintf("INSERT INTO `cc_alerte`  VALUES ( '$date', '%s', '%s', '','','','','','$ip','$t0')",$telephone,$dept ));
 					msg_ok(traduire("Mise à jour réalisée."));
 					ajout_log( "", "Inscription Alerte météo $telephone ($dept) via web ");
 
@@ -183,7 +188,7 @@ require_once "connex_inc.php";
 
 		echo "<table> <tr> <td align=\"right\" valign=\"bottom\" ></td>";
 		echo "<td><a id=\"lien_conditions\" href=\"conditions_alerte.html\">".traduire('Conditions d\'utilisation')."</a>";
-		echo "- <a id=\"lien_contact\" href=\"index.php?action=contact\">".traduire('Nous contacter')."</a>";
+		echo "- <a id=\"lien_contact\" href=\"http://adileos.jimdo.com/contact\">".traduire('Nous contacter')."</a>";
 		echo "- Copyright <a href=\"http://adileos.doc-depot.com\">ADILEOS 2015</a> ";
 		$version= parametre("DD_version_portail") ;
 		echo "- $version ";	

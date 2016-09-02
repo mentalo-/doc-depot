@@ -3,8 +3,104 @@
 
 include 'param.php';
 include 'bdd.php';
+require_once 'include_crypt.php';
 
+function ob_replace($tag, $prefixe, $buffer)
+	{
+	$saut='/n';
+	
+	$buffer=str_replace("<$tag","$saut$prefixe<$tag",$buffer);
+	$buffer=str_replace("</$tag","$saut$prefixe</$tag",$buffer);
+	
+	return($buffer);
+	}
 
+function ob_finalisation($buffer)
+	{
+//	$buffer=str_replace("table","",$buffer);
+	return($buffer);
+	}
+	
+	
+	
+FUNCTION poste_local()
+	 {
+	 return($_SERVER['REMOTE_ADDR']=="127.0.0.1");
+	 }
+	 
+	function token_ref($action)
+		{
+		$t=time();
+		return( "token=".encrypt("$action-#-$t")); 
+		}	
+		
+	function token($action, $user='#')
+		{
+		$t=time();
+		$token=addslashes(encrypt("$action-$user-$t"));
+		echo "<input type=\"hidden\" name=\"token\" value=\"$token\"> " ;
+		}	
+	function token_return($action, $user='#')
+		{
+		$t=time();
+		$token=addslashes(encrypt("$action-$user-$t"));
+		return("<input type=\"hidden\" name=\"token\" value=\"$token\"> ") ;
+		}
+		
+	function verifi_token($token,$action,$user="")
+		{
+		$token=decrypt($token);
+		if ($token!="")
+			{
+			$d3= explode("-",$token);
+			$u=$d3[1];
+			$action_token=$d3[0];
+			$time_token=$d3[2];
+			//echo "Token : $action_token $u $time_token";
+			// si commande publiques on ne vérifie que la durée de validité 
+			if ( ($action=="finaliser_user") || ($action=="recup_dossier") || ($action=="reinit_mdp") ) // pour ces commandes, la validité est de 7 jours
+				{
+				if ( (time()- $time_token) > parametre("DD_duree_vie_dossier")*24*3600) 
+					{
+					erreur("Commande périmèe");
+					return ("");
+					}	
+				}
+			else
+				{
+				if ( ($u!="#") && ($user!="") && ($u!=$user))
+					{
+					erreur("Commande non valide pour vous ($user)");
+					return ("");
+					}
+				
+				if ( (time()- $time_token) > 1.5*TIME_OUT) 
+					{
+					erreur("Commande périmèe");
+					return ("");
+					}
+				}
+		
+			
+			/*if (($action!="") && ( $action != $action_token) )
+				{
+				erreur("Token incorrect $action != $action_token ");
+				return ("");
+				}	
+			*/	
+			
+
+			return ($action_token); 
+			}
+		else
+			{
+			erreur("Token incorrect");
+			return ("");
+			}
+		}
+		
+		//====================================================================================================================
+			
 	function jour($t)
 		{
 		return (($t+4) % 7);
@@ -82,11 +178,42 @@ include 'bdd.php';
 		}	
 
 				
-	function libelle_organisme($organisme	)
+	function libelle_organisme($organisme)
 		{
 		$r1 =command("select * from  r_organisme where idx='$organisme' ");
 		$d1 = fetch_command($r1);
 		return(stripcslashes($d1["organisme"]));
+		}		
+	function adresse_organisme($organisme)
+		{
+		$r1 =command("select * from  r_organisme where idx='$organisme' ");
+		$d1 = fetch_command($r1);
+		return(stripcslashes($d1["adresse"]));
+		}		
+	function telephone_organisme($organisme)
+		{
+		$r1 =command("select * from  r_organisme where idx='$organisme' ");
+		$d1 = fetch_command($r1);
+		return(stripcslashes($d1["tel"]));
+		}			
+	function mail_organisme($organisme)
+		{
+		$r1 =command("select * from  r_organisme where idx='$organisme' ");
+		$d1 = fetch_command($r1);
+		return(stripcslashes($d1["mail"]));
+		}			
+				
+	function libelle_organisme_du_user($idx	)
+		{
+		$l="";
+		if (is_numeric($idx))
+			{
+			$r1 =command("select * from  r_user where idx='$idx' ");
+			if($d1 = fetch_command($r1))
+				if ( ($d1["droit"]=="S") || ($d1["droit"]=="s") || ($d1["droit"]=="R")|| ($d1["droit"]=="r") ) 
+					$l= libelle_organisme($d1["organisme"]);
+			}
+		return($l);
 		}
 
 	function supp_acces($ddeur,$bene,$autorise)
@@ -131,12 +258,18 @@ include 'bdd.php';
 	// formulaire ("");
 	function formulaire ($action, $source="")
 		{
+		global $user;
+		
 		if ($source=="")
 			$source=$_SERVER['PHP_SELF'] ;
 
 		commentaire_html("Formulaire $action");
 		echo "<form method=\"POST\" action=\"$source\">";
-		echo "<input type=\"hidden\" name=\"action\" value=\"$action\"> " ;
+	//	echo "<input type=\"hidden\" name=\"action\" value=\"$action\"> " ;
+		if (isset($user))
+			token($action, "$user");
+		else
+			token($action,"#");
 		}
 // ----------------------------------------------------------------- Mise en forme
 
@@ -230,7 +363,8 @@ include 'bdd.php';
 		$prenom=remplace_carcateres($prenom);
 		return(ucfirst($prenom));
 		}
-		
+
+	
 	Function mef_date($date)
 		{
 		if (substr_count($date,"/")!=2)
@@ -294,6 +428,23 @@ include 'bdd.php';
 			return(sprintf("%04d-%02d-%02d",$a,$m,$j));
 			}			
 
+			
+	function mise_en_forme_date_aaaammjj( $date_jour)
+		{
+		$d3= explode("/",$date_jour);  
+		if (isset($d3[2]))
+			$a=$d3[2];
+		else
+			$a=date("Y");
+		if ($a<100) $a+=2000;
+		$m=$d3[1];
+		$j=$d3[0];	
+		if (($j<1) || ($j>31) || ($m<1) || ($m>12) )
+			return("");
+		
+		return( "$a-$m-$j" );
+		}
+			
 		function mef_heure_BdD($date)
 			{
 			$date=strtolower($date);
@@ -399,16 +550,33 @@ include 'bdd.php';
 		// extension = le dernier element
 		return (strtolower($tabfile[sizeof($tabfile)-1] ));
 		}	
+	
+
+	function visu_session($nom)
+		{
+		if (isset($_SESSION[$nom]))
+			echo "<br> ['$nom'] : '".$_SESSION[$nom]."'";
+		}
+	$trace_variables="";
+	function trace_variable( $libelle , $valeur )
+		{
+		global $trace_variables;
+		if ($libelle!="token")
+			$trace_variables .= "<br> $libelle = '$valeur'";
+		return ($valeur);
+		}
 		
+	// recupére la variable d'abord en POST puis en GET
 	function variable_s($libelle)
 		{
 		if (isset ($_POST[$libelle]))
-			return(filtre_xss($_POST[$libelle]));
+			return(trace_variable( $libelle ,filtre_xss($_POST[$libelle])));
 		if (isset ($_GET[$libelle]))
-			return(filtre_xss($_GET[$libelle]));
+			return(trace_variable( $libelle ,filtre_xss($_GET[$libelle])));
 		return("");
 		}
-		
+	
+	// recupére la variable d'abord en POST ou seulement "action" en GET	
 	function variable($libelle)
 		{
 		if (isset ($_POST[$libelle]))
@@ -422,12 +590,12 @@ include 'bdd.php';
 				$tmp= str_replace("%","",$tmp);
 				$tmp= str_replace("^","",$tmp);
 				}
-			return($tmp);	
+			return(trace_variable( $libelle ,$tmp));	
 			}
 
 		if (isset ($_GET[$libelle]))
-			if ($libelle=="action")
-				return(mysql_real_escape_string(filtre_xss($_GET[$libelle])));
+			if (($libelle=="action") || ($libelle=="token") )
+				return(trace_variable( $libelle ,mysql_real_escape_string(filtre_xss($_GET[$libelle]))));
 
 		return("");
 		}
@@ -437,10 +605,10 @@ include 'bdd.php';
 		{
 		if (isset ($_POST[$libelle]))
 //			return(addslashes(mysql_real_escape_string(decrypt(filtre_xss(strtr($_POST[$libelle] ' ',  '+'))))));
-			return(mysql_real_escape_string(decrypt(filtre_xss($_POST[$libelle]))));
+			return(trace_variable( $libelle ,mysql_real_escape_string(decrypt(filtre_xss($_POST[$libelle])))));
 			
 		if (isset ($_GET[$libelle]))
-			return(mysql_real_escape_string(decrypt(filtre_xss(strtr($_GET[$libelle], ' ',  '+')))));
+			return(trace_variable( $libelle ,mysql_real_escape_string(decrypt(filtre_xss(strtr($_GET[$libelle], ' ',  '+'))))));
 			
 		return("");
 		}		
@@ -450,10 +618,10 @@ include 'bdd.php';
 		if (isset ($_GET[$libelle]))
 			{	
 			if ($libelle=="action")
-				return(mysql_real_escape_string(filtre_xss($_GET[$libelle])));
+				return(trace_variable( $libelle ,mysql_real_escape_string(filtre_xss($_GET[$libelle]))));
 			else
 				{
-				return(mysql_real_escape_string(decrypt(filtre_xss(strtr($_GET[$libelle], ' ',  '+')))));
+				return(trace_variable( $libelle ,mysql_real_escape_string(decrypt(filtre_xss(strtr($_GET[$libelle], ' ',  '+'))))));
 				}
 			}
 		return("");
@@ -464,10 +632,10 @@ include 'bdd.php';
 		if (isset ($_GET[$libelle]))
 			{	
 			if ($libelle=="action")
-				return(mysql_real_escape_string(filtre_xss($_GET[$libelle])));
+				return(trace_variable( $libelle ,mysql_real_escape_string(filtre_xss($_GET[$libelle]))));
 			else
 				{
-				return(mysql_real_escape_string(decrypt_ltd(filtre_xss(strtr($_GET[$libelle], ' ',  '+')),$validite)));
+				return(trace_variable( $libelle ,mysql_real_escape_string(decrypt_ltd(filtre_xss(strtr($_GET[$libelle], ' ',  '+')),$validite))));
 				}
 			}
 		return("");
@@ -489,6 +657,8 @@ include 'bdd.php';
 	
 	function lien($image, $action, $param, $title="", $size="20", $blank="", $sans_lien="", $arrondi =false )
 		{
+		global $user;
+		
 		commentaire_html(" $image / $action / $blank");
 		
 		if ($arrondi)
@@ -504,16 +674,19 @@ include 'bdd.php';
 			$source= "index.php";
 			if ( ($action=="visu_image") || ($action=="visu_image_mini")|| ($action=="visu_fichier")|| ($action=="visu_doc") )
 				$source= "visu.php";
-
 			if  ($action=="visu_suivi") 
-				$source= "visu_suivi.php";
+				$source= "visu_suivi.php";			
+			if  ($action=="visu_dossier") 
+				$source= "visu_dossier.php";
 				
 			echo "<form method=\"POST\" action=\"$source\" $blank >";
+
 			if ($size=="")
 				echo "<input type=\"image\" src=\"$image\" title=\"".traduire($title)."\" $format_arrondi>";
 			else
 				echo "<input type=\"image\" src=\"$image\" width=\"$size\" height=\"$size\" title=\"".traduire($title)."\" $format_arrondi>";
-			echo "<input type=\"hidden\" name=\"action\" value=\"$action\">";
+			token($action,$user);
+//			echo "<input type=\"hidden\" name=\"action\" value=\"$action\">";
 			echo "$param</form>";
 			}
 		else
@@ -738,7 +911,9 @@ include 'bdd.php';
 	
 	function liste_profil( $user_droit_org, $val_init)
 		{
-		echo "<form method=\"post\" > <input  type=\"hidden\" name=\"action\" value=\"modif_profil\"/> ";
+		echo "<form method=\"post\" >";
+		//ECHO "<input  type=\"hidden\" name=\"action\" value=\"modif_profil\"/> ";
+		token("modif_profil");
 		echo "<SELECT name=\"profil\" onChange=\"this.form.submit();\"  >";
 		if ($user_droit_org=="R")
 			{
@@ -779,7 +954,8 @@ include 'bdd.php';
 			$m = "<form method=\"POST\" action=\"index.php\">$tel ";
 			$m .= "<input type=\"image\" src=\"images/sms.png\" width=\"20\" height=\"20\" title=\"".traduire('Envoyer un SMS')."\">";
 			$m .= "<input type=\"hidden\" name=\"tel\" value=\"$tel\">";
-			$m .= "<input type=\"hidden\" name=\"action\" value=\"sms_test_ovh\"></form>";
+			//$m .= "<input type=\"hidden\" name=\"action\" value=\"sms_test_ovh\"></form>";
+			$m .= token_return("sms_test_ovh")."</form>";
 			$tel =$m;
 			}
 		return  ($tel) ;			
@@ -792,7 +968,8 @@ include 'bdd.php';
 			$m = "<form method=\"POST\" action=\"index.php\">$mail ";
 			$m .= "<input type=\"image\" src=\"images/mail2.png\" width=\"20\" height=\"20\"  title=\"".traduire('Envoyer un Mail')."\">";
 			$m .= "<input type=\"hidden\" name=\"mail\" value=\"$mail\">";
-			$m .= "<input type=\"hidden\" name=\"action\" value=\"mail_test\"></form>";
+			$m .= token_return("mail_test")."</form>";
+			//$m .= "<input type=\"hidden\" name=\"action\" value=\"mail_test\"></form>";
 			$mail =$m;
 			}
 			
@@ -801,7 +978,7 @@ include 'bdd.php';
 		
 	function pied_de_page($r="")
 		{
-		global $user_lang ;
+		global $user_lang , $trace_variables;
 		
 		if ($r!="")
 			echo "<center><p><br><a id=\"accueil\" href=\"index.php\">".traduire('Retour à la page d\'accueil.')."</a>"; 
@@ -813,23 +990,23 @@ include 'bdd.php';
 		if ( ($_SERVER["SCRIPT_NAME"]=="/doc-depot/index.php")	 || ($_SERVER["SCRIPT_NAME"]=="/index.php")	)
 			{
 			if ($user_lang!="fr")
-				echo "<td><a href=\"index.php?action=fr\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"français\" alt=\"français\" src=\"images/flag_fr.png\"/></a></td><td> | </td>";
+				echo "<td><a href=\"index.php?".token_ref("fr")."\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"français\" alt=\"français\" src=\"images/flag_fr.png\"/></a></td><td> | </td>";
 			if ($user_lang!="gb")
-				echo "<td><a href=\"index.php?action=gb\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"english\" alt=\"anglais\" src=\"images/flag_gb.png\"/></a></td><td> | </td>";
+				echo "<td><a href=\"index.php?".token_ref("gb")."\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"english\" alt=\"anglais\" src=\"images/flag_gb.png\"/></a></td><td> | </td>";
 			/*
 			if ($user_lang!="de")
-					echo "<td><a href=\"index.php?action=de\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"allemand\" alt=\"allemand\" src=\"images/flag_de.png\"/></a></td><td> | </td>";
+					echo "<td><a href=\"index.php?".token_ref("de")."\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"allemand\" alt=\"allemand\" src=\"images/flag_de.png\"/></a></td><td> | </td>";
 			if ($user_lang!="es")
-					echo "<td><a href=\"index.php?action=es\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"espagnol\" alt=\"espagnol\" src=\"images/flag_es.png\"/></a></td><td> | </td>";
+					echo "<td><a href=\"index.php?".token_ref("es")."\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"espagnol\" alt=\"espagnol\" src=\"images/flag_es.png\"/></a></td><td> | </td>";
 			if ($user_lang!="ru")
-					echo "<td><a href=\"index.php?action=ru\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"russe\" alt=\"russe\" src=\"images/flag_ru.png\"/></a></td><td> | </td>";
+					echo "<td><a href=\"index.php?".token_ref("ru")."\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"russe\" alt=\"russe\" src=\"images/flag_ru.png\"/></a></td><td> | </td>";
 			*/
 			echo "<td><a id=\"lien_conditions\" href=\"conditions.html\">".traduire('Conditions d\'utilisation')."</a>";
 			}
 		else
 			echo "<td><a id=\"lien_conditions\" href=\"conditions_frs.html\">".traduire('Conditions d\'utilisation')."</a>";
 
-		echo "- <a id=\"lien_contact\" href=\"index.php?action=contact\">".traduire('Nous contacter')."</a>";
+		echo "- <a id=\"lien_contact\" href=\"http://adileos.jimdo.com/contact\">".traduire('Nous contacter')."</a>";
 		echo "- Copyright <a href=\"http://adileos.doc-depot.com\"  target=_blank >ADILEOS</a> ";
 		$version= parametre("DD_version_portail") ;
 		if ($_SERVER['REMOTE_ADDR']=="127.0.0.1")
@@ -837,8 +1014,59 @@ include 'bdd.php';
 		else
 			echo "- $version ";	
 
-		echo "- <a href=\"index.php?action=bug\">".traduire('Signaler un bug ou demander une évolution').".</a> </td> </table>";
-		fermeture_bdd() ;	
+		echo "- <a href=\"http://adileos.jimdo.com/contact\">".traduire('Signaler un bug ou demander une évolution').".</a> </td> </table>";
+
+		ECHO "</center><p align=\"left\">";
+		if (($_SERVER['REMOTE_ADDR']=="127.0.0.1") || ( parametre("TECH_identite_environnement")=="PP") )
+			{
+			 if (variable("token")!="")
+				{
+				$token=decrypt(variable("token"));
+				if ($token!="")
+					{
+					$d3= explode("-",$token);
+					$u=$d3[1];
+					$action_token=$d3[0];
+					$time_token=$d3[2];
+					echo "<hr><p align=\"left\"> Token : $action_token / $u / ".date ( 'Y-m-d H\hi.s',$time_token);
+					}
+				}
+			echo "<p align=\"left\"> $trace_variables";
+				
+			echo "<p align=\"left\"> Session";
+			visu_session("user");
+			 visu_session("user_idx");
+			 visu_session("lang");
+			 visu_session("bene");
+			 visu_session("chgt_user");
+			 visu_session("logo");
+			 visu_session("profil");
+			 visu_session("droit");
+			 visu_session("filtre");
+			 visu_session("LAST_ACTIVITY");
+			 visu_session("support");
+			 
+			}
+		
+		
+		//echo "<p>LG:".strlen(ob_get_contents() );
+		
+		if (isset($_SESSION["user"]))
+			$idx=$_SESSION["user"];
+		else
+			$idx="";
+			$t=time();
+			
+		if ( strtolower(parametre("DD_MODE_Debug"))=="oui")
+			command (sprintf("INSERT INTO `r_pages_users_debug` VALUES ( '%s', '%s', '%s') ",$idx,$t, mysql_real_escape_string(ob_get_contents()) ));
+		/*
+		$f=fopen ("tmp/$idx-$t.htm","w");
+		fwrite($f, ob_get_contents());
+		fclose($f);
+		*/
+		ob_end_flush();
+		fermeture_bdd() ;
+		
 		exit();
 		}
 		
@@ -883,8 +1111,13 @@ include 'bdd.php';
 		$u2=$_SESSION['user'];		// Acteur
 		
 		$reponse =command("select * from  r_attachement where num='$nom_fichier' ");	
-		if ($donnees = fetch_command($reponse) )
+		if ($donnees = fetch_command($reponse) ) 
 			{
+			if (strtolower($nom_fichier)!=strtolower($donnees['num']))
+				{
+				ajout_log_tech( "Tentative d'accès à un fichier inexistant '$nom_fichier' par ".libelle_user($u2) ,"P0");
+				return (false);	
+				}
 			if ($donnees['user']==$u2) // cas on c'est un doc du bénéficiaire
 				return (true);	
 			else
@@ -914,4 +1147,43 @@ include 'bdd.php';
 		return (false);	
 		}
 
+		
+	// ===============================================================================================
+	// transforme la liste d'activité stockées en table en une liste affichable avec lien pour supprimer
+	function mef_activites($act,$nom,$date)
+		{
+		$ret="";
+		$d3=explode('#-#',$act);
+		$i=0;
+		while (isset($d3[$i]))
+			{
+			if ($d3[$i]!="")
+				{
+				$a=str_replace ('(A)','',$d3[$i]);
+				$ret.=$a;
+				$ret.="<a title=\"Suppresion $a\"  href=\"fissa.php?".token_ref("supp_activite")."&idx=$i&nom=$nom&date_jour=$date\"> <img src=\"images/croixrouge.png\"width=\"15\" height=\"15\"><a>";
+				$ret.="; ";
+				}
+			
+			$i++;
+			}
+		return $ret;
+		}
+		
+
+	function liste_participants_activite( $act, $date )
+		{
+		global $bdd;
+
+		$ret="";
+		
+		$reponse = command("SELECT * FROM $bdd WHERE date='$date' and (activites like '%$act%') group by nom ASC "); 
+		while ($donnees = fetch_command($reponse) )
+			$ret.=stripcslashes($donnees["nom"]).", ";
+	
+		return($ret);
+		}
+
+
+		
 ?>

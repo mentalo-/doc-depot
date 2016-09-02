@@ -26,19 +26,17 @@ require_once 'exploit.php';
 		}
 
 // ---------------------------------------on récupére les information de la personne connectée
-if (isset($_POST['pass']))
+if (isset($_POST['pass'])) // mot de passe défini
 	{
-	$id_post=$_POST['id'];
-	
-	$id_4=substr ( $id_post, -4, 4 );
-	$reponse = command("SELECT * from  r_user WHERE id like '%$id_4' "); 
-	if (!fetch_command($reponse))// sécurité : on vérifie que la fin de chaine est bien inclue dans l'identifiant de façon à éviter le passage de commndes SQL
-		ttt_echec_cx ("...$id_4");
-	else
-		{
-		$reponse = command("SELECT * from  r_user WHERE id='$id_post' "); 
+	$id_post=variable('id');
+	$reponse = command(sprintf("SELECT * from  r_user WHERE id='%s' ",$id_post ) ); 
 		if (!($donnees = fetch_command($reponse)))
-			ttt_echec_cx ($id);
+			{
+			ttt_echec_cx (sprintf("%s",$id_post));
+			ajout_log_tech("'$id_post' - '".$_POST['id']);
+			//ajout_log_tech("Mot de passe : '".$_POST['pass']."'");			
+			//ajout_log_tech("Source : ".$_SERVER['PHP_SELF'] );			
+			}
 		else
 			{
 			$mot_de_passe=$donnees["pw"];	
@@ -47,10 +45,18 @@ if (isset($_POST['pass']))
 			$date_log=date('Y-m-d');	
 			$heure_jour=date("H\hi.s");	
 			$_SESSION['bene']="";
+			
+			ajout_log_tech("'$id' - '".$_POST['id']."' - '$id_post'");
+			//ajout_log_tech("'".decrypt($mot_de_passe )."' - '".$_POST['pass']."'");			
+			//ajout_log_tech("'$mot_de_passe' - '".encrypt(addslashes($_POST['pass']))."' - '".encrypt($_POST['pass'])."'" );
+			//ajout_log_tech("Droit : '$droit' " );			
+			//ajout_log_tech("Source : ".$_SERVER['PHP_SELF'] );
 
 			// verifion si la variable = mot de passe...
 			if ( ( 
 				(encrypt(addslashes($_POST['pass']))==$mot_de_passe) // on vérifie le mot de passe 
+				||			
+				(strtolower($_POST['pass'])==strtolower(decrypt($mot_de_passe)) ) // on vérifie le mot de passe en minuscule
 				||
 				// cas particulier en mode poste de développement on vérifie aussu un mot de passe en clair 
 				(($_POST['pass']==$mot_de_passe) && ($_SERVER['REMOTE_ADDR']=="127.0.0.1")	 )
@@ -107,7 +113,7 @@ if (isset($_POST['pass']))
 								$donnees = fetch_command($reponse); 
 								$last_echec_cx=$donnees["date"];	
 								if ($last_echec_cx>$last_cx)
-									echo traduire("Depuis votre derniére connexion, il y a eu tentative de connexion à votre compte, merci de consulter votre")." <a href=\"index.php?action=histo\"  >".traduire('historique')."</a> ";
+									echo traduire("Depuis votre derniére connexion, il y a eu tentative de connexion à votre compte, merci de consulter votre")." <a href=\"index.php?".token_ref("histo")."\"  >".traduire('historique')."</a> ";
 								}
 							}
 					if ($_SESSION['droit']=="")
@@ -121,11 +127,12 @@ if (isset($_POST['pass']))
 				
 					}
 				else
-					ttt_echec_cx ($id,$mot_de_passe);
+					ttt_echec_cx ($id,$mot_de_passe." - ". encrypt(addslashes($_POST['pass'])));
 			}
 		}
-	}
+	
 
+	// permet à l'exploitant de prendre le role de n'importe quel utilisateur mais sans mise à jour SQL
 	if ( ($action=="chgt_user") && ($_SESSION['droit']=="E"))
 		{
 		$_SESSION['user']=variable_s('user');
@@ -140,7 +147,7 @@ if (isset($_POST['pass']))
 		}
 		
 	// ------------------------------------ on collecte les infos utiles du user connceté
-	if (isset($_SESSION['user']))
+	if ( (isset($_SESSION['user'])) && (is_numeric($_SESSION['user'])) )
 		{
 		$idx=$_SESSION['user'];
 		$reponse = command("SELECT * from  r_user WHERE idx='$idx'"); 
@@ -189,7 +196,15 @@ if (isset($_POST['pass']))
 			$_SESSION['logo']=$logo;
 			}
 		}
+	else 
+		unset($_SESSION['user']);
 
+	if( strpos(parametre("DD_Ip_bannis",""),$_SERVER["REMOTE_ADDR"]) !==false )
+		{
+		erreur(traduire("Mot de passe incorrect")." !!"). 
+		$_SESSION['pass']=false;
+		ajout_log_tech( traduire("Refus Connexion ip banni")." : ".$_SERVER["REMOTE_ADDR"]);
+		}
 
 	if ( !isset($_SESSION['pass']) ||($_SESSION['pass']==false) || !(isset($_SESSION['user'])) || ($_SESSION['user']=="") )
 		// si pas de valeur pass en session on affiche le formulaire...
@@ -200,7 +215,8 @@ if (isset($_POST['pass']))
 		echo "<TABLE><TR> <td><form class=\"center\"  method=\"post\"> ".traduire('Identifiant').": </td><td><input required type=\"text\" name=\"id\" value=\"\"/></td>";
 		echo "<TR> <td>".traduire('Mot de passe').": </td><td><input required  id=\"pwd2\"  type=\"password\" name=\"pass\"  autocomplete=\"off\" value=\"\"/>";
 		echo "<td><input type=\"checkbox\" onchange=\"document.getElementById('pwd2').type = this.checked ? 'text' : 'password'\"> ".traduire('Voir saisie')."<td>";
-		echo "<input  type=\"hidden\" name=\"action\" value=\"\"/></td>";
+		//echo "<input  type=\"hidden\" name=\"action\" value=\"\"/></td>";
+		token("");
 		echo "<TR> <td></td><td><input type=\"submit\" value=\"".traduire('Se connecter')."\"/><p></td>";
 		echo "</form> </table> </table> ";
 		fin_cadre();
@@ -208,7 +224,7 @@ if (isset($_POST['pass']))
 		$msg_tech=parametre("DD_msg_1ere_page");
 		if ($msg_tech!="")
 			echo $msg_tech;
-		echo "<p><br><a href=\"index.php?action=dde_mdp\" > <img src=\"images/oubli.png\" width=\"35\" height=\"35\" > ".traduire('Si vous avez oublié votre mot de passe, cliquez ici.')." </a><p><p>";
+		echo "<p><br><a href=\"index.php?".token_ref("dde_mdp")."\" > <img src=\"images/oubli.png\" width=\"35\" height=\"35\" > ".traduire('Si vous avez oublié votre mot de passe, cliquez ici.')." </a><p><p>";
 		echo "<p><br></center></div>";
 		pied_de_page();
 		} 

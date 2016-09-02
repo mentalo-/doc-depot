@@ -49,6 +49,7 @@
 		{
 		global  $ZZ_CLE, $mode_cryptage;
 		
+		$data=str_replace(" ","+",$data);
 		$td = mcrypt_module_open($mode_cryptage,"",MCRYPT_MODE_ECB,"");
 		$iv = mcrypt_create_iv(mcrypt_enc_get_iv_size($td), MCRYPT_RAND);
 		mcrypt_generic_init($td,$ZZ_CLE,$iv);

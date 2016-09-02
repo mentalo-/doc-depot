@@ -1,11 +1,11 @@
 <?php  
 	session_start(); 
 	
-	include "connex_inc.php";
-	include 'general.php';
- 	include 'include_crypt.php';
-	include 'include_charge_image.php';	
-	include 'exploit.php';	
+	require_once "connex_inc.php";
+	require_once 'general.php';
+ 	require_once 'include_crypt.php';
+	require_once 'include_charge_image.php';	
+	require_once 'exploit.php';	
 	
 	
 	if (!empty($_FILES)) 

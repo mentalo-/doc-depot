@@ -21,56 +21,7 @@ include 'include_mail.php';
 		echo "<meta http-equiv=\\\"Content-Type\\\" content=\\\"text/html; charset=iso-8859-1\\\" />";
 		echo "</head><body>";
 		
-	function mise_en_forme_date_aaaammjj( $date_jour)
-		{
-		$d3= explode("/",$date_jour);  
-		if (isset($d3[2]))
-			$a=$d3[2];
-		else
-			$a=date("Y");
-		if ($a<100) $a+=2000;
-		$m=$d3[1];
-		$j=$d3[0];	
-		if (($j<1) || ($j>31) || ($m<1) || ($m>12) )
-			return("");
-		
-		return( "$a-$m-$j" );
-		}
-	// ===============================================================================================
-	// transforme la liste d'activité stockées en table en une liste affichable avec lien pour supprimer
-	function mef_activites($act,$nom,$date)
-		{
-		$ret="";
-		$d3=explode('#-#',$act);
-		$i=0;
-		while (isset($d3[$i]))
-			{
-			if ($d3[$i]!="")
-				{
-				$a=str_replace ('(A)','',$d3[$i]);
-				$ret.=$a;
-				$ret.="<a title=\"Suppresion $a\"  href=\"fissa.php?action=supp_activite&idx=$i&nom=$nom&date_jour=$date\"> <img src=\"images/croixrouge.png\"width=\"15\" height=\"15\"><a>";
-				$ret.="; ";
-				}
-			
-			$i++;
-			}
-		return $ret;
-		}
-		
-	function liste_participants_activite( $act, $date )
-		{
-		global $bdd;
 
-		$ret="";
-		
-		$reponse = command("SELECT * FROM $bdd WHERE date='$date' and (activites like '%$act%') group by nom ASC "); 
-		while ($donnees = fetch_command($reponse) )
-			$ret.=stripcslashes($donnees["nom"]).", ";
-	
-		return($ret);
-		}
-		
 	function nbre_participants_activite( $act, $date )
 		{
 		global $bdd;
@@ -355,7 +306,7 @@ include 'include_mail.php';
 				{
 				$memo=retourne_memo($n);
 				$n_court=str_replace("(F)","",$n_court);
-				echo "<a href=\"fissa.php?action=nouveau&date_jour=$date_jour&nom=$n&memo=&presence=Visite&commentaire=\">$n_court</a> $memo; " ;
+				echo "<a href=\"fissa.php?".token_ref("nouveau")."&date_jour=$date_jour&nom=$n&memo=&presence=Visite&commentaire=\">$n_court</a> $memo; " ;
 				}
 				
 			}
@@ -413,9 +364,9 @@ include 'include_mail.php';
 								}
 							$n_court=substr($n, 0, strlen($n)-3);
 							if ( (strpos($n,"(B)")!==FALSE) ||(strpos($n,"(S)")!==FALSE) )
-								echo "<a href=\"fissa.php?action=nouveau&date_jour=$date_jour&nom=$n&memo=&presence=Acteur+Social&commentaire=\">$n_court</a>; " ;
+								echo "<a href=\"fissa.php?".token_ref("nouveau")."&date_jour=$date_jour&nom=$n&memo=&presence=Acteur+Social&commentaire=\">$n_court</a>; " ;
 							if ( (strpos($n,"(A)")!==FALSE))
-								echo "<a href=\"fissa.php?action=nouveau&date_jour=$date_jour&nom=$n&memo=&presence=Activité&commentaire=\">$n_court</a>; " ;
+								echo "<a href=\"fissa.php?".token_ref("nouveau")."&date_jour=$date_jour&nom=$n&memo=&presence=Activité&commentaire=\">$n_court</a>; " ;
 							}
 						}
 					else
@@ -429,7 +380,7 @@ include 'include_mail.php';
 							
 							$n_court=stripcslashes($n);
 							if ($donnees["TOTAL"]>$min )
-								echo "<a href=\"fissa.php?action=nouveau&date_jour=$date_jour&nom=$n&memo=&presence=Visite&commentaire=\">$n_court</a>; " ;
+								echo "<a href=\"fissa.php?".token_ref("nouveau")."&date_jour=$date_jour&nom=$n&memo=&presence=Visite&commentaire=\">$n_court</a>; " ;
 							}
 					
 					}
@@ -476,9 +427,8 @@ include 'include_mail.php';
 			{
 			if (!$mail_deja_envoyé )  // il existe déjà un mail
 				{
-				echo "<form method=\"GET\" action=\"fissa.php\">";
-				echo "<input type=\"hidden\" name=\"action\" value=\"mail\"> " ;
-				echo "<input type=\"hidden\" name=\"date_jour\"  value=\"$date\">";
+				formulaire("mail");
+				echo param ("date_jour","$date");
 				echo "<input type=\"submit\" value=\">>> Envoi Mail Synthèse et Rapport d'activité >>>\" ></form>";	
 				}
 			else
@@ -620,7 +570,7 @@ include 'include_mail.php';
 			echo "<tr><td > ".traduire('Détaillé')."  </td><td>$dest2</td>";
 			echo "</table></div>";
 			if ( ($_SESSION['droit']=='R') ||($_SESSION['droit']=='S') )
-				echo "<a href=\"fissa.php?action=modif_liste_mail\">".traduire("Modifier les listes")."</a>";						
+				echo "<a href=\"fissa.php?".token_ref("modif_liste_mail")."\">".traduire("Modifier les listes")."</a>";						
 			}
 		
 		}
@@ -671,14 +621,14 @@ include 'include_mail.php';
 				}
 			echo "<div class=\"CSSTableGenerator\" ><table><tr><td > ".traduire('Rapport')."  </td><td> ".traduire('Destinataires')." </td>";
 			echo "<tr><td > ".traduire('Synthèse')."  </td> ";
-			echo "<td><form method=\"POST\" action=\"fissa.php\">";
-			echo "<input type=\"hidden\" name=\"action\" value=\"mail_synth\"> " ;
+			echo "<td>";
+			formulaire("mail_synth");
 			echo "<TEXTAREA rows=\"4\" cols=\"110\" name=\"liste_mail\" onChange=\"this.form.submit();\">$dest_synthese</TEXTAREA>";
 			echo "</td> </form> ";
-			
+	
 			echo "<tr><td > ".traduire('Détaillé')."  </td>";
-			echo "<td><form method=\"POST\" action=\"fissa.php\">";
-			echo "<input type=\"hidden\" name=\"action\" value=\"mail_detail\"> " ;
+			echo "<td>";
+			formulaire("mail_detail");
 			echo "<TEXTAREA rows=\"4\" cols=\"110\" name=\"liste_mail\" onChange=\"this.form.submit();\">$dest</TEXTAREA>";
 			echo "</td> </form> ";
 			echo "</table></div>";
@@ -741,7 +691,7 @@ include 'include_mail.php';
 				$c=mef_texte_a_afficher( stripcslashes($donnees["commentaire"]) );
 				$n=$donnees["nom"];
 				echo "<a href=\"suivi.php?nom=$n\" > <b>$n</b> </a> : $c";
-				echo "<a title=\"Suppression mémo\"  href=\"fissa.php?action=supp_memo&nom=$n\"> <img src=\"images/croixrouge.png\"width=\"15\" height=\"15\"><a>; ";
+				echo "<a title=\"Suppression mémo\"  href=\"fissa.php?".token_ref("supp_memo")."&nom=$n\"> <img src=\"images/croixrouge.png\"width=\"15\" height=\"15\"><a>; ";
 				
 				$i++; 		
 				}
@@ -832,13 +782,12 @@ include 'include_mail.php';
 		global $jmax,$liste_nom,$date_jour;
 		
 		echo "<table id=\"dujour\"  border=\"2\" >";
-		echo "<form method=\"GET\" action=\"fissa.php#dujour\">";
-		echo "<input type=\"hidden\" name=\"action\" value=\"nouveau\"> " ;
-		echo "<input type=\"hidden\" name=\"femme\" value=\"\"> " ;
-		echo "<input type=\"hidden\" name=\"memo\" value=\"\"> " ;	
-		echo "<input type=\"hidden\" name=\"commentaire\" value=\"\"> " ;
-		echo "<input type=\"hidden\" name=\"presence\" value=\"Visite\"> " ;	
-		echo "<input type=\"hidden\" name=\"date_jour\"  value=\"$date_jour\">";
+		formulaire("nouveau","fissa.php#dujour");
+		echo param ("femme","") ;
+		echo param ("memo","") ;	
+		echo param ("commentaire","") ;
+		echo param ("presence","Visite") ;	
+		echo param ("date_jour","$date_jour");
 		echo "<tr> <td bgcolor=\"#d4ffaa\"> ";
 		echo "<SELECT name=nom onChange=\"this.form.submit();\">";
 		echo "<OPTION  VALUE=\"\">  </OPTION>";
@@ -872,12 +821,11 @@ include 'include_mail.php';
 			{
 			echo "<table id=\"dujour\"  border=\"2\" >";
 			// =====================================================================loc AJOUTER 
-			echo "<form method=\"GET\" action=\"fissa.php#dujour\">";
-			echo "<input type=\"hidden\" name=\"action\" value=\"nouveau\"> " ;
-			echo "<input type=\"hidden\" name=\"memo\" value=\"\"> " ;	
-			echo "<input type=\"hidden\" name=\"commentaire\" value=\"\"> " ;
-			echo "<input type=\"hidden\" name=\"presence\" value=\"$presence\"> " ;	
-			echo "<input type=\"hidden\" name=\"date_jour\"  value=\"$date_jour\">";
+			formulaire("nouveau","fissa.php#dujour");
+			echo param ("memo","") ;	
+			echo param ("commentaire","") ;
+			echo param ("presence","$presence") ;	
+			echo param ("date_jour","$date_jour");
 			echo "<tr> <td bgcolor=\"#d4ffaa\"> ";
 			echo "<SELECT name=nom onChange=\"this.form.submit();\">";
 			echo "<OPTION  VALUE=\"\">  </OPTION>";
@@ -901,12 +849,12 @@ include 'include_mail.php';
 		
 		if  ($_SESSION['droit']=='R') 
 			{
-			echo "<td bgcolor=\"#d4ffaa\"></td> <td bgcolor=\"#d4ffaa\"><form method=\"GET\" action=\"fissa.php\">";
-			echo "<input type=\"hidden\" name=\"action\" value=\"nouveau\"> " ;
-			echo "<input type=\"hidden\" name=\"date_jour\"  value=\"$date_jour\">";
-			echo "<input type=\"hidden\" name=\"memo\" value=\"\"> " ;	
+			echo "<td bgcolor=\"#d4ffaa\"></td> <td bgcolor=\"#d4ffaa\">";
+			formulaire("nouveau");
+			echo param ("date_jour","$date_jour");
+			echo param ("memo","") ;	
 			echo "<input type=\"text\" name=\"nom\" size=\"30\" value=\"\">";	
-			echo "<input type=\"hidden\" name=\"commentaire\" value=\"\"> " ;	
+			echo param ("commentaire","") ;	
 			if ($type=="Bénévole")
 				{
 				echo "<SELECT name=type >";
@@ -915,8 +863,8 @@ include 'include_mail.php';
 				echo "</SELECT>";
 				}
 			else
-				echo "<input type=\"hidden\" name=\"presence\" value=\"$presence\"> " ;
-			echo "<input type=\"hidden\" name=\"type\" value=\"$type\"> " ;
+				echo param ("presence","$presence") ;
+			echo param ("type","$type") ;
 			echo "<input type=\"submit\" value=\"Créer $libelle\" >  ";
 			echo "</td></form> ";	
 			}
@@ -946,11 +894,10 @@ include 'include_mail.php';
 				{
 				if (($ncolor++ %2 )==0) $color="#ffffff" ; else $color="#d4ffaa" ; 
 				echo "<tr id=\"E$i\" > <td bgcolor=\"$color\"> ";
-				echo "<form method=\"GET\" action=\"fissa.php#E$i\">";
-				echo "<input type=\"hidden\" name=\"action\" value=\"nouveau\"> " ;
-				echo "<input type=\"hidden\" name=\"date_jour\"  value=\"$date_jour\">";
+				formulaire("nouveau","fissa.php#E$i");
+				echo param ("date_jour","$date_jour");
 				$nom1=$nom_charge[$i];
-				echo "<input type=\"hidden\" name=\"nom\" size=\"20\" value=\"$nom1\">";
+				echo param ("nom","$nom1");
 				echo "<a href=\"suivi.php?nom=$nom1\"> <b>$nom1</b> </a></td>";
 				
 				switch ($type)
@@ -976,7 +923,7 @@ include 'include_mail.php';
 						if ($nom1!= "Mail")
 							liste_presence($valeur, $nom_charge[$i], $color);
 						else
-							echo "</td> <input type=\"hidden\" name=\"presence\" value=\"$valeur\"> <td bgcolor=\"$color\">";
+							echo "</td>".param ("presence","$valeur")." <td bgcolor=\"$color\">";
 						break;
 					}
 
@@ -1018,7 +965,14 @@ include 'include_mail.php';
 	// ConnexiondD
 include "connex_inc.php";
 
-$action=variable_s("action");	
+	// ------------------------------------------------------------------------------ traitement des actions sans mot de passe
+	$token=variable("token");	
+	if ($token!="")	
+		$action=verifi_token($token,variable("action"));
+	else
+		$action=variable("action");		
+//$action=variable_s("action");	
+
 require_once 'cx.php';
 
 include 'suivi_liste.php';	
@@ -1058,18 +1012,16 @@ else
 		$type= variable_s("type");	
 		$quantite= variable_s("qte");	
 
-		if (!isset ($_GET["date_jour"]))
+		$date_jour=variable_s("date_jour");
+		if ($date_jour=="")
 			$date_jour=date('d/m/Y');
-		else 
-			{
-			$date_jour=variable_s("date_jour");
+		else
 			if ( mise_en_forme_date_aaaammjj($date_jour)=="")
 				{
 				erreur("Format de date incorrect");
 				$action="";
 				$date_jour=date('d/m/Y');
 				}
-			}
 			
 			if ($action=="nouveau")
 				{
@@ -1104,8 +1056,10 @@ else
 
 				if ($type=="Bénéficiaire femme")
 					$nom .= " (F)";
-				nouveau2($date_jour,$nom, variable_s("age"),variable_s("nationalite"));
+				$result_nouveau2 = nouveau2($date_jour,$nom, variable_s("age"),variable_s("nationalite"));
 				}
+			else
+				$result_nouveau2=true;
 
 			if ($action=="chgt_nom")
 				chgt_nom($nom,$nouveau);
@@ -1201,12 +1155,12 @@ else
 				echo "<td width=\"450\"><center>";
 
 				echo "<ul id=\"menu-bar\">";
-				echo "<li><a href=\"fissa.php?date_jour=$date_jour&action=rapport\" target=_blank>Rapport du $date_jour </a></li>";
+				echo "<li><a href=\"fissa.php?".token_ref("rapport")."date_jour=$date_jour\" target=_blank>Rapport du $date_jour </a></li>";
 				echo "<li><a href=\"stat.php\" target=_blank>Statistiques</a>";
-				echo "<li><a href=\"index.php?action=dx\">Deconnexion</a>";
+				echo "<li><a href=\"index.php?".token_ref("dx")."\">Deconnexion</a>";
 				if ( ($_SESSION['droit']=='R') || ($_SESSION['droit']=='S') )
 					{
-					echo "<ul ><li><a href=\"fissa.php?action=redacteur&date_jour=$date_jour\"  target=_blank >Visualisation des rédacteurs</a>";
+					echo "<ul ><li><a href=\"fissa.php?".token_ref("redacteur")."&date_jour=$date_jour\"  target=_blank >Visualisation des rédacteurs</a>";
 					if ($_SESSION['droit']=='R') 
 						echo "<li><a href=\"export_fissa.php\" target=_blank>Export des données</a>";
 					echo "</ul> ";
@@ -1219,15 +1173,14 @@ else
 				echo "<td> ";
 			
 				$veille=date($format_date,  mktime(0,0,0 , $m, $j-1, $a));
-				echo "<td><a href=\"fissa.php?action=date&date_jour=$veille\"> <img src=\"images/gauche.png\" width=\"20\" height=\"20\"> </a> </td> <td> ";
-				echo "<form method=\"GET\" action=\"fissa.php\">";
-				echo "<input type=\"hidden\" name=\"action\" value=\"date\"> " ;	
+				echo "<td><a href=\"fissa.php?".token_ref("date")."&date_jour=$veille\"> <img src=\"images/gauche.png\" width=\"20\" height=\"20\"> </a> </td> <td> ";
+				formulaire("date");
 				echo "<input type=\"text\" name=\"date_jour\" size=\"10\" value=\"$date_jour\" class=\"calendrier\" >";
 				$aujourdhui=date('d/m/Y');
 				if ($date_jour!=$aujourdhui)
-					echo "<br><a href=\"fissa.php?action=date&date_jour=$aujourdhui\">Aujourd'jui</a>";
+					echo "<br><a href=\"fissa.php?".token_ref("date")."&date_jour=$aujourdhui\">Aujourd'jui</a>";
 				$jsuivant=date($format_date,  mktime(0,0,0 , $m, $j+1, $a));
-				echo "</td> <td> <a href=\"fissa.php?action=date&date_jour=$jsuivant\"> <img src=\"images/droite.png\"  width=\"20\" height=\"20\">  </a> </td> <td> ";
+				echo "</td> <td> <a href=\"fissa.php?".token_ref("date")."&date_jour=$jsuivant\"> <img src=\"images/droite.png\"  width=\"20\" height=\"20\">  </a> </td> <td> ";
 				echo "<input type=\"submit\" value=\"Valider\" >  ";
 				echo " </td></form> ";	
 				echo "<br>";
@@ -1258,12 +1211,15 @@ else
 				//ajouter_beneficiaire();
 				echo "<table id=\"dujour\"  border=\"2\" >";
 				// =====================================================================loc NOUVEAU
-				$age=variable_s("age");
-				echo "<tr><td bgcolor=\"#d4ffaa\"><table><tr><td><form method=\"GET\" action=\"fissa.php\">Prénom / Nom : ";
-				echo "<input type=\"hidden\" name=\"action\" value=\"nouveau2\"> " ;
-				echo "<input type=\"hidden\" name=\"date_jour\"  value=\"$date_jour\">";
-				if ($action=="nouveau2")
+				$age="";
+				echo "<tr><td bgcolor=\"#d4ffaa\"><table><tr><td>Prénom / Nom : ";
+				formulaire("nouveau2");
+				echo param ("date_jour","$date_jour");
+				if (!$result_nouveau2)
+					{
 					echo "<input type=\"text\" name=\"nom\" size=\"30\" value=\"$nom\"></td>";	
+					$age=variable_s("age");
+					}
 				else
 					echo "<input type=\"text\" name=\"nom\" size=\"30\" value=\"\"></td>";	
 				
@@ -1355,12 +1311,11 @@ else
 				echo "<TABLE><TR> <td></td><td > <div class=\"CSS_titre\"  >";
 				echo "<table id=\"synthese\"  border=\"0\" >";
 				echo "<tr> <td> <a href=\"suivi.php?nom=Synth\" > Synthèse de la journée </a>";
-				echo "<form method=\"GET\" action=\"fissa.php#synthese\">";
-				echo "<input type=\"hidden\" name=\"action\" value=\"nouveau\"> " ;
-				echo "<input type=\"hidden\" name=\"nom\"  value=\"Synth\">";
-				echo "<input type=\"hidden\" name=\"date_jour\"  value=\"$date_jour\">";
-				echo "<input type=\"hidden\" name=\"femme\" value=\"\"> " ;
-				echo "<input type=\"hidden\" name=\"presence\"  value=\"Synth\">";
+				formulaire("nouveau","fissa.php#synthese");
+				echo param ("nom","Synth");
+				echo param ("date_jour","$date_jour");
+				echo param ("femme","") ;
+				echo param ("presence","Synth") ;
 				if ($synth=="") 
 					$synth="Faits marquants:\n ";
 				else 
@@ -1375,8 +1330,7 @@ else
 					{
 					// =====================================================================loc CHANGEMENT NOM
 					echo "<P> <table border=\"0\" ><tr> <td>";
-					echo "<form method=\"GET\" action=\"suivi.php\">";
-					echo "<input type=\"hidden\" name=\"action\" value=\"chgt_nom\"> " ;
+					formulaire("chgt_nom","suivi.php");
 					echo "<SELECT name=nom>";
 					echo "<OPTION  VALUE=\"\">  </OPTION>";
 					for ($j=0;$j<$jmax;$j++)

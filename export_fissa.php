@@ -10,58 +10,7 @@ include 'general.php';
 				echo "<meta http-equiv=\\\"Content-Type\\\" content=\\\"text/html; charset=iso-8859-1\\\" />";
 		echo "</head><body>";
 		
-	function mise_en_forme_date_aaaammjj( $date_jour)
-		{
-		$d3= explode("/",$date_jour);  
-		if (isset($d3[2]))
-			$a=$d3[2];
-		else
-			$a=date("Y");
-		if ($a<100) $a+=2000;
-		$m=$d3[1];
-		$j=$d3[0];	
-		if (($j<1) || ($j>31) || ($m<1) || ($m>12) )
-			return("");
-		
-		return( "$a-$m-$j" );
-		}
-	// ===============================================================================================
-	// transforme la liste d'activité stockées en table en une liste affichable avec lien pour supprimer
-	function mef_activites($act,$nom,$date)
-		{
-		$ret="";
-		$d3=explode('#-#',$act);
-		$i=0;
-		while (isset($d3[$i]))
-			{
-			if ($d3[$i]!="")
-				{
-				$a=str_replace ('(A)','',$d3[$i]);
-				$ret.=$a;
-				$ret.="<a title=\"Suppresion $a\"  href=\"fissa.php?action=supp_activite&idx=$i&nom=$nom&date_jour=$date\"> <img src=\"images/croixrouge.png\"width=\"15\" height=\"15\"><a>";
-				$ret.="; ";
-				}
-			
-			$i++;
-			}
-		return $ret;
-		}
-	
-	function liste_participants_activite( $act, $date )
-		{
-		global $bdd;
 
-		$ret="";
-		
-		$reponse = command("SELECT * FROM $bdd WHERE date='$date' and (activites like '%$act%') group by nom ASC "); 
-		while ($donnees = fetch_command($reponse) )
-			$ret.=stripcslashes($donnees["nom"]).", ";
-	
-		return($ret);
-		}
-
-
-		
 	function affiche_memo()
 		{
 		global $bdd,$format_date ;

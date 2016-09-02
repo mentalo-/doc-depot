@@ -1,6 +1,10 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">
-<?php include 'header.php';	  ?>
+<?php 
+include 'header.php';	  
+//include 'general.php';
+define('serveur','');	 
+ ?>
     <head>
 	<title>ADILEOS</title>
     <meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\" />
@@ -17,9 +21,6 @@ box-shadow: 15px 10px 10px 0 #A6A6A6;
 		}
 	</style>
 	<body>
-<?php	
-	define('serveur','');
-?>
 
 <center>
 <a href="http://adileos.jimdo.com/"  target=_blank ><img src="images/adileos.jpg" width="700" height="90" > </a> 
@@ -134,6 +135,9 @@ Association de Développement et d’Intégration de Logiciels Economiques Orientés 
 
 
 </TABLE>
+<?php 
 
+// pied_de_page("");
+ ?>
 
 	</body>

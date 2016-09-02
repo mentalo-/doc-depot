@@ -11,31 +11,12 @@ include 'general.php';
 		echo "<meta http-equiv=\\\"Content-Type\\\" content=\\\"text/html; charset=iso-8859-1\\\" />";
 		echo "</head><body>";
 	
-	
-	function mise_en_forme_date_aaaammjj( $date_jour)
-		{
-		$d3= explode("/",$date_jour);  
-		if (isset($d3[2]))
-			$a=$d3[2];
-		else
-			$a=date("Y");
-		if ($a<100) $a+=2000;
-		$m=$d3[1];
-		$j=$d3[0];	
-		if (($j<1) || ($j>31) || ($m<1) || ($m>12) )
-			return("");
-		
-		return( "$a-$m-$j" );
-		}
-
-
 
 	$format_date = "d/m/Y";
 	$user_lang='fr';
 
 	// ConnexiondD
 	include "connex_inc.php";
-$action=variable_s("action");	
 	
 	require_once 'cx.php';
 	

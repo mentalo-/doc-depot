@@ -85,10 +85,10 @@ define('TAILLE_FICHIER_dropzone','8');
 			$nom_a_modifier=variable_get("nom");
 
 			echo "<table><tr> ";
-			echo "<td><a href=\"index.php?action=gb\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"anglais\" alt=\"anglais\" src=\"images/flag_gb.png\"/></a></td><td> | </td>";
-			echo "<td><a href=\"index.php?action=de\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"allemand\" alt=\"allemand\" src=\"images/flag_de.png\"/></a></td><td> | </td>";
-			echo "<td><a href=\"index.php?action=es\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"espagnol\" alt=\"espagnol\" src=\"images/flag_es.png\"/></a></td><td> | </td>";
-			echo "<td><a href=\"index.php?action=ru\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"russe\" alt=\"russe\" src=\"images/flag_ru.png\"/></a></td><td> | </td>";
+			echo "<td><a href=\"index.php?".token_ref("gb")."\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"anglais\" alt=\"anglais\" src=\"images/flag_gb.png\"/></a></td><td> | </td>";
+			echo "<td><a href=\"index.php?".token_ref("de")."\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"allemand\" alt=\"allemand\" src=\"images/flag_de.png\"/></a></td><td> | </td>";
+			echo "<td><a href=\"index.php?".token_ref("es")."\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"espagnol\" alt=\"espagnol\" src=\"images/flag_es.png\"/></a></td><td> | </td>";
+			echo "<td><a href=\"index.php?".token_ref("ru")."\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"russe\" alt=\"russe\" src=\"images/flag_ru.png\"/></a></td><td> | </td>";
 
 			Echo "<td>Langue = $user_lang </td></table><hr>";
 			
@@ -118,7 +118,10 @@ define('TAILLE_FICHIER_dropzone','8');
 				else
 					$chk= ""  ;
 				
-				echo "<td width=\"10\"><form method=\"post\" action=\"index.php#$idx2\"><input  type=\"hidden\"  name=\"action\" value=\"modif_trad_tech\"/><input  type=\"hidden\"  name=\"idx\" value=\"$idx\"/> <input type=\"checkbox\" name=\"valeur\" onChange=\"this.form.submit();\" $chk >  </form> </td> ";
+				echo "<td width=\"10\">";
+				formulaire ("modif_trad_tech", "index.php#$idx2");
+				echo param("idx","$idx");
+				echo "<input type=\"checkbox\" name=\"valeur\" onChange=\"this.form.submit();\" $chk >  </form> </td> ";
 								
 				echo "<td id=\"$idx\" width=\"30%\"> $nom ";
 				
@@ -131,7 +134,12 @@ define('TAILLE_FICHIER_dropzone','8');
 				
 
 				if ($commentaire!="technique")
-					echo "<td width=\"70%\"><form method=\"post\" action=\"index.php#$idx2\"> <input  type=\"hidden\"  name=\"action\" value=\"modif_trad\"/> ".param('idx',"$idx").param('filtre',"$filtre1")."<input type=\"text\" name=\"valeur\" id=\"$idx\" value=\"".$valeur."\" size=\"100\" onChange=\"this.form.submit();\" >  </form> </td>";
+					{
+					echo "<td width=\"70%\">");
+					formulaire ("modif_trad", "index.php#$idx2");
+					echo param('idx',"$idx").param('filtre',"$filtre1");
+					echo "<input type=\"text\" name=\"valeur\" id=\"$idx\" value=\"".$valeur."\" size=\"100\" onChange=\"this.form.submit();\" >  </form> </td>";
+					}
 				else 
 					echo "<td > </td>";
 

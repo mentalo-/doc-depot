@@ -6,7 +6,7 @@
 		{
 		global $action;
 			
-		if ( ($flag!="") && ($_SERVER['REMOTE_ADDR']=="127.0.0.1"))
+		if ( ($flag!="") && ( poste_local() ))
 			echo "<p>$ligne ";
 		
 		if (isset ($_SESSION['chgt_user']) && 	($_SESSION['chgt_user']==true) && (strpos( strtolower($ligne),"select" )===false) )
