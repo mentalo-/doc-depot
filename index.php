@@ -745,13 +745,13 @@ function maj_mdp_fichier($idx, $pw )
 		
 			$body .= "<p> Pour accéder aux documents sur 'Doc-depot.com', merci de cliquer sur ce <a  id=\"lien\"  href=\"$lien\">lien </a> "; 
 			
-			$body .= "ou sur l'image ci-dessous <p> <a  id=\"lien_image\"  href=\"$lien\">  <img src=\"http://".serveur."dossier/$ref.jpg\" width=\"100\" height=\"140\" > </a>"; 
+			$body .= "ou sur l'image ci-dessous <p> <a  id=\"lien_image\"  href=\"$lien\">  <img src=\"http://".serveur."dossier/$identifiant-0.jpg\" width=\"100\" height=\"140\" > </a>"; 
 
 			$date_limite=date("d/m/Y",  mktime(0,0,0 , date("m"), date("d")+parametre("DD_duree_vie_dossier"), date ("Y")));
 			$body .= ". <p>Remarque importante: les documents doivent être récupérés avant le $date_limite ";            
 			$body .="<br><br>Si le lien ne fonctionne pas, recopiez dans votre navigateur internet cette adresse : <br>$lien";
 			$body .= "<p> Cordialement";		
-			$body .= "<p> $user_nom $user_prenom ($user_telephone/$user_mail)";		
+			$body .= "<p> $user_nom $user_prenom ( $user_telephone / $user_mail ) <br>";		
 			if ($user_organisme!="")
 				{
 				$body .= "<br>". libelle_organisme($user_organisme) ;		

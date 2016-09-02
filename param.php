@@ -135,7 +135,7 @@ define('TAILLE_FICHIER_dropzone','8');
 
 				if ($commentaire!="technique")
 					{
-					echo "<td width=\"70%\">");
+					echo "<td width=\"70%\">";
 					formulaire ("modif_trad", "index.php#$idx2");
 					echo param('idx',"$idx").param('filtre',"$filtre1");
 					echo "<input type=\"text\" name=\"valeur\" id=\"$idx\" value=\"".$valeur."\" size=\"100\" onChange=\"this.form.submit();\" >  </form> </td>";

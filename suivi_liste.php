@@ -21,13 +21,16 @@
 					if ($age!="")
 						$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom_slash', '1111-11-11', 'Age','$age','$user','$modif','','')");
 					if ($nationalite!="Inconnu")
-						$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom_slash', '1111-11-11', 'nationalite','$nationalite','$user','$modif','','')");					
+						$reponse = command("INSERT INTO `$bdd`  VALUES ( '$nom_slash', '1111-11-11', 'nationalite','$nationalite','$user','$modif','','')");
+					msg_ok("Création réalisée.");
+					return (true);
 					}
 				else
 					erreur("Ce nom existe déjà");
 			}
 		else
 			erreur("Le champ nom ne doit pas être vide");
+		return (false);
 		}
 		
 	function choix_action_suivi($act)

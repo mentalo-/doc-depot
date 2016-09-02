@@ -5,21 +5,6 @@ include 'param.php';
 include 'bdd.php';
 require_once 'include_crypt.php';
 
-function ob_replace($tag, $prefixe, $buffer)
-	{
-	$saut='/n';
-	
-	$buffer=str_replace("<$tag","$saut$prefixe<$tag",$buffer);
-	$buffer=str_replace("</$tag","$saut$prefixe</$tag",$buffer);
-	
-	return($buffer);
-	}
-
-function ob_finalisation($buffer)
-	{
-//	$buffer=str_replace("table","",$buffer);
-	return($buffer);
-	}
 	
 	
 	
