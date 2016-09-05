@@ -677,19 +677,30 @@ function maj_mdp_fichier($idx, $pw )
 		echo "<h3>".traduire('La Consigne Numérique Solidaire')."</h3><font size=\"5\">'' ".traduire("Mon essentiel à l'abri en toute confiance")." ''</font> <p>";
 		debut_cadre("700");
 		$ref=variable_get("ref");
-		echo "<p><br>".traduire('Récupération documents')." : (".traduire('Référence dossier')." = $ref )";
+		echo "<p><br>".traduire('Récupération documents')." : ";
+		
+		$d3= explode("-",$ref);
+		if (isset($d3[0]))
+			{
+			$user=$d3[0];
+			$reponse =command("select * from  r_user where idx='$user' ");		
+			$donnees = fetch_command($reponse) ;
+			$nom=$donnees["nom"];
+			$prenom=$donnees["prenom"];	
+			echo "<strong>$nom - $prenom</strong>";
+			}
+		echo "<br>(".traduire('Référence dossier')." = $ref )";
 		if ($ref!="") 
 			{
 			if (file_exists("dossiers/$ref.pdf"))
 				{
-				supp_fichier("dossiers/$ref.jpg");
-				exec ( "/usr/bin/convert -density 100 dossiers/$ref.pdf dossiers/$ref.jpg" ) ;  // si PDF et sur serveur OVH alors on crée une miniature
-				echo "<br><p>";
+				echo "<p>".traduire("Cliquez sur l'image pour ouvrir le fichier au format PDF contenant le(s) documents transmis")." : ";	
+				echo "<br><p>";				
 				if (file_exists("dossiers/$ref.jpg"))
-					lien("dossiers/$ref.jpg", "visu_dossier", param ("fichier","$ref"), "Dossier $ref", "","B","", true);
+					lien("dossiers/$ref.jpg", "visu_dossier", param ("fichier","$ref"), "Dossier $ref", "100","B","", true);
 				else
-					lien("images/fichier.jpg", "visu_dossier", param ("fichier","$ref"), "Dossier $ref", "","B","", true);
-				echo "<p>".traduire("Cliquez sur l'image pour ouvrir le fichier au format PDF contenant le(s) documents transmis")." : ";		
+					lien("images/fichier.jpg", "visu_dossier", param ("fichier","$ref"), "Dossier $ref", "100","B","", true);
+	
 				echo "<p>".traduire('Enregistrer le fichier pour le traiter').".<br><p>";				
 				}
 			else
@@ -718,15 +729,17 @@ function maj_mdp_fichier($idx, $pw )
 			// 10 tentatives pour trouver 
 			for ($i=0; $i<10;$i++)
 				{
-				$identifiant=$user."-".rand(1000000,9999999);
+				$identifiant=$user."-".rand(100000,999999);
 				if ( (!file_exists("dossiers/$identifiant.jpg")) && (!file_exists("dossiers/$identifiant.pdf")) ) 
 					 break;
 				}
 				
 			copy("tmp/_$ref.pdf", "dossiers/$identifiant.pdf");
-			exec ( "/usr/bin/convert -density 100 dossiers/$ref.pdf dossiers/$identifiant.jpg" ) ;  //on crée une miniature
-			if (!file_exists("dossiers/$identifiant.jpg"))
-				copy("images/fichier.jpg", "dossiers/$identifiant.jpg");
+			genere_miniature_pdf("dossiers/$identifiant.pdf" , "dossiers/$identifiant" );
+			
+//			exec ( "/usr/bin/convert -density 100 dossiers/$ref.pdf dossiers/$identifiant.jpg" ) ;  //on crée une miniature
+//			if (!file_exists("dossiers/$identifiant.jpg"))
+//				copy("images/fichier.jpg", "dossiers/$identifiant.jpg");
 				
 			$reponse =command("select * from  r_user where idx='$user' ");		
 			$donnees = fetch_command($reponse) ;
@@ -737,18 +750,18 @@ function maj_mdp_fichier($idx, $pw )
 			$lien = serveur."index.php?".token_ref("recup_dossier")."&ref=".addslashes(encrypt("$identifiant"));
 			
 			$body= "Bonjour, <p> Veuillez trouver ci-dessous le lien vers les documents de $user_nom_b $user_prenom_b"  ;
+			$comment=html_entity_decode($comment);
 			$comment=stripcslashes($comment);
 			$comment=stripcslashes($comment);
 			$comment=nl2br($comment);
 			if ($comment!="")
 				$body .= "<p> Commentaire de l'expéditeur $user_nom $user_prenom : <table><tr><td><i>".$comment."</i></td> </table>";            
 		
-			$body .= "<p> Pour accéder aux documents sur 'Doc-depot.com', merci de cliquer sur ce <a  id=\"lien\"  href=\"$lien\">lien </a> "; 
+			$body .= "<p> Pour accéder aux documents sur 'Doc-depot.com', merci de cliquer sur ce <a  id=\"lien\"  href=\"$lien\">lien. </a> "; 
 			
-			$body .= "ou sur l'image ci-dessous <p> <a  id=\"lien_image\"  href=\"$lien\">  <img src=\"http://".serveur."dossier/$identifiant-0.jpg\" width=\"100\" height=\"140\" > </a>"; 
-
 			$date_limite=date("d/m/Y",  mktime(0,0,0 , date("m"), date("d")+parametre("DD_duree_vie_dossier"), date ("Y")));
-			$body .= ". <p>Remarque importante: les documents doivent être récupérés avant le $date_limite ";            
+			$body .= "<br>Remarque importante: les documents doivent être récupérés avant le $date_limite "; 	
+			          
 			$body .="<br><br>Si le lien ne fonctionne pas, recopiez dans votre navigateur internet cette adresse : <br>$lien";
 			$body .= "<p> Cordialement";		
 			$body .= "<p> $user_nom $user_prenom ( $user_telephone / $user_mail ) <br>";		
@@ -795,7 +808,9 @@ function maj_mdp_fichier($idx, $pw )
 		
 		$j=1;
 		formulaire ("creer_dossier");
-
+		
+		if ($user_droit!="")
+			affiche_titre_user($_SESSION['user_idx']);
 		echo traduire('Ajouter au dossier vos coordonnées ?')." <input type=\"checkbox\" name=\"add\" > ".traduire('Adresse')." ,<input type=\"checkbox\" name=\"tel\" > ".traduire('Téléphone')." , <input type=\"checkbox\" name=\"mail\" >".traduire('Mail').", <input type=\"checkbox\" name=\"anniv\" >".traduire('Date de naissance');
 		echo "<p>".traduire('Sélectionnez les fichiers à prendre en compte')." :<table>";
 		$reponse =command("select * from r_attachement where ref='$ref' order by date DESC ");
@@ -876,7 +891,7 @@ function maj_mdp_fichier($idx, $pw )
 		if  ((variable("add")=="on") && ($user_adresse!="") )
 			$pdf1->text(10,51,"Adresse : $user_adresse ");
 			
-		$comment=stripcslashes(variable("comment"));	
+		$comment=stripcslashes(html_entity_decode(variable("comment")));	
 		if ($comment!="")
 			$pdf1->text(10,58,"Commentaire : $comment");
 		
@@ -1084,7 +1099,7 @@ function maj_mdp_fichier($idx, $pw )
 			if ($recept_mail>=$date_jour)
 				{
 				echo "<td> - ".traduire("Réception de document par mail autorisé pour la journée")." ('$id@fixeo.com' ";
-				if (VerifierTelephone($n))
+				if (VerifierTelephone($tel))
 					echo traduire("ou")." '$tel@fixeo.com')";
 				else
 					echo ")";				
@@ -2807,7 +2822,7 @@ function affiche_titre_user($user)
 	
 	$user=encrypt($user);
 
-	if ($_SESSION['user']!=$_SESSION['user_idx'])
+	if ($_SESSION['bene']!="")
 		{
 		echo "<table><tr><td> <ul id=\"menu-bar\">";
 		echo "<li> <a href=\"index.php?".token_ref("detail_user2")."&user=$user\" > $nom $prenom $anniv </a></li>";
@@ -2947,6 +2962,7 @@ function affiche_membre($idx, $opt_aff="")
 				{
 				// liste des actions ne nécessitant pas de droits
 				case "":
+				case "cmd_perimee":
 				case "liste":
 				case "fr":
 				case "es":
@@ -3236,7 +3252,13 @@ function affiche_membre($idx, $opt_aff="")
 			msg_ok( traduire("Bug enregistré")." ($n).");
 			$action="bug";
 			}	
-			
+
+		if ($action=="cmd_perimee")
+			{
+			echo "<p>".traduire("L'action demandée n'est plus autorisée (délais dépassé)");
+			$action="";
+			}	
+						
 		if ($action=="alerte_admin")
 			{
 			aff_logo();
@@ -4488,8 +4510,8 @@ require_once 'cx.php';
 	if (($action=="mail_envoi") )
 		{
 		$mail = variable("mail");
-		$titre = stripcslashes(variable("titre"));
-		$msg = stripcslashes(variable("msg"));
+		$titre = html_entity_decode(stripcslashes(variable("titre")));
+		$msg = html_entity_decode(stripcslashes(variable("msg")));
 		$org = stripcslashes(variable("origine"));
 		$mail_org = variable("mail_org");
 		if ( VerifierAdresseMail($mail))

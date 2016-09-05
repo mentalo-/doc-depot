@@ -43,12 +43,12 @@ FUNCTION poste_local()
 			$time_token=$d3[2];
 			//echo "Token : $action_token $u $time_token";
 			// si commande publiques on ne vérifie que la durée de validité 
-			if ( ($action=="finaliser_user") || ($action=="recup_dossier") || ($action=="reinit_mdp") ) // pour ces commandes, la validité est de 7 jours
+			if ( ($action_token=="finaliser_user") || ($action_token=="recup_dossier") || ($action_token=="reinit_mdp") ) // pour ces commandes, la validité est de 7 jours
 				{
 				if ( (time()- $time_token) > parametre("DD_duree_vie_dossier")*24*3600) 
 					{
-					erreur("Commande périmèe");
-					return ("");
+					//erreur("Commande périmèe");
+					return ("cmd_perimee");
 					}	
 				}
 			else
@@ -61,8 +61,8 @@ FUNCTION poste_local()
 				
 				if ( (time()- $time_token) > 1.5*TIME_OUT) 
 					{
-					erreur("Commande périmèe");
-					return ("");
+					//erreur("Commande périmèe");
+					return ("cmd_perimee");
 					}
 				}
 		
