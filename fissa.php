@@ -1155,7 +1155,7 @@ else
 				echo "<td width=\"450\"><center>";
 
 				echo "<ul id=\"menu-bar\">";
-				echo "<li><a href=\"fissa.php?".token_ref("rapport")."date_jour=$date_jour\" target=_blank>Rapport du $date_jour </a></li>";
+				echo "<li><a href=\"fissa.php?".token_ref("rapport")."&date_jour=$date_jour\" target=_blank>Rapport du $date_jour </a></li>";
 				echo "<li><a href=\"stat.php\" target=_blank>Statistiques</a>";
 				echo "<li><a href=\"index.php?".token_ref("dx")."\">Deconnexion</a>";
 				if ( ($_SESSION['droit']=='R') || ($_SESSION['droit']=='S') )

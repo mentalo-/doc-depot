@@ -673,7 +673,6 @@ class MailAttachmentManager
 					$reponse = command ("SELECT * FROM r_user WHERE ( (id like '$id' ) or telephone='$id') and droit='' "); 
 					if ($donnees = fetch_command($reponse))
 						{
-						echo " x0 ";
 						$droit=$donnees["droit"];
 						$user=$donnees["idx"];
 						$recept_mail=$donnees["recept_mail"];
@@ -689,7 +688,7 @@ class MailAttachmentManager
 							if ($d1 = fetch_command($r1))  // on a trouver un utilisateur
 								$vient_de_RC=true;
 									
-							$r1 = command("SELECT * FROM r_user WHERE mail='$from' and user='$user'  "); 
+							$r1 = command("SELECT * FROM r_user WHERE mail='$from' and idx='$user'  "); 
 							if ($d1 = fetch_command($r1))  // le mail vient du bénéficiaire lui meme
 								$vient_du_beneficiaire=true;		
 									
