@@ -4450,10 +4450,10 @@ require_once 'cx.php';
 		else
 			{
 			erreur (traduire("Message trop court"));
-			$action="sms_test";			
+			//$action="sms_test";			
 			}
 		}	
-
+/*
 	if (($action=="sms_envoi_ovh") &&  ($user_droit!=""))
 		{
 		$msg= stripcslashes(variable("msg"));		
@@ -4471,7 +4471,7 @@ require_once 'cx.php';
 			$action="sms_test";			
 			}
 		}	
-		
+*/	
 	if ((($action=="sms_test") || ($action=="sms_test_ovh"))  &&  ($user_droit!=""))
 		{
 		$tel= variable("tel");

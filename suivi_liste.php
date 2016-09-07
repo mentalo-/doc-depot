@@ -142,6 +142,7 @@
 		
 		affiche_un_choix($act,"Accompagnement/bilan");
 		affiche_un_choix($act,"Accompagnement administratif");
+		affiche_un_choix($act,"Accompagnement physique");
 		affiche_un_choix($act,"Attestation présence");
 		affiche_un_choix($act,"Attestation situation");		
 		affiche_un_choix($act,"Aide financière");	
