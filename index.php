@@ -464,14 +464,19 @@ function maj_mdp_fichier($idx, $pw )
 
 	function liste_organisme( $val_init, $action=0 )
 		{
-
+		global $user_droit;
+		
 		if ($action==0)
 			echo "<td> <SELECT name=\"organisme\" id=\"organisme\" onChange=\"javascript:afficheNouveauType();\" >";
 		else
 			echo "<td> <SELECT name=\"organisme\" id=\"organisme\" onChange=\"this.form.submit();\"  >";
 		
 		affiche_un_choix($val_init,"");
-		$reponse =command("select * from  r_organisme  ");
+		if ($user_droit=='A')
+			$reponse =command("select * from  r_organisme ");
+		else
+			$reponse =command("select * from  r_organisme where convention<>'2'");
+
 		while ($donnees = fetch_command($reponse) ) 
 			{
 			$organisme=stripcslashes($donnees["organisme"]);
@@ -1096,16 +1101,25 @@ function maj_mdp_fichier($idx, $pw )
 			}
 		
 		if (substr($ref,0,1)=="A")
+			{
 			if ($recept_mail>=$date_jour)
 				{
-				echo "<td> - ".traduire("Réception de document par mail autorisé pour la journée")." ('$id@fixeo.com' ";
+				$id=strtolower($id);
+				echo "<td> - ".traduire("Réception de document par mail autorisé pour la journée")." (<strong>'$id@fixeo.com</strong>' ";
 				if (VerifierTelephone($tel))
-					echo traduire("ou")." '$tel@fixeo.com')";
-				else
-					echo ")";				
+					echo traduire("ou")." '<strong>$tel@fixeo.com</strong>'";
+				echo ")";				
 				lien ("images/croixrouge.png", "supp_recept_mail", param("idx","$idx" ),"Annuler l'autorisation." );
-				echo "</td>";
 				}
+			else
+				{
+				echo "<td> - ".traduire("Dépot permanent par référent de confiance ou bénéficiaire")." (<strong>'$id@fixeo.com</strong>' ";
+				if (VerifierTelephone($tel))
+					echo traduire("ou")." '<strong>$tel@fixeo.com</strong>'";
+				echo ")";	
+				}					
+			echo "</td>";
+			}
 		if ((($action=="ajout_admin") &&  (substr($ref,0,1)=="A"))|| ( ($action=="ajout_photo")&&  (substr($ref,0,1)=="P")) ) 
 			{
 			if ( $nb_doc<MAX_FICHIER)
@@ -2462,9 +2476,9 @@ function maj_mdp_fichier($idx, $pw )
 				}
 
 			if ($filtre1=="")
-				$reponse =command("select * from  r_organisme order by organisme asc");
+				$reponse =command("select * from  r_organisme where convention<>'2' order by organisme asc");
 			else
-				$reponse =command("select * from  r_organisme where (adresse REGEXP '$filtre1' or organisme REGEXP '$filtre1' or sigle REGEXP '$filtre1' or mail REGEXP '$filtre1' or tel REGEXP '$filtre1') order by organisme asc");			
+				$reponse =command("select * from  r_organisme where (convention<>'2') and (adresse REGEXP '$filtre1' or organisme REGEXP '$filtre1' or sigle REGEXP '$filtre1' or mail REGEXP '$filtre1' or tel REGEXP '$filtre1') order by organisme asc");			
 
 			while ($donnees = fetch_command($reponse) ) 
 				{
@@ -3155,7 +3169,7 @@ function affiche_membre($idx, $opt_aff="")
 						$nom=libelle_user($_SESSION['user']);
 					else 
 						$nom="user non connecté (".$_SERVER["REMOTE_ADDR"].")";
-					ajout_log_tech ( "Action '$action' inconnue par $nom ", "P1" );
+					ajout_log_tech ( "Action '$action' inconnue par $nom ", "P0" );
 					
 					// on pénalise l'utilisateur 
 					$ip=$_SERVER["REMOTE_ADDR"];
@@ -3170,18 +3184,8 @@ function affiche_membre($idx, $opt_aff="")
 
 	$user_lang='fr';
 		
-	// on teste le pays d'origine
-	if ($_SERVER['REMOTE_ADDR']!="127.0.0.1")
-		{
-		$pays= strtoupper($_SERVER['GEOIP_COUNTRY_CODE']); 
-		if (($pays!="FR") && ($pays!="CA") && ($pays!="")&& ($pays!="UNKNOWN") )  // on n'autorise que la france 
-			{
-			ajout_log_tech ( "Rejet connexion ".$_SERVER['REMOTE_ADDR']." car pays = '$pays' ", "P1" );
-			aff_logo("x");
-			echo "<p>".traduire('Service only available from France and Canada');
-			pied_de_page(); 
-			}
-		}
+	include "ctrl_pays.php";
+
 		
 	/*
 	if (substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2)!="fr") 
@@ -3901,7 +3905,7 @@ function affiche_membre($idx, $opt_aff="")
 			echo "<p>Liste des structures déployant 'doc-depot' : " ;
 			titre_organisme();
 			
-			$reponse =command("select * from  r_organisme where not (mail regexp 'fixeo' ) order by organisme asc");
+			$reponse =command("select * from  r_organisme where convention<>'2' order by organisme asc");
 			while ($donnees = fetch_command($reponse) ) 
 				{
 				$adresse=stripcslashes($donnees["adresse"]);

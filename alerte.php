@@ -80,7 +80,7 @@ require_once "connex_inc.php";
 	echo "</head><body>";
 
 	$user_lang='fr';
-	$format_date = "d/m/Y";
+	$format_date = "Y-m-d";
 	$token=variable("token");	
 	if ($token!="")	
 		$action=verifi_token($token,variable("action"));
