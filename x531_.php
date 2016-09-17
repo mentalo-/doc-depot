@@ -9,6 +9,26 @@
 	include 'general.php';
 	include 'exploit.php';
 	
+	function aff_log_tech($prio)
+		{
+		$d="";
+		echo "<div class=\"CSSTableGenerator\" ><table><tr><td > Date  </td><td> Prio </td><td> Evénement </td><td> Ip </td>";
+		$reponse =command("select * from  z_log_t where prio='$prio' order by date desc limit 0,19");		
+		while ($donnees = fetch_command($reponse) ) 
+				{
+				$date=$donnees["date"];	
+				$d3= explode(" ",$date);
+				if(( $d!="") && ($d!=$d3[0]))
+					echo "<tr><td> - - -  </td><td> - - </td><td> - - - - - -  </td><td> - - -  </td>";
+				$d=$d3[0];
+				$ligne=$donnees["ligne"];
+				$ip=$donnees["ip"];
+				$prio=$donnees["prio"];
+				echo "<tr><td>  $date   </a></td><td> $prio </td><td> $ligne </td><td> $ip </td>";
+
+				}
+		echo "</table></div><hr>";
+		}
 		
 	$time_ttt= time();
 	$heure=date('H',  time());
@@ -71,26 +91,6 @@
 	
 	echo "</table><hr>";
 
-
-		
-	$d="";
-	echo "<div class=\"CSSTableGenerator\" ><table><tr><td > Date  </td><td> Prio </td><td> Evénement </td><td> Ip </td>";
-	$reponse =command("select * from  z_log_t  order by date desc limit 0,19");		
-	while ($donnees = fetch_command($reponse) ) 
-			{
-			$date=$donnees["date"];	
-			$d3= explode(" ",$date);
-			if(( $d!="") && ($d!=$d3[0]))
-				echo "<tr><td> - - -  </td><td> - - </td><td> - - - - - -  </td><td> - - -  </td>";
-			$d=$d3[0];
-			$ligne=$donnees["ligne"];
-			$ip=$donnees["ip"];
-			$prio=$donnees["prio"];
-			echo "<tr><td>  $date   </a></td><td> $prio </td><td> $ligne </td><td> $ip </td>";
-
-			}
-	echo "</table></div><hr>";
-
 	
 		$d="";
 		echo "<div class=\"CSSTableGenerator\" ><table><tr><td > Date </td><td> IP</td><td> Action </td><td> Compte </td><td> Acteur </td>";
@@ -116,6 +116,10 @@
 				}
 		echo "</table></div><hr>";
 
+
+	aff_log_tech("P0");
+	aff_log_tech("P2");
+	aff_log_tech("P1");
 
 	echo "</body>";
 	
