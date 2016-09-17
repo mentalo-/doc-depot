@@ -401,7 +401,7 @@ require_once "include_mail.php";
 					$msg=str_replace (" .", ".", $msg);
 					command("UPDATE `cc_alerte` SET dernier_envoi='$maintenant'  where tel='$telephone'  ");
 					if (!$mode_test)
-						envoi_SMS($telephone,stripcslashes($msg));
+						envoi_SMS_operateur($telephone,stripcslashes($msg));
 					}
 				command("UPDATE `cc_alerte` SET dernier_ttt='$maintenant'  where tel='$telephone'  ");
 				}

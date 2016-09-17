@@ -46,7 +46,7 @@ if (isset($_POST['pass'])) // mot de passe défini
 			$heure_jour=date("H\hi.s");	
 			$_SESSION['bene']="";
 			
-			ajout_log_tech("'$id' - '".$_POST['id']."' - '$id_post'");
+			//ajout_log_tech("'$id' - '".$_POST['id']."' - '$id_post'");
 			//ajout_log_tech("'".decrypt($mot_de_passe )."' - '".$_POST['pass']."'");			
 			//ajout_log_tech("'$mot_de_passe' - '".encrypt(addslashes($_POST['pass']))."' - '".encrypt($_POST['pass'])."'" );
 			//ajout_log_tech("Droit : '$droit' " );			
@@ -224,7 +224,7 @@ if (isset($_POST['pass'])) // mot de passe défini
 		$msg_tech=parametre("DD_msg_1ere_page");
 		if ($msg_tech!="")
 			echo $msg_tech;
-		echo "<p><br><a href=\"index.php?".token_ref("dde_mdp")."\" > <img src=\"images/oubli.png\" width=\"35\" height=\"35\" > ".traduire('Si vous avez oublié votre mot de passe, cliquez ici.')." </a><p><p>";
+		echo "<p><br><a href=\"index.php?".token_ref("dde_mdp")."\" > <img src=\"images/oubli.png\" width=\"35\" height=\"35\" > ".traduire('Si vous avez oublié votre mot de passe ou identifiant, cliquez ici.')." </a><p><p>";
 		echo "<p><br></center></div>";
 		pied_de_page();
 		} 

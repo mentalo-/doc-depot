@@ -2,8 +2,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">
 <?php 
 include 'header.php';	  
-//include 'general.php';
-define('serveur','');	 
+include 'general.php';
+ 
  ?>
     <head>
 	<title>ADILEOS</title>
@@ -36,7 +36,7 @@ Association de Développement et d’Intégration de Logiciels Economiques Orientés 
 	<TABLE>
 	<TR> 
 	<td> 
-	<?php echo "<a href=\"".serveur."alerte.php\"> "; ?>
+	<?php echo "<a href=\"alerte.php\"> "; ?>
 	
 	<img src="images/logo-alerte.jpg" width="150" height="100" > </a> </td>
 	<td width="500" class="ombre"> 
@@ -51,7 +51,7 @@ Association de Développement et d’Intégration de Logiciels Economiques Orientés 
 	<TABLE>
 	<TR> 
 	<td> 
-	<?php echo "<a href=\"".serveur."index.php\"> "; ?>
+	<?php echo "<a href=\"index.php\"> "; ?>
 
 	<img src="images/logo.png" width="150" height="100" > </a> </td>
 	<td width="500" class="ombre"> <center>
@@ -66,7 +66,7 @@ Association de Développement et d’Intégration de Logiciels Economiques Orientés 
 	if (file_exists ( "webmail" )) 
 		{
 		echo "<br><TABLE><TR> <td> ";
-		echo "<a href=\"".serveur."wm.php\"> "; 
+		echo "<a href=\"wm.php\"> "; 
 		echo "<img src=\"images/webmail.jpg\" width=\"150\" height=\"100\" > </a> </td>";
 		echo "<td width=\"500\" class=\"ombre\"> <center> <b><font size=\"4\">WEBMAIL </b></font>";
 		echo "<br><br> Accèder à vos mails de façon très simple.</td></TABLE>";
@@ -85,7 +85,7 @@ Association de Développement et d’Intégration de Logiciels Economiques Orientés 
 		<TR> 
 			<td width="200" > 
 			<center>
-			<?php echo "<a href=\"".serveur."index.php\"> "; ?>
+			<?php echo "<a href=\"index.php\"> "; ?>
 			<img src="images/logo.png" width="101" height="75" > 
 			</a>
 			</td > <td > 
@@ -93,7 +93,7 @@ Association de Développement et d’Intégration de Logiciels Economiques Orientés 
 </td>
 		 <TR> 
 <td > <center>
-	<?php echo "<a href=\"".serveur."fissa.php\"> "; ?>
+	<?php echo "<a href=\"fissa.php\"> "; ?>
 		<img src="images/fissa.jpg" width="101" height="75" > 
 		</a>
 					</td > <td > 
@@ -103,7 +103,7 @@ Association de Développement et d’Intégration de Logiciels Economiques Orientés 
 		
 		<TR> 
 <td > <center>
-<?php echo "<a href=\"".serveur."suivi.php\"> "; ?>
+<?php echo "<a href=\"suivi.php\"> "; ?>
 		<img src="images/suivi.jpg" width="101" height="75" > 
 	</a>
 				</td > <td > 
@@ -113,7 +113,7 @@ Association de Développement et d’Intégration de Logiciels Economiques Orientés 
 
 		 <TR> 
 <td > <center>
-	<?php echo "<a href=\"".serveur."rdv.php\"> "; ?>
+	<?php echo "<a href=\"rdv.php\"> "; ?>
 		<img src="images/rdv.jpg" width="101" height="75" > 
 		</a>
 					</td > <td > 
@@ -137,7 +137,17 @@ Association de Développement et d’Intégration de Logiciels Economiques Orientés 
 </TABLE>
 <?php 
 
-// pied_de_page("");
+		echo "<hr><center> ";
+
+		echo "<table> <tr> <td align=\"right\" valign=\"bottom\" ></td>";
+		echo "<td><a id=\"lien_conditions\" href=\"conditions_portail.html\">".traduire('Conditions d\'utilisation')."</a>";
+		echo "- <a id=\"lien_contact\" href=\"http://adileos.jimdo.com/contact\">".traduire('Nous contacter')."</a>";
+		echo "- Copyright <a href=\"http://adileos.doc-depot.com\"  target=_blank >ADILEOS</a> ";
+		$version= parametre("DD_version_portail") ;
+		echo "- $version ";	
+		echo "- <a href=\"http://adileos.jimdo.com/contact\">".traduire('Signaler un bug ou demander une évolution').".</a> </td> </table>";
+
+
  ?>
 
 	</body>

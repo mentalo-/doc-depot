@@ -679,6 +679,7 @@ class MailAttachmentManager
 						$telephone=$donnees["telephone"];
 
 							$date_jour=date('Y-m-d');
+							$_SESSION['droit']='';
 							
 							$from = $header->from[0]->mailbox."@".$header->from[0]->host ;			
 							// vérifiction si cela ne vient pas d'un référent de confiance
@@ -686,7 +687,10 @@ class MailAttachmentManager
 							
 							$r1 = command("SELECT * FROM r_user WHERE mail='$from' and (droit='S' or droit='R' )"); 
 							if ($d1 = fetch_command($r1))  // on a trouver un utilisateur
+								{
 								$vient_de_RC=true;
+								$_SESSION['droit']='S';
+								}
 									
 							$r1 = command("SELECT * FROM r_user WHERE mail='$from' and idx='$user'  "); 
 							if ($d1 = fetch_command($r1))  // le mail vient du bénéficiaire lui meme
@@ -708,7 +712,8 @@ class MailAttachmentManager
 									ajout_log( $user,"Contact VCF reçu : '$ligne' ",$user);
 									}
 								else
-									 {		
+									 {
+									 
 									if (!$flag_MMS)
 										{
 										if (charge_image("1","tmp/$filename",str_replace(" ","_","$filename"),$donnees["lecture"],"A-$user", $sujet, "Mail",$from, $user))

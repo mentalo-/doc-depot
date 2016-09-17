@@ -108,7 +108,7 @@ FUNCTION poste_local()
 	function liste_avant( $val_init , $mode="", $autre="")
 		{
 		echo "<td><SELECT name=\"avant\" $mode >";
-		affiche_un_choix($val_init,"Aucun", traduire("Aucun"));
+		affiche_un_choix($val_init,"Aucun", traduire("Pas de SMS"));
 		affiche_un_choix($val_init,"1H");
 //		affiche_un_choix($val_init,"4H");
 		affiche_un_choix($val_init,"La veille", traduire("La veille soir"));

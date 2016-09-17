@@ -593,7 +593,6 @@ function rotateImage($sourceFile,$destImageName,$degreeOfRotation)
 			}
 		imagethumb("$source.jpg","$dest.jpg", $hauteur);
 		supp_fichier("$source.jpg");
-	
 		}
 	
 	?> 

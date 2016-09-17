@@ -391,7 +391,8 @@ include 'inc_style.php';
 
 	// ConnexiondD
 	include "connex_inc.php";
-	
+	include "ctrl_pays.php";
+		
 	$token=variable("token");	
 	if ($token!="")	
 		$action=verifi_token($token,variable("action"));

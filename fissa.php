@@ -964,6 +964,7 @@ include 'include_mail.php';
 	
 	// ConnexiondD
 include "connex_inc.php";
+include "ctrl_pays.php";
 
 	// ------------------------------------------------------------------------------ traitement des actions sans mot de passe
 	$token=variable("token");	
@@ -974,7 +975,7 @@ include "connex_inc.php";
 //$action=variable_s("action");	
 
 require_once 'cx.php';
-
+		
 include 'suivi_liste.php';	
  
 $reponse = command("SELECT * FROM fct_fissa WHERE support='$bdd' "); 

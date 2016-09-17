@@ -1,5 +1,6 @@
   <?php  
 // traduire() : Ok (inutile)
+session_start(); 
 
 	echo "<head>";
 	echo "<META HTTP-EQUIV=\"refresh\" CONTENT=\"15\">";
@@ -45,6 +46,7 @@
 		command("delete from z_log_t  where ligne like 'Controle de signature%' and date<'$ilyaunesemaine' ");
 		command("delete from z_log_t  where ligne like 'Backup tables%' and date<'$ilyaunesemaine' ");
 		command("delete from z_log_t  where ligne like 'Traitement Purges%' and date<'$ilyaunesemaine' ");
+		command("delete from z_log_t  where ligne like 'Rejet connexion%' and date<'$ilyaunesemaine' ");
 		command("optimize table z_log_t");
 		
 		$hier =date('Y-m-d H\hi.00',  mktime(0,0,0 , date("m"), date("d")-1, date ("Y")));		
@@ -569,8 +571,9 @@ function random_chaine($car)
 					{
 					if ($nb_ttt<($tempo_mesure/15/4))
 						{
-						ajout_log_tech( "Traitement mail hors delais ");
-						envoi_mail(parametre('DD_mail_gestinonnaire'),"Début alarme Traitement mail hors delais ","");
+						ajout_log_tech( "Traitement mail hors delais ","P0");
+						if (parametre("TECH_mail_sur_alarme_delais_TTT")!="")
+							envoi_mail(parametre('DD_mail_gestinonnaire'),"Début alarme Traitement mail hors delais ","");
 						ecrit_parametre("TECH_alarme_delais_TTT",time()) ;			
 						}						
 					}
@@ -580,7 +583,8 @@ function random_chaine($car)
 					if ($nb_ttt>($tempo_mesure/15*2/3))
 						{
 						ajout_log_tech( "Fin alarme Traitement mail hors delais","P0");
-						envoi_mail(parametre('DD_mail_gestinonnaire'),"Fin alarme Traitement mail hors delais ","");;
+						if (parametre("TECH_mail_sur_alarme_delais_TTT")!="")
+							envoi_mail(parametre('DD_mail_gestinonnaire'),"Fin alarme Traitement mail hors delais ","");;
 						ecrit_parametre("TECH_alarme_delais_TTT",'') ;
 						}						
 					}
