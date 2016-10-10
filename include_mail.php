@@ -176,7 +176,7 @@
 		}
 
 		
-	function envoi_SMS_operateur($subject,$body)		
+	function envoi_SMS_operateur($subject,$body,$origine="ADILEOS")		
 		{
 		$subject=homogenise_telephone($subject) ;
 		if (VerifierPortable($subject))
@@ -189,12 +189,15 @@
 			//envoi_mail_brut(parametre('DD_mail_pour_gateway_sms'),$subject,$body);
 			if ( ($body!=parametre('FORM_msg_rdv')) || ($subject!=parametre('FORM_tel_rdv'))) 
 				{
-				if ( (strlen(strstr($subject,"06"))==10) || (strlen(strstr($subject,"07"))==10) )
-					$subject="0033".substr($subject, 1);		
+				if  (strlen(strstr($subject,"0692"))==10)  
+					$subject="00262".substr($subject, 1);		
 				else
-					$subject="00".substr($subject, 1);	
+					if ( (strlen(strstr($subject,"06"))==10) || (strlen(strstr($subject,"07"))==10) )
+						$subject="0033".substr($subject, 1);		
+					else
+						$subject="00".substr($subject, 1);	
 				
-				$url= "https://www.ovh.com/cgi-bin/sms/http2sms.cgi?smsAccount=sms-cj277894-1&login=fredgont&password=fredgont&from=ADILEOS&to=".trim($subject)."&contentType=text/json&message=".urlencode($body);
+				$url= "https://www.ovh.com/cgi-bin/sms/http2sms.cgi?smsAccount=sms-cj277894-1&login=fredgont&password=fredgont&from=$origine&to=".trim($subject)."&contentType=text/json&message=".urlencode($body);
 				
 				$soap_do = curl_init();
 				curl_setopt($soap_do, CURLOPT_URL,            $url );
@@ -312,6 +315,13 @@ function TTT_mail($aff=true)
 			$pos =strpos($sujet, "<")+4;
 			$n= substr($sujet, $pos, 9 ); // recupération du numéro de téléphone dasn le titre du mail 
 			
+			$n= substr($sujet, strpos($sujet, "<")+1, strpos($sujet, ">")-strlen($sujet));
+			$n=str_replace("+33","",$n);
+			$n=str_replace("+262","",$n); // cas la réunion
+			$n=str_replace("+590","",$n); // cas la martinique
+			$n=str_replace("+594","",$n); // cas la guyane
+			$n=str_replace("+596","",$n); // cas la guadeloupe
+			
 			if ($aff) echo " --> SMS : $n";
 			if (
 				(parametre('DD_numero_tel_sms')=="+33$n")  // test si cela vient de la gateway de reception
@@ -328,7 +338,10 @@ function TTT_mail($aff=true)
 					ajout_log_tech( "Reception supervision gatewaysms (delais $delta sec)");
 					ecrit_parametre('TECH_dernier_envoi_supervision', '' );
 					if (parametre("TECH_alarme_supervision_sms")!="") 
-						envoi_mail(parametre('DD_mail_gestinonnaire'),"Fin alarme supervision gateway sms ","");
+						{
+						envoi_mail(parametre('DD_mail_gestinonnaire'),"Fin alarme supervision gateway sms ","");	
+						ajout_log_tech( "Fin alarme supervision gatewaysms","P0");
+						}
 					ecrit_parametre("TECH_alarme_supervision_sms",'') ;
 					}			
 				}
@@ -336,7 +349,7 @@ function TTT_mail($aff=true)
 				{
 				$ligne = trim(imap_fetchbody($mBox, $i, 1));
 				$pos = strpos(strtolower($ligne), "alerte");	
-				
+				$ligne=utf8_decode (quoted_printable_decode($ligne));
 				ajout_log_tech( "Reception SMS de $n : '$ligne' ($pos)");
 				if  (strtolower($ligne)=="stop" )
 					command("delete from `cc_alerte` where tel='+33$n' ");
@@ -358,15 +371,15 @@ function TTT_mail($aff=true)
 								command("UPDATE `cc_alerte` SET creation='$date' ,dept='$dept' ,sueil='',stop='' ,modif='$t0', ip='$ip' where tel='+33$n'  ");
 							else
 								command("INSERT INTO `cc_alerte`  VALUES ( '$date', '+33$n', '$dept', '','','','','','$ip','$t0')");
-							envoi_sms("+33$n","Demande d'alerte SMS pris en compte pour 1 an. Vous pouvez arrêtez l'alerte en envoyant 'stop' au 06.98.47.43.12 (prix d'un sms non surtaxé)");
+							envoi_sms_operateur("+33$n","Demande d'alerte SMS pris en compte pour 1 an. Vous pouvez arrêtez l'alerte en envoyant 'stop' au 06.98.47.43.12 (prix d'un sms non surtaxé)");
 							ajout_log( "", "Enregistrement Alerte SMS par +33$n ($dept) ");
 							}
 						else
-							envoi_sms("+33$n","Demande d'alerte SMS non pris en compte car pas d'indication de numéro de département");
+							envoi_sms_operateur("+33$n","Demande d'alerte SMS non pris en compte car pas d'indication de numéro de département");
 						}
 					else
 						{				
-						$cmd= "SELECT * from  r_user WHERE ((telephone='0$n') or (telephone='+33$n')  ) and droit='' ";
+						$cmd= "SELECT * from  r_user WHERE ((telephone='0$n') or (telephone='+33$n')  or (telephone='+262$n') or (telephone='+590$n') or (telephone='+594$n') or (telephone='+596$n')  ) and droit='' ";
 						$reponse = command($cmd); 
 						if ($donnees = fetch_command($reponse)) 
 							{
@@ -383,17 +396,23 @@ function TTT_mail($aff=true)
 								{
 								if (!strstr(strtolower($ligne), "activation"))
 									{
-									$num_seq=inc_index("notes");
-									$cmd= "INSERT INTO r_sms VALUES ('$date_jour', '$idx', '$ligne', '$num_seq' ) ";
-									$reponse = command($cmd); 
+									$ligne=utf8_decode (quoted_printable_decode($ligne));
+									$ligne= addslashes2($ligne);
+									
+									$reponse = command("select * from  r_sms where idx='$idx' and ligne='$ligne' ");	
+									if (!fetch_command($reponse))  // on vérifie que l'on a pas 2 fois le même message 
+										{
+										$num_seq=inc_index("notes");
+										$reponse = command("INSERT INTO r_sms VALUES ('$date_jour', '$idx', '$ligne', '$num_seq' ) "); 
+										}
 									}
 								else
 									{
 									recept_mail($idx,date('Y-m-d'));
 									if (VerifierTelephone($n))
-										envoi_sms ("0$n","Réception de documents par mail autorisée pour la journée à $id@fixeo.com ou 0$n@fixeo.com");
+										envoi_SMS_operateur ("0$n","Réception de documents par mail autorisée pour la journée à $id@fixeo.com ou 0$n@fixeo.com","DOC-DEPOT");
 									else
-										envoi_sms ("0$n","Réception de documents par mail autorisée pour la journée à $id@fixeo.com ");
+										envoi_SMS_operateur ("0$n","Réception de documents par mail autorisée pour la journée à $id@fixeo.com ","DOC-DEPOT");
 									
 									}
 								}
@@ -685,12 +704,19 @@ class MailAttachmentManager
 							// vérifiction si cela ne vient pas d'un référent de confiance
 							$vient_de_RC=false;
 							
-							$r1 = command("SELECT * FROM r_user WHERE mail='$from' and (droit='S' or droit='R' )"); 
+							// autorise tous tous RC
+							$r1 = command("SELECT * FROM r_user WHERE mail='$from' and (droit='S' or droit='M' or droit='R' )"); 
 							if ($d1 = fetch_command($r1))  // on a trouver un utilisateur
 								{
 								$vient_de_RC=true;
 								$_SESSION['droit']='S';
 								}
+							
+							// autorise les RC qui ne sont pas des AS
+							$r1 = command("SELECT * FROM r_referent WHERE mail='$from' and organisme='' and user='$user' "); 
+							if ($d1 = fetch_command($r1))  // on a trouver un utilisateur
+								$vient_de_RC=true;
+
 									
 							$r1 = command("SELECT * FROM r_user WHERE mail='$from' and idx='$user'  "); 
 							if ($d1 = fetch_command($r1))  // le mail vient du bénéficiaire lui meme
@@ -726,7 +752,7 @@ class MailAttachmentManager
 
 										if (charge_image("1","tmp/$filename",str_replace(" ","_","$filename"),$donnees["lecture"],"P-$user", $sujet, "MMS",$from, $user))
 											{
-											envoi_SMS($telephone , "MMS déposé dans votre espace personnel.");
+											envoi_SMS_operateur($telephone , "MMS déposé dans votre espace personnel.","DOC-DEPOT");
 											ajout_log( $user,"MMS reçu de $telephone et déposé dans espace personnel : '$filename' ",$user);
 											}
 										}

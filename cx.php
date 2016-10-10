@@ -4,15 +4,29 @@ require_once 'exploit.php';
 
 	function ttt_echec_cx ($id,$mot_de_passe="")
 		{
-		tempo_cx ($id);
-		$ip= $_SERVER["REMOTE_ADDR"];
-		tempo_cx ($ip);	
-		erreur(traduire("Mot de passe incorrect")." !!"). 
-		$_SESSION['pass']=false;
-		ajout_log( $id,traduire("Echec Connexion")."  $id ");
-		ajout_log_tech( traduire("Echec Connexion")."  $id / $mot_de_passe / ".$_POST['pass']);
-		ajout_echec_cx ($id);
-		ajout_echec_cx ($ip);
+		global $droit;
+
+		if (
+			( (strpos( $_SERVER['PHP_SELF'],"index.php")===FALSE)  && (strpos( $_SERVER['PHP_SELF'],"wm.php")===FALSE) )
+			&&
+			 (  ($droit=="")  || ($droit=="M")  || ($droit=="A")  || ($droit=="E") )
+			 )
+			 {
+			erreur(traduire("Vous n'avez pas les droits pour d'accéder à ce module. Pour accèder à Doc-depot, cliquez")." <a  id=\"lien\"  href=\"".serveur."index.php\">".traduire("ici")."</a>") ;
+			$_SESSION['pass']=false;
+			}
+			else
+			{
+			tempo_cx ($id);
+			$ip= $_SERVER["REMOTE_ADDR"];
+			tempo_cx ($ip);	
+			erreur(traduire("Mot de passe incorrect")." !!"). 
+			$_SESSION['pass']=false;
+			ajout_log( $id,traduire("Echec Connexion")."  $id ");
+			ajout_log_tech( traduire("Echec Connexion")."  $id / $mot_de_passe / ".$_POST['pass']);
+			ajout_echec_cx ($id);
+			ajout_echec_cx ($ip);
+			}
 		}
 		
 	
@@ -33,8 +47,9 @@ if (isset($_POST['pass'])) // mot de passe défini
 		if (!($donnees = fetch_command($reponse)))
 			{
 			ttt_echec_cx (sprintf("%s",$id_post));
-			ajout_log_tech("'$id_post' - '".$_POST['id']);
-			//ajout_log_tech("Mot de passe : '".$_POST['pass']."'");			
+			//ajout_log_tech("User inconnu ");
+			ajout_log_tech("User inconnu '$id_post' - '".$_POST['id']);
+			ajout_log_tech("Mot de passe : '".$_POST['pass']."'");			
 			//ajout_log_tech("Source : ".$_SERVER['PHP_SELF'] );			
 			}
 		else
@@ -45,7 +60,8 @@ if (isset($_POST['pass'])) // mot de passe défini
 			$date_log=date('Y-m-d');	
 			$heure_jour=date("H\hi.s");	
 			$_SESSION['bene']="";
-			
+			//ajout_log_tech("User connu ");
+
 			//ajout_log_tech("'$id' - '".$_POST['id']."' - '$id_post'");
 			//ajout_log_tech("'".decrypt($mot_de_passe )."' - '".$_POST['pass']."'");			
 			//ajout_log_tech("'$mot_de_passe' - '".encrypt(addslashes($_POST['pass']))."' - '".encrypt($_POST['pass'])."'" );
@@ -62,8 +78,8 @@ if (isset($_POST['pass'])) // mot de passe défini
 				(($_POST['pass']==$mot_de_passe) && ($_SERVER['REMOTE_ADDR']=="127.0.0.1")	 )
 				) 
 				&& ( !strstr($donnees["droit"] ,"-" ) )  // ceux qui sont désactivé ne peuvent pas accéder
-				&& ( $id==$id_post)  // sécurité : on s'assure que l'id lu est bien celui demandé (et non in contournement de la requette
-					&& ( ( ($droit!="")  && ($droit!="A") && ($droit!="E") ) || (strpos( $_SERVER['PHP_SELF'],"index.php")>0)  || (strpos( $_SERVER['PHP_SELF'],"wm.php")>0)  )  // ceux qui sont désactivé ne peuvent pas accéder
+				&& ( strtolower($id)==strtolower($id_post))  // sécurité : on s'assure que l'id lu est bien celui demandé (et non in contournement de la requette
+					&& ( ( ($droit!="")  && ($droit!="M") && ($droit!="A") && ($droit!="E") ) || (strpos( $_SERVER['PHP_SELF'],"index.php")>0)  || (strpos( $_SERVER['PHP_SELF'],"wm.php")>0)  )  // ceux qui sont désactivé ne peuvent pas accéder
 					)
 					{
 					supp_echec_cx ($_POST['id']);
@@ -85,6 +101,7 @@ if (isset($_POST['pass'])) // mot de passe défini
 						
 					$_SESSION['user_idx']=$donnees["idx"];
 					$_SESSION['droit']= $donnees["droit"];
+					$user_fuseau= $donnees["fuseau"];
 					$_SESSION['filtre']= "";
 					$_SESSION['ad']=false;	
 					$_SESSION['chgt_user']=false;
@@ -160,7 +177,7 @@ if (isset($_POST['pass'])) // mot de passe défini
 		$user_prenom=$donnees["prenom"];
 		$user_droit_org=$donnees["droit"];
 	
-		if 	( ( ($user_droit_org=="") || ($user_droit_org=="A") || ($user_droit_org=="F") || ($user_droit_org=="E")| ($user_droit_org=="T")| ($user_droit_org=="t") )  
+		if 	( ( ($user_droit_org=="") || ($user_droit_org=="M") || ($user_droit_org=="A") || ($user_droit_org=="F") || ($user_droit_org=="E") || ($user_droit_org=="T") || ($user_droit_org=="t") )  
 			&& strpos( $_SERVER['PHP_SELF'],"index.php")===FALSE 
 			&& strpos( $_SERVER['PHP_SELF'],"wm.php")===FALSE  
 				)
@@ -174,6 +191,7 @@ if (isset($_POST['pass'])) // mot de passe défini
 				$user_droit=$donnees["droit"];
 			else
 				$user_droit=$_SESSION['droit'];
+			$user_fuseau= $donnees["fuseau"];
 			$user_type_user=$donnees["type_user"];
 			$user_anniv=$donnees["anniv"];
 			$user_telephone=$donnees["telephone"];

@@ -855,7 +855,7 @@ include 'inc_style.php';
 
 								echo "<tr> <td> <b> Portable </b> : ";
 								if ( VerifierPortable($tel )  )
-										echo "<a href=\"index.php?".token_ref("sms_test")."&tel=$tel\" > <img src=\"images/sms.png\" width=\"30\" height=\"30\" title=\"Envoyer SMS\"></a>";
+										echo "<a href=\"index.php?".token_ref("sms_test_ovh")."&tel=$tel\" > <img src=\"images/sms.png\" width=\"30\" height=\"30\" title=\"Envoyer SMS\"></a>";
 								echo "</td><td>";
 								formulaire("telephone");
 								echo param ("nom","$nom");

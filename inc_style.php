@@ -1,5 +1,7 @@
 <style>
 
+
+
 .table_planning
 {
 border-collapse: collapse;
@@ -224,7 +226,6 @@ border-radius:20px;
   height: 1%;
 }
 
-
 .CSSTableGenerator {
 	margin:0px;padding:0px;
 	width:100%;
@@ -321,9 +322,112 @@ border-radius:20px;
 	border-width:0px 0px 1px 1px;
 }
 
+
+
+
+
+
+.CSSTableGeneratorB {
+	margin:0px;padding:0px;
+	width:100%;
+	box-shadow: 10px 10px 5px #888888;
+	border:1px solid #0070C0;
+	
+	-moz-border-radius-bottomleft:0px;
+	-webkit-border-bottom-left-radius:0px;
+	border-bottom-left-radius:0px;
+	
+	-moz-border-radius-bottomright:0px;
+	-webkit-border-bottom-right-radius:0px;
+	border-bottom-right-radius:0px;
+	
+	-moz-border-radius-topright:0px;
+	-webkit-border-top-right-radius:0px;
+	border-top-right-radius:0px;
+	
+	-moz-border-radius-topleft:0px;
+	-webkit-border-top-left-radius:0px;
+	border-top-left-radius:0px;
+}.CSSTableGeneratorB table{
+    border-collapse: collapse;
+        border-spacing: 0;
+	width:100%;
+	height:100%;
+	margin:0px;padding:0px;
+}.CSSTableGeneratorB tr:last-child td:last-child {
+	-moz-border-radius-bottomright:0px;
+	-webkit-border-bottom-right-radius:0px;
+	border-bottom-right-radius:0px;
+}
+.CSSTableGeneratorB table tr:first-child td:first-child {
+	-moz-border-radius-topleft:0px;
+	-webkit-border-top-left-radius:0px;
+	border-top-left-radius:0px;
+}
+.CSSTableGeneratorB table tr:first-child td:last-child {
+	-moz-border-radius-topright:0px;
+	-webkit-border-top-right-radius:0px;
+	border-top-right-radius:0px;
+}.CSSTableGeneratorB tr:last-child td:first-child{
+	-moz-border-radius-bottomleft:0px;
+	-webkit-border-bottom-left-radius:0px;
+	border-bottom-left-radius:0px;
+}.CSSTableGeneratorB tr:hover td{
+	
+}
+.CSSTableGeneratorB tr:nth-child(odd){ background-color:#CCDCDC; }
+.CSSTableGeneratorB tr:nth-child(even)    { background-color:#ffffff; }.CSSTableGeneratorB td{
+	vertical-align:middle;
+	
+	
+	border:1px solid #0070C0;
+	border-width:0px 1px 1px 0px;
+	text-align:left;
+	padding:7px;
+	font-size:13px;
+	font-family:Arial;
+	font-weight:normal;
+	color:#000000;
+}.CSSTableGeneratorB tr:last-child td{
+	border-width:0px 1px 0px 0px;
+}.CSSTableGeneratorB tr td:last-child{
+	border-width:0px 0px 1px 0px;
+}.CSSTableGeneratorB tr:last-child td:last-child{
+	border-width:0px 0px 0px 0px;
+}
+.CSSTableGeneratorB tr:first-child td{
+		background:-o-linear-gradient(bottom, #00A0C0 5%, #0070C0 100%);	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #00A0C0), color-stop(1, #0070C0) );
+	background:-moz-linear-gradient( center top, #00A0C0 5%, #0070C0 100% );
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr="#00A0C0", endColorstr="#0070C0");	background: -o-linear-gradient(top,#00A0C0,0070C0);
+
+	background-color:#00A0C0;
+	border:0px solid #0070C0;
+	text-align:center;
+	border-width:0px 0px 1px 1px;
+	font-size:14px;
+	font-family:Arial;
+	font-weight:bold;
+	color:#ffffff;
+}
+.CSSTableGeneratorB tr:first-child:hover td{
+	background:-o-linear-gradient(bottom, #00A0C0 5%, #0070C0 100%);	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #00A0C0), color-stop(1, #0070C0) );
+	background:-moz-linear-gradient( center top, #00A0C0 5%, #0070C0 100% );
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr="#00A0C0", endColorstr="#0070C0");	background: -o-linear-gradient(top,#00A0C0,0070C0);
+
+	background-color:#00A0C0;
+}
+.CSSTableGeneratorB tr:first-child td:first-child{
+	border-width:0px 0px 1px 0px;
+}
+.CSSTableGeneratorB tr:first-child td:last-child{
+	border-width:0px 0px 1px 1px;
+}
+
 .bordure_arrondi
 	{
 	border-radius:25px;
 	border:2px groove;
 	}
+
+
 </style>

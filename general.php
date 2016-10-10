@@ -933,14 +933,19 @@ FUNCTION poste_local()
 		
 	function formate_telephone($tel)
 		{
+		global $user_droit;
 
-		if (VerifierPortable($tel))	
+		if ((VerifierPortable($tel)) && ($user_droit!="M") )
 			{
+			$src =$_SERVER['PHP_SELF'];
 			$m = "<form method=\"POST\" action=\"index.php\">$tel ";
 			$m .= "<input type=\"image\" src=\"images/sms.png\" width=\"20\" height=\"20\" title=\"".traduire('Envoyer un SMS')."\">";
 			$m .= "<input type=\"hidden\" name=\"tel\" value=\"$tel\">";
-			//$m .= "<input type=\"hidden\" name=\"action\" value=\"sms_test_ovh\"></form>";
-			$m .= token_return("sms_test_ovh")."</form>";
+			if (strpos($_SERVER['PHP_SELF'],'index.php')!==false)
+				$m .= token_return("sms_test_ovh_dd")."</form>";
+			else
+				$m .= token_return("sms_test_ovh")."</form>";
+			
 			$tel =$m;
 			}
 		return  ($tel) ;			
@@ -1072,10 +1077,11 @@ FUNCTION poste_local()
 			else
 				echo "<OPTION  VALUE=\"$val\" selected> $libelle </OPTION>";
 		}
-	function rappel_regles_messages()
+	function rappel_regles_messages($sms="")
 		{
 		echo "<center><p>".traduire("Il est interdit d’envoyer des messages à caractère injurieux, insultants, dénigrants, diffamatoires, dégradants ou susceptibles de porter atteinte à la vie privée des personnes ou à leur dignité, relatifs à la race, l’origine nationale, les mœurs, la religion, les opinions politiques, les origines sociales, l’âge ou le handicap ;")." : ";
-		echo "<center><br>".traduire("Envoi du lundi au samedi entre 8h et 20h (hors jours fériés) ");
+		if ($sms!="")
+			echo "<center><br>".traduire("Envoi du lundi au samedi entre 8h et 20h (hors jours fériés) ");
 		}
 
 		

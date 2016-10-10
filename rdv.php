@@ -23,7 +23,7 @@ include 'inc_style.php';
 	
 	 function ajout_rdv()
 			{
-			global $user_organisme;
+			global $user_organisme, $user_fuseau;
 			
 			$user_idx=$_SESSION['user'];
 			$ligne=variable ('ligne');
@@ -40,7 +40,7 @@ include 'inc_style.php';
 				$idx=inc_index("rdv");
 				if ($date_jour<=$date)
 					{
-					command("INSERT INTO DD_rdv VALUES ('$idx', '$user1','$user_idx','$date $heure', '$ligne', '$avant', 'A envoyer' ) ");
+					command("INSERT INTO DD_rdv VALUES ('$idx', '$user1','$user_idx','$date $heure', '$ligne', '$avant', 'A envoyer' ,'$user_fuseau') ");
 					}
 				else
 					erreur(traduire("La date doit être dans le futur"));

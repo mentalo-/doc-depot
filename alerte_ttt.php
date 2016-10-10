@@ -336,6 +336,12 @@ require_once "include_mail.php";
 	$maintenant = mktime(date("H"),date("i"), 0 , date("m"), date("d"), date ("Y"));
 	echo "<br>TTT alerte: ";	
 
+	if ( date("N",time())==7) 
+		{
+		echo "Pas de tratiement le dimanche";
+		exit();
+		}
+
 
 	$reponse = command("SELECT * FROM cc_alerte WHERE dernier_envoi>'$ilya5minutes' ");
 	if ( ($donnees = fetch_command($reponse)) && (!$mode_test) )
