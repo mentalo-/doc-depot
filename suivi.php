@@ -383,6 +383,84 @@ include 'inc_style.php';
 			}
 		}
 
+		
+		function affiche_choix_sur_filtre($filtre, $limite)
+			{
+			global $bdd;
+			
+			echo "<table>";
+			
+			$champs=" ( pres_repas='Suivi' or pres_repas='pda' or pres_repas='Age'  or pres_repas='Mail' or pres_repas='Partenaire' or pres_repas='adresse' or pres_repas='PE' or pres_repas='nationalite'  and pres_repas='__upload' )"; 
+			$filtre1="(date REGEXP '$filtre' or date REGEXP '$filtre' or nom REGEXP '$filtre' or commentaire REGEXP '$filtre' )";
+			$nu=0;
+			$reponse = command("SELECT * FROM $bdd WHERE $champs and $filtre1 group by nom order by modif DESC  "); 			
+			while ($donnees = fetch_command($reponse) ) 
+				{
+			    $nom =$donnees["nom"];
+			    $date =$donnees["date"];
+			    $modif =$donnees["modif"];
+				$n_court=stripcslashes($nom);
+				if ($modif>10000)
+					{
+					if ($nu==0)
+						echo "<tr><td bgcolor=\"#3f7f00\" > <font color=\"white\">Mise à jour </font></td><td bgcolor=\"#3f7f00\"> <font color=\"white\"> Bénéficiaire </font> </td>";
+						
+					if (($nu++ %2 )==0) $color="#ffffff" ; else $color="#d4ffaa" ; 	
+					
+					$date=date ("d/m/Y H:i",$modif);	
+					echo "<tr> <td bgcolor=\"$color\"> $date </td>";
+					echo "<td bgcolor=\"$color\"> <a href=\"suivi.php?".token_ref("suivi")."&nom=$nom\">$n_court</a> </td>";
+					
+					if ($nu==$limite) 
+						{
+						echo "<tr><td> - - - </td>";
+						echo "<td> Liste limitée à $limite  réponses</td>";
+						break;
+						}
+					}
+				}
+			if ($nu==0)
+				echo "Aucune information ne contient cette information.";				
+			echo "</table>";
+			}
+			
+		function affiche_mes_actions($filtre,$limite)
+			{
+			global $bdd;
+			
+			echo "<table>";
+			$nu=0;
+			$user=$_SESSION['user'];
+			$reponse = command("SELECT * FROM $bdd WHERE user='' group by nom order by modif DESC  "); 			
+			while ($donnees = fetch_command($reponse) ) 
+				{
+			    $nom =$donnees["nom"];
+			    $date =$donnees["date"];
+			    $modif =$donnees["modif"];
+				$n_court=stripcslashes($nom);
+				if ($modif>10000)
+					{
+					if ($nu==0)
+						echo "<tr><td bgcolor=\"#3f7f00\" > <font color=\"white\">Mise à jour </font></td><td bgcolor=\"#3f7f00\"> <font color=\"white\"> Bénéficiaire </font> </td>";
+						
+					if (($nu++ %2 )==0) $color="#ffffff" ; else $color="#d4ffaa" ; 	
+					
+					$date=date ("d/m/Y H:i",$modif);	
+					echo "<tr> <td bgcolor=\"$color\"> $date </td>";
+					echo "<td bgcolor=\"$color\"> <a href=\"suivi.php?".token_ref("suivi")."&nom=$nom\">$n_court</a> </td>";
+					
+					if ($nu==$limite) 
+						{
+						echo "<tr><td> - - - </td>";
+						echo "<td> Liste limitée à $limite réponses</td>";
+						break;
+						}
+					}
+				}
+			if ($nu==0)
+				echo "Aucune information ne contient cette information.";				
+			echo "</table>";
+			}
 	// -====================================================================== Saisie
 
 
@@ -435,7 +513,11 @@ include 'inc_style.php';
 		$com=variable_s("com");
 		$act=variable_s("activites");
 		$nom=variable_s("nom");
-	
+
+		$filtre="";
+		if ($action=="filtre_suivi")
+			$filtre=variable_s("filtre");		
+			
 		if ($action=="chgt_nom")
 			{
 			$nouveau=variable_s("nouveau");
@@ -473,11 +555,15 @@ include 'inc_style.php';
 		echo "<tr> <td> <a href=\"suivi.php\"> <img src=\"images/suivi.jpg\" width=\"140\" height=\"100\"  ></a></td> ";		
 
 		// =====================================================================loc Histo
-		echo "<td>Suivi de <br>";
+		echo "<td>Suivi de ";
 		formulaire("suivi");
 		echo "<SELECT name=nom onChange=\"this.form.submit();\">";
 		echo "<OPTION  VALUE=\"\">  </OPTION>";
-		$reponse = command("SELECT * FROM $bdd WHERE nom<>'Mail' group by nom "); 			
+		if ($filtre=="")
+				$reponse = command("SELECT * FROM $bdd WHERE nom<>'Mail' group by nom "); 			
+			else
+				$reponse = command("SELECT * FROM $bdd WHERE nom<>'Mail' and nom like '%$filtre%' group by nom "); 			
+			
 		while ($donnees = fetch_command($reponse) ) 
 			{
 			$sel=$donnees["nom"];				
@@ -497,6 +583,15 @@ include 'inc_style.php';
 				}
 			}
 
+			
+			formulaire("filtre_suivi");
+			echo "<hr><table><tr><td>Filtre </td><td><input type=\"text\" name=\"filtre\" size=\"20\" value=\"$filtre\" onChange=\"this.form.submit();\"> ";
+			echo "</form><td><img src=\"images/loupe.png\"width=\"20\" height=\"20\">  </td>";
+			if ($filtre!="")
+				lien_c ("images/croixrouge.png", "supp_filtre_suivi","" , traduire("Supprimer"));
+
+			echo "<td> <a href=\"suivi.php?".token_ref("mes_actions")."&filtre=$filtre\" > Mes derniéres activités </a></td>";				
+			echo "</table>";
 		echo "</td>";
 		// =====================================================================loc RAPPORT
 		echo "<td width=\"150\"><p><center>";
@@ -507,7 +602,12 @@ include 'inc_style.php';
 			echo "<ul ><li><a href=\"export_suivi.php\" target=_blank>Export des Suivis</a> ";
 			echo "<li><a href=\"export_bene.php\" target=_blank>Export des Bénéficiaires</a></ul >";
 			}
-		echo "</li> </ul> ";		
+		echo "</li> </ul> ";
+
+		echo "<p><ul id=\"menu-bar\">";
+		echo "<li><a href=\"stat_suivi.php\">Statistiques</a>";
+		echo "</li> </ul> ";
+		
 		$reponse = command("SELECT * FROM $bdd WHERE  pres_repas='présence' "); 
 			if ($donnees = fetch_command($reponse))
 				echo "<p><a href=\"hebergement.php\"  target=_blank > Planning Hébergement </a> ";
@@ -1379,71 +1479,86 @@ include 'inc_style.php';
 			}
 		else 
 			{
-			proposition_suivi ("Accès rapide");
-			
 
-				echo "<table id=\"dujour\"  border=\"2\" >";
-				// =====================================================================loc NOUVEAU
-				$age=variable_s("age");
-				echo "<tr><td bgcolor=\"#d4ffaa\"><table><tr><td>Prénom / Nom : ";
-				formulaire("nouveau2");
-				echo param ("date_jour","$date_jour");
-				echo "<input type=\"text\" name=\"nom\" size=\"30\" value=\"$nom\"></td>";	
-				echo " </td> <td> Date naissance : <input type=\"text\" name=\"age\" size=\"12\" value=\"$age\"> </td> <td> Origine : ";	
-				select_pays( "", variable_s("nationalite") );
-				echo "</td> <td> ";
-				liste_type();
-				echo "</td><td></table></td><td bgcolor=\"#d4ffaa\"><input type=\"submit\" value=\"Nouveau\" >  ";
-				echo "</form></td> ";
-				echo "</table>";			
-			$i=0;
 			
-			// liste des plans d'action ouvert
-			$reponse = command("SELECT * FROM $bdd WHERE pres_repas='pda' and (activites<>''  and !(activites like 'terminé'))  order by activites "); 
-			while ($donnees = fetch_command($reponse) ) 
+			
+			if (($filtre!="") && ($action!="mes_actions"))	
 				{
-				if ($i++==0)
-					echo "<P><div class=\"CSSTableGenerator\" > <table border=\"0\" ><tr> <td>Qui </td><td>Echéance </td><td>Plan d'action </td>";
-				
-				$nom=$donnees["nom"];
-				$echeance=$donnees["activites"];
-				$pda=$donnees["commentaire"];
-				echo "<tr> <td><a href=\"suivi.php?".token_ref("suivi")."&nom=$nom\" >$nom </td>";
-				$aujourdhui=date('Y-m-d');
-				if ($echeance<$aujourdhui)
-					echo "<td bgcolor=\"orange\" >";
-				else
-					echo "<td>";
-
-				echo mef_date_fr($echeance)."</td><td>$pda</td>";
+				affiche_choix_sur_filtre($filtre,30);
 				}
-				
-			if ($i!=0)
-				echo "</table></div><p><br><p><br>";
 			else
-				echo "<p><br><p><br><p><br><p><br><p><br><p><br><p><br><p><br>";
-		
-
-				
-			if ( ($_SESSION['droit']=='R') ||($_SESSION['droit']=='S') )
 				{
-				// =====================================================================loc CHANGEMENT NOM
-				echo "<P> <table border=\"0\" ><tr> <td>Modification d'un nom :</td><td>";
-				formulaire("chgt_nom");
-				echo "<SELECT name=nom>";
-				echo "<OPTION  VALUE=\"\">  </OPTION>";
-				$reponse = command("SELECT * FROM $bdd WHERE nom<>'Mail' and nom<>'Synth'  group by nom "); 			
-				while ($donnees = fetch_command($reponse) ) 
+				if ($action=="mes_actions")
+					affiche_mes_actions($filtre,30);
+				else
 					{
-					$sel=$donnees["nom"];	
-					echo "<OPTION  VALUE=\"$sel\"> $sel </OPTION>";
+						
+					proposition_suivi ("Accès rapide");
+
+					echo "<table id=\"dujour\"  border=\"2\" >";
+					// =====================================================================loc NOUVEAU
+					$age=variable_s("age");
+					echo "<tr><td bgcolor=\"#d4ffaa\"><table><tr><td>Prénom / Nom : ";
+					formulaire("nouveau2");
+					echo param ("date_jour","$date_jour");
+					echo "<input type=\"text\" name=\"nom\" size=\"30\" value=\"$nom\"></td>";	
+					echo " </td> <td> Date naissance : <input type=\"text\" name=\"age\" size=\"12\" value=\"$age\"> </td> <td> Origine : ";	
+					select_pays( "", variable_s("nationalite") );
+					echo "</td> <td> ";
+					liste_type();
+					echo "</td><td></table></td><td bgcolor=\"#d4ffaa\"><input type=\"submit\" value=\"Nouveau\" >  ";
+					echo "</form></td> ";
+					echo "</table>";			
+					$i=0;
+					
+					// liste des plans d'action ouvert
+					$reponse = command("SELECT * FROM $bdd WHERE pres_repas='pda' and (activites<>''  and !(activites like 'terminé'))  order by activites "); 
+					while ($donnees = fetch_command($reponse) ) 
+						{
+						if ($i++==0)
+							echo "<P><div class=\"CSSTableGenerator\" > <table border=\"0\" ><tr> <td>Qui </td><td>Echéance </td><td>Plan d'action </td>";
+						
+						$nom=$donnees["nom"];
+						$echeance=$donnees["activites"];
+						$pda=$donnees["commentaire"];
+						echo "<tr> <td><a href=\"suivi.php?".token_ref("suivi")."&nom=$nom\" >$nom </td>";
+						$aujourdhui=date('Y-m-d');
+						if ($echeance<$aujourdhui)
+							echo "<td bgcolor=\"orange\" >";
+						else
+							echo "<td>";
+
+						echo mef_date_fr($echeance)."</td><td>$pda</td>";
+						}
+						
+					if ($i!=0)
+						echo "</table></div><p><br><p><br>";
+					else
+						echo "<p><br><p><br><p><br><p><br><p><br><p><br><p><br><p><br>";
+				
+
+						
+					if ( ($_SESSION['droit']=='R') ||($_SESSION['droit']=='S') )
+						{
+						// =====================================================================loc CHANGEMENT NOM
+						echo "<P> <table border=\"0\" ><tr> <td>Modification d'un nom :</td><td>";
+						formulaire("chgt_nom");
+						echo "<SELECT name=nom>";
+						echo "<OPTION  VALUE=\"\">  </OPTION>";
+						$reponse = command("SELECT * FROM $bdd WHERE nom<>'Mail' and nom<>'Synth'  group by nom "); 			
+						while ($donnees = fetch_command($reponse) ) 
+							{
+							$sel=$donnees["nom"];	
+							echo "<OPTION  VALUE=\"$sel\"> $sel </OPTION>";
+							}
+						echo "</SELECT></td>";
+						echo "</td> <td> à transformer en </td> <td>";
+						echo "<input type=\"text\" name=\"nouveau\" size=\"20\" value=\"\">";	
+						echo "<input type=\"submit\" value=\"Mise à jour du nom\" >  ";
+						echo " </form> ";
+						echo "</table>  ";
+						}
 					}
-				echo "</SELECT></td>";
-				echo "</td> <td> à transformer en </td> <td>";
-				echo "<input type=\"text\" name=\"nouveau\" size=\"20\" value=\"\">";	
-				echo "<input type=\"submit\" value=\"Mise à jour du nom\" >  ";
-				echo " </form> ";
-				echo "</table>  ";
 				}
 				
 			}

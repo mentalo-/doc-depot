@@ -663,6 +663,8 @@ FUNCTION poste_local()
 				$source= "visu_suivi.php";			
 			if  ($action=="visu_dossier") 
 				$source= "visu_dossier.php";
+			if  ($action=="supp_filtre_suivi") 
+				$source= "suivi.php";
 				
 			echo "<form method=\"POST\" action=\"$source\" $blank >";
 
