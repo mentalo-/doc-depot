@@ -517,7 +517,31 @@ include 'inc_style.php';
 		$filtre="";
 		if ($action=="filtre_suivi")
 			$filtre=variable_s("filtre");		
-			
+		$filtre_aff=$filtre;
+		
+		// cas particulier où c'est une date
+		if ($filtre!="")
+			{
+			$d3= explode("/",$filtre);
+			if (isset($d3[2]))
+				{ 
+				if ( (is_numeric($d3[2])) && (is_numeric($d3[1])) && (is_numeric($d3[0])) )
+					$filtre=sprintf("%04d-%02d-%02d",$d3[2],$d3[1],$d3[0]);
+				}
+			else
+				if (isset($d3[2]))
+					{
+					if ((is_numeric($d3[1])) && (is_numeric($d3[0])) )
+						{
+						if ($d3[1] >2000)
+							$filtre=sprintf("%04d-%02d",$d3[1],$d3[0]);
+						else
+							$filtre=sprintf("%02d-%02d",$d3[1],$d3[0]);
+							
+						}
+					}
+			}
+
 		if ($action=="chgt_nom")
 			{
 			$nouveau=variable_s("nouveau");
@@ -562,7 +586,7 @@ include 'inc_style.php';
 		if ($filtre=="")
 				$reponse = command("SELECT * FROM $bdd WHERE nom<>'Mail' group by nom "); 			
 			else
-				$reponse = command("SELECT * FROM $bdd WHERE nom<>'Mail' and nom like '%$filtre%' group by nom "); 			
+				$reponse = command("SELECT * FROM $bdd WHERE nom<>'Mail' and nom like '%$filtre%' group by nom order by modif desc"); 			
 			
 		while ($donnees = fetch_command($reponse) ) 
 			{
@@ -585,7 +609,7 @@ include 'inc_style.php';
 
 			
 			formulaire("filtre_suivi");
-			echo "<hr><table><tr><td>Filtre </td><td><input type=\"text\" name=\"filtre\" size=\"20\" value=\"$filtre\" onChange=\"this.form.submit();\"> ";
+			echo "<hr><table><tr><td>Filtre </td><td><input type=\"text\" name=\"filtre\" size=\"20\" value=\"$filtre_aff\" onChange=\"this.form.submit();\"> ";
 			echo "</form><td><img src=\"images/loupe.png\"width=\"20\" height=\"20\">  </td>";
 			if ($filtre!="")
 				lien_c ("images/croixrouge.png", "supp_filtre_suivi","" , traduire("Supprimer"));
@@ -595,7 +619,12 @@ include 'inc_style.php';
 		echo "</td>";
 		// =====================================================================loc RAPPORT
 		echo "<td width=\"150\"><p><center>";
+		
 		echo "<ul id=\"menu-bar\">";
+		echo "<li><a href=\"stat_suivi.php\" target=_blank>Statistiques</a>";
+		echo "</li> </ul> ";		
+		
+		echo "<p><ul id=\"menu-bar\">";
 		echo "<li><a href=\"index.php?".token_ref("dx")."\">Deconnexion</a>";
 		if ($_SESSION['droit']=='R') 
 			{
@@ -604,9 +633,7 @@ include 'inc_style.php';
 			}
 		echo "</li> </ul> ";
 
-		echo "<p><ul id=\"menu-bar\">";
-		echo "<li><a href=\"stat_suivi.php\">Statistiques</a>";
-		echo "</li> </ul> ";
+
 		
 		$reponse = command("SELECT * FROM $bdd WHERE  pres_repas='présence' "); 
 			if ($donnees = fetch_command($reponse))

@@ -29,11 +29,26 @@ include 'suivi_liste.php';
 
 
 		
-	function  kpi_sur_periode($jd, $jf, $choix )
+	function  kpi_sur_periode($jd, $jf, $choix1)
 			{
 			global 	$bdd, $crit_bene,  $crit_activite ,  $suivi;
 			
-			$reponse = command("select * from $bdd where date>='$jd' and date<='$jf' and  ( $crit_bene or (pres_repas='$choix') ) order by date ");
+			$choix=$choix1;
+		   switch ($choix)
+				{
+				case "H" : 
+						$choix="Suivi"; 
+						$reponse = command("select * from $bdd where date>='$jd' and date<='$jf' and not (nom like '%(F)%') and ( $crit_bene or (pres_repas='$choix') ) order by date ");
+						break;
+				case "F" : 
+						$choix="Suivi";
+						$reponse = command("select * from $bdd where date>='$jd' and date<='$jf' and (nom like '%(F)%') and ( $crit_bene or (pres_repas='$choix') ) order by date ");
+						break;
+				default:
+					$reponse = command("select * from $bdd where date>='$jd' and date<='$jf' and  ( $crit_bene or (pres_repas='$choix') ) order by date ");
+					break;
+				}		
+				
 			$suivi=0;
 			while ($donnees = fetch_command($reponse) )
 				{
@@ -43,14 +58,18 @@ include 'suivi_liste.php';
 					default : break;
 					}
 				}
-		   switch ($choix)
+		   switch ($choix1)
 				{
 				case "__upload" : $choix="Dépôt doc interne"; break;
 				case "releve" : $choix="Relevé courrier"; break;
+				case "H" : $choix="- Hommes"; break;
+				case "F" : $choix="- Femmes"; break;
+				default : $choix = $choix1;
 				}
 					
 			echo "<tr> <td> $choix </td>";	
 			echo "<td ALIGN=\"RIGHT\" width=\"20\"> $suivi </td>";
+			return($suivi);
 			}
 
 
@@ -93,7 +112,6 @@ include 'suivi_liste.php';
 				}
 				
 			echo "<tr><td ALIGN=\"RIGHT\" > Total</td>";		
-			$n=$nb;
 			echo "<td ALIGN=\"RIGHT\" > $n</td>";
 			echo "<td ALIGN=\"RIGHT\" > $nt%</td>";
 			echo "</table><hr>";
@@ -190,12 +208,20 @@ include 'suivi_liste.php';
 			$num_usager=$num;
 			
 			echo "<hr><table> <tr> <td bgcolor=\"#3f7f00\"><font color=\"white\"> Action </td><td bgcolor=\"#3f7f00\"><font color=\"white\">  Nbre </font></td>";	
-			kpi_sur_periode($jd, $jf ,"Suivi");
-			kpi_sur_periode($jd, $jf ,"__upload");	
+			$nbs=kpi_sur_periode($jd, $jf ,"Suivi");
+			$n=kpi_sur_periode($jd, $jf ,"H");			
+			if ($nbs!=0)
+				echo "<td ALIGN=\"RIGHT\" width=\"20\"> &nbsp;&nbsp;".sprintf("%2.1f", $n/$nbs*100) ."% </td>";
+			$n=kpi_sur_periode($jd, $jf ,"F");
+			if ($nbs!=0)
+				echo "<td ALIGN=\"RIGHT\" width=\"20\"> &nbsp;&nbsp;".sprintf("%2.1f", $n/$nbs*100) ."% </td>";
+			echo "<tr> <td><hr></td><td> <hr> </td><td> <hr> </td>";	
 
+			kpi_sur_periode($jd, $jf ,"__upload");	
 			//kpi_sur_periode($jd, $jf ,"Arrivée courrier");
 			kpi_sur_periode($jd, $jf ,"releve");
 
+			
 			echo "</table><hr>";	
 								
 
