@@ -131,7 +131,7 @@ if ($org!="  ")
 		{
 		$entete=  "<p>Bonjour,<p>Veuillez trouver ci-dessous les saisies qui nécessitent votre regard. ";
 		$entete.=  " Certains mots ou expressions utilisés sont susceptibles de ne pas respecter les directives de la CNIL.";
-		$entete.=  "<p>Ce système de détection, en phase expérimentale, peut ne pas avoir détecté certains mots ou expressions inappropriés, n'hésitez pas à nous faire des retours via le lien <a id=\"lien\"  href=\"https://www.doc-depot.com/index.php?action=contact\">contact de FISSA</a><p>";				
+		$entete.=  "<p>Ce système de détection, en phase expérimentale, peut ne pas avoir détecté certains mots ou expressions inappropriés, n'hésitez pas à nous faire des retours via le lien <a id=\"lien\"  href=\"http://adileos.jimdo.com/contact\">contact de FISSA</a><p>";				
 		$entete.=  "<p>Rappel CNIL: les informations personnelles enregistrées doivent être «adéquates, pertinentes et non excessives au regard des finalités pour lesquelles elles sont collectées (article 6-3°).";
 		$entete.=  "<br>En principe, les données sensibles (information concernant l’origine raciale ou ethnique, les opinions politiques, philosophiques ou religieuses, l’appartenance syndicale, la santé ou la vie sexuelle) ne peuvent être recueillies et exploitées qu’avec le consentement explicite des personnes. ";
 
@@ -145,7 +145,7 @@ if ($org!="  ")
 		
 		$entete=  "<p>Bonjour,<p> ";
 		$entete.=  "Le texte saisi ne présente pas, a priori, de mots ou d'expressions susceptibles de ne pas respecter les directives de la CNIL.";
-		$entete.=  "<p>Ce système de détection, en phase expérimentale, peut ne pas avoir détecté certains mots ou expressions inappropriés, n'hésitez pas à nous faire des retours via le lien <a id=\"lien\"  href=\"https://www.doc-depot.com/index.php?action=contact\">contact de FISSA</a><p>";				
+		$entete.=  "<p>Ce système de détection, en phase expérimentale, peut ne pas avoir détecté certains mots ou expressions inappropriés, n'hésitez pas à nous faire des retours via le lien <a id=\"lien\"  href=\"http://adileos.jimdo.com/contact\">contact de FISSA</a><p>";				
 		$entete.=  "<p>Rappel CNIL: les informations personnelles enregistrées doivent être «adéquates, pertinentes et non excessives au regard des finalités pour lesquelles elles sont collectées (article 6-3°).";
 		$entete.=  "<br>En principe, les données sensibles (information concernant l’origine raciale ou ethnique, les opinions politiques, philosophiques ou religieuses, l’appartenance syndicale, la santé ou la vie sexuelle) ne peuvent être recueillies et exploitées qu’avec le consentement explicite des personnes. ";
 

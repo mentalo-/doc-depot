@@ -118,6 +118,48 @@ include 'suivi_liste.php';
 			
 			}				
 	
+
+
+
+	function 	kpi_as_sur_periode($jd, $jf )
+			{
+			global  $jd,$jf,	$bdd, $crit_bene,  $crit_activite ;
+
+			echo "<table> <tr> <td bgcolor=\"#3f7f00\"  ><font color=\"white\"> ";
+			echo "Acteur Social";		
+			echo "</td><td bgcolor=\"#3f7f00\" ><font color=\"white\">  Nbre </font></td>";	
+			echo "<td bgcolor=\"#3f7f00\" ALIGN=\"RIGHT\" ><font color=\"white\"> % </font></td>";	
+			$reponse = command("select distinct * from $bdd where date>='$jd' and date<='$jf' and pres_repas='Suivi' and activites<>'' and not $crit_activite  ");
+			$total=nbre_enreg ($reponse);
+			
+			$ncolor=0;
+			$n=0;
+			$nt=0;
+			$reponse = command("select distinct * from $bdd where date>='$jd' and date<='$jf' and pres_repas='Suivi' and activites<>'' and not $crit_activite group by user ");
+			while ($donnees = fetch_command($reponse) )	
+				{
+				if (($ncolor++ %2 )==0) $color="#ffffff" ; else $color="#d4ffaa" ; 
+				$user=$donnees["user"];		
+				echo "<tr><td ALIGN=\"RIGHT\" bgcolor=\"$color\" > ".libelle_user($user)."</td>";		
+
+				$r1 = command("select distinct * from $bdd where date>='$jd' and date<='$jf' and pres_repas='Suivi' and activites<>'' and not $crit_activite and user='$user' ");
+					
+				$nb=nbre_enreg ($r1);
+				$n+=$nb;
+				echo "<td ALIGN=\"RIGHT\" bgcolor=\"$color\" > $nb</td>";
+				echo "<td ALIGN=\"RIGHT\" bgcolor=\"$color\"> &nbsp;&nbsp;".sprintf("%2.01f",$nb/$total*100)."% </td>";
+				$nt+=$nb;
+				}
+				
+			echo "<tr><td ALIGN=\"RIGHT\" > Total</td>";		
+			echo "<td ALIGN=\"RIGHT\" > $n</td>";
+			echo "<td ALIGN=\"RIGHT\" >&nbsp;&nbsp;".sprintf("%2.01f",$nt/$total*100)."%</td>";
+			echo "</table><hr>";
+			
+			}			
+	
+	
+	
 	$detail = true;	
 	$format_date = "d/m/Y";		
 	$aujourdhui=date($format_date,  mktime(0,0,0 , date("m"), date("d"), date ("Y")));		
@@ -179,7 +221,8 @@ include 'suivi_liste.php';
 				echo " </form> </table>";	
 		
 			$crit_presence=" (pres_repas='présence') and ( not (nom like '%(B)%')) and ( not (nom like '%(S)%')) and ( not (nom like '%(A)%')) and ( not (nom like '%(M)%')) and (nom<>'Synth') and (nom<>'Mail')  ";
-			$crit_bene="  ( not (nom like '%(B)%')) and ( not (nom like '%(S)%')) and ( not (nom like '%(A)%')) and ( not (nom like '%(M)%')) and (nom<>'Synth') and (nom<>'Mail') and (pres_repas<>'presence')  and (pres_repas<>'__upload') and (nom<>'Mail') and (pres_repas<>'Pour info') and (pres_repas<>'Suivi') and (pres_repas<>'reponse')and (pres_repas<>'partenaire')  ";
+//			$crit_bene="  ( not (nom like '%(B)%')) and ( not (nom like '%(S)%')) and ( not (nom like '%(A)%')) and ( not (nom like '%(M)%')) and (nom<>'Synth') and (nom<>'Mail') and (pres_repas<>'presence')  and (pres_repas<>'__upload') and (nom<>'Mail') and (pres_repas<>'Pour info') and (pres_repas<>'Suivi') and (pres_repas<>'reponse')and (pres_repas<>'partenaire')  ";
+			$crit_bene="  ( not (nom like '%(B)%')) and ( not (nom like '%(S)%')) and ( not (nom like '%(A)%')) and ( not (nom like '%(M)%')) and (nom<>'Synth') and (nom<>'Mail') and (pres_repas<>'presence')  and (pres_repas<>'__upload') and (nom<>'Mail') and (pres_repas<>'Pour info') and (pres_repas='Suivi')  ";
 			$crit_AS=" (nom like '%(B)%' or nom like '%(S)%' )";
 			$crit_activite="( nom like '%(A)%')";
 			$crit_materiel="( nom like '%(M)%')";
@@ -230,6 +273,7 @@ include 'suivi_liste.php';
 			kpi_detail_sur_periode($jd, $jf, "Partenaire" ); // orientation
 			
 			
+			kpi_as_sur_periode($jd, $jf );
 
 // ----------------------------------------------------- pays
 			echo "<hr><p> ";

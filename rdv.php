@@ -133,10 +133,10 @@ include 'inc_style.php';
 						{
 						$r1 = command("SELECT * FROM $bdd WHERE nom='$user' and pres_repas='Téléphone' "); 
 						if (!($d1 = fetch_command($r1)))
-							$avant="";
+							$avant="Aucun";
 						else
 							if ( !VerifierPortable($d1["commentaire"] )  )
-							$avant="";
+							$avant="Aucun";
 
 						echo "<tr><td> $date </td><td> $heure </td><td> <a href=\"suivi.php?nom=$user\" > $user</a></td><td> $ligne </td><td> $avant </td><td> $auteur </td>";
 						if (  ($etat=="A envoyer") || ($avant=="Aucun")) 

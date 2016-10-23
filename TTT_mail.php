@@ -60,8 +60,8 @@ session_start();
 		commentaire_html("purge_rdv");
 
 		echo "<br>Purge Rdv";
-		$ilyaunmois =date('Y-m-d H\hi',  mktime(0,0,0 , date("m")-1, date("d"), date ("Y")));		
-		command("delete from DD_rdv where  date<'$ilyaunmois' ");
+		$ilya3j =date('Y-m-d H\hi',  mktime(0,0,0 , date("m"), date("d")-3, date ("Y")));		
+		command("delete from DD_rdv where  date<'$ilya3j' ");
 		}
 	
 	// supprime les commentaire de plus de 2 ans 
@@ -465,7 +465,7 @@ function random_chaine($car)
 					
 					
 		// ----------------------------------------------------------------------- traitement de JOUR			
-		if (($heure>6) && ($heure<21))
+		if (($heure>4) && ($heure<21))
 			{
 	
 			// ----------------------------------------------------------------------- traitement des RDV				
@@ -478,31 +478,62 @@ function random_chaine($car)
 				$date=$donnees["date"];	
 				$avant=$donnees["avant"];	
 				$auteur=$donnees["auteur"];	
+				$fuseau=$donnees["fuseau"];	
 				
-				// calcul de l'heure d'envoi
+				// on recrée le timestamp du rdv 
+				$annee=substr ($date,0,4);
+				$mois=substr ($date,5,2);
+				$jour=substr ($date,8,2);
+				$heure=substr ($date,11,2);
+				$minute=substr ($date,14,2);
+
+				
+				$decalage_horaire = 0;
+				// cas de la Réunion, on traite le décalage horaire
+				if ($fuseau!="")
+					{
+					if ($fuseau=="RE")
+						$dateTimeZoneDOMTOM = new DateTimeZone("Indian/Reunion");
+					if ($fuseau=="MQ")
+						$dateTimeZoneDOMTOM = new DateTimeZone("America/Martinique");						
+					if (($fuseau=="GP")  || ($fuseau=="GF"))
+						$dateTimeZoneDOMTOM = new DateTimeZone("America/Guadeloupe");
+						
+					$dateTimeZoneFR = new DateTimeZone("Europe/Paris");
+					$dateTimeDOMTOM = new DateTime("now", $dateTimeZoneDOMTOM);
+					$timeOffset = $dateTimeZoneFR->getOffset($dateTimeDOMTOM);
+					$decalage_horaire =$timeOffset/3600;
+					}				
+				
 				switch ($avant )
 					{
-					case "1H": $time_corrige = date('Y-m-d H\hi',  mktime(date("H")+1 ,date("i"), 0  , date("m"), date("d"), date ("Y")) );
+					case "1H": $heure = $heure-1-$decalage_horaire ;
+								if ($heure<8) // si envoi avant 8h alors on envoi la veille
+									{
+									$jour = $jour-1;
+									$heure = 18-$decalage_horaire;
+									}
+								if ($heure>20) // si envoi après 20h alors on reporsitionne 
+									$heure = 19;
 								break;
-					case "4H": $time_corrige = date('Y-m-d H\hi',  mktime(date("H")+4 ,date("i"), 0  , date("m"), date("d"), date ("Y")) );
-								break;
+								
 					case "La veille": 
-								if ( ($heure>18) and rand(0,60)==1)
-									$time_corrige = date('Y-m-d H\hi',  mktime(23 ,59, 0  , date("m"), date("d")+1, date ("Y")) );
-								else
-									$time_corrige=$date;
-								break;
-					case "24H": $time_corrige = date('Y-m-d H\hi',  mktime(date("H") ,date("i"), 0  , date("m"), date("d")+1, date ("Y")) );
-								break;
-					case "15min": $time_corrige = date('Y-m-d H\hi',  mktime(date("H") ,date("i")+15, 0  , date("m"), date("d"), date ("Y")) );
-								break;
-					default : $time_corrige=$date; break;
+								$heure = 18-$decalage_horaire;
+								$minute	= rand(0,59);
+								$jour = $jour-1;
+								break;			
 					}
 				
-				echo "<br> $time_corrige : $date";
+				// si la notification doit être envoyé un dimanche alors on l'anticipe à la veille
+				if ( date("N",mktime(12 ,0, 0  , $mois, $jour, $annee))==7) 
+					$jour = $jour-1;
 				
-				// test de l'heure d'envoi
-				if ( $time_corrige > $date  )
+				$declenchement = mktime($heure ,$minute, 0  , $mois, $jour, $annee);
+				
+				echo "<br> $date ($decalage_horaire) --> ".date( "Y-m-d H\hi.s",$declenchement) ;
+
+				// si heure actuelle est superieure à l'heure de déclenchement
+				if ( $declenchement < time() )
 					{
 					$ligne=stripcslashes($donnees["ligne"]);
 					$user_idx=$donnees["user"];

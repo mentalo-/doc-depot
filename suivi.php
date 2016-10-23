@@ -619,12 +619,14 @@ include 'inc_style.php';
 		echo "</td>";
 		// =====================================================================loc RAPPORT
 		echo "<td width=\"150\"><p><center>";
+		if ($_SESSION['droit']=='R') 
+			{		
+			echo "<ul id=\"menu-bar\">";
+			echo "<li><a href=\"stat_suivi.php\" target=_blank>Statistiques</a>";
+			echo "</li> </ul> <p>";	
+			}
 		
 		echo "<ul id=\"menu-bar\">";
-		echo "<li><a href=\"stat_suivi.php\" target=_blank>Statistiques</a>";
-		echo "</li> </ul> ";		
-		
-		echo "<p><ul id=\"menu-bar\">";
 		echo "<li><a href=\"index.php?".token_ref("dx")."\">Deconnexion</a>";
 		if ($_SESSION['droit']=='R') 
 			{
