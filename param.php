@@ -88,7 +88,8 @@ define('TAILLE_FICHIER_dropzone','8');
 			echo "<td><a href=\"index.php?".token_ref("gb")."\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"anglais\" alt=\"anglais\" src=\"images/flag_gb.png\"/></a></td><td> | </td>";
 			echo "<td><a href=\"index.php?".token_ref("de")."\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"allemand\" alt=\"allemand\" src=\"images/flag_de.png\"/></a></td><td> | </td>";
 			echo "<td><a href=\"index.php?".token_ref("es")."\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"espagnol\" alt=\"espagnol\" src=\"images/flag_es.png\"/></a></td><td> | </td>";
-			echo "<td><a href=\"index.php?".token_ref("ru")."\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"russe\" alt=\"russe\" src=\"images/flag_ru.png\"/></a></td><td> | </td>";
+			echo "<td><a href=\"index.php?".token_ref("ro")."\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"roumain\" alt=\"roumain\" src=\"images/flag_ro.png\"/></a></td><td> | </td>";
+			echo "<td><a href=\"index.php?".token_ref("ar")."\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"arabe\" alt=\"arabe\" src=\"images/flag_ar.png\"/></a></td><td> | </td>";
 
 			Echo "<td>Langue = $user_lang </td></table><hr>";
 			

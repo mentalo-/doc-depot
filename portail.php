@@ -140,7 +140,7 @@ Association de Développement et d’Intégration de Logiciels Economiques Orientés 
 		echo "<hr><center> ";
 
 		echo "<table> <tr> <td align=\"right\" valign=\"bottom\" ></td>";
-		echo "<td><a id=\"lien_conditions\" href=\"conditions_portail.html\">".traduire('Conditions d\'utilisation')."</a>";
+		echo "<td><a id=\"lien_conditions\" href=\"conditions_portail.html\">".traduire('Mentions légales')."</a>";
 		echo "- <a id=\"lien_contact\" href=\"http://adileos.jimdo.com/contact\">".traduire('Nous contacter')."</a>";
 		echo "- Copyright <a href=\"http://adileos.doc-depot.com\"  target=_blank >ADILEOS</a> ";
 		$version= parametre("DD_version_portail") ;

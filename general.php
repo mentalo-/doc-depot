@@ -125,7 +125,7 @@ FUNCTION poste_local()
 		{
 		global $user_lang, $traductions_fr_fr;
 				
-		if (($user_lang!="fr") && ($user_lang!="gb") && ($user_lang!="de") &&  ($user_lang!="es") && ($user_lang!="ru"))
+		if (($user_lang!="fr") && ($user_lang!="gb") && ($user_lang!="de") &&  ($user_lang!="es") && ($user_lang!="ru")&&  ($user_lang!="ro") && ($user_lang!="ar"))
 			$user_lang="fr";
 		
 		if ($traductions_fr_fr)
@@ -276,7 +276,9 @@ FUNCTION poste_local()
 	function VerifierTelephone($telephone)  
 		{ 
 		$telephone=homogenise_telephone($telephone) ;
-	
+
+		if ( $telephone=="")
+ 		 return false;  		
 		if ( ($telephone[0]!='0')  && ($telephone[0]!='+'))
  		 return false;  
 		 
@@ -987,6 +989,10 @@ FUNCTION poste_local()
 				echo "<td><a href=\"index.php?".token_ref("fr")."\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"français\" alt=\"français\" src=\"images/flag_fr.png\"/></a></td><td> | </td>";
 			if ($user_lang!="gb")
 				echo "<td><a href=\"index.php?".token_ref("gb")."\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"english\" alt=\"anglais\" src=\"images/flag_gb.png\"/></a></td><td> | </td>";
+			if ($user_lang!="ro")
+					echo "<td><a href=\"index.php?".token_ref("ro")."\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"Roumain\" alt=\"Roumain\" src=\"images/flag_ro.png\"/></a></td><td> | </td>";
+			if ($user_lang!="ar")
+					echo "<td><a href=\"index.php?".token_ref("ar")."\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"Arabe\" alt=\"Arabe\" src=\"images/flag_ar.png\"/></a></td><td> | </td>";
 			/*
 			if ($user_lang!="de")
 					echo "<td><a href=\"index.php?".token_ref("de")."\" ><img width=\"25\" border=\"0\" height=\"18\" title=\"allemand\" alt=\"allemand\" src=\"images/flag_de.png\"/></a></td><td> | </td>";

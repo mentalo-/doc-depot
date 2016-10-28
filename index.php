@@ -58,6 +58,18 @@ include 'general.php';
 		</script>
 		
 <script language="JavaScript">
+function Expand(obj) {
+ if (!obj) return;
+ while(obj && !obj.className.match(/\bexpandbox\b/)) obj = obj.parentNode; //on remonte jusqu'au parent
+ if (!obj) return; //on sort si on a part trouvé d'obj parent
+ var aElt = obj.getElementsByTagName("*" ); //onrecupere tous les noeuds enfants
+ for (var i=0; i<aElt.length; i++) { //on parcours
+  if (aElt[i].className.match(/\bexpand\b/)) { //tous les noeuds avec une classe expand on les affichent ou on les cachent
+   with(aElt[i].style) display = (display=="none" ) ? "" : "none";
+  }
+ }
+}
+
 function afficheNouveauType(){
     if (document.getElementById('organisme').value=="")
         document.getElementById('ReversBE').style.visibility= "visible";
@@ -504,7 +516,7 @@ function maj_mdp_fichier($idx, $pw )
 
 	function liste_AS( $organisme )
 		{
-		$reponse =command("select * from  r_user where organisme=\"$organisme\" and (droit='S' or droit='R')  ");
+		$reponse =command("select * from  r_user where organisme=\"$organisme\" and (droit='S' or droit='M' or droit='R')  ");
 
 		echo "<td> <SELECT name=\"nom\"   >";
 		affiche_un_choix("","Tous");
@@ -548,7 +560,34 @@ function maj_mdp_fichier($idx, $pw )
 
 		
 		
+	function visu_liste_miniature ($ref, $type_doc)
+		{
+	
+		$reponse =command("select * from r_attachement where ref='$ref' and status='$type_doc' ");
+		while ($donnees = fetch_command($reponse) ) 
+			{
+			$num=$donnees["num"];	
+			if (est_image($num)) 
+				{
+//				if (($doc_autorise=="") || (stristr($doc_autorise, ";$type_org;") === FALSE) )
+					$icone_a_afficher="visu.php?action=visu_image_mini&nom=$num";
+				}
+			else
+				if (extension_fichier($num)=="pdf")
+					{
+					if (!file_exists("upload_mini/$num.jpg"))
+						$icone_a_afficher="images/fichier.jpg";	
+					else
+						$icone_a_afficher="visu.php?action=visu_image_mini&nom=$num.jpg";
+					}
+				else
+					$icone_a_afficher="images/fichier.png";
+
+
+			echo "<img src=\"$icone_a_afficher\" height=\"55\" width=\"55\"  >";
+			}
 		
+		}
 		
 		
 	// $num est le nom du fichier
@@ -569,7 +608,7 @@ function maj_mdp_fichier($idx, $pw )
 				{
 				$r1 =command("select * from  r_user where idx='$deposeur' ");
 				$d1 = fetch_command($r1);
-				if ( ($d1["droit"]=="S") || ($d1["droit"]=="s") || ($d1["droit"]=="R")|| ($d1["droit"]=="r") ) 
+				if ( ($d1["droit"]=="S") || ($d1["droit"]=="s") || ($d1["droit"]=="R")|| ($d1["droit"]=="r")|| ($d1["droit"]=="M")|| ($d1["droit"]=="M") ) 
 					{
 					$deposeur=" ".traduire("par")." ".libelle_user($deposeur)." (".libelle_organisme_du_user($deposeur).")";
 					}
@@ -676,7 +715,10 @@ function maj_mdp_fichier($idx, $pw )
 					}
 				else
 					{
-					lien("images/fichier.png", "visu_doc", param ("num","$num"), traduire('Déposé le')." $date", "","B",$sans_lien, true);
+					if ($deposeur=="")
+						lien("images/fichier.png", "visu_doc", param ("num","$num"), traduire('Déposé le')." $date", "","B",$sans_lien, true);
+					else
+						lien("images/fichier_coche.png", "visu_doc", param ("num","$num"), traduire('Déposé le')." $date", "","B",$sans_lien, true);
 					if (substr($ref,0,1)=="A")
 						echo "$type <br>";
 					echo "$ident <br>";
@@ -1025,7 +1067,7 @@ function maj_mdp_fichier($idx, $pw )
 		pied_de_page("x");
 		}
 		
-	function bouton_upload($ref,$idx)
+	function bouton_upload($ref,$idx, $type_doc="")
 		{
 		global $action,$user_droit,$user_lecture,$user_idx,$id;
 			
@@ -1140,6 +1182,7 @@ function maj_mdp_fichier($idx, $pw )
 				}					
 			echo "</td>";
 			}
+			
 		if ((($action=="ajout_admin") &&  (substr($ref,0,1)=="A"))|| ( ($action=="ajout_photo")&&  (substr($ref,0,1)=="P")) ) 
 			{
 			if ( $nb_doc<MAX_FICHIER)
@@ -1173,11 +1216,36 @@ function maj_mdp_fichier($idx, $pw )
 			else
 				echo "<td>".traduire('Nombre maximum de fichiers atteind.')."</td>";
 			}
-
-		echo " </table>  <table>";
-		$reponse =command("select * from r_attachement where ref='$ref' order by date DESC ");
+		
+		echo "</table> ";
+		$type_doc_avant="???";
+		if ($user_droit=="")
+			{
+			$reponse =command("select * from r_attachement where ref='$ref' order by date DESC ");
+			echo "<table> ";
+			}
+		else
+			$reponse =command("select * from r_attachement where ref='$ref' order by status ASC");
+			
+		$n=0;
 		while (($donnees = fetch_command($reponse) ) && ($j<100))
 			{
+			$type_doc=$donnees["status"];
+			if ( ($type_doc_avant!=$type_doc) && ($user_droit!="") )
+					{
+					
+					echo "</table> </div>";
+					
+					echo "<div class=\"expandbox\">	<a href=\"#\" onclick=\"Expand(this); return false;\"> <table><tr><td width=\"100\">$type_doc</td><td>";
+					
+					visu_liste_miniature($ref,$type_doc);
+					$j=1;
+					echo " </td></table> </a><table style=\"display:none\" class=\"expand\">";
+					
+					}
+					
+			$type_doc_avant=$type_doc;		
+			
 			if ((($j-1) % 4)==0)
 				echo "<tr>";
 			$num=$donnees["num"];	
@@ -1208,7 +1276,8 @@ function maj_mdp_fichier($idx, $pw )
 			$j++; 	
 			}
 
-		echo "</table>";
+		echo "</div></table> ";
+		
 		if ($action!="ajout_admin")	
 			echo "<HR>";	
 		}
@@ -1571,7 +1640,7 @@ function maj_mdp_fichier($idx, $pw )
 			$mail="";
 			
 		$mail= formate_mail($mail);
-		if (($droit=="s") || ($droit=="p") || ($droit=="m") || ($droit=="M") )
+		if (($droit=="s") || ($droit=="p") || ($droit=="m")  )
 			{
 			if ($masque!="") 
 				echo "<tr><td> $organisme </td><td> <img src=\"images/inactif.png\" title=\"Inactif\" width=\"15\" height=\"15\"> $nom   </td><td> $prenom   </td><td> $tel </td><td> $mail</td><td> $adresse</td>";
@@ -3039,6 +3108,8 @@ function affiche_membre($idx, $opt_aff="")
 				case "cmd_perimee":
 				case "liste":
 				case "fr":
+				case "ro":
+				case "ar":
 				case "es":
 				case "de":
 				case "gb":
@@ -3282,7 +3353,7 @@ function affiche_membre($idx, $opt_aff="")
 		
 	if ($action!="")
 		{
-		if (($action=="fr") || ($action=="es") || ($action=="gb")|| ($action=="de")|| ($action=="ru") )
+		if (($action=="fr") || ($action=="es") || ($action=="gb")|| ($action=="de")|| ($action=="ru") || ($action=="ro")|| ($action=="ar") )
 			{
 			$_SESSION['lang'] = $action;
 			$user_lang=$_SESSION['lang'];
@@ -4150,12 +4221,20 @@ require_once 'cx.php';
 			// par défaut on impose le créateur comme référent de  confiance
 			nouveau_referent($idx1 ,$user_organisme, "Tous", "", "","","");
 
-		if ($user_droit=="S") 
-			$action="ajout_beneficiaire";
-		else
-			$action="ajout_user";			
-		}
-
+		if ($idx1=="")
+			{
+			if ($user_droit=="S") 
+				$action="ajout_beneficiaire";
+			else
+				$action="ajout_user";			
+			}
+			else
+				{
+				msg_ok(traduire("Compte créé avec succès"));
+				$action="";	
+				}
+		}				
+				
 	if (($action=="modif_user") && (($user_droit=="R") || ($user_droit=="A") ) )
 		{
 		modification_user(variable("idx"),variable("nom"),variable("prenom"),variable("telephone"),variable("mail"),variable("droit"));
