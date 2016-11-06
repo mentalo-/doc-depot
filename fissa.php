@@ -646,7 +646,7 @@ include 'include_mail.php';
 		echo "<table border=\"1\"><tr> <td bgcolor=\"#3f7f00\"><font color=\"white\"> Nom </td> <td bgcolor=\"#3f7f00\"> </td> <td bgcolor=\"#3f7f00\"> <font color=\"white\">Commentaire</td> <td bgcolor=\"#3f7f00\"><font color=\"white\">Rédacteur </td> <td bgcolor=\"#3f7f00\"><font color=\"white\">Date Heure</td></font>";
 		
 		$d=mise_en_forme_date_aaaammjj( $date);
-		$reponse = command("SELECT DISTINCT * FROM $bdd WHERE date='$d' or (date='0000-00-00' and commentaire<>'') "); 
+		$reponse = command("SELECT DISTINCT * FROM $bdd WHERE date='$d' or (date='0000-00-00' and commentaire<>'' and pres_repas='') "); 
 		while ($donnees = fetch_command($reponse) ) 
 			{
 			if (($ncolor++ %2 )==0) $color="#ffffff" ; else $color="#d4ffaa" ; 
@@ -671,7 +671,7 @@ include 'include_mail.php';
 		global $bdd,$format_date ;
 		
 		$c="";
-		$reponse = command("SELECT * FROM $bdd WHERE nom='$nom' and commentaire<>'' and date='0000-00-00' and pres_repas<>'pda' and pres_repas<>'Age' and pres_repas<>'Mail' and pres_repas<>'Téléphone' and pres_repas<>'nationalie' and pres_repas<>'PE'  "); 
+		$reponse = command("SELECT * FROM $bdd WHERE nom='$nom' and commentaire<>'' and date='0000-00-00' and pres_repas=''  "); 
 		if ($donnees = fetch_command($reponse) )
 				$c=" ==> ". mef_texte_a_afficher( stripcslashes($donnees["commentaire"]) );
 		return($c);
@@ -683,7 +683,7 @@ include 'include_mail.php';
 		
 		$date_jour=date($format_date );
 		$i=0; 
-		$reponse = command("SELECT * FROM $bdd WHERE commentaire<>'' and date='0000-00-00' and pres_repas<>'pda' and pres_repas<>'Age' and pres_repas<>'Mail' and pres_repas<>'Téléphone' and pres_repas<>'nationalie' and pres_repas<>'PE' order by nom DESC "); 
+		$reponse = command("SELECT * FROM $bdd WHERE commentaire<>'' and date='0000-00-00' and pres_repas='' order by nom DESC "); 
 		while (($donnees = fetch_command($reponse) ) && ($i<10000))
 				{
 				if ($i==0)

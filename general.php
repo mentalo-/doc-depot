@@ -128,7 +128,14 @@ FUNCTION poste_local()
 		if (($user_lang!="fr") && ($user_lang!="gb") && ($user_lang!="de") &&  ($user_lang!="es") && ($user_lang!="ru")&&  ($user_lang!="ro") && ($user_lang!="ar"))
 			$user_lang="fr";
 		
-		if ($traductions_fr_fr)
+		if (
+			($traductions_fr_fr) 
+			&& (strpos($ligne,'2015')===false) 
+			&& (strpos($ligne,'2016')===false) 
+			&& (strpos($ligne,'2017')===false)  
+			&& (strpos($ligne,'2018')===false)  
+			&& (strpos($ligne,'php')===false)  
+			)
 			{
 			$l=addslashes($ligne);
 			$r1 =command("select * from  z_traduire where original='$l' ");

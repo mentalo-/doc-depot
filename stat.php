@@ -177,12 +177,7 @@ include 'suivi_liste.php';
 			if ( ($visite!=0) && ($refus!=0) )
 				echo "<td ALIGN=\"RIGHT\" > ".sprintf("%2.1f",$refus/$visite*100)."% </td>";
 			
-			echo "<tr> <td> Suivi et accompagnement </td>";		
-			echo "<td ALIGN=\"RIGHT\" width=\"20\"> $suivi</td>";
-			if ( ($visite!=0) && ($suivi!=0) )
-				echo "<td ALIGN=\"RIGHT\" > ".sprintf("%2.1f",$suivi/$visite*100)."% </td>";
 	
-		
 			// ============================================================================ACTIVITES 
 			
 			$req_sql_activite="SELECT *,count(*) as TOTAL FROM $bdd where date<='$jf' and date>='$jd' and $crit_activite and pres_repas<>'Pour info' group by nom order by TOTAL DESC";

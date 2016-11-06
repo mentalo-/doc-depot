@@ -105,6 +105,8 @@ session_start();
 			}
 		}
 
+		
+
 	// supprime tous les fichiers temporaires de plus de 2 minutes
 	function purge_dossiers( )
 		{
@@ -112,7 +114,7 @@ session_start();
 		
 		// suppression des fichiers temporaire
 		$l= date('Y-m-d H:i',  mktime(0,0, date ("s") , date("m"), date("d")-parametre("DD_duree_vie_dossier"), date ("Y") ));
-		foreach(glob($dir.'*.pdf') as $v)
+		foreach(glob('dossiers/*.*') as $v)
 			{
 			if (date ("Y-m-d H:i:s", filemtime($v))<$l)
 				{

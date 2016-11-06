@@ -222,7 +222,7 @@ include 'suivi_liste.php';
 		
 			$crit_presence=" (pres_repas='présence') and ( not (nom like '%(B)%')) and ( not (nom like '%(S)%')) and ( not (nom like '%(A)%')) and ( not (nom like '%(M)%')) and (nom<>'Synth') and (nom<>'Mail')  ";
 //			$crit_bene="  ( not (nom like '%(B)%')) and ( not (nom like '%(S)%')) and ( not (nom like '%(A)%')) and ( not (nom like '%(M)%')) and (nom<>'Synth') and (nom<>'Mail') and (pres_repas<>'presence')  and (pres_repas<>'__upload') and (nom<>'Mail') and (pres_repas<>'Pour info') and (pres_repas<>'Suivi') and (pres_repas<>'reponse')and (pres_repas<>'partenaire')  ";
-			$crit_bene="  ( not (nom like '%(B)%')) and ( not (nom like '%(S)%')) and ( not (nom like '%(A)%')) and ( not (nom like '%(M)%')) and (nom<>'Synth') and (nom<>'Mail') and (pres_repas<>'presence')  and (pres_repas<>'__upload') and (nom<>'Mail') and (pres_repas<>'Pour info') and (pres_repas='Suivi')  ";
+			$crit_bene="  ( not (nom like '%(B)%')) and ( not (nom like '%(S)%')) and ( not (nom like '%(A)%')) and ( not (nom like '%(M)%')) and (nom<>'Synth') and (nom<>'Mail') and ( (pres_repas='Suivi') or (pres_repas='reponse')  or (pres_repas='partenaire')    ) ";
 			$crit_AS=" (nom like '%(B)%' or nom like '%(S)%' )";
 			$crit_activite="( nom like '%(A)%')";
 			$crit_materiel="( nom like '%(M)%')";

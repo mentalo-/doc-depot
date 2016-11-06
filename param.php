@@ -93,7 +93,7 @@ define('TAILLE_FICHIER_dropzone','8');
 
 			Echo "<td>Langue = $user_lang </td></table><hr>";
 			
-			formulaire ("trad");
+			formulaire ("");
 			echo "<table><tr><td > Filtre : <input type=\"text\" name=\"filtre\" size=\"20\" value=\"$filtre1\" onChange=\"this.form.submit();\"> ";
 			echo "</form><td><img src=\"images/loupe.png\"width=\"20\" height=\"20\">  </td></table> ";
 

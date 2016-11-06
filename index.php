@@ -304,6 +304,8 @@ require_once "suivi_liste.php";  // pour la liste des pays
 		affiche_un_choix($val_init,"ALERTE");
 		affiche_un_choix($val_init,"PORTAIL");	
 		affiche_un_choix($val_init,"CANICULE");
+		affiche_un_choix($val_init,"Webmail");
+		affiche_un_choix($val_init,"Planning");
 		affiche_un_choix($val_init,"Conditions");
 		echo "</SELECT></form>";
 		}
@@ -1209,6 +1211,7 @@ function maj_mdp_fichier($idx, $pw )
 					echo "<td><input type=\"file\" size=\"50\"  name=\"nom\" >";
 					echo "<input type=\"hidden\" name=\"ref\" value=\"$ref\"> " ;
 					echo "<input type=\"hidden\" name=\"idx\" value=\"$idx\"> </td> " ;
+					token ("upload");
 					echo "<td><input type=\"submit\" id=\"upload\" value=\"".traduire('Charger')."\" >  ";
 					echo " </form> </td>";
 					}
@@ -1926,13 +1929,13 @@ function maj_mdp_fichier($idx, $pw )
 		return(true);
 		}
 
-	FUNCTION modification_user($idx,$nom, $prenom , $telephone, $mail, $droit)
+	FUNCTION modification_user($idx,$nom, $prenom , $telephone, $mail, $droit, $organisme)
 		{
 		global $user_idx;
 		
 		$mail=trim($mail);
 		$telephone=trim($telephone);
-		$reponse = command("UPDATE `r_user` SET mail='$mail', telephone='$telephone', nom='$nom', prenom='$prenom', droit='$droit'  where idx='$idx'  ");
+		$reponse = command("UPDATE `r_user` SET mail='$mail', telephone='$telephone', nom='$nom', prenom='$prenom', droit='$droit' , organisme='$organisme'  where idx='$idx'  ");
 		ajout_log( $idx, traduire("Modification nom/prenom/tel/mail"), $user_idx );
 		}		
 		
@@ -1994,7 +1997,7 @@ function maj_mdp_fichier($idx, $pw )
 			$prenom=$donnees["prenom"];	
 			$reponse =command( "DELETE FROM `r_referent` where user='$idx' ");
 			$reponse =command("DELETE FROM `r_lien`  where user='$idx' ");
-			$reponse =command("DELETE FROM `r_user`  where idx='$idx' ");
+			$reponse =command("UPDATE `r_user` SET droit='z' , pw='(supprimé)' , organisme=''  where idx='$idx' ");
 			ajout_log( $idx, traduire("Suppression compte")." $nom $prenom ($idx)" ,  $user_idx);
 			}
 		}		
@@ -3228,7 +3231,7 @@ function affiche_membre($idx, $opt_aff="")
 				case "ajout_beneficiaire":
 				case "verif_existe_user":
 				case "verif_user":
-//				case "upload":
+				case "upload":
 				case "modifier_user":
 				case "supp_filtre":
 				case "alerte_admin":
@@ -3912,7 +3915,7 @@ function affiche_membre($idx, $opt_aff="")
 						}
 
 					
-					if (( ($id1==$id) || ($mail==$id)|| ($telephone==$id)) && ($droit!="")&& ($droit!="s")&& ($droit!="m")) // cas des AS et responsables
+					if (( (strtolower($id1)==strtolower($id)) || (strtolower($mail)==strtolower($id))|| ($telephone==$id)) && ($droit!="")&& ($droit!="s")&& ($droit!="m")) // cas des AS et responsables
 						{
 						$id=$donnees["id"];
 						$idx=$donnees["idx"];
@@ -4237,7 +4240,7 @@ require_once 'cx.php';
 				
 	if (($action=="modif_user") && (($user_droit=="R") || ($user_droit=="A") ) )
 		{
-		modification_user(variable("idx"),variable("nom"),variable("prenom"),variable("telephone"),variable("mail"),variable("droit"));
+		modification_user(variable("idx"),variable("nom"),variable("prenom"),variable("telephone"),variable("mail"),variable("droit"),variable("organisme"));
 		$action="";
 		}		
 		
@@ -4398,9 +4401,8 @@ require_once 'cx.php';
 		echo "<tr><td><hr>";
 	
 //    ?????     Etrange que ce code soit au milieu de cette zone  ????  ==>> devrait être après
-// de plus il n'est appelé par personne ==> mis en commentaire 
-//		if ($action=="upload")
-//			traite_upload($user_idx, $code_lecture, variable ("idx") );
+		if ($action=="upload")
+			traite_upload($user_idx, $code_lecture, variable ("idx") );
 
 		//    ?????     etrange que ce code soi au milieu de cette zone  ????  ==>> devrait être AVANT
 		if ($action=="modif_tel")

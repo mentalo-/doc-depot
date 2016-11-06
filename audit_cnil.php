@@ -4,6 +4,8 @@
 
 	function homogene ( $commentaire)
 		{
+		 global $autorises;
+		$commentaire = strtolower($commentaire);
 		$commentaire = strtr($commentaire, 'Êáàâäãåçéèêëíìîïñóòôöõúùûüıÿ-_()<>;.,"?/!’«”“‘', 'Eaaaaaaceeeeiiiinooooouuuuyy                  ');
 	//	$commentaire = strtr($commentaire, "'", " ");
 		$commentaire = str_replace ("'"," ", $commentaire);
@@ -13,29 +15,43 @@
 		$commentaire = str_replace ("\n"," ", $commentaire);
 		$commentaire = str_replace ("\r"," ", $commentaire);
 		$commentaire = str_replace (" ;"," ", $commentaire);
-		return($commentaire);
+		
+		for ($i=0; isset($autorises[$i]); $i++)		
+			{
+			$m = $autorises[$i]; 
+			$m2 = str_replace ( " " ,"_", $m ); 
+			$commentaire = str_replace ( $m ," _".$m2, $commentaire);
+			}
+
+		return( $commentaire );
 		}
 		
 	function dd_strstr($commentaire,$recherche)
 		 {
-		 global $nb_tst;
-		 
-		$nb_tst++;
-		return(stristr($commentaire,$recherche));
+ 		return(stristr($commentaire,$recherche));
 		 }
 	
 
 	function test1( $m)
 		{
-		global $autorises, $commentaire;
+		global $commentaire, $tag, $flag_detection;
 
 		if 	(dd_strstr($commentaire,$m) )
-			$commentaire=str_ireplace ($m, "<B><span style=\"background-color:#ffff66;\" >&nbsp;$m&nbsp;</span></b>", $commentaire);
+			{
+			/*
+			$p=strpos( $commentaire,$m );
+			$fin = $p+strlen($m ); 
+			for ($i=$p+1; $i< $fin ; $i++)		
+				$tag[$i]++;
+			 */
+			 $flag_detection=1;	
+			$commentaire=str_ireplace ($m, " <B><span style=\"background-color:#ffff66;\" >$m</span></b> ", $commentaire);
+			}
 		}
 		
 	function test( $m)
 		{
-		global $autorises, $commentaire;
+		global $commentaire;
 					
 		if 	(dd_strstr($commentaire," ".$m))
 			{
@@ -57,10 +73,13 @@
 		
 	function audit_cnil($periode, $support, $envoi_mail=true )
 		{
-		global $commentaire,$mots,$nb_tst;
+		global $commentaire,$mots,$nb_tst, $tag, $flag_detection;
 		
 		$nb_tst=0;
-		
+
+		for ($i=0; $i<1024; $i++)		
+			$tag[$i]=0;
+				
 		for ($i=0; isset($mots[$i]); $i++)
 				$mots[$i] = trim( strtr ($mots[$i], 'áàâäãåçéèêëíìîïñóòôöõúùûüıÿ-()<>;.', 'aaaaaaceeeeiiiinooooouuuuyy       ') ) ;	
 				
@@ -76,17 +95,19 @@
 		$ncolor=0;			
 		$nb=0;
 		$cumul="";
-			
-		while ($d1 = mysql_fetch_array($r1) )
+	
+		while ($d1 = mysql_fetch_array($r1) ) 
 			{
 			$commentaire = $d1["commentaire"];
+
 			$org=$commentaire ;		
 			$commentaire = " ".homogene ( $commentaire)." ";
 			$original=$commentaire;
-				
+						
+			$flag_detection=0;	
 			for ($i=0; isset($mots[$i]); $i++)
 				{
-				$m=$mots[$i];
+				$m=strtolower($mots[$i]);
 				
 				test( $m);
 				
@@ -99,8 +120,8 @@
 					test_approx("xuel","xuelle", $m);
 					test_approx("gie","gue", $m);
 					test_approx("if","ive", $m);	
-					
-						// test ortographe approximatif
+
+					// test ortographe approximatif
 					test_approx("ph","f", $m) ;	
 					test_approx("tt","t", $m);
 					test_approx("ll","l", $m);
@@ -117,9 +138,12 @@
 					test_approx("an","en", $m);		
 					}
 				test_approx(" ","", $m);	
+
+
 				}
 					
-			if ($original!=$commentaire)
+	//		if ($original!=$commentaire)
+			if ($flag_detection==1)
 				{
 				$user=$d1["user"];
 				$jour=$d1["date"];
@@ -151,7 +175,23 @@
 				$cumul.="<td bgcolor=\"$color\">  $beneficiaire </td> ";	
 				$cumul.= "<td bgcolor=\"$color\">  $jour </td> ";	
 				$cumul.= "<td bgcolor=\"$color\">  $pres_repas </td> ";	
+				
+			/*
+				$org2="";
+				for ($i=0; $i<strlen($org); $i++)
+					{
+					if ( ($tag[$i]==0) && ($tag[$i+1]!=0)  )			
+						$org2.="<B><span style=\"background-color:#ffff66;\" >";
+					if ( ($tag[$i]!=0) && ($tag[$i+1]==0)  )								
+						$org2.="</span></b>";
+					$org2.=$org[$i];
+					}
+				
+				for ($i=0; $i<1024; $i++)		
+						$tag[$i]=0;
+			*/
 				$cumul.= "<td bgcolor=\"$color\">  $org </td> ";
+			//	$cumul.= "<td bgcolor=\"$color\">  $org2 </td> ";
 				$cumul.= "<td bgcolor=\"$color\">  $commentaire </td> ";
 				$nb++;
 				}
@@ -204,7 +244,7 @@
 						}
 					}
 					else
-					 echo "$dest : $entete $cumul </table> nbtest= $nb_tst";
+					 echo "$dest : $entete $cumul </table> ";
 					
 				}
 			else

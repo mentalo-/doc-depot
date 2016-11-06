@@ -745,7 +745,7 @@ class MailAttachmentManager
 										if (charge_image("1","tmp/$filename",str_replace(" ","_","$filename"),$donnees["lecture"],"A-$user", $sujet, "Mail",$from, $user))
 											envoi_mail($from,"Document $filename ajouté à $id.","");
 										else
-											envoi_mail($from,"Erreur : $filename n'a pas été ajouté à $id.","La taille doit être inférieure à 3 Mo et le format doit être du type image (JPG) ou PDF. ");
+											envoi_mail($from,"Erreur : $filename n'a pas été ajouté à $id.","La taille doit être inférieure à 3 Mo et le format doit être du type image JPG ou PDF. ");
 										}
 									else // si image dasn MMS alors on stocke dans espace perso
 										{

@@ -1,14 +1,18 @@
   <?php  
 
 		$autorises = array(
-		"catholique" => "secours catholique",
-		"cul" => "cul de sac",
-		"hygiene" => "produits d hygiene",
-		"culte" => "denier du culte",
-		"queue" => "queue de cerise",
-		"queue" => "queue de billard",
-		"lache" => "laché",	
-		"alcoolique" => "hydro-alcoolique",
+		"travail au noir",		
+		"travaille au noir",		
+		"travaille au black",		
+		"travail au black",		
+		"secours catholique",
+		"cul de sac",
+		"produits d hygiene",
+		"hydro alcoolique",
+		"hydro alcolique",		
+		"pieces jointes",
+		"piece jointe",
+		"sms"
 		);
 		
 		// ne pas mettre de ponctualtion ni d'apostrophe
@@ -16,7 +20,7 @@
 				"syndrome", "symptôme",
 				
 				// orientation sexuelles
-				"homo", "homosexuel","heterosexuel", "zoophile", "gérontophile", "tapette", "pedé", "tarlouze","prostitue",
+				"homo", "homosexuel","heterosexuel", "zoophile", "gérontophile", "tapette", "pedé","P D", "tarlouze","prostitue",
 				"bisexuel","partouze",	"frigide", "coureur de jupon" , "fornique" , "don juan" , "obsédé sexuel", "cul", "bite","couille",
 				"travesti","transexuel","putain","pute", "lopette", "PD","P D", "baise", "homophobe", "pédale", "sodomie","sodome", "cunnilingus", 
 				"fellation", "une pipe", "pourri", "lesbienne", "gouine", "goudou", "gonzesse", "tantouse", "gay", "pederaste", "androgine",
@@ -29,8 +33,8 @@
 				"deviant sexuel", "baisable", "dépenance a", "dépenance au", 
 				
 				// maladie
-				"hiv","H I V","VIH","V I H","sida","sideen","hepatite ","séropositif","séro+","Cancer","Alzheimer","parkinson","chimiothérapie","cardiaque",
-				"MST","M S T", "vénérien", "vénérienne", "Maladie sexuellement transmissible","IST", "I S T", "tremblement",
+				"H I V","V I H","s i d a","sideen","hepatite ","séropositif","séro+","Cancer","Alzheimer","parkinson","chimiothérapie","cardiaque",
+				"MST","M S T", "vénérien", "vénérienne", "Maladie sexuellement transmissible", "I S T", "tremblement",
 				"IVG", "I V G",  "vaginal",  "leucemie", "sclerose", "mucoviscidose", "allergie", "allergique", "purulent", "maladif", 
 				"anorexie","anorexique","boderline","ejaculation","frigidité","Kleptomanie","Kleptomane","Narcolepsie","Phobie sociale","Phobique",
 				"mycose","infection", "Herpès", "pustule" ,"Tumeur", "Syphilis", "Eczéma", "Zona", "Tuberculose", 
@@ -60,7 +64,7 @@
 				"addiction","alcoolique","alcoolisé","cas social","drogué","se pique","sniffe" ,"snife" ,"problème d’alcool", 
 				"se shoute","se shoote", "toxicomane", "toxicomanie", "cocaïne", "LSD", "amphétamine", "methamphétamine", "cannabis", 
 				"marijuana", "joint", "psychotrope",  "hallucinogène", "hallucination", "hallucinatoire",  "haschisch","hasch",	"bad trip", 
-				"alcool++", "stupéfiants", "pillule", "herbe", "heroine", "LSD", "L S D",  "shite", "shit", "emprise de l alcool", "dealer", 
+				"alcool++", "stupéfiants", "pillule", "herbe", "heroine", "L S D",  "shite", "shit", "emprise de l alcool", "dealer", 
 				"psychothrope", "alcolo", "pochtron", "beuze", "drepou", "coke", "keco", "cocaine", "hero", "came", "dope", "accro", 
 				"défoncé", "junky", "pete", "toxico", "explosé", "teuchi", "schnouf", "chnouf", "ivre","chicon", "kif", 
 				 
@@ -70,7 +74,7 @@
 				"maladie contagieuse",  "Escarre", "Hémorragie", "Glaucome", "Strabisme", "congenital", "cancéreux",
 				"Scanner", "IRM", "I R M", "contagieux", "puanteur", "septicémie", "medoc", "asphyxie", "hémiplégie", "hémiplégique",   
 				"soins palliatif",  "scarification", "scarifie", "contamine",  "grossesse difficile",  "grossesse à risque", 
-				"convulsion", "spasme", "circoncision", "circoncire", 
+				"convulsion", "spasme", "circoncision", "circoncire", "polyclinique", "clinique", 
 				 
 				 // les terminaison en ...gue sont aussi testées
 				 "Endocrinologie", "Gastroentérologie", "Gériatrie","Oncologie", "Pneumologie", "Urologie", "Rhumatologie", "Oto-rhino-laryngologie",
@@ -85,7 +89,7 @@
 				"imbecile","cretin","fou","folle","debile","manque une case","stupide","cyclothymie", "cyclothymique", "hysterie", "hysterique",
 				"pervers","perversion",  "suicide", "suicidaire","senile", "taré", "amoché", "arriéré", "qi", "quotient intellectuel", 
 				"persécution","sociopathe",  "faible d esprit" , "infirme", "handicapé mental","handicapée mental",
-				"décérébré", "lobotomise", "en dépression", "psychose", "nevrose", "demence", "burn out",  "hyperactif",
+				"décérébré", "lobotomise", "en dépression", "psychose", "nevrose", "demence", "dement", "burn out",  "hyperactif",
 				"barge", "barjo","destroy", "dingue", "flippé", "givré", "guedin", "ouf", "stone", "tapé", "veugra", "vegra",
 				"furax", "furieux", "pyromanie","pyromane",  "délirant", "Troubles affectifs", "Troubles de la pessonnalité", 
 				"obsessionnel", "anxiété", "paranoïde", "compulsif", "démence", "dément", "Machiavélique", "Machiavélisme", "illuminé", 
@@ -156,15 +160,14 @@
 				"SRPJ","S R P J","garde à vue","incarcéré","emprisonne","sequestre","sequestration","meurtre","violent","laceration","mutilation",
 				"pédophile","pedophilie","assassin","violeur","viol","viole","inceste","incestueux","meurtrier","delinquant","recidiviste",
 				 "truqueur", "filou", "arnaqueur", "escroc", "roublard","malhonnête","tricheur","voleur","tortionnaire","torture","trafiquant","traffiquant",
-				"petite frappe","petit calibre","gros calibre","dealer","revendeur de drogue",
-				"maison d arrêt", "centre de détention", "prison", "menotte", "cachot", "détention provisoire","détention", "en tole",
+				"petite frappe","petit calibre","gros calibre","dealer","revendeur de drogue","retention", 
+				"maison d arrêt", "centre de détention", "prison", "menotte", "cachot", "détention provisoire","détention", "en tole","de tole",
 				"pénitencier", "emprisonnement", "maison centrale", "casseur", "chourave", "escroc", "truand",
 				"terreur", "terrorise","terroriste", "mal-honnête", "fripouille", "cambrioleur", "cambriolage", "crapule","keuf", "poulet",
 				"coffre", "flic", "flicard", "képi", "keuf", "gnouf", "pointeur", "hors-la-loi",  "crapuleux",  
 				
 				// Syndicat
 				"force ouvriere","syndicaliste",
-				"FO","CGT","CGC","CFDT","CFTC","CFE-CGC","FSU","UNSA","UNEF","FNSEA","UIMM","CGPME","UNL","UNSA", 
 				"F O","C G T","C G C","C F D T","C F T C","C F E C G C","F S U","U N S A","U N E F","F N S E A","U I M M","C G P M E","U N L","U N I","U N S A",
 				);	
 	
