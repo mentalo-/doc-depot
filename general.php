@@ -25,6 +25,7 @@ FUNCTION poste_local()
 		$token=addslashes(encrypt("$action-$user-$t"));
 		echo "<input type=\"hidden\" name=\"token\" value=\"$token\"> " ;
 		}	
+		
 	function token_return($action, $user='#')
 		{
 		$t=time();
@@ -675,7 +676,9 @@ FUNCTION poste_local()
 			if  ($action=="visu_dossier") 
 				$source= "visu_dossier.php";
 			if  ($action=="supp_filtre_suivi") 
-				$source= "suivi.php";
+				$source= "suivi.php";			
+			if  ($action=="supp_filtre_fissa") 
+				$source= "fissa.php";
 				
 			echo "<form method=\"POST\" action=\"$source\" $blank >";
 

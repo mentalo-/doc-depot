@@ -74,7 +74,8 @@
 				"maladie contagieuse",  "Escarre", "Hémorragie", "Glaucome", "Strabisme", "congenital", "cancéreux",
 				"Scanner", "IRM", "I R M", "contagieux", "puanteur", "septicémie", "medoc", "asphyxie", "hémiplégie", "hémiplégique",   
 				"soins palliatif",  "scarification", "scarifie", "contamine",  "grossesse difficile",  "grossesse à risque", 
-				"convulsion", "spasme", "circoncision", "circoncire", "polyclinique", "clinique", 
+				"convulsion", "spasme", "circoncision", "circoncire", "polyclinique", "clinique", "E C G" ,"E C B U" , "asthme" ,"asthmatique" ,
+				"electro cardiogramme",
 				 
 				 // les terminaison en ...gue sont aussi testées
 				 "Endocrinologie", "Gastroentérologie", "Gériatrie","Oncologie", "Pneumologie", "Urologie", "Rhumatologie", "Oto-rhino-laryngologie",
@@ -110,7 +111,7 @@
 				"islam","islamiste","jihadiste","jihad", "non croyant",	"Judaïsme","Judaïque","Bouddhiste", "sunite", "sunnite", "chiite",
 				"dévotion", "envouté","culte","religion","croyance","idolatrie", "vaudou", "mystique", "chretien", "chretienne", "vaudou", "en trans", 
 				"pécheur", "impie","hérétique", "païen", "renégat",  "blasphématoire", "blasphéme", "impénitent",   "profanateur", "irréligieux", 
-				"pieux", "devot", "hallal", "ramadam", "excision", 
+				"pieux", "devot", "hallal", "ramadam", "excision", "excisée", "imam",
 				
 				// phylosophique
 				"epicurien","libre penseur", "feministe", "Transhumaniste", "altruiste", "Stoïcisme","Stoïcien", "libertaire",

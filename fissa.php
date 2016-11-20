@@ -273,13 +273,13 @@ include 'include_mail.php';
 		}
 
 	// proposition sur score
-	function proposition_sur_score($profil, $titre="", $fin_cadre="")
+	function proposition_sur_score($profil, $titre="", $filtre)
 		{
 		global  $exclus, $date_jour, $bdd;
 
 		$i=0;
 		$nu=0;
-		$reponse = command("SELECT nom,qte FROM $bdd where date='0000-00-00' and pres_repas='' and qte<>'0' and qte<>'?' and nom not like '%(A)%' and nom not like '%(M)%'  and nom not like '%(B)%'   and nom not like '%(S)%' $exclus group by nom order by qte DESC  "); 
+		$reponse = command("SELECT nom,qte FROM $bdd where date='0000-00-00' $filtre and pres_repas='' and qte<>'0' and qte<>'?' and nom not like '%(A)%' and nom not like '%(M)%'  and nom not like '%(B)%'   and nom not like '%(S)%' $exclus group by nom order by qte DESC  "); 
 		while ($donnees = fetch_command($reponse) ) 
 			{
 			if ($i>80) 
@@ -315,7 +315,7 @@ include 'include_mail.php';
 		}		
 		
 		
-	function proposition($profil, $titre="", $fin_cadre="")
+	function proposition($profil, $titre="", $filtre="")
 		{
 		global  $exclus, $date_jour, $bdd, $acteur;
 
@@ -348,7 +348,7 @@ include 'include_mail.php';
 			$min=2; 
 			 }	
 			
-		$reponse = command("SELECT *,count(*) as TOTAL FROM $bdd where date>'$l' and nom<>'Synth' and nom<>'Mail' $exclus group by nom order by nom  "); 
+		$reponse = command("SELECT *,count(*) as TOTAL FROM $bdd where date>'$l' and nom<>'Synth' and nom<>'Mail' $filtre $exclus group by nom order by nom  "); 
 		while ($donnees = fetch_command($reponse) ) 
 				{
 				$n=$donnees["nom"];
@@ -359,33 +359,35 @@ include 'include_mail.php';
 							{
 							if ( ($nu==0) && ($titre!="") )
 								{
-								echo "<tr> <td width=\"1000\"><hr> $titre: ";
+								echo "<tr > <td width=\"1000\"><hr> $titre: ";
 								$nu++;
 								}
 							$n_court=substr($n, 0, strlen($n)-3);
 							if ( (strpos($n,"(B)")!==FALSE) ||(strpos($n,"(S)")!==FALSE) )
-								echo "<a href=\"fissa.php?".token_ref("nouveau")."&date_jour=$date_jour&nom=$n&memo=&presence=Acteur+Social&commentaire=\">$n_court</a>; " ;
+								echo "<a href=\"fissa.php?".token_ref("nouveau")."&date_jour=$date_jour&nom=$n&memo=&presence=Acteur+Social&commentaire=#liste2\">$n_court</a>; " ;
 							if ( (strpos($n,"(A)")!==FALSE))
-								echo "<a href=\"fissa.php?".token_ref("nouveau")."&date_jour=$date_jour&nom=$n&memo=&presence=Activité&commentaire=\">$n_court</a>; " ;
+								echo "<a href=\"fissa.php?".token_ref("nouveau")."&date_jour=$date_jour&nom=$n&memo=&presence=Activité&commentaire=#liste2\">$n_court</a>; " ;
+							if ( (strpos($n,"(M)")!==FALSE))
+								echo "<a href=\"fissa.php?".token_ref("nouveau")."&date_jour=$date_jour&nom=$n&memo=&presence=Matériel&commentaire=#liste2\">$n_court</a>; " ;
 							}
 						}
 					else
-						if ( (strstr($n,"(B)")===FALSE) &&(strstr($n,"(S)")===FALSE) && (strstr($n,"(A)")===FALSE))
+						if ( (strstr($n,"(B)")===FALSE) &&(strstr($n,"(S)")===FALSE) && (strstr($n,"(A)")===FALSE)&& (strstr($n,"(M)")===FALSE))
 							{
 							if ( ($nu==0) && ($titre!="") )
 								{
-								echo "<tr> <td width=\"1000\"> $titre: ";							
+								echo "<tr > <td width=\"1000\"> $titre: ";							
 								$nu++;
 								}		
 							
 							$n_court=stripcslashes($n);
 							if ($donnees["TOTAL"]>$min )
-								echo "<a href=\"fissa.php?".token_ref("nouveau")."&date_jour=$date_jour&nom=$n&memo=&presence=Visite&commentaire=\">$n_court</a>; " ;
+								echo "<a href=\"fissa.php#liste2?".token_ref("nouveau")."&date_jour=$date_jour&nom=$n&memo=&presence=Visite&commentaire=#liste2\">$n_court</a>; " ;
 							}
 					
 					}
 				}
-		if ( ($nu!=0) && ($fin_cadre!="") )
+		if ($nu!=0) 
 				echo "</td>";				
 		}
 
@@ -777,7 +779,7 @@ include 'include_mail.php';
 			echo "<br>";
 		}
 	
-	function ajouter_beneficiaire()
+	function ajouter_beneficiaire($filtre)
 		{
 		global $jmax,$liste_nom,$date_jour;
 		
@@ -795,7 +797,8 @@ include 'include_mail.php';
 			{
 			$sel=$liste_nom[$j];
 			if (  (strpos($sel,"(A)")===FALSE) && (strpos($sel,"(B)")===FALSE) && (strpos($sel,"(S)")===FALSE))
-				echo "<OPTION  VALUE=\"$sel\"> $sel </OPTION>";
+				if ( ($filtre=="") || (($filtre!="") && (stristr($sel,$filtre)) ) ) 
+					echo "<OPTION  VALUE=\"$sel\"> $sel </OPTION>";
 			}
 		echo "</SELECT>";
 		echo "</td> <td bgcolor=\"#d4ffaa\"> "; 
@@ -805,7 +808,7 @@ include 'include_mail.php';
 		}
 		
 		
-	function liste_ajout_par_type( $presence,  $type)
+	function liste_ajout_par_type( $presence,  $type, $filtre)
 		{
 		global $date_jour,$liste_nom, $jmax;
 		
@@ -813,21 +816,25 @@ include 'include_mail.php';
 		for ($j=0;$j<$jmax;$j++)
 			{
 			$sel=$liste_nom[$j];
-			if  ( ( strstr($sel,"$type")) || (  ($type=="(B)") && ( strstr($sel,"(S)"))) )
+			if  (
+				( ( strstr($sel,"$type")) || (  ($type=="(B)") && ( strstr($sel,"(S)"))) )
+				&&
+				( ($filtre=="") || (($filtre!="") && (stristr($sel,$filtre)) ) ) 
+				)
 				$select.= "<OPTION  VALUE=\"$sel\"> $sel </OPTION>";
 			}		
 		
 		if ($select!="")
 			{
-			echo "<table id=\"dujour\"  border=\"2\" >";
+			echo "<table id=\"$type\"  border=\"2\" >";
 			// =====================================================================loc AJOUTER 
-			formulaire("nouveau","fissa.php#dujour");
+			formulaire("nouveau","fissa.php#$type");
 			echo param ("memo","") ;	
 			echo param ("commentaire","") ;
 			echo param ("presence","$presence") ;	
 			echo param ("date_jour","$date_jour");
 			echo "<tr> <td bgcolor=\"#d4ffaa\"> ";
-			echo "<SELECT name=nom onChange=\"this.form.submit();\">";
+			echo "<SELECT name=\"nom\" > ";
 			echo "<OPTION  VALUE=\"\">  </OPTION>";
 
 			echo "$select </SELECT>";
@@ -874,9 +881,9 @@ include 'include_mail.php';
 		}
 
 		
-	function liste_du_jour( $libelle, $l2, $type)
+	function liste_du_jour( $libelle, $l2, $type, $filtre)
 		 {
-		global $bdd, $date_jour,$nom_charge, $pres_repas, $imax,$activites, $qte,$commentaire;
+		global $bdd, $date_jour,$nom_charge, $pres_repas, $imax,$activites, $qte,$commentaire, $i_label;
 		
 		echo "<tr> <td bgcolor=\"#3f7f00\"><font color=\"white\"> $libelle </td> <td bgcolor=\"#3f7f00\"> <font color=\"white\"> $l2 </td>";
 		echo "<td bgcolor=\"#3f7f00\"> <font color=\"white\">Memo </td>";
@@ -886,15 +893,20 @@ include 'include_mail.php';
 		echo "<td bgcolor=\"#3f7f00\"> <font color=\"white\"> Commentaire du jour</font></td>";		
 		$ncolor=0;
 		for($i=0;$i<$imax;$i++)
-			if ( 
+			if (( 
 				( ($type<>"") && (( strstr($nom_charge[$i],"$type")) || (  ($type=="(B)") && ( strstr($nom_charge[$i],"(S)"))) ) )
 				||
 				( ($type=="") && ( (!strstr($nom_charge[$i],"(M)")) && (!strstr($nom_charge[$i],"(A)")) && (!strstr($nom_charge[$i],"(B)")) && (!strstr($nom_charge[$i],"(S)"))) )
 				)
+				and 
+				( ($filtre=="") || (($filtre!="") && (stristr($nom_charge[$i],$filtre)) ) ) 
+				)
+				
 				{
 				if (($ncolor++ %2 )==0) $color="#ffffff" ; else $color="#d4ffaa" ; 
-				echo "<tr id=\"E$i\" > <td bgcolor=\"$color\"> ";
-				formulaire("nouveau","fissa.php#E$i");
+				echo "<tr id=\"E$i_label\" > <td bgcolor=\"$color\"> ";
+				formulaire("nouveau","fissa.php#E".max(0,$i_label-5));
+				$i_label++;
 				echo param ("date_jour","$date_jour");
 				$nom1=$nom_charge[$i];
 				echo param ("nom","$nom1");
@@ -1169,10 +1181,8 @@ else
 					}
 				echo "</ul> ";
 				
-				echo " <table> <tr> <td><b>$libelle</b> : </td>";
+				echo " <table> <tr>";
 
-				echo "<td> ";
-			
 				$veille=date($format_date,  mktime(0,0,0 , $m, $j-1, $a));
 				echo "<td><a href=\"fissa.php?".token_ref("date")."&date_jour=$veille\"> <img src=\"images/gauche.png\" width=\"20\" height=\"20\"> </a> </td> <td> ";
 				formulaire("date");
@@ -1184,11 +1194,17 @@ else
 				echo "</td> <td> <a href=\"fissa.php?".token_ref("date")."&date_jour=$jsuivant\"> <img src=\"images/droite.png\"  width=\"20\" height=\"20\">  </a> </td> <td> ";
 				echo "<input type=\"submit\" value=\"Valider\" >  ";
 				echo " </td></form> ";	
-				echo "<br>";
-			
-				echo "</td></table>";
+				
+				$filtre=variable_s("filtre");		
+				$filtre_aff=$filtre;
+				formulaire("filtre_fissa");				
+				echo "<td><table><tr><td>Filtre </td><td><input type=\"text\" name=\"filtre\" size=\"20\" value=\"$filtre_aff\" onChange=\"this.form.submit();\"> ";
+				echo "</form><td><img src=\"images/loupe.png\"width=\"20\" height=\"20\">  </td>";
+				if ($filtre!="")
+					lien_c ("images/croixrouge.png", "supp_filtre_fissa","" , traduire("Supprimer"));
+				echo "</table></td>";
+				echo "</table></td>";			
 
-				echo "</td>";
 				echo "<td><a href=\"index.php\"> <img src=\"images/logo.png\" width=\"70\" height=\"50\"><a></td>";		
 				echo "<td><a href=\"suivi.php\"><img src=\"images/suivi.jpg\" width=\"70\" height=\"50\"><a></td>";						
 				if (($_SESSION['droit']!="P") )
@@ -1202,14 +1218,7 @@ else
 				echo "</center></td>";					
 				echo "</table> ";
 				
-				// =====================================================================loc Liste présents
-				echo "<TABLE><TR> <td></td><td > <div class=\"CSS_titre\"  >";
-				echo "<table border=\"0\" >";
-				
-				// =====================================================================loc AJOUTER
-				// Echo "Visistes : ". presents(date('Ymd'));
-				echo "<tr> <td width=\"1000\">";
-				//ajouter_beneficiaire();
+
 				echo "<table id=\"dujour\"  border=\"2\" >";
 				// =====================================================================loc NOUVEAU
 				$age="";
@@ -1232,17 +1241,27 @@ else
 				echo "</form></td> ";
 				
 				
-				echo "</table></td>";
+				echo "</table>";
 				
+
+				echo "</table>";
+				// =====================================================================loc Liste présents
+
 				// =====================================================================loc PROPOSITIONS 
-				proposition_sur_score("(F)","Femme");
-				proposition_sur_score("","Homme");
-				proposition("(S)",$acteur);	
-				proposition("(B)","Bénévoles");				
-				proposition("(A)","Activités");					
-				proposition("(M)","Matériel");					
-				echo "  </table> <P> ";
-				fin_cadre();
+				if ($filtre!="")
+					$filtre_nom=" and nom like '%$filtre%' ";
+				else
+					$filtre_nom="";
+				
+				proposition_sur_score("(F)","Femme", $filtre_nom );
+				proposition_sur_score("","Homme", $filtre_nom );
+				echo "<br id=\"liste2\">";
+				proposition("(S)",$acteur, $filtre_nom );	
+				proposition("(B)","Bénévoles", $filtre_nom);				
+				proposition("(A)","Activités", $filtre_nom);					
+				proposition("(M)","Matériel", $filtre_nom);					
+
+				echo "<hr><p> ";
 
 
 				// =====================================================================loc Rdv
@@ -1251,21 +1270,22 @@ else
 				// =====================================================================loc MEMO
 				if ($date_jour==date('d/m/Y'))
 					affiche_memo();
-					
+				
+				$i_label=0;
 				// =====================================================================loc BENEFICIAIRES
-				ajouter_beneficiaire()	;
+				ajouter_beneficiaire($filtre)	;
 				echo "<td bgcolor=\"#d4ffaa\"></td> ";
 				echo "<td bgcolor=\"#d4ffaa\"></td> <td bgcolor=\"#d4ffaa\"></td> ";	
-				liste_du_jour( "Prénom / Nom ","Evénement","");
+				liste_du_jour( "Prénom / Nom ","Evénement","", $filtre);
 
 				// =====================================================================loc SALARIE et BENEVOLES
 				echo "</table> ";
 				echo "<p> ";
 
-				if (liste_ajout_par_type( "Visite", "(B)"))
+				if (liste_ajout_par_type( "Visite", "(B)", $filtre))
 					{
 					creation_par_type( "Bénévole",  "Atelier",  "nouvel Acteur Social");
-					liste_du_jour( "Acteur Social","Evénement","(B)");	
+					liste_du_jour( "Acteur Social","Evénement","(B)", $filtre);	
 					echo "</table><p> ";
 					}
 				else
@@ -1276,10 +1296,10 @@ else
 					echo "</table><p> ";
 					}
 				// =====================================================================loc ACTIVITES
-				if (liste_ajout_par_type( "Visite", "(A)"))
+				if (liste_ajout_par_type( "Visite", "(A)", $filtre))
 					{
 					creation_par_type( "Activité",  "Atelier",  "nouvelle Activité");
-					liste_du_jour( "Activité","Evénement","(A)");
+					liste_du_jour( "Activité","Evénement","(A)", $filtre);
 					echo "</table><p> ";
 					}
 				else
@@ -1291,10 +1311,10 @@ else
 
 					}
 				// =====================================================================loc MATERIEL
-				if (liste_ajout_par_type( "Matériel", "(M)"))
+				if (liste_ajout_par_type( "Matériel", "(M)", $filtre))
 					{
 					creation_par_type( "Matériel",  "Matériel",  "nouveau Matériel");
-					liste_du_jour( "Matériel","Quantité","(M)");
+					liste_du_jour( "Matériel","Quantité","(M)", $filtre);
 					echo "</table><p> ";
 					}
 				else

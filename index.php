@@ -547,10 +547,10 @@ function maj_mdp_fichier($idx, $pw )
 
 	function traite_upload($idx, $pw, $user)
 		{
-		global $id,$action;
+		global $id,$action ;
 		
-		$nom1 =  $_FILES["nom"]['tmp_name'];
-		$n =  $_FILES["nom"]['name'];
+		$nom1 =  $_FILES['nom']['tmp_name'];
+		$n =  $_FILES['nom']['name'];
 
 		if (isset ($_POST["ref"])) $ref=$_POST["ref"];else	$ref="";
 		if (isset ($_POST["type"])) $type=$_POST["type"];else	$type="";				
@@ -1198,7 +1198,7 @@ function maj_mdp_fichier($idx, $pw )
 				
 				if ($_SERVER['REMOTE_ADDR']=="127.0.0.1")	
 					{				
-					echo "</table> <table><tr><td><form method=\"POST\" action=\"index.php\" ></td><td>".traduire('Dépot de fichier unique')." </td>";
+					echo "</table> <table><tr><td><form method=\"POST\" action=\"index.php\" >".traduire('Dépot de fichier unique')." </td>";
 					if ($action=="ajout_admin")
 						{
 						echo "<td> ";
@@ -1208,7 +1208,7 @@ function maj_mdp_fichier($idx, $pw )
 
 					if (substr($ref,0,1)=="A")
 							echo "<td> Référence : <input type=\"text\" name=\"ident\" size=\"15\"  value=\"\"></td>  " ;
-					echo "<td><input type=\"file\" size=\"50\"  name=\"nom\" >";
+					echo "<td><input type=\"file\" size=\"50\"  name=\"nom\" />";
 					echo "<input type=\"hidden\" name=\"ref\" value=\"$ref\"> " ;
 					echo "<input type=\"hidden\" name=\"idx\" value=\"$idx\"> </td> " ;
 					token ("upload");
@@ -1423,27 +1423,29 @@ function maj_mdp_fichier($idx, $pw )
 	function mail_valide_surv($user_mail)
 		{
 		$domain = explode('@', $user_mail); 
-		switch ($domain[1]) 
-			{
-			case "gmail.com":
-			case "doc-depot.com":
-			case "orange.fr":
-			case "wanadoo.fr":
-			case "hotmail.com":
-			case "hotmail.fr":
-			case "yahoo.fr":
-			case "live.fr":
-			case "sfr.fr":
-			case "cegetel.fr":
-			case "neuf.fr":
-			case "free.fr":
-			case "aol.com":
-			case "laposte.net":
-					return (true);
-					break;
-					
-			default : return (false);
-			}
+		if (isset($domain[1]))
+			switch ($domain[1]) 
+				{
+				case "gmail.com":
+				case "doc-depot.com":
+				case "orange.fr":
+				case "wanadoo.fr":
+				case "hotmail.com":
+				case "hotmail.fr":
+				case "yahoo.fr":
+				case "live.fr":
+				case "sfr.fr":
+				case "cegetel.fr":
+				case "neuf.fr":
+				case "free.fr":
+				case "aol.com":
+				case "laposte.net":
+						return (true);
+						break;
+						
+				default : return (false);
+				}
+			return (false);
 		}
 
 	function alerte_surv_mail()
@@ -1997,7 +1999,7 @@ function maj_mdp_fichier($idx, $pw )
 			$prenom=$donnees["prenom"];	
 			$reponse =command( "DELETE FROM `r_referent` where user='$idx' ");
 			$reponse =command("DELETE FROM `r_lien`  where user='$idx' ");
-			$reponse =command("UPDATE `r_user` SET droit='z' , pw='(supprimé)' , organisme=''  where idx='$idx' ");
+			$reponse =command("UPDATE `r_user` SET droit='-s' , pw='(supprimé)' , organisme=''  where idx='$idx' ");
 			ajout_log( $idx, traduire("Suppression compte")." $nom $prenom ($idx)" ,  $user_idx);
 			}
 		}		
@@ -4400,10 +4402,6 @@ require_once 'cx.php';
 		
 		echo "<tr><td><hr>";
 	
-//    ?????     Etrange que ce code soit au milieu de cette zone  ????  ==>> devrait être après
-		if ($action=="upload")
-			traite_upload($user_idx, $code_lecture, variable ("idx") );
-
 		//    ?????     etrange que ce code soi au milieu de cette zone  ????  ==>> devrait être AVANT
 		if ($action=="modif_tel")
 			{
@@ -4511,8 +4509,10 @@ require_once 'cx.php';
 			
 		//-----------------------------------*/ 		
 	
+	
 		echo "</table>";
 
+			
 		if ($user_droit=="P")
 			{
 			echo "<hr><p><br><p><br><p><br><p><br><p><br><p><br><p><br><p><br><p><br><p><br><p><br><p><br><p><br>";
@@ -4547,9 +4547,10 @@ require_once 'cx.php';
 		
 		echo "<hr>";
 
+	
+		if ($action=="upload")
+			traite_upload($user_idx, $code_lecture, variable ("idx") );	
 		
-		
-
 
 	if (($action=="phpinfo") && ( ($user_droit=="A") || ($user_droit=="E")) )
 		{
