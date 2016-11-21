@@ -1,4 +1,17 @@
-<?php session_start(); ?> 
+<?php 
+///////////////////////////////////////////////////////////////////////
+//   This file is part of doc-depot.
+//
+//   doc-depot is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
+//   the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+//
+//   doc-depot is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+//
+//   You should have received a copy of the GNU General Public License along with doc-depot.  If not, see <http://www.gnu.org/licenses/>.
+///////////////////////////////////////////////////////////////////////
+
+session_start(); ?> 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0trict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">
 <?php include 'header.php';	  ?>
@@ -388,6 +401,8 @@ include 'inc_style.php';
 			{
 			global $bdd;
 			
+			echo " Rappel: La liste des usagers sélectionnables ci-dessous est aussi filtrée.";				
+
 			echo "<table>";
 			
 			$champs=" ( pres_repas='Suivi' or pres_repas='pda' or pres_repas='Age'  or pres_repas='Mail' or pres_repas='Partenaire' or pres_repas='adresse' or pres_repas='PE' or pres_repas='nationalite'  and pres_repas='__upload' )"; 
@@ -420,7 +435,7 @@ include 'inc_style.php';
 					}
 				}
 			if ($nu==0)
-				echo "Aucune information ne contient cette information.";				
+				echo "Aucune information ne contient cette information. Rappel: La liste des usagers selectionnables ci-dessous est aussi filtrée.";				
 			echo "</table>";
 			}
 			
@@ -431,7 +446,7 @@ include 'inc_style.php';
 			echo "<table>";
 			$nu=0;
 			$user=$_SESSION['user'];
-			$reponse = command("SELECT * FROM $bdd WHERE user='' group by nom order by modif DESC  "); 			
+			$reponse = command("SELECT * FROM $bdd WHERE user='$user' group by nom order by modif DESC  "); 			
 			while ($donnees = fetch_command($reponse) ) 
 				{
 			    $nom =$donnees["nom"];
