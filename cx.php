@@ -1,4 +1,16 @@
 <?php
+///////////////////////////////////////////////////////////////////////
+//   This file is part of doc-depot.
+//
+//   doc-depot is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
+//   the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+//
+//   doc-depot is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+//
+//   You should have received a copy of the GNU General Public License along with doc-depot.  If not, see <http://www.gnu.org/licenses/>.
+///////////////////////////////////////////////////////////////////////
+
 require_once 'include_crypt.php';
 require_once 'exploit.php';
 
@@ -54,7 +66,7 @@ if (isset($_POST['pass'])) // mot de passe défini
 			}
 		else
 			{
-			$mot_de_passe=$donnees["pw"];	
+			$mot_de_passe=addslashes($donnees["pw"]);	
 			$droit=$donnees["droit"];	
 			$id=$donnees["id"];
 			$date_log=date('Y-m-d');	
@@ -62,11 +74,11 @@ if (isset($_POST['pass'])) // mot de passe défini
 			$_SESSION['bene']="";
 			//ajout_log_tech("User connu ");
 
-			//ajout_log_tech("'$id' - '".$_POST['id']."' - '$id_post'");
-			//ajout_log_tech("'".decrypt($mot_de_passe )."' - '".$_POST['pass']."'");			
-			//ajout_log_tech("'$mot_de_passe' - '".encrypt(addslashes($_POST['pass']))."' - '".encrypt($_POST['pass'])."'" );
-			//ajout_log_tech("Droit : '$droit' " );			
-			//ajout_log_tech("Source : ".$_SERVER['PHP_SELF'] );
+			ajout_log_tech("'$id' - '".$_POST['id']."' - '$id_post'");
+			ajout_log_tech("'".decrypt($mot_de_passe )."' - '".$_POST['pass']."'");			
+			ajout_log_tech("'$mot_de_passe' - '".encrypt(addslashes($_POST['pass']))."' - '".encrypt($_POST['pass'])."'" );
+			ajout_log_tech("Droit : '$droit' " );			
+			ajout_log_tech("Source : ".$_SERVER['PHP_SELF'] );
 
 			// verifion si la variable = mot de passe...
 			if ( ( 

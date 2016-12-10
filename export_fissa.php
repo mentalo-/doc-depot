@@ -1,4 +1,17 @@
-<?php session_start(); ?> 
+<?php
+///////////////////////////////////////////////////////////////////////
+//   This file is part of doc-depot.
+//
+//   doc-depot is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
+//   the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+//
+//   doc-depot is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+//
+//   You should have received a copy of the GNU General Public License along with doc-depot.  If not, see <http://www.gnu.org/licenses/>.
+///////////////////////////////////////////////////////////////////////
+
+ session_start(); ?> 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0trict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">
 
@@ -64,7 +77,7 @@ else
 		affiche_memo();
 
 		$ncolor=0;
-		$reponse = command("SELECT DISTINCT * FROM $bdd WHERE date>'2010-01-01' and pres_repas!='Suivi' and pres_repas!='reponse' and pres_repas!='partenaire' and pres_repas!='Age'  and pres_repas!='Telephone' order by date  desc, nom asc "); 
+		$reponse = command("SELECT DISTINCT * FROM $bdd WHERE date>'2010-01-01' and pres_repas!='Suivi' and pres_repas!='reponse' and pres_repas!='PE'  and pres_repas!='Mail'  and pres_repas!='partenaire' and pres_repas!='Telephone' order by date  desc, nom asc "); 
 		echo "<table>";
 		$color="#d4ffaa" ; 
 		echo "<tr><td bgcolor=\"$color\"><b>Qui  </td><td bgcolor=\"$color\">Date </td><td bgcolor=\"$color\"> <b>Action</b> </td><td bgcolor=\"$color\">Description</td><td bgcolor=\"$color\">Activités/Participants</td><td bgcolor=\"$color\">Auteur saisie</td><td bgcolor=\"$color\">Date saisie</td>"; 
