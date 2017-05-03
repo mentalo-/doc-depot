@@ -1,6 +1,6 @@
 <?PHP
 	// --- ISOD --- //
-	// --- Connexion base de donn�es --- //
+	// --- Connexion base de données --- //
 	
 	$dbh = new PDO('mysql:host=localhost;dbname=docdepot', 'myuser', 'mypassword');
 	if (!$dbh) {
@@ -11,9 +11,9 @@
 		
 	$cle= sprintf ("%2.29f", exp(pi()));
 	$cle = strtr($cle, '0123456789',
-					   '&�"\'(-�_��');
+					   '&é"\'(-è_çà');
 	$ZZ_CLE=$cle;
 	
-	//$ZZ_CLE=  "\"'.�(&��\"�'\"__�\"-����(�\"_-����&\"";
-	$ZZ_CLE=  "\"'.�(&��\"�'\"__�\"���&���&���_�_&'";
+	//$ZZ_CLE=  "\"'.é(&èà\"è'\"__à\"-àèàè(è\"_-àéèè&\"";
+-	$ZZ_CLE=  "\"'.é(&èà\"è'\"__à\"èèç&éçà&ééè_è_&'";
 ?>
