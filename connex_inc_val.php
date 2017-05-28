@@ -1,19 +1,19 @@
 <?PHP
 	// --- ISOD --- //
-	// --- Connexion base de donnÃ©es --- //
+	// --- Connexion base de données --- //
 	
 	$dbh = new PDO('mysql:host=fixeofrkud_val.mysql.db;dbname=fixeofrkud_val', 'fixeofrkud_val', 'VgEZxd5a6DUU');
 	if (!$dbh) {
 		echo "<div id=\"logo\"> <center><a href=\"index.php\"><img src=\"images/logo.png\" width=\"200\" height=\"150\" ></a> </div> <center>";
-		echo "<p><b><font size=\"5\">DÃ©solÃ©, service saturÃ©. Merci d'essayer de vous connecter plus tard.</b></font>";
+		echo "<p><b><font size=\"5\">Désolé, service saturé. Merci d'essayer de vous connecter plus tard.</b></font>";
 		exit();
 	}
 
 	$cle= sprintf ("%2.29f", exp(pi()));
 	$cle = strtr($cle, '0123456789',
-					   '&Ã©"\'(-Ã¨_Ã§Ã ');
+					   '&é"\'(-è_çà');
 	$ZZ_CLE=$cle;
 	
-	//$ZZ_CLE=  "\"'.Ã©(&Ã¨Ã \"Ã¨'\"__Ã \"-Ã Ã¨Ã Ã¨(Ã¨\"_-Ã Ã©Ã¨Ã¨&\"";
--	$ZZ_CLE=  "\"'.Ã©(&Ã¨Ã \"Ã¨'\"__Ã \"Ã¨Ã¨Ã§&Ã©Ã§Ã &Ã©Ã©Ã¨_Ã¨_&'";
+	//$ZZ_CLE=  "\"'.é(&èà\"è'\"__à\"-àèàè(è\"_-àéèè&\"";
+	$ZZ_CLE=  "\"'.é(&èà\"è'\"__à\"èèç&éçà&ééè_è_&'";
 ?>
